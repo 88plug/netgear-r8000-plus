@@ -1,0 +1,17 @@
+brcmfmac: fall back to legacy MBSS when interface_create is unsupported
+
+Pre-2016 FullMAC firmwares (e.g. BCM43602 fw 7.35.177.56 on the Netgear R8000)
+do not implement the modern "interface_create" iovar. request_ap_if() tries it,
+then queries the supported version, and on query failure returns -EOPNOTSUPP,
+skipping the legacy "bsscfg:ssid" MBSS fallback right below that this firmware
+does support. Result: a 2nd AP BSS fails with add_iface -95 even though MBSS is
+detected. Fall through to the legacy path instead of bailing.
+
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c
+@@ -726,4 +726,4 @@
+ 	if (err) {
+ 		brcmf_err("fail to get supported version, err=%d\n", err);
+-		return -EOPNOTSUPP;
++		iface_create_ver = 0; /* R8000: fall through to legacy mbss */
+ 	}
