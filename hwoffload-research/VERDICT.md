@@ -13,10 +13,21 @@ register map reconstructed by disassembly guesswork; it is Broadcom's own
 driver source, verified in two independent vendor trees (ASUS Merlin,
 FreshTomato), for the specific chip in this router.
 
-**But there is one real, unresolved gap, and it is not a documentation gap —
-it's a hardware-verification gap:** nobody has ever confirmed that the FA
-silicon block is physically present, powered, and functional on an actual
-R8000 board. The stock firmware analyzed in `blob-analysis` (build 10.1.88,
+**UPDATE 2026-07-23 — RESOLVED.** The gap described below (silicon presence
+unverified) is closed: `fa-probe/fa_bringup.c` performed the real
+`fa_setmode()`-equivalent table-init write on this exact board and got a
+correct, live response — all 5 `CTF_INTSTAT_*_INIT_DONE` bits asserted
+within 1ms, each answering its own distinct control bit, self-clearing
+correctly on the strobe bits while persisting on the mode bits. Full
+result: `fa-probe/BRINGUP_RESULT.md`. The FA silicon is physically present,
+powered, and its table-init control plane works exactly as Broadcom's own
+driver expects. NAPT table-row programming and switch-side SRAB enable are
+still open, separate next steps — this resolved silicon presence, not
+full data-plane acceleration.
+
+**Original gap this update resolves, kept for context:** nobody had
+confirmed that the FA silicon block is physically present, powered, and
+functional on an actual R8000 board. The stock firmware analyzed in `blob-analysis` (build 10.1.88,
 May 2024, the exact `.chk` in `images/`) contains **zero** FA-related code —
 not a stripped-down reference, not a gated NVRAM path, but a total absence:
 no `fa_napt_add`, no `faregs`, no `mem_acc_ctl`, no `ctf_fa_mode` anywhere in

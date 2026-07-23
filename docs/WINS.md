@@ -239,3 +239,33 @@ the actual `FILES=` source for a real build, not just a reference tree.
   replacing a "could not verify" note.
 - **v8 is the current shipping image**, `openwrt-25.12.5-r8000plus-v8-bcm53xx-generic-netgear_r8000-squashfs.chk`,
   sha256 `cac883b07e5357c4a56662c305c326efb048edabc339791718a3b1a1ec307cd2`.
+
+## FA/CTF hardware accelerator: silicon presence CONFIRMED (2026-07-23)
+
+The single biggest open question in this project's hardware-offload
+research — is the Flow-Accelerator silicon block physically present,
+powered, and functional on this exact R8000, or fused/absent like the
+2015-era stock firmware's total lack of FA code suggested — is now
+**resolved: it's real, it's alive, and its control plane works.**
+
+`fa_bringup.c` performed the actual `fa_setmode()`-equivalent table-init
+write (from Broadcom's own leaked SDK6 `etc_fa.c`) directly against the
+live router's FA register block at `0x18027c00`: all 5
+`CTF_INTSTAT_*_INIT_DONE` bits asserted within 1ms, each answering its own
+distinct control bit correctly, self-cleared as one-shot strobes should on
+unload while the persistent config bits stayed set — sophisticated,
+correct, purposeful hardware behavior, not floating bus noise. Zero
+adverse effect on the running router: uptime unbroken, all 4 SSIDs
+untouched, no new errors. Full writeup:
+`hwoffload-research/fa-probe/BRINGUP_RESULT.md`.
+
+This was gated behind its own explicit operator go-ahead, separate from
+the earlier read-only probe's authorization, per this project's own
+`GO_NOGO_BRINGUP.md` — and scoped deliberately narrow: NAPT/next-hop table
+row programming (the actual data-plane write path, needs the WAR777
+workaround) and switch-side `robo_fa_enable()` over SRAB (discovered
+mid-implementation to be a required part of a *complete* `fa_up()`, and a
+materially different risk surface — it touches the DSA switch carrying all
+LAN ports, not just this isolated GMAC-3 sub-block) were both explicitly
+left untouched. Those are the next real steps, and each needs its own
+separate go/no-go, the same discipline that gated this one.
