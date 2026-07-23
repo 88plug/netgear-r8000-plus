@@ -173,3 +173,42 @@ after two full flash-and-recovery cycles.
 - Always run `sysupgrade -b` and download the backup **before** any future
   sysupgrade — config loss on this device is confirmed, not hypothetical
   (process rule, see RUNBOOK.md, not a one-time task).
+
+## v7 — consolidated build: everything actually baked into one shippable image (2026-07-23)
+
+Every prior workstream (WPA3, guest isolation, roaming, perf-tune, LED fix,
+flow-offload, radio-watchdog) had been live-verified on the router by hand at
+some point, but `image-files/` — the directory actually used to build the
+shipped v6 `.chk` — only ever carried radio-watchdog + nvram, not the rest.
+v7 closes that gap: `v2-files/` (the complete, consolidated overlay) is now
+the actual `FILES=` source for a real build, not just a reference tree.
+
+- **Caught a real regression before it shipped a second time.**
+  `v2-files/lib/modules/6.12.94/brcmfmac.ko` (a stale raw-`.ko` artifact,
+  gitignored, never actually used to build anything) did not match the
+  driver actually running on the router. Verified empirically (unpacked
+  `images/packages/kmod-brcmfmac-6.12.94.6.18.26-r1.apk` with apk-tools'
+  own `adbdump`, diffed its embedded file hash against the live module) —
+  the `.apk` is correct, the stale `.ko` was excluded from the build overlay
+  entirely. Same class of mistake `docs/WINS.md`'s v5→v6 packaging fix
+  already caught once; caught the same way this time: verify the actual
+  artifact, not the file that happens to be sitting in the tree.
+- **Found and fixed a live regression the flash itself exposed.** The v7
+  image's first build used `wpad-basic-mbedtls` (per
+  `v2-staging/wpa3/imagebuilder-packages.md`'s explicit recommendation) and
+  shipped `bss_transition` (802.11v) in the merged wireless config anyway —
+  hostapd rejected the whole config as an unknown directive, taking down
+  **all four SSIDs** (3 main + guest) on first boot. This is the exact bug
+  `docs/FINDINGS.md`'s v2b entry had already found and fixed once, silently
+  regressed by a later, narrower-scoped staging doc. Re-fixed the same way:
+  swapped to `wpad-mbedtls` (`-wpad-basic-mbedtls wpad-mbedtls` in
+  `PACKAGES=`, since the two conflict and the device profile pulls in
+  `wpad-basic-mbedtls` by default). Rebuilt, reflashed, verified live:
+  zero hostapd errors, `bss_transition=1` active in the running config, all
+  4 SSIDs up. Corrected both `FINDINGS.md` and the wpa3 staging doc so this
+  doesn't regress a third time.
+- **v7 is the current shipping image**, `openwrt-25.12.5-r8000plus-v7-bcm53xx-generic-netgear_r8000-squashfs.chk`,
+  sha256 `a513eece58dcae7c4d2f50d030c71ce2b5dfd0635a02da675243eb66abbd2c67`.
+  Verified live post-flash: config sizes non-default (no #21655 hit this
+  time), guest SSID + firewall isolation intact, `radio-watchdog`/`perf-tune`
+  enabled, driver checksum matches the confirmed-good module.

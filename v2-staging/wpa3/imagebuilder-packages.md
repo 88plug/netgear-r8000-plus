@@ -1,5 +1,17 @@
 # ImageBuilder PACKAGES change -- WPA3-SAE / 802.11w
 
+## CORRECTION (2026-07-23, see FINDINGS.md item 2 / v7)
+
+This doc's "keep wpad-basic-mbedtls" recommendation is correct for WPA3-SAE
+and 802.11w/MFP alone, but does NOT account for `bss_transition` (802.11v),
+which this repo's own modern-wifi/roaming workstream also ships in the same
+merged wireless.conf. `wpad-basic-mbedtls` lacks CONFIG_WNM, so hostapd
+rejects `bss_transition` outright and every AP interface fails to come up --
+this was already found once (FINDINGS.md's v2b entry) and regressed again on
+v7 by following this doc's package list verbatim. If the merged config ships
+`bss_transition`, use `wpad-mbedtls` (with `-wpad-basic-mbedtls` to drop the
+device-profile default), not `wpad-basic-mbedtls`.
+
 ## Decision: no wpad package swap
 
 v1 shipped `wpad-basic-mbedtls`, which is also the OpenWrt upstream default

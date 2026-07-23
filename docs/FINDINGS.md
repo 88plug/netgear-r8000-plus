@@ -123,6 +123,16 @@ test rather than trust:
    whole config → 5GHz fell back to ch36/20 MHz. Fix: swap to full
    **`wpad-mbedtls`** (`CONFIG_WNM=y`), keeping the feature. Verified `wpad` has
    `bss_transition`/`wnm_sleep_mode` before flashing.
+   **Regressed and re-confirmed on v7 (2026-07-23):** a later staging doc
+   (`v2-staging/wpa3/imagebuilder-packages.md`) argued for keeping
+   `wpad-basic-mbedtls` (correct for WPA3-SAE/MFP alone, but doesn't mention
+   `bss_transition`) and the v7 build followed that PACKAGES list — silently
+   reintroducing this exact outage (all 4 SSIDs down, "unknown configuration
+   item 'bss_transition'", `hostapd.add_iface` failed for every phy). Re-fixed
+   the same way: `PACKAGES="-wpad-basic-mbedtls wpad-mbedtls ..."`. Both
+   packages provide the same `hostapd`/`wpa-supplicant` and conflict if listed
+   together — the `-wpad-basic-mbedtls` exclusion is required since the device
+   profile pulls it in by default.
 
 **Verified working on v2b:**
 - OpenWrt 25.12.5, 3 radios, unified `R8000` SSID on all three.
