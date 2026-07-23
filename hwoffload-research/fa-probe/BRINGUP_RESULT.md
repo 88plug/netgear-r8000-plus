@@ -103,6 +103,65 @@ constructing a complete, semantically valid NAPT flow-table row (not just
 an inert Next-Hop slot) and the separate switch-side SRAB enable — both
 remain open, deliberately un-attempted steps.
 
+## Follow-up: switch-side SRAB register (robo_fa_enable's OOB_PAUSE bit) — CONFIRMED
+
+`fa_switch_oobpause_test.c` tested the switch-side half of Broadcom's
+`robo_fa_enable()` - the `REG_FC_OOBPAUSE` bit on the BCM53012 switch,
+reached via the SRAB bus (physical base `0x18007000`, confirmed live via
+this router's own devicetree: `ethernet-switch@18007000`, compatible
+`brcm,bcm53012-srab`).
+
+This was treated as its own, separate go/no-go from the GMAC-side FA work:
+the SRAB bus is actively used *right now* by the already-loaded `b53_srab`
+driver managing this exact switch (unlike the FA/CTF block, which nothing
+else in the kernel touches), so a naive independent access could race with
+it. Ten parallel research passes were run first to actually answer that
+concern rather than guess:
+
+- Confirmed `robo_fa_enable()`'s OTHER register (`BRCM_HDR` tag mode) is
+  **already active today** via mainline's own `b53_brcm_hdr_setup()` -
+  not touched here, since writing it again would add risk with no new
+  information.
+- Confirmed this exact device/switch family has real documented history
+  of CPU-port/tagging bugs causing full LAN loss (OpenWrt #13784 bricked
+  R8000 wired LAN on a stock release; #9024 on this exact switch chip) -
+  the caution was warranted, not excessive.
+- Confirmed DSA's tag-parsing is bounds-checked everywhere (malformed
+  frames get safely dropped, not a crash) and that a real power-cycle
+  (not a soft reboot) fully resets the switch ASIC independent of
+  whatever state Linux left it in - the actual recovery story if
+  something had gone wrong.
+- Confirmed the RCAREQ/RCAGNT grant handshake is genuine hardware
+  arbitration, not a software convention - built to handle concurrent
+  requesters correctly, which is what actually made proceeding
+  reasonable despite the shared-bus concern.
+
+Implementation replicated mainline `b53_srab.c`'s exact protocol (request
+grant, encode page+register into `B53_SRAB_CMDSTAT`, poll the busy bit,
+release grant) rather than inventing a new one - registers: `CTRLS@0x40`,
+`CMDSTAT@0x2c`, `RD_L@0x3c`, `WD_L@0x34`.
+
+**Result:**
+```
+OOBPAUSE before        = 0x0000 (bit8=0)
+OOBPAUSE after write    = 0x0100 (bit8=1)  SET-CONFIRMED
+OOBPAUSE after revert   = 0x0000            REVERT-CONFIRMED
+```
+
+Write and revert both confirmed via read-back, not assumed. System
+stability re-checked immediately after: uptime unbroken, 0% ping loss,
+`lan1` (the only physically connected port) still up, all 4 WiFi SSIDs
+intact, no new dmesg errors, clean `rmmod`.
+
+**All three FA/CTF hardware mechanisms this project set out to verify are
+now confirmed working**, empirically, on real silicon: the GMAC-side
+table-init control handshake, the GMAC-side indirect data read/write
+path, and the switch-side enable register. What remains for actual
+traffic acceleration is constructing and inserting a complete, real NAPT
+flow-table row (not just an inert test slot) referencing real connection
+state - a data-construction task at this point, not a remaining hardware
+question.
+
 ## What this changes
 
 `VERDICT.md`'s central open question — "is the FA silicon block physically

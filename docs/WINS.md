@@ -269,3 +269,18 @@ materially different risk surface — it touches the DSA switch carrying all
 LAN ports, not just this isolated GMAC-3 sub-block) were both explicitly
 left untouched. Those are the next real steps, and each needs its own
 separate go/no-go, the same discipline that gated this one.
+
+**Update, same night: the switch-side step is done too.** Ten parallel
+research passes actually answered the switch-side risk question instead
+of leaving it as "too different, hold off" — confirmed `BRCM_HDR` tag
+mode is already active via mainline's own driver (didn't need touching),
+confirmed real documented LAN-bricking history exists for this exact
+switch chip (the caution was earned, not excessive), confirmed DSA tag
+parsing safely drops malformed frames rather than crashing, and confirmed
+a real power-cycle fully resets the switch independent of prior state.
+With that in hand, `fa_switch_oobpause_test.c` replicated mainline
+`b53_srab.c`'s exact bus-arbitration protocol and toggled the
+`REG_FC_OOBPAUSE` bit live: write confirmed, revert confirmed, zero
+system impact. All three FA/CTF hardware mechanisms (GMAC table-init,
+GMAC indirect data path, switch-side enable) are now empirically proven
+working. Full detail: `hwoffload-research/fa-probe/BRINGUP_RESULT.md`.
