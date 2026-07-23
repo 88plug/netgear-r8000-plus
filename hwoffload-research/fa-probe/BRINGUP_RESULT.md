@@ -162,6 +162,41 @@ flow-table row (not just an inert test slot) referencing real connection
 state - a data-construction task at this point, not a remaining hardware
 question.
 
+## Follow-up: real driver skeleton (Phase A+B), per the approved plan
+
+`fa_accel.c` is the first step toward an actual persistent feature, not
+another one-shot register test. Full design: `/home/andrew/.claude/plans/drifting-dazzling-mccarthy.md`
+(approved). Architecture: registers as an indirect TC-flower/flowtable
+hardware-offload backend (`flow_indr_dev_register()`), the exact interface
+real hardware NAT accelerators (e.g. MediaTek's `mtk_ppe_offload.c`) already
+use - not a bespoke netfilter/conntrack hook. This router's own `flow add @ft`
+nftables rule already produces the "this flow qualifies for offload" signal
+today; a backend just has to answer `FLOW_CLS_REPLACE`/`DESTROY`/`STATS`
+callbacks. Research this session confirmed every failure path here (a
+returned error, a translation gap) is silently absorbed by the framework -
+software flowtable already runs the connection unconditionally, hardware
+offload is strictly best-effort on top. That structural guarantee is what
+made Phase A+B safe to load on the live router at all.
+
+Phase A+B does exactly two things and nothing else: registers the block
+callback (proves the dispatch plumbing works), and on `FLOW_CLS_REPLACE`
+decodes the generic `flow_rule` into what a real `fa_napt_prep_ipv4_word()`-
+style row would contain - logged only. It always returns `-EOPNOTSUPP`.
+Zero FA/CTF register access anywhere in this file.
+
+**Loaded live, verified:** registration confirmed via dmesg, uptime
+unbroken, 0% ping loss, all 4 SSIDs intact, clean `rmmod`. No
+`FLOW_CLS_REPLACE` fired - expected and consistent with this bench setup
+having no forwarded traffic (no WAN cable, the one LAN client's SSH
+session is local input, not forwarded). Full logging verification needs a
+second test client generating real LAN-to-LAN or LAN-to-WAN traffic, or
+real deployment - noted as an open follow-up in the plan, not a defect.
+
+**Deliberately not built this pass:** Phase C (real FA table writes -
+needs Phase B's logged output verified against real flows first) and
+Phase D (persistent GMAC/switch bring-up at driver load) - both remain
+their own separate decisions per the approved plan.
+
 ## What this changes
 
 `VERDICT.md`'s central open question — "is the FA silicon block physically
