@@ -27,6 +27,15 @@ hwoffload-research/ghidra-cli/
 v2-staging/firmware/re-analysis/full_disasm.txt
 v2-staging/firmware/re-analysis/strings_with_offsets.txt
 
+# out-of-tree Kbuild artifacts (regeneratable via `make`; keep .c/Makefile/docs only)
+hwoffload-research/fa-probe/*.ko
+hwoffload-research/fa-probe/*.o
+hwoffload-research/fa-probe/*.mod
+hwoffload-research/fa-probe/*.mod.c
+hwoffload-research/fa-probe/.*.cmd
+hwoffload-research/fa-probe/Module.symvers
+hwoffload-research/fa-probe/modules.order
+
 # python / scratch
 __pycache__/
 *.pyc

@@ -391,3 +391,69 @@ precisely (version pairing, not policy), and a real avenue exists for a
 recognize `-52` (not just `EOPNOTSUPP`) as an `interface_create`-unsupported
 signal before attempting this firmware pairing again — that would need to be
 proven on a bench/spare unit, not the operator's live router.
+
+## 13. Closed watch-items and standing decisions (2026-07-23)
+
+**EAP_MODE_SIMPLIFIED (openwrt/openwrt#21349) — closed, no action needed.**
+Full trace already in `v2-staging/extras/dsa-switch/NOTES.md`: upstream commit
+`4227ea91e265` (backported to `6.12.30`) broke standalone/non-bridged switch
+ports on Northstar (BCM5301x) chips by setting `EAP_MODE_SIMPLIFIED`. This
+repo's 25.12.5 source tree already carries the real upstream fix
+(`target/linux/bcm53xx/patches-6.12/701-net-dsa-b53-disable-EAP-setup-on-Northstar-switches.patch`,
+skips `EAP_MODE_SIMPLIFIED` on `is5301x()` chips) — confirmed present and
+applied, `wan` (a standalone port) passes traffic cleanly on the live device.
+Closing this watch-item rather than leaving it open: don't re-fix it, and if
+a future kernel bump drops/renumbers the patch, that's the thing to catch.
+
+**`sar2g`/`sar5g` NVRAM — decision: leave unset.** These SAR (Specific
+Absorption Rate) power-back-off NVRAM keys exist as strings the stock
+firmware checks for (`v2-staging/firmware/re-analysis/strings_with_offsets.txt`)
+but are **absent from this unit's own extracted stock NVRAM**
+(`extracted/calibration.txt`) — the device shipped without them set. SAR
+tables exist to cap RF power for body-worn/handheld proximity-to-body FCC
+exposure limits; a stationary shelf-mounted router has no such use case, and
+setting them would only add an unnecessary power cap contradicting the
+already-shipped PA-ceiling policy (§6: "the operator owns regulatory
+responsibility"). Consistent decision: don't add them — matches stock
+behavior, matches the project's existing power posture.
+
+**UART vs pstore/ramoops for post-crash debug visibility — decision: defer,
+prefer pstore/ramoops when built.** UART requires physically locating and
+soldering to an on-board header (hardware risk, bench time) for one-shot
+serial-console access. `pstore`/`ramoops` (a reserved DRAM region that
+survives a warm reboot so the previous boot's `dmesg` can be read back from
+`/sys/fs/pstore/` after a crash/watchdog reset) is software-only — no
+soldering, and it complements `radio-watchdog` (§10) by giving it (or the
+operator) forensic visibility into *why* a wedge happened, not just that one
+did. Not wired into this build: adding a `ramoops` reservation requires a DTS
+change (a reserved-memory node) and a rebuild+reflash cycle, which is a real
+change of the SoC's memory map, not a config tweak — appropriately scoped as
+its own dedicated pass with its own build-and-verify cycle, not bundled into
+this one. Recorded here as the decided direction for that future pass, not
+as something silently completed now.
+
+**"Stuck regulatory domain" (self-managed wiphy at `99: DFS-UNSET`) — root
+cause found: cosmetic display artifact, not a functional bug.** `iw reg get`
+prints `country 99: DFS-UNSET` under each `phy#N` header even on a clean cold
+boot with `country 'US'` correctly set in `/etc/config/wireless` and
+`global\n country US: DFS-FCC` correctly shown at the top of the same command's
+output. This looked like the regulatory domain failing to apply — it isn't.
+Cross-checked against what's *actually* applied to the radios (not just the
+summary label): `iw dev phy0-ap0 info` / `phy2-ap0 info` show real operation
+at **31 dBm firmware-clamped power** (matches the PA-ceiling policy, §6) on
+non-DFS UNII-1/UNII-3 channels (36, 153), and `iw phy phy0 channels` lists
+the full **34-channel US table** — not the degraded flat-20 dBm/4-entry table
+a genuinely-unapplied regdomain would show. brcmfmac's self-managed wiphys
+pull their country/power table from NVRAM `ccode` at firmware attach time,
+not from cfg80211's generic `REG_SET_DRIVER` path that the `iw reg get`
+per-phy summary line reflects — so that summary line stays at the
+world/unset placeholder cosmetically while the firmware-side table (the one
+that actually gates channels and power) is correctly `US`. Verified by
+directly reproducing the confusing state (a `wifi`/`network` hot-reload
+during this session's guest-network change did visibly degrade real
+operation to 20 dBm/no-DFS — a real, distinct issue, already covered by the
+existing "reboot after any hot-reload with country set" rule) and then
+confirming a genuine cold boot restores full real-world power/channels while
+the `iw reg get` label remains unchanged either way. No fix needed or
+possible here — it's not broken, `iw reg get`'s per-phy summary just isn't
+the right place to look for this driver.

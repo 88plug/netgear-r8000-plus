@@ -124,6 +124,32 @@ of it), wired as an `nf_flowtable` / `flow_offload` hardware-offload backend.
    register writes (BRCM-HDR enable, OOB pause, CFP TCAM FIN/RST rules) added
    on top — see the concrete page/offset table in
    `graveyard-vendor/notes.md` §4.
+
+   **Reconciliation (2026-07-23): this port is lower-effort than the general
+   phrasing above implies.** `bcmrobo.c`'s own SRAB bus layer
+   (`srab_wreg`/`srab_rreg`: arbitrate `rcareq`/`rcagnt`, load `wd_h`/`wd_l`,
+   issue `cmdstat = (page<<24)|(offset<<16)|gordyn|write`, poll, read
+   `rd_h`/`rd_l`) is not something a driver has to re-port at all — mainline
+   `b53_srab.c` (`hardware-docs/extracted-sources/b53_srab.c`) already
+   implements the byte-identical protocol as generic, page+register-addressed
+   primitives (`b53_srab_read{8,16,32,48,64}` /
+   `b53_srab_write{8,16,32,48,64}`, wired into `struct b53_io_ops` at
+   `b53_srab.c:480-489`) — confirmed function-for-function equivalent to
+   `bcmrobo.c`'s `srab_wreg`/`srab_rreg` (same page/offset/go-ready bit
+   layout, same `wd_h/wd_l/rd_h/rd_l` register pair). So `robo_fa_enable()`
+   (2 register writes: `PAGE_MMR/REG_BRCM_HDR`, `PAGE_FC/REG_FC_OOBPAUSE`)
+   and `robo_fa_aux_enable()` (1 write: `PAGE_CFP/REG_CFP_CTL_REG`) reduce to
+   direct `dev->ops->write8()` calls against already-running mainline
+   infrastructure — no new bus driver, no new arbitration/polling logic, just
+   new page/offset constants. Only `robo_fa_aux_init()`'s CFP TCAM programming
+   (4 rules via the `REG_CFPTCAM_ACC` indirect command register) needs its own
+   new indirect-access helper, structurally identical to (and reusable
+   alongside) the FA table-access pattern in step 2 above — b53 doesn't
+   already have a CFP TCAM helper, since mainline b53 never drives FA. Net
+   effect: the switch-side glue step is almost entirely "add page/offset
+   defines + a handful of `write8()` calls to existing b53 ops," not a
+   from-scratch register-access port — tightens the Medium-Low estimate in
+   the effort table below toward Low.
 5. **Do not touch `et.ko`/GMAC-3's regular UniMAC path** — it's unrelated;
    `bgmac` already owns it.
 

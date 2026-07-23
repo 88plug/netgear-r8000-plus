@@ -116,10 +116,60 @@ OWE cleanly removed (no dead interfaces) + the packaging regression fixed +
 5GHz/MBSS/WPA3/802.11r-k-v/guest-network all independently re-verified live
 after two full flash-and-recovery cycles.
 
-## Outstanding (user tasks, not bugs)
+## v6.1 — finish pass: guest isolation, passphrases, regdomain root-cause, FA next-gate (2026-07-23)
 
-- Change temp passphrases: `ChangeMe-R8000-2026`, `GuestChangeMe2026`.
-- Set SQM WAN bandwidth to activate bufferbloat control.
-- Move `R8000-Guest` to an isolated network/VLAN for true guest isolation.
+- **Real WiFi passphrases live.** Temp `ChangeMe-R8000-2026`/`GuestChangeMe2026`
+  replaced with random 20-char alnum passphrases on the router and in
+  `v2-files/etc/config/wireless`.
+- **Guest network isolated.** `R8000-Guest` moved off `lan` onto its own
+  bridge/subnet (`br-guest`, 192.168.2.0/24) with a dedicated firewall zone
+  (forward-allowed to `wan` only, explicit reject rule to `lan`) — verified
+  live (`br-guest` up, zone/forwarding/rule confirmed via `uci show
+  firewall`). `v2-files/etc/config/{network,firewall,dhcp,wireless}` now
+  carry this as a reproducible template.
+- **"Stuck regulatory domain" finding closed — cosmetic, not a bug.**
+  `iw reg get`'s per-phy `country 99: DFS-UNSET` label is a brcmfmac
+  self-managed-wiphy display artifact; actual applied power/channels
+  (verified via `iw dev ... info` / `iw phy ... channels`, not just the
+  summary line) correctly reflect `US` — 31 dBm firmware-clamped, full
+  34-channel table. Full trace in FINDINGS.md §13. Separately reconfirmed
+  live: a `wifi`/`network` hot-reload (as opposed to a fresh boot) *does*
+  still visibly degrade real operation to 20 dBm/no-DFS, matching the
+  existing "reboot after any hot-reload with country set" rule.
+- **FA hardware-offload research: chip identity resolved, bring-up still
+  gated.** Live `dmesg` confirms the R8000's actual SiliconBackplane SoC
+  chip id as `53010 rev 0x00` (distinct from the separately-confirmed
+  switch-IP self-ID `BCM53012 rev 5`) — closes the die-revision unknown
+  `GO_NOGO.md` flagged before any `fa_up()` bring-up could be considered.
+  A second, post-reboot `fa_probe.ko` read returned byte-identical
+  `control`/`status` values to the first — stable, repeatable, real evidence
+  the block is driven, not floating bus noise. Full detail:
+  `hwoffload-research/fa-probe/GO_NOGO_BRINGUP.md`. **The register-write
+  bring-up itself was deliberately not run** — it's a distinct risk class
+  from a read-only probe and stays its own future go/no-go.
+- **Switch-side FA glue reconciled with mainline.** Confirmed mainline
+  `b53_srab.c`'s generic `b53_srab_read/write{8,16,32,48,64}` primitives are
+  function-for-function equivalent to `bcmrobo.c`'s own SRAB bus layer — the
+  switch-side port (`VERDICT.md` §2 step 4) needs new page/offset register
+  writes on top of already-running infrastructure, not a new bus driver.
+  Lowers that step's effort estimate from Medium-Low toward Low.
+- **`sar2g`/`sar5g` NVRAM — decided: leave unset**, and **UART vs
+  pstore/ramoops — decided: prefer pstore/ramoops** (deferred to its own
+  build+DTS-change pass, not silently done). Both documented in
+  FINDINGS.md §13.
+- **EAP_MODE_SIMPLIFIED (#21349) — closed**, folded into FINDINGS.md §13
+  from where it lived (`v2-staging/extras/dsa-switch/NOTES.md`): the
+  upstream fix is already present and applied in this repo's 25.12.5 tree,
+  no action needed.
+
+## Outstanding (genuinely blocked, not effort gaps)
+
+- **SQM WAN bandwidth** — cannot be set correctly right now: `wan@eth2` is
+  link-down (`LOWERLAYERDOWN`, no cable connected) in this bench setup, so
+  there's no real ISP link to measure. `sqm.wan.download`/`upload` are `0`
+  (idle) until the router is deployed at its real network location with the
+  actual WAN link connected — set them from a real speed test at that point,
+  not a guessed number now.
 - Always run `sysupgrade -b` and download the backup **before** any future
-  sysupgrade — config loss on this device is confirmed, not hypothetical.
+  sysupgrade — config loss on this device is confirmed, not hypothetical
+  (process rule, see RUNBOOK.md, not a one-time task).
