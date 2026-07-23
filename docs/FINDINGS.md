@@ -152,3 +152,32 @@ must be changed.
 - On this hardware, "unlock" ≠ "edit the regulatory table" — the real gates are
   the DTS freq-limits (channels, hardware-tied to antenna diplexing) and the PA
   calibration (power). Regdb is inert here (proven).
+- A `-95`/EOPNOTSUPP is a *driver* return, not always a firmware wall — read the
+  driver. The multi-BSS limit was a driver bug, not a chip limit (see §8).
+
+## 8. Multi-BSS driver fix (the "impossible" one — DONE)
+
+The 2nd AP BSS per radio failed with `add_iface -95`, so OWE-transition, guest
+SSIDs, and multi-SSID-per-radio were all "impossible" on brcmfmac/BCM43602.
+
+**Root cause (read the driver, not the docs):** `brcmf_cfg80211_request_ap_if()`
+tries the modern `interface_create` iovar (v1/v2, then a version query). The
+R8000's 2015 firmware (7.35.177.56) doesn't implement it, so the version query
+fails and the driver did `return -EOPNOTSUPP` — **skipping the legacy
+`bsscfg:ssid` MBSS fallback right below it that this firmware DOES support.**
+MBSS was even detected (driver advertised `#{AP}<=4`); the code just bailed
+before trying the path that works.
+
+**Fix** (`patches/861-brcmfmac-r8000-legacy-mbss-fallback.patch`, 2 lines): on
+the version-query failure, set `iface_create_ver = 0` and fall through to the
+legacy MBSS path instead of returning. Built as `kmod-brcmfmac` via the 25.12.5
+bcm53xx **SDK** (ABI/vermagic matched to the running kernel), deployed live.
+
+**Verified on hardware:** `iw phy phy0 interface add … type __ap` → exit 0 (was
+-95); dmesg shows the fallthrough to legacy `bsscfg:ssid`. Re-enabled OWE +
+added a guest SSID → **6 BSSes beaconing** (R8000 ×3, R8000-Open,
+R8000-Open-OWE, R8000-Guest). Upstreamable to OpenWrt mac80211 / linux brcmfmac.
+
+Caveat: the patched module is currently deployed as a `/lib/modules` overlay
+(persists across reboot). A clean reproducible image (v3) folding the patched
+`kmod-brcmfmac.apk` into ImageBuilder is the remaining packaging step.
