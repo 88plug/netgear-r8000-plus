@@ -1,0 +1,40 @@
+#!/bin/sh /etc/rc.common
+#
+# radio-watchdog -- cron-driven recovery for brcmfmac firmware wedges on the
+# R8000's 3x BCM43602 radios.
+#
+# See ../NOTES.md for the failure signature, the OpenWrt issues this is
+# built from, and the escalation rationale. This init script only wires the
+# checker (/usr/sbin/radio-watchdog-check) into cron; it does not run a
+# persistent daemon.
+
+START=99
+STOP=10
+
+CRON_LINE="*/5 * * * * /usr/sbin/radio-watchdog-check"
+CRON_MARK="# radio-watchdog"
+
+start() {
+	[ -x /usr/sbin/radio-watchdog-check ] || {
+		echo "radio-watchdog: /usr/sbin/radio-watchdog-check missing or not executable" >&2
+		return 1
+	}
+
+	mkdir -p /etc/crontabs
+	touch /etc/crontabs/root
+
+	# idempotent: strip any previous entry, then re-add
+	grep -v "$CRON_MARK\$" /etc/crontabs/root > /etc/crontabs/root.new 2>/dev/null
+	echo "$CRON_LINE $CRON_MARK" >> /etc/crontabs/root.new
+	mv /etc/crontabs/root.new /etc/crontabs/root
+
+	/etc/init.d/cron enabled || /etc/init.d/cron enable
+	/etc/init.d/cron running && /etc/init.d/cron reload || /etc/init.d/cron start
+}
+
+stop() {
+	[ -f /etc/crontabs/root ] || return 0
+	grep -v "$CRON_MARK\$" /etc/crontabs/root > /etc/crontabs/root.new 2>/dev/null
+	mv /etc/crontabs/root.new /etc/crontabs/root
+	/etc/init.d/cron running && /etc/init.d/cron reload
+}

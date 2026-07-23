@@ -1,0 +1,73 @@
+# NETGEAR R8000 (bcm53xx / brcmfmac) -- v2 SQM (bufferbloat control)
+# Workstream: modern roaming/steering/QoS. Rationale/evidence: ../../notes.md
+#
+# Package: sqm-scripts (pulls in kmod-sched-cake, kmod-ifb, tc, ip,
+# iptables-mod-ipopt automatically -- see ../../imagebuilder-packages.md).
+# This is the single biggest real-world latency-under-load win available on
+# this device: it is pure userspace/software (tc + cake qdisc on the kernel
+# side), has zero dependency on brcmfmac AP-mode capability, and works
+# identically regardless of what the WiFi driver can or can't do. Every WAN
+# packet crosses this shaper.
+#
+# WAN interface confirmed live on-device: `ip link` / `board.json` both show
+# the WAN net-device is literally named 'wan' (bcm53xx switch driver exposes
+# it directly, not eth0.2/eth1-style) -- verified via `cat
+# /sys/class/net/wan/address` matching board.json's wan.macaddr.
+#
+# *** DOWNLINK/UPLINK BELOW ARE PLACEHOLDERS -- MUST BE SET BEFORE USE ***
+# Run a real bufferbloat-aware speed test (e.g. waveform.com/tools/bufferbloat,
+# or `speedtest-cli`) on the actual WAN link, then set download/upload to
+# ~90% of the measured throughput. Re-run the test after deploying; if
+# latency-under-load is still bad, lower another 5-10%; if idle throughput
+# feels short-changed, raise back up in small steps. Cake's queue starves
+# itself into extra latency if download/upload are set *above* the real
+# line rate, so err low on the first pass.
+
+config queue 'wan'
+	option enabled '1'
+	option interface 'wan'
+
+	# kbit/s. Placeholders -- REPLACE with ~90% of measured WAN throughput.
+	option download '0'
+	option upload '0'
+
+	option qdisc 'cake'
+	option script 'piece_of_cake.qos'
+
+	# cake's own DSCP-aware and per-host-fairness logic; leave "besteffort"
+	# off (i.e. let cake's default diffserv3 tin classification run) unless
+	# a specific need for full priority-tier QoS (VoIP/gaming ahead of bulk
+	# downloads) shows up -- diffserv3 already does most of what home
+	# networks need without hand-tuned DSCP marking elsewhere in the config.
+	option qdisc_advanced '0'
+	option squash_dscp '1'
+	option squash_ingress '1'
+	option ingress_ecn 'ECN'
+	option egress_ecn 'ECN'
+
+	# --- Link-layer overhead: SET TO MATCH THE ACTUAL WAN HANDOFF TYPE ---
+	# Values below assume a typical North American cable/DOCSIS hand-off
+	# behind this router (common default for a Netgear R8000 deployment).
+	# If the WAN is actually PPPoE/VDSL2, fiber ONT (pure Ethernet), or
+	# something else, replace per this table (OpenWrt SQM docs, verified
+	# 2026):
+	#   DOCSIS/cable modem (Ethernet handoff) ......... linklayer ethernet, overhead 22
+	#   Pure Ethernet / fiber ONT (no PPPoE) ........... linklayer ethernet, overhead 44
+	#   VDSL2 + PPPoE ................................... linklayer ethernet, overhead 34
+	#   VDSL2 bridged, no PPPoE ......................... linklayer ethernet, overhead 26
+	#   ADSL / other DSL (ATM) .......................... linklayer atm,      overhead 44
+	# When genuinely unsure, overestimate -- 44 is the documented safe
+	# default across connection types.
+	option linklayer 'ethernet'
+	option overhead '22'
+
+	# Leave empty for automatic target selection (cake computes this from
+	# the configured bandwidth); do not set a fixed ms value unless a
+	# specific measurement justifies overriding cake's own choice.
+	option itarget ''
+	option etarget ''
+	option iqdisc_opts ''
+	option eqdisc_opts ''
+
+	option debug_logging '0'
+	option verbosity '5'
