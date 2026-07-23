@@ -1,0 +1,42 @@
+diff --git a/package/utils/nvram/files/nvram-bcm53xx.init b/package/utils/nvram/files/nvram-bcm53xx.init
+index c97c493..102d3a3 100755
+--- a/package/utils/nvram/files/nvram-bcm53xx.init
++++ b/package/utils/nvram/files/nvram-bcm53xx.init
+@@ -68,6 +68,37 @@ set_bcm43602_variables() {
+ 			nvram set 2:sromrev=11
+ 			nvram set 2:boardflags=0x30040000
+ 			;;
++
++		netgear,r8000)
++			COMMIT=1
++
++			# radio 0 (5 GHz) - BCM43602
++			nvram set devpath0=pcie/1/1
++			nvram set 0:devpath0=sb/1/
++			nvram set 0:devid=0x43bc
++			nvram set 0:boardrev=0x1421
++			nvram set 0:sromrev=11
++			nvram set 0:boardflags=0x30008000
++			nvram set 0:boardflags2=0x2
++
++			# radio 1 (2.4 GHz) - BCM43602
++			nvram set devpath1=pcie/2/3
++			nvram set 1:devpath1=sb/1/
++			nvram set 1:devid=0x43bb
++			nvram set 1:boardrev=0x1421
++			nvram set 1:sromrev=11
++			nvram set 1:boardflags=0x1000
++			nvram set 1:boardflags2=0x2
++
++			# radio 2 (5 GHz) - BCM43602
++			nvram set devpath2=pcie/2/4
++			nvram set 2:devpath2=sb/1/
++			nvram set 2:devid=0x43bc
++			nvram set 2:boardrev=0x1421
++			nvram set 2:sromrev=11
++			nvram set 2:boardflags=0x10000000
++			nvram set 2:boardflags2=0x2
++			;;
+ 	esac
+ }
+ 
