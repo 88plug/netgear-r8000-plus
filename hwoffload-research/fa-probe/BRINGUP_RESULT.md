@@ -72,6 +72,37 @@ effect from this write.
   actually get hardware-forwarded faster; it proves the control plane
   (the table-init handshake) is alive and correct.
 
+## Follow-up: indirect memory-access (data-plane write path) — CONFIRMED
+
+`fa_macc_test.c` tested the `mem_acc_ctl`/`m_accdata[]` indirect table-write
+path (with the WAR777 workaround) against an inert Next-Hop table slot
+(index 0 — not referenced by any flow-table row, so no live traffic touches
+it): wrote `0x11111111 / 0x22222222 / 0x33333333` to the 3 NH-row words,
+read them back.
+
+Words 0 and 1 round-tripped byte-for-byte. Word 2 came back as `0x00000003`
+— at first glance a mismatch, but Broadcom's own `CTF_FA_SET_NH_ENTRY` macro
+(`etc_fa.c`) only ever assigns `d[2] = (s[0] & 0xE0) >> 5` — a **3-bit**
+field. `0x33333333 & 0x7 = 0x3`, exactly the read-back value. The hardware
+silently truncated to precisely its documented, real field width — the
+same behavior Broadcom's own driver's row-packing macro assumes. A
+floating/undriven or garbage register would not be expected to truncate to
+exactly a specific, independently-documented bit width; this is further,
+specific confirmation the mem-access path works as designed, not a failure
+of it. (The naive PASS/FAIL check inside `fa_macc_test.c` itself flags this
+as a "MISMATCH" since it doesn't know the field-width story — that's a
+limitation of the test script's own logic, not the hardware.)
+
+System stability re-checked after this write too: uptime unbroken, 0%
+ping loss, all 4 SSIDs intact, clean `rmmod`.
+
+**Two real hardware mechanisms are now confirmed working**: the table-init
+control handshake, and the indirect data read/write path used to actually
+program table rows. What's still needed for real traffic acceleration:
+constructing a complete, semantically valid NAPT flow-table row (not just
+an inert Next-Hop slot) and the separate switch-side SRAB enable — both
+remain open, deliberately un-attempted steps.
+
 ## What this changes
 
 `VERDICT.md`'s central open question — "is the FA silicon block physically
