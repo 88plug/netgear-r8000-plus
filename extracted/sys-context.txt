@@ -1,0 +1,2 @@
+
+nvram show 2>/dev/null | grep -iE 'macaddr|ccode|regrev|sromrev|boardflags|devpath|pa2ga|pa5ga|pa5gla|pa5gha|maxp|txchain|rxchain|aa2g|aa5g|43602|wl[0-2]_' | sort; echo 

@@ -1,0 +1,16 @@
+# large firmware binaries — kept on disk, not in git
+images/*.chk
+images/*.zip
+*.bin
+
+# OpenWRT source clone + build artifacts (huge)
+openwrt/
+imagebuilder*/
+*.tar.zst
+build/
+bin/
+
+# python / scratch
+__pycache__/
+*.pyc
+extracted/nvram-stock.txt
