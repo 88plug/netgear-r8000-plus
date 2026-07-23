@@ -15,3 +15,5 @@ __pycache__/
 *.pyc
 extracted/nvram-stock.txt
 v2-files/etc/config/wireless
+v2-files/lib/modules/
+images/packages/*.apk
