@@ -10,10 +10,13 @@ their documented hardware ceiling.
 - **v1 SHIPPED & VERIFIED:** OpenWrt 25.12.5 running on the R8000. All 3 radios
   up; both 5GHz radios functional (29 channels each, VHT/AP-capable); live 5GHz
   scan works. The "dead 5GHz" (#20514) is not dead.
-- **v2 IN BUILD:** LEDs, WPA3-SAE, newest 43602 firmware + extracted `clm_blob`,
-  max-power/all-band unlock (to FCC-certified ceilings), modern roaming/steering
-  (dawn, 802.11r/k/v), OWE, SQM/cake. Assembled from parallel workstreams under
-  `v2-staging/`, flashed via `sysupgrade`.
+- **v2b SHIPPED & VERIFIED:** unified `R8000` SSID on all 3 radios with
+  **WPA3-SAE + 802.11r/k/v** (full `wpad-mbedtls`), **usteer** band-steering,
+  OWE, **SQM/cake**, flow-offload, working **LEDs**, PA-ceiling power, 5GHz split
+  at VHT80, **LuCI**. Built via ImageBuilder (`v2-files/` overlay), flashed via
+  `sysupgrade -n`. Two regressions caught on-device and fixed (fatal clm_blob
+  removed; 802.11v needed full wpad) — see [FINDINGS](FINDINGS.md) §6–7.
+  Change the temp passphrase `ChangeMe-R8000-2026`.
 
 ## Docs
 

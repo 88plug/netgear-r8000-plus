@@ -108,4 +108,47 @@ Workstreams (artifacts in `v2-staging/`):
   (only what brcmfmac AP mode genuinely honors).
 - **extras** — flow-offload, radio-hang watchdog, channel defaults.
 
-_(v2 on-device verification results appended after sysupgrade.)_
+### v2 shipped result (as `r8000plus-v2b`, verified on-device)
+
+Two v2 regressions were caught by on-device testing and fixed — the reason we
+test rather than trust:
+
+1. **clm_blob was firmware-rejected and FATAL.** The extracted blob loaded but
+   the 43602 firmware rejected it (`clmload failed -52`), and unlike a *missing*
+   clm (v1, harmless warning) a *rejected* clm aborts brcmfmac init → **all three
+   radios failed to register.** Removed it. Radios work at the v1 29-channel
+   baseline. The clm/DFS-unlock path did not pan out; honest outcome.
+2. **802.11v needed the full wpad, not a workaround.** `bss_transition` is
+   unsupported by `wpad-basic-mbedtls` (`CONFIG_WNM` off) → hostapd rejected the
+   whole config → 5GHz fell back to ch36/20 MHz. Fix: swap to full
+   **`wpad-mbedtls`** (`CONFIG_WNM=y`), keeping the feature. Verified `wpad` has
+   `bss_transition`/`wnm_sleep_mode` before flashing.
+
+**Verified working on v2b:**
+- OpenWrt 25.12.5, 3 radios, unified `R8000` SSID on all three.
+- **WPA3-SAE + 802.11r (FT-SAE) + 802.11k (RRM) + 802.11v (BSS-Transition)** —
+  `Encryption: SAE / FT-SAE / WPA-PSK / FT-PSK (CCMP)`, `bss_transition=1` in all
+  hostapd confs, **0 hostapd config errors**.
+- **5GHz split at VHT80**: phy0 upper (ch149/153, 5.765 GHz), phy2 lower (ch36,
+  5.180 GHz); phy1 = 2.4 GHz ch1.
+- **usteer** band-steering up, **flow-offload** on, **SQM/cake** installed (idle
+  until WAN bandwidth set), **LEDs** all defined, **LuCI** on :80.
+- Max power: config requests the PA-ceiling txpower (27/27/23), firmware clamps
+  to the true calibrated max. brcmfmac does not report applied txpower via `iw`;
+  the ceiling is the config target, the firmware is the enforcer.
+
+**Honest not-delivered:** DFS-channel unlock (clm rejected); 802.11s mesh +
+airtime-fairness (brcmfmac driver ceiling, not a package choice); regulatory
+"table de-neuter" (channels are DT `ieee80211-freq-limit`-gated, not
+table-gated — proven empirically). Temp WiFi passphrase `ChangeMe-R8000-2026`
+must be changed.
+
+## 7. Engineering lessons
+
+- Test on the device: both v2 regressions (fatal clm, 802.11v fallback) were
+  invisible until flashed.
+- Enable, don't strip: an unsupported hostapd option means the wrong daemon
+  variant, not a feature to delete.
+- On this hardware, "unlock" ≠ "edit the regulatory table" — the real gates are
+  the DTS freq-limits (channels, hardware-tied to antenna diplexing) and the PA
+  calibration (power). Regdb is inert here (proven).
