@@ -1,0 +1,54 @@
+[    2.818773] bcma-host-soc 18000000.axi: bus0: Core 7 found: PCIe Gen 2 (manuf 0x4BF, id 0x501, rev 0x01, class 0x0)
+[    2.829385] bcma-host-soc 18000000.axi: bus0: Core 8 found: PCIe Gen 2 (manuf 0x4BF, id 0x501, rev 0x01, class 0x0)
+[    2.840001] bcma-host-soc 18000000.axi: bus0: Core 9 found: PCIe Gen 2 (manuf 0x4BF, id 0x501, rev 0x01, class 0x0)
+[    3.089257] pcie_iproc_bcma bcma0:7: host bridge /axi@18000000/pcie@12000 ranges:
+[    3.096804] pcie_iproc_bcma bcma0:7:   No bus range found for /axi@18000000/pcie@12000, using [bus 00-ff]
+[    3.106425] OF: /axi@18000000/pcie@12000: Missing device_type
+[    3.112219] pcie_iproc_bcma bcma0:7: non-prefetchable memory resource required
+[    3.236602] pcie_iproc_bcma bcma0:7: link: UP
+[    3.241214] pcie_iproc_bcma bcma0:7: PCI host bridge to bus 0000:00
+[    3.269795] pci 0000:00:00.0: [14e4:8012] type 01 class 0x060400 PCIe Root Port
+[    3.317673] pci 0000:01:00.0: [14e4:aa52] type 00 class 0x028000 PCIe Endpoint
+[    3.411553] pci 0000:00:00.0: 4.000 Gb/s available PCIe bandwidth (5.0 GT/s PCIe x1 link)
+[    3.419953] pcie_iproc_bcma bcma0:8: host bridge /axi@18000000/pcie@13000 ranges:
+[    3.427506] pcie_iproc_bcma bcma0:8:   No bus range found for /axi@18000000/pcie@13000, using [bus 00-ff]
+[    3.437136] pcie_iproc_bcma bcma0:8: non-prefetchable memory resource required
+[    3.556601] pcie_iproc_bcma bcma0:8: link: UP
+[    3.561106] pcie_iproc_bcma bcma0:8: PCI host bridge to bus 0001:00
+[    3.589693] pci 0001:00:00.0: [14e4:8012] type 01 class 0x060400 PCIe Root Port
+[    3.637598] pci 0001:01:00.0: [10b5:8603] type 01 class 0x060400 PCIe Switch Upstream Port
+[    3.715575] pci 0001:02:01.0: [10b5:8603] type 01 class 0x060400 PCIe Switch Downstream Port
+[    3.740479] pci 0001:02:02.0: [10b5:8603] type 01 class 0x060400 PCIe Switch Downstream Port
+[    5.762232] pci 0001:03:00.0: [14e4:aa52] type 00 class 0x028000 PCIe Endpoint
+[    5.809506] pci 0001:04:00.0: [14e4:aa52] type 00 class 0x028000 PCIe Endpoint
+[    6.365498] pci 0001:00:00.0: 4.000 Gb/s available PCIe bandwidth (5.0 GT/s PCIe x1 link)
+[    6.373894] pcie_iproc_bcma bcma0:9: host bridge /axi@18000000/pcie@14000 ranges:
+[    6.381438] pcie_iproc_bcma bcma0:9:   No bus range found for /axi@18000000/pcie@14000, using [bus 00-ff]
+[    6.391072] pcie_iproc_bcma bcma0:9: non-prefetchable memory resource required
+[    6.506602] pcie_iproc_bcma bcma0:9: PHY or data link is INACTIVE!
+[    6.512818] pcie_iproc_bcma bcma0:9: no PCIe EP device detected
+[   18.130423] usbcore: registered new interface driver brcmfmac
+[   18.142179] brcmfmac 0000:01:00.0: enabling device (0140 -> 0142)
+[   18.256813] brcmfmac: brcmf_fw_alloc_request: using brcm/brcmfmac43602-pcie for chip BCM43602/1
+[   18.283117] brcmfmac 0001:03:00.0: enabling device (0140 -> 0142)
+[   18.289826] brcmfmac 0000:01:00.0: Direct firmware load for brcm/brcmfmac43602-pcie.netgear,r8000.bin failed with error -2
+[   18.406938] brcmfmac: brcmf_fw_alloc_request: using brcm/brcmfmac43602-pcie for chip BCM43602/1
+[   18.421775] brcmfmac 0001:04:00.0: enabling device (0140 -> 0142)
+[   18.428743] brcmfmac 0001:03:00.0: Direct firmware load for brcm/brcmfmac43602-pcie.netgear,r8000.bin failed with error -2
+[   18.455035] brcmfmac 0000:01:00.0: Direct firmware load for brcm/brcmfmac43602-pcie.txt failed with error -2
+[   18.468391] brcmfmac 0001:03:00.0: Direct firmware load for brcm/brcmfmac43602-pcie.clm_blob failed with error -2
+[   18.478855] brcmfmac 0001:03:00.0: Direct firmware load for brcm/brcmfmac43602-pcie.txcap_blob failed with error -2
+[   18.546874] brcmfmac: brcmf_fw_alloc_request: using brcm/brcmfmac43602-pcie for chip BCM43602/1
+[   18.556452] brcmfmac 0001:04:00.0: Direct firmware load for brcm/brcmfmac43602-pcie.netgear,r8000.bin failed with error -2
+[   18.580588] brcmfmac 0001:04:00.0: Direct firmware load for brcm/brcmfmac43602-pcie.txt failed with error -2
+[   18.600007] brcmfmac 0001:04:00.0: Direct firmware load for brcm/brcmfmac43602-pcie.clm_blob failed with error -2
+[   18.610513] brcmfmac 0001:04:00.0: Direct firmware load for brcm/brcmfmac43602-pcie.txcap_blob failed with error -2
+[   18.678142] brcmfmac: brcmf_c_process_clm_blob: no clm_blob available (err=-2), device may have limited channels available
+[   18.689299] brcmfmac: brcmf_c_process_txcap_blob: no txcap_blob available (err=-2)
+[   18.690209] brcmfmac: brcmf_c_process_clm_blob: no clm_blob available (err=-2), device may have limited channels available
+[   18.708112] brcmfmac: brcmf_c_process_txcap_blob: no txcap_blob available (err=-2)
+[   18.715788] brcmfmac: brcmf_c_preinit_dcmds: Firmware: BCM43602/1 wl0: Sep 18 2015 03:30:01 version 7.35.177.56 (r587209) FWID 01-6cb8e269
+[   18.720359] brcmfmac: brcmf_c_preinit_dcmds: Firmware: BCM43602/1 wl0: Sep 18 2015 03:30:01 version 7.35.177.56 (r587209) FWID 01-6cb8e269
+[   18.741417] brcmfmac: brcmf_c_process_clm_blob: no clm_blob available (err=-2), device may have limited channels available
+[   18.752555] brcmfmac: brcmf_c_process_txcap_blob: no txcap_blob available (err=-2)
+[   18.760917] brcmfmac: brcmf_c_preinit_dcmds: Firmware: BCM43602/1 wl0: Sep 18 2015 03:30:01 version 7.35.177.56 (r587209) FWID 01-6cb8e269
