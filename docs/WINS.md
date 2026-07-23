@@ -212,3 +212,30 @@ the actual `FILES=` source for a real build, not just a reference tree.
   Verified live post-flash: config sizes non-default (no #21655 hit this
   time), guest SSID + firewall isolation intact, `radio-watchdog`/`perf-tune`
   enabled, driver checksum matches the confirmed-good module.
+
+## v8 — wifi hardening + one closed performance gap (2026-07-23)
+
+- **OCV (Operating Channel Validation)** enabled on all three main radios —
+  anti channel-manipulation downgrade defense, OpenWrt's own standard
+  hardening for WPA3/802.11r. **Shipped as unverified-against-real-client-
+  hardware** (documented in `v2-files/etc/config/wireless`'s header, with a
+  one-line rollback) rather than silently declared done — OCV has known
+  interop bugs with buggy client OCV implementations, and this exact repo
+  just proved (`bss_transition`, this session) that untested hostapd config
+  changes can silently break association. Live-verified only that it
+  doesn't break *this* boot: zero hostapd errors, all 4 SSIDs up, `ocv=1`
+  active in the running config.
+- **Guest SSID client isolation closed.** `option isolate '1'` (→
+  `ap_isolate=1` in the running hostapd config) was flagged as a gap in the
+  original guest-isolation code review and never actually closed — a guest
+  network that isolates from LAN but lets guest devices see each other
+  wasn't a complete implementation of its own goal. Verified live in the
+  running `hostapd-phy1.conf`.
+- **Closed the `ethtool` verification gap** perf-tune's own research
+  (v3-staging/perf/notes.md item 4) had left open. `ethtool` package added,
+  confirmed working live: `rx-checksumming` and `tcp-segmentation-offload`
+  are hardware-fixed **off** on `bgmac` (not toggleable, not a config gap),
+  `tx-checksumming` and `generic-receive-offload` are **on**. Real data
+  replacing a "could not verify" note.
+- **v8 is the current shipping image**, `openwrt-25.12.5-r8000plus-v8-bcm53xx-generic-netgear_r8000-squashfs.chk`,
+  sha256 `cac883b07e5357c4a56662c305c326efb048edabc339791718a3b1a1ec307cd2`.
