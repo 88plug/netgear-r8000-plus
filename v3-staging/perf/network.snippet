@@ -1,0 +1,21 @@
+# /etc/config/network additions -- packet-steering baseline
+#
+# This is documentation of the correct baseline UCI state, not a new
+# setting: `packet_steering '1'` is already present in this router's live
+# config (confirmed live, 2026-07-23) and is the upstream default on
+# bcm53xx. Merge into the existing `config globals 'globals'` section if
+# building a files/ overlay from scratch -- don't duplicate the section.
+#
+# packet_steering=1 is a *prerequisite* for this workstream's RPS/IRQ fix
+# (files/etc/init.d/perf-tune) to matter -- with it off, the platform hook
+# (usr/libexec/platform/packet-steering.sh) zeroes RPS on br-lan/eth0 and
+# exits, and perf-tune re-asserts full RPS anyway (see notes.md: RPS
+# spreading helps in every offload state, so perf-tune does not
+# conditionalize on packet_steering). Listed here for completeness/audit,
+# not because perf-tune depends on reading it.
+#
+# `network.@globals[0].steering_flows` is deliberately NOT set here -- see
+# notes.md "steering_flows is a dead UCI option on this board" for why.
+
+config globals 'globals'
+	option packet_steering '1'

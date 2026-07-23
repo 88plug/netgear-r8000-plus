@@ -1,0 +1,30 @@
+# flow-offload/firewall.snippet
+#
+# Drop-in UCI addition for /etc/config/firewall on the R8000 (bcm53xx).
+# Apply by appending to the existing `config defaults` section, or by
+# `uci import` / `uci batch` (see NOTES.md for exact install steps).
+#
+# WHY software (not hardware) offload:
+# bcm53xx (BCM4709 / Northstar, R8000's SoC) has no upstream hardware NAT
+# acceleration path. Stock Netgear firmware uses Broadcom's proprietary CTF /
+# "NATP accelerator" to hit line-rate; that block is not driven by the
+# mainline b53/bgmac drivers OpenWrt uses. Confirmed by a bcm53xx maintainer
+# on a sibling Northstar board (Linksys EA9500, same switch family as R8000's
+# BCM53012 SRAB switch):
+#   "the stock firmware makes use of the NATP accelerator, whereas the
+#    upstream kernel or OpenWrt does not have that capability"
+#   -- https://github.com/openwrt/openwrt/issues/7023#issuecomment-1040297058
+# The same thread's resolution for reaching line-rate on this exact switch
+# family is CPU-based "software flow-offloading" in firewall settings:
+#   https://github.com/openwrt/openwrt/issues/7023#issuecomment-1040297068
+#
+# flow_offloading_hw is left OFF on purpose -- there is no hw offload path on
+# this target and forcing it on is a silent no-op at best.
+
+config defaults
+	option syn_flood		'1'
+	option input			'REJECT'
+	option output			'ACCEPT'
+	option forward			'REJECT'
+	option flow_offloading		'1'
+	option flow_offloading_hw	'0'

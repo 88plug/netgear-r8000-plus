@@ -1,0 +1,2715 @@
+
+./lib/modules/2.6.36.4brcmarm+/kernel/drivers/net/emf/emf.ko:     file format elf32-littlearm
+
+
+Disassembly of section .text:
+
+00000000 <emfc_mfdb_group_find>:
+       0:	push	{r4, lr}
+       4:	mov	r3, r0
+       8:	ldr	r2, [r0, #92]	@ 0x5c
+       c:	cmp	r1, r2
+      10:	bne	28 <emfc_mfdb_group_find+0x28>
+      14:	ldr	r2, [r0, #148]	@ 0x94
+      18:	add	r2, r2, #1
+      1c:	str	r2, [r0, #148]	@ 0x94
+      20:	ldr	r0, [r0, #96]	@ 0x60
+      24:	pop	{r4, pc}
+      28:	ldr	r2, [r0, #152]	@ 0x98
+      2c:	add	r2, r2, #1
+      30:	str	r2, [r0, #152]	@ 0x98
+      34:	lsr	r0, r1, #24
+      38:	add	r0, r0, r1, lsr #16
+      3c:	add	r0, r0, r1, lsr #8
+      40:	uxtab	r0, r0, r1
+      44:	and	r0, r0, #7
+      48:	add	r0, r0, #3
+      4c:	ldr	r2, [r3, r0, lsl #3]
+      50:	add	ip, r3, r0, lsl #3
+      54:	b	78 <emfc_mfdb_group_find+0x78>
+      58:	ldr	r4, [r2, #8]
+      5c:	mov	r0, r2
+      60:	cmp	r1, r4
+      64:	bne	74 <emfc_mfdb_group_find+0x74>
+      68:	str	r2, [r3, #96]	@ 0x60
+      6c:	str	r1, [r3, #92]	@ 0x5c
+      70:	pop	{r4, pc}
+      74:	ldr	r2, [r2]
+      78:	cmp	r2, ip
+      7c:	bne	58 <emfc_mfdb_group_find+0x58>
+      80:	mov	r0, #0
+      84:	pop	{r4, pc}
+
+00000088 <emfc_iflist_clear>:
+      88:	push	{r4, r5, r6, lr}
+      8c:	mov	r4, r0
+      90:	ldr	r0, [r0, #180]	@ 0xb4
+      94:	bl	1c28 <OSL_LOCK>
+      98:	ldr	r1, [r4, #184]	@ 0xb8
+      9c:	b	b4 <emfc_iflist_clear+0x2c>
+      a0:	ldr	r5, [r1]
+      a4:	mov	r2, #16
+      a8:	ldr	r0, [r4, #104]	@ 0x68
+      ac:	bl	0 <osl_mfree>
+      b0:	mov	r1, r5
+      b4:	cmp	r1, #0
+      b8:	bne	a0 <emfc_iflist_clear+0x18>
+      bc:	str	r1, [r4, #184]	@ 0xb8
+      c0:	ldr	r0, [r4, #180]	@ 0xb4
+      c4:	pop	{r4, r5, r6, lr}
+      c8:	b	1bc4 <OSL_UNLOCK>
+
+000000cc <emfc_unreg_frame_handle>:
+      cc:	push	{r0, r1, r2, r4, r5, r6, r7, r8, r9, sl, fp, lr}
+      d0:	mov	r4, r0
+      d4:	ldr	r8, [sp, #52]	@ 0x34
+      d8:	mov	sl, r1
+      dc:	mov	r9, r2
+      e0:	mov	r5, r3
+      e4:	ldr	fp, [sp, #48]	@ 0x30
+      e8:	cmp	r8, #10
+      ec:	beq	148 <emfc_unreg_frame_handle+0x7c>
+      f0:	ldr	r0, [r0, #104]	@ 0x68
+      f4:	bl	0 <osl_pktdup>
+      f8:	subs	r1, r0, #0
+      fc:	bne	120 <emfc_unreg_frame_handle+0x54>
+     100:	cmp	r5, #2
+     104:	ldreq	r3, [r4, #124]	@ 0x7c
+     108:	ldrne	r3, [r4, #144]	@ 0x90
+     10c:	addeq	r3, r3, #1
+     110:	addne	r3, r3, #1
+     114:	streq	r3, [r4, #124]	@ 0x7c
+     118:	strne	r3, [r4, #144]	@ 0x90
+     11c:	b	27c <emfc_unreg_frame_handle+0x1b0>
+     120:	ldr	r3, [r4, #164]	@ 0xa4
+     124:	ldr	r0, [r4, #108]	@ 0x6c
+     128:	blx	r3
+     12c:	cmp	r5, #2
+     130:	ldreq	r3, [r4, #120]	@ 0x78
+     134:	ldrne	r3, [r4, #140]	@ 0x8c
+     138:	addeq	r3, r3, #1
+     13c:	addne	r3, r3, #1
+     140:	streq	r3, [r4, #120]	@ 0x78
+     144:	strne	r3, [r4, #140]	@ 0x8c
+     148:	ldr	r0, [r4, #180]	@ 0xb4
+     14c:	mov	r7, #0
+     150:	bl	1c28 <OSL_LOCK>
+     154:	ldr	r6, [r4, #184]	@ 0xb8
+     158:	b	20c <emfc_unreg_frame_handle+0x140>
+     15c:	ldr	r3, [r6, #4]
+     160:	cmp	r9, r3
+     164:	beq	208 <emfc_unreg_frame_handle+0x13c>
+     168:	cmp	r5, #2
+     16c:	ldr	r3, [r6, #12]
+     170:	ldrne	r2, [r6, #8]
+     174:	addne	r3, r2, r3
+     178:	cmp	r3, #0
+     17c:	beq	208 <emfc_unreg_frame_handle+0x13c>
+     180:	mov	r1, sl
+     184:	ldr	r0, [r4, #104]	@ 0x68
+     188:	bl	0 <osl_pktdup>
+     18c:	subs	r1, r0, #0
+     190:	bne	1c0 <emfc_unreg_frame_handle+0xf4>
+     194:	cmp	r5, #2
+     198:	ldr	r0, [r4, #180]	@ 0xb4
+     19c:	ldreq	r3, [r4, #124]	@ 0x7c
+     1a0:	ldrne	r3, [r4, #144]	@ 0x90
+     1a4:	addeq	r3, r3, #1
+     1a8:	addne	r3, r3, #1
+     1ac:	streq	r3, [r4, #124]	@ 0x7c
+     1b0:	strne	r3, [r4, #144]	@ 0x90
+     1b4:	bl	1bc4 <OSL_UNLOCK>
+     1b8:	mov	r1, #0
+     1bc:	b	27c <emfc_unreg_frame_handle+0x1b0>
+     1c0:	subs	r3, r8, #0
+     1c4:	movne	r3, #1
+     1c8:	ldr	ip, [r4, #160]	@ 0xa0
+     1cc:	str	r3, [sp]
+     1d0:	mov	r2, fp
+     1d4:	ldr	r0, [r4, #108]	@ 0x6c
+     1d8:	ldr	r3, [r6, #4]
+     1dc:	blx	ip
+     1e0:	cmp	r0, #0
+     1e4:	beq	204 <emfc_unreg_frame_handle+0x138>
+     1e8:	cmp	r5, #2
+     1ec:	ldreq	r3, [r4, #124]	@ 0x7c
+     1f0:	ldrne	r3, [r4, #144]	@ 0x90
+     1f4:	addeq	r3, r3, #1
+     1f8:	addne	r3, r3, #1
+     1fc:	streq	r3, [r4, #124]	@ 0x7c
+     200:	strne	r3, [r4, #144]	@ 0x90
+     204:	add	r7, r7, #1
+     208:	ldr	r6, [r6]
+     20c:	cmp	r6, #0
+     210:	bne	15c <emfc_unreg_frame_handle+0x90>
+     214:	ldr	r0, [r4, #180]	@ 0xb4
+     218:	bl	1bc4 <OSL_UNLOCK>
+     21c:	cmp	r7, #0
+     220:	beq	244 <emfc_unreg_frame_handle+0x178>
+     224:	cmp	r5, #2
+     228:	ldreq	r3, [r4, #116]	@ 0x74
+     22c:	ldrne	r3, [r4, #136]	@ 0x88
+     230:	addeq	r3, r3, #1
+     234:	addne	r3, r3, #1
+     238:	streq	r3, [r4, #116]	@ 0x74
+     23c:	strne	r3, [r4, #136]	@ 0x88
+     240:	b	268 <emfc_unreg_frame_handle+0x19c>
+     244:	cmp	r8, #10
+     248:	bne	268 <emfc_unreg_frame_handle+0x19c>
+     24c:	cmp	r5, #2
+     250:	ldreq	r3, [r4, #124]	@ 0x7c
+     254:	ldrne	r3, [r4, #144]	@ 0x90
+     258:	addeq	r3, r3, #1
+     25c:	addne	r3, r3, #1
+     260:	streq	r3, [r4, #124]	@ 0x7c
+     264:	strne	r3, [r4, #144]	@ 0x90
+     268:	mov	r1, sl
+     26c:	ldr	r0, [r4, #104]	@ 0x68
+     270:	mov	r2, #0
+     274:	bl	0 <osl_pktfree>
+     278:	mov	r1, #2
+     27c:	mov	r0, r1
+     280:	pop	{r1, r2, r3, r4, r5, r6, r7, r8, r9, sl, fp, pc}
+
+00000284 <emfc_igmp_snooper_register>:
+     284:	push	{r3, r4, r5, r6, r7, r8, sl, lr}
+     288:	subs	r8, r2, #0
+     28c:	mov	r4, r0
+     290:	mov	r5, r1
+     294:	ldreq	r0, [pc, #184]	@ 354 <emfc_igmp_snooper_register+0xd0>
+     298:	beq	33c <emfc_igmp_snooper_register+0xb8>
+     29c:	cmp	r1, #0
+     2a0:	ldreq	r0, [pc, #176]	@ 358 <emfc_igmp_snooper_register+0xd4>
+     2a4:	beq	33c <emfc_igmp_snooper_register+0xb8>
+     2a8:	cmp	r4, #0
+     2ac:	bne	2c0 <emfc_igmp_snooper_register+0x3c>
+     2b0:	ldr	r0, [pc, #164]	@ 35c <emfc_igmp_snooper_register+0xd8>
+     2b4:	mov	r6, r4
+     2b8:	bl	0 <printk>
+     2bc:	b	31c <emfc_igmp_snooper_register+0x98>
+     2c0:	ldr	r3, [pc, #152]	@ 360 <emfc_igmp_snooper_register+0xdc>
+     2c4:	ldr	sl, [pc, #152]	@ 364 <emfc_igmp_snooper_register+0xe0>
+     2c8:	ldr	r0, [r3]
+     2cc:	bl	1c28 <OSL_LOCK>
+     2d0:	ldr	r7, [sl]
+     2d4:	b	304 <emfc_igmp_snooper_register+0x80>
+     2d8:	mov	r0, r4
+     2dc:	add	r1, r7, #8
+     2e0:	bl	0 <strcmp>
+     2e4:	cmp	r0, #0
+     2e8:	mov	r6, r7
+     2ec:	bne	300 <emfc_igmp_snooper_register+0x7c>
+     2f0:	ldr	r3, [pc, #104]	@ 360 <emfc_igmp_snooper_register+0xdc>
+     2f4:	ldr	r0, [r3]
+     2f8:	bl	1bc4 <OSL_UNLOCK>
+     2fc:	b	31c <emfc_igmp_snooper_register+0x98>
+     300:	ldr	r7, [r7]
+     304:	cmp	r7, sl
+     308:	bne	2d8 <emfc_igmp_snooper_register+0x54>
+     30c:	ldr	r3, [pc, #76]	@ 360 <emfc_igmp_snooper_register+0xdc>
+     310:	mov	r6, #0
+     314:	ldr	r0, [r3]
+     318:	bl	1bc4 <OSL_UNLOCK>
+     31c:	cmp	r6, #0
+     320:	str	r6, [r5]
+     324:	ldreq	r0, [pc, #60]	@ 368 <emfc_igmp_snooper_register+0xe4>
+     328:	beq	33c <emfc_igmp_snooper_register+0xb8>
+     32c:	ldr	r3, [r8]
+     330:	cmp	r3, #0
+     334:	bne	348 <emfc_igmp_snooper_register+0xc4>
+     338:	ldr	r0, [pc, #44]	@ 36c <emfc_igmp_snooper_register+0xe8>
+     33c:	bl	0 <printk>
+     340:	mvn	r0, #0
+     344:	pop	{r3, r4, r5, r6, r7, r8, sl, pc}
+     348:	str	r8, [r6, #156]	@ 0x9c
+     34c:	mov	r0, #0
+     350:	pop	{r3, r4, r5, r6, r7, r8, sl, pc}
+     354:	.word	0x00000000
+     358:	.word	0x00000026
+     35c:	.word	0x00000045
+	...
+     368:	.word	0x00000061
+     36c:	.word	0x0000007d
+
+00000370 <emfc_igmp_snooper_unregister>:
+     370:	cmp	r0, #0
+     374:	movne	r3, #0
+     378:	strne	r3, [r0, #156]	@ 0x9c
+     37c:	bxne	lr
+     380:	ldr	r0, [pc]	@ 388 <emfc_igmp_snooper_unregister+0x18>
+     384:	b	0 <printk>
+     388:	.word	0x000000a8
+
+0000038c <emfc_input>:
+     38c:	push	{r0, r1, r2, r4, r5, r6, r7, r8, r9, sl, fp, lr}
+     390:	mov	r5, r3
+     394:	ldr	r6, [r3, #16]
+     398:	mov	sl, r2
+     39c:	mov	r4, r0
+     3a0:	mov	r7, r1
+     3a4:	ldr	r8, [sp, #48]	@ 0x30
+     3a8:	rev	r6, r6
+     3ac:	ldr	r2, [sp, #52]	@ 0x34
+     3b0:	and	r3, r6, #-268435456	@ 0xf0000000
+     3b4:	cmp	r3, #-536870912	@ 0xe0000000
+     3b8:	bne	678 <emfc_input+0x2ec>
+     3bc:	ldrb	r3, [r0, #176]	@ 0xb0
+     3c0:	cmp	r3, #0
+     3c4:	beq	678 <emfc_input+0x2ec>
+     3c8:	ldrb	r3, [r5]
+     3cc:	lsr	r3, r3, #4
+     3d0:	cmp	r3, #4
+     3d4:	bne	678 <emfc_input+0x2ec>
+     3d8:	ldrb	r3, [r5, #9]
+     3dc:	cmp	r3, #2
+     3e0:	bne	494 <emfc_input+0x108>
+     3e4:	ldr	r0, [r0, #156]	@ 0x9c
+     3e8:	cmp	r0, #0
+     3ec:	beq	494 <emfc_input+0x108>
+     3f0:	ldr	r3, [r4, #112]	@ 0x70
+     3f4:	mov	r1, sl
+     3f8:	add	r3, r3, #1
+     3fc:	str	r3, [r4, #112]	@ 0x70
+     400:	ldrb	r3, [r5]
+     404:	str	r2, [sp, #4]
+     408:	mov	r2, r5
+     40c:	str	r8, [sp]
+     410:	and	r3, r3, #15
+     414:	ldr	ip, [r0]
+     418:	add	r3, r5, r3, lsl #2
+     41c:	blx	ip
+     420:	cmp	r0, #11
+     424:	ldrls	pc, [pc, r0, lsl #2]
+     428:	b	47c <emfc_input+0xf0>
+     42c:	.word	0x00000670
+     430:	.word	0x000004d4
+     434:	.word	0x0000047c
+     438:	.word	0x0000047c
+     43c:	.word	0x0000047c
+     440:	.word	0x0000047c
+     444:	.word	0x0000047c
+     448:	.word	0x0000047c
+     44c:	.word	0x0000047c
+     450:	.word	0x0000047c
+     454:	.word	0x00000484
+     458:	.word	0x0000045c
+     45c:	ldr	r3, [r4, #164]	@ 0xa4
+     460:	mov	r1, r7
+     464:	ldr	r0, [r4, #108]	@ 0x6c
+     468:	blx	r3
+     46c:	ldr	r3, [r4, #120]	@ 0x78
+     470:	add	r3, r3, #1
+     474:	str	r3, [r4, #120]	@ 0x78
+     478:	b	668 <emfc_input+0x2dc>
+     47c:	ldr	r0, [pc, #516]	@ 688 <emfc_input+0x2fc>
+     480:	bl	0 <printk>
+     484:	ldr	r3, [r4, #116]	@ 0x74
+     488:	add	r3, r3, #1
+     48c:	str	r3, [r4, #116]	@ 0x74
+     490:	b	678 <emfc_input+0x2ec>
+     494:	ldr	r3, [r4, #128]	@ 0x80
+     498:	add	r3, r3, #1
+     49c:	str	r3, [r4, #128]	@ 0x80
+     4a0:	bic	r3, r6, #255	@ 0xff
+     4a4:	cmn	r6, #268435462	@ 0x10000006
+     4a8:	cmpne	r3, #-536870912	@ 0xe0000000
+     4ac:	beq	678 <emfc_input+0x2ec>
+     4b0:	ldr	r0, [r4, #100]	@ 0x64
+     4b4:	bl	1c28 <OSL_LOCK>
+     4b8:	mov	r0, r4
+     4bc:	mov	r1, r6
+     4c0:	bl	0 <emfc_mfdb_group_find>
+     4c4:	subs	r9, r0, #0
+     4c8:	bne	4f8 <emfc_input+0x16c>
+     4cc:	ldr	r0, [r4, #100]	@ 0x64
+     4d0:	bl	1bc4 <OSL_UNLOCK>
+     4d4:	ldrb	r3, [r5, #9]
+     4d8:	mov	r0, r4
+     4dc:	str	r6, [sp, #48]	@ 0x30
+     4e0:	mov	r1, r7
+     4e4:	str	r8, [sp, #52]	@ 0x34
+     4e8:	mov	r2, sl
+     4ec:	add	sp, sp, #12
+     4f0:	pop	{r4, r5, r6, r7, r8, r9, sl, fp, lr}
+     4f4:	b	cc <emfc_unreg_frame_handle>
+     4f8:	cmp	r8, #10
+     4fc:	beq	53c <emfc_input+0x1b0>
+     500:	ldrb	r3, [r4, #177]	@ 0xb1
+     504:	cmp	r3, #0
+     508:	beq	53c <emfc_input+0x1b0>
+     50c:	ldr	r0, [r4, #104]	@ 0x68
+     510:	mov	r1, r7
+     514:	bl	0 <osl_pktdup>
+     518:	subs	fp, r0, #0
+     51c:	beq	568 <emfc_input+0x1dc>
+     520:	ldr	r3, [r4, #164]	@ 0xa4
+     524:	mov	r1, fp
+     528:	ldr	r0, [r4, #108]	@ 0x6c
+     52c:	blx	r3
+     530:	ldr	r3, [r4, #140]	@ 0x8c
+     534:	add	r3, r3, #1
+     538:	str	r3, [r4, #140]	@ 0x8c
+     53c:	ldr	r5, [r9, #12]
+     540:	b	5d8 <emfc_input+0x24c>
+     544:	ldr	r3, [r5, #8]
+     548:	ldr	r3, [r3, #4]
+     54c:	cmp	sl, r3
+     550:	beq	5d4 <emfc_input+0x248>
+     554:	ldr	r0, [r4, #104]	@ 0x68
+     558:	mov	r1, r7
+     55c:	bl	0 <osl_pktdup>
+     560:	subs	fp, r0, #0
+     564:	bne	580 <emfc_input+0x1f4>
+     568:	ldr	r0, [r4, #100]	@ 0x64
+     56c:	bl	1bc4 <OSL_UNLOCK>
+     570:	ldr	r3, [r4, #144]	@ 0x90
+     574:	add	r3, r3, #1
+     578:	str	r3, [r4, #144]	@ 0x90
+     57c:	b	67c <emfc_input+0x2f0>
+     580:	ldr	r3, [r5, #8]
+     584:	subs	r2, r8, #0
+     588:	movne	r2, #1
+     58c:	str	r2, [sp]
+     590:	mov	r1, fp
+     594:	mov	r2, r6
+     598:	ldr	ip, [r4, #160]	@ 0xa0
+     59c:	ldr	r3, [r3, #4]
+     5a0:	ldr	r0, [r4, #108]	@ 0x6c
+     5a4:	blx	ip
+     5a8:	cmp	r0, #0
+     5ac:	ldreq	r3, [r5, #8]
+     5b0:	ldrne	r3, [r4, #144]	@ 0x90
+     5b4:	ldreq	r2, [r3, #8]
+     5b8:	addne	r3, r3, #1
+     5bc:	strne	r3, [r4, #144]	@ 0x90
+     5c0:	addeq	r2, r2, #1
+     5c4:	streq	r2, [r3, #8]
+     5c8:	ldr	r3, [r5, #16]
+     5cc:	add	r3, r3, #1
+     5d0:	str	r3, [r5, #16]
+     5d4:	ldr	r5, [r5]
+     5d8:	ldr	r3, [r9, #16]
+     5dc:	cmp	r5, r3
+     5e0:	bne	544 <emfc_input+0x1b8>
+     5e4:	ldr	r3, [r5, #8]
+     5e8:	ldr	r3, [r3, #4]
+     5ec:	cmp	sl, r3
+     5f0:	beq	644 <emfc_input+0x2b8>
+     5f4:	subs	r8, r8, #0
+     5f8:	movne	r8, #1
+     5fc:	mov	r2, r6
+     600:	str	r8, [sp]
+     604:	mov	r1, r7
+     608:	ldr	ip, [r4, #160]	@ 0xa0
+     60c:	ldr	r0, [r4, #108]	@ 0x6c
+     610:	blx	ip
+     614:	cmp	r0, #0
+     618:	ldreq	r3, [r5, #8]
+     61c:	ldrne	r3, [r4, #144]	@ 0x90
+     620:	ldreq	r2, [r3, #8]
+     624:	addne	r3, r3, #1
+     628:	strne	r3, [r4, #144]	@ 0x90
+     62c:	addeq	r2, r2, #1
+     630:	streq	r2, [r3, #8]
+     634:	ldr	r3, [r5, #16]
+     638:	add	r3, r3, #1
+     63c:	str	r3, [r5, #16]
+     640:	b	654 <emfc_input+0x2c8>
+     644:	ldr	r0, [r4, #104]	@ 0x68
+     648:	mov	r1, r7
+     64c:	mov	r2, #0
+     650:	bl	0 <osl_pktfree>
+     654:	ldr	r3, [r4, #132]	@ 0x84
+     658:	ldr	r0, [r4, #100]	@ 0x64
+     65c:	add	r3, r3, #1
+     660:	str	r3, [r4, #132]	@ 0x84
+     664:	bl	1bc4 <OSL_UNLOCK>
+     668:	mov	fp, #2
+     66c:	b	67c <emfc_input+0x2f0>
+     670:	mov	fp, #0
+     674:	b	67c <emfc_input+0x2f0>
+     678:	mov	fp, #1
+     67c:	mov	r0, fp
+     680:	add	sp, sp, #12
+     684:	pop	{r4, r5, r6, r7, r8, r9, sl, fp, pc}
+     688:	.word	0x000000cc
+
+0000068c <emfc_mfdb_mhif_add>:
+     68c:	push	{r4, r5, r6, lr}
+     690:	mov	r5, r0
+     694:	mov	r6, r1
+     698:	ldr	r4, [r0, #88]	@ 0x58
+     69c:	b	6b0 <emfc_mfdb_mhif_add+0x24>
+     6a0:	ldr	r3, [r4, #4]
+     6a4:	cmp	r3, r6
+     6a8:	beq	6f4 <emfc_mfdb_mhif_add+0x68>
+     6ac:	ldr	r4, [r4]
+     6b0:	cmp	r4, #0
+     6b4:	bne	6a0 <emfc_mfdb_mhif_add+0x14>
+     6b8:	ldr	r0, [r5, #104]	@ 0x68
+     6bc:	mov	r1, #12
+     6c0:	bl	0 <osl_malloc>
+     6c4:	cmp	r0, #0
+     6c8:	bne	6dc <emfc_mfdb_mhif_add+0x50>
+     6cc:	mov	r1, #12
+     6d0:	ldr	r0, [pc, #36]	@ 6fc <emfc_mfdb_mhif_add+0x70>
+     6d4:	bl	0 <printk>
+     6d8:	b	6f4 <emfc_mfdb_mhif_add+0x68>
+     6dc:	str	r4, [r0, #8]
+     6e0:	mov	r4, r0
+     6e4:	str	r6, [r0, #4]
+     6e8:	ldr	r3, [r5, #88]	@ 0x58
+     6ec:	str	r3, [r0]
+     6f0:	str	r0, [r5, #88]	@ 0x58
+     6f4:	mov	r0, r4
+     6f8:	pop	{r4, r5, r6, pc}
+     6fc:	.word	0x000000f4
+
+00000700 <emfc_gethostmaclist>:
+     700:	push	{r0, r1, r2, lr}
+     704:	ldr	r0, [r0, #156]	@ 0x9c
+     708:	cmp	r0, #0
+     70c:	beq	72c <emfc_gethostmaclist+0x2c>
+     710:	ldr	ip, [r0, #12]
+     714:	cmp	ip, #0
+     718:	beq	72c <emfc_gethostmaclist+0x2c>
+     71c:	ldr	lr, [sp, #16]
+     720:	str	lr, [sp]
+     724:	blx	ip
+     728:	b	730 <emfc_gethostmaclist+0x30>
+     72c:	mvn	r0, #0
+     730:	pop	{r1, r2, r3, pc}
+
+00000734 <emfc_mfdb_membership_find>:
+     734:	push	{r4, r5, r6, lr}
+     738:	mov	r4, r0
+     73c:	mov	r6, r1
+     740:	ldr	r0, [r0, #100]	@ 0x64
+     744:	mov	r5, r2
+     748:	bl	1c28 <OSL_LOCK>
+     74c:	mov	r0, r4
+     750:	mov	r1, r6
+     754:	bl	0 <emfc_mfdb_group_find>
+     758:	subs	r2, r0, #0
+     75c:	ldrne	r3, [r2, #12]!
+     760:	bne	780 <emfc_mfdb_membership_find+0x4c>
+     764:	b	794 <emfc_mfdb_membership_find+0x60>
+     768:	ldr	r1, [r3, #8]
+     76c:	mov	r0, r3
+     770:	ldr	r1, [r1, #4]
+     774:	cmp	r5, r1
+     778:	beq	78c <emfc_mfdb_membership_find+0x58>
+     77c:	ldr	r3, [r3]
+     780:	cmp	r3, r2
+     784:	bne	768 <emfc_mfdb_membership_find+0x34>
+     788:	b	794 <emfc_mfdb_membership_find+0x60>
+     78c:	cmp	r3, #0
+     790:	popne	{r4, r5, r6, pc}
+     794:	ldr	r0, [r4, #100]	@ 0x64
+     798:	bl	1bc4 <OSL_UNLOCK>
+     79c:	mov	r0, #0
+     7a0:	pop	{r4, r5, r6, pc}
+
+000007a4 <emfc_mfdb_membership_add>:
+     7a4:	push	{r4, r5, r6, r7, r8, lr}
+     7a8:	mov	r4, r0
+     7ac:	mov	r5, r1
+     7b0:	ldr	r0, [r0, #100]	@ 0x64
+     7b4:	mov	r8, r2
+     7b8:	bl	1c28 <OSL_LOCK>
+     7bc:	mov	r0, r4
+     7c0:	mov	r1, r5
+     7c4:	bl	0 <emfc_mfdb_group_find>
+     7c8:	subs	r6, r0, #0
+     7cc:	movne	r2, r6
+     7d0:	ldrne	r3, [r2, #12]!
+     7d4:	bne	858 <emfc_mfdb_membership_add+0xb4>
+     7d8:	ldr	r0, [r4, #104]	@ 0x68
+     7dc:	mov	r1, #20
+     7e0:	bl	0 <osl_malloc>
+     7e4:	subs	r6, r0, #0
+     7e8:	bne	7fc <emfc_mfdb_membership_add+0x58>
+     7ec:	mov	r1, #20
+     7f0:	ldr	r0, [pc, #332]	@ 944 <emfc_mfdb_membership_add+0x1a0>
+     7f4:	bl	0 <printk>
+     7f8:	b	8f0 <emfc_mfdb_membership_add+0x14c>
+     7fc:	add	r3, r6, #12
+     800:	str	r5, [r6, #8]
+     804:	str	r3, [r6, #16]
+     808:	str	r3, [r6, #12]
+     80c:	lsr	r3, r5, #24
+     810:	add	r3, r3, r5, lsr #16
+     814:	add	r3, r3, r5, lsr #8
+     818:	uxtab	r5, r3, r5
+     81c:	and	r5, r5, #7
+     820:	add	r5, r5, #3
+     824:	ldr	r3, [r4, r5, lsl #3]
+     828:	str	r6, [r3, #4]
+     82c:	ldr	r3, [r4, r5, lsl #3]
+     830:	str	r3, [r6]
+     834:	add	r3, r4, r5, lsl #3
+     838:	str	r3, [r6, #4]
+     83c:	str	r6, [r4, r5, lsl #3]
+     840:	b	888 <emfc_mfdb_membership_add+0xe4>
+     844:	ldr	r1, [r3, #8]
+     848:	ldr	r1, [r1, #4]
+     84c:	cmp	r8, r1
+     850:	beq	864 <emfc_mfdb_membership_add+0xc0>
+     854:	ldr	r3, [r3]
+     858:	cmp	r3, r2
+     85c:	bne	844 <emfc_mfdb_membership_add+0xa0>
+     860:	b	888 <emfc_mfdb_membership_add+0xe4>
+     864:	cmp	r3, #0
+     868:	beq	888 <emfc_mfdb_membership_add+0xe4>
+     86c:	ldr	r2, [r3, #12]
+     870:	add	r2, r2, #1
+     874:	str	r2, [r3, #12]
+     878:	ldr	r0, [r4, #100]	@ 0x64
+     87c:	bl	1bc4 <OSL_UNLOCK>
+     880:	mov	r0, #0
+     884:	pop	{r4, r5, r6, r7, r8, pc}
+     888:	ldr	r0, [r4, #104]	@ 0x68
+     88c:	mov	r1, #20
+     890:	bl	0 <osl_malloc>
+     894:	subs	r5, r0, #0
+     898:	add	r7, r6, #12
+     89c:	bne	900 <emfc_mfdb_membership_add+0x15c>
+     8a0:	ldr	r0, [pc, #160]	@ 948 <emfc_mfdb_membership_add+0x1a4>
+     8a4:	mov	r1, #20
+     8a8:	bl	0 <printk>
+     8ac:	ldr	r3, [r6, #12]
+     8b0:	cmp	r3, r7
+     8b4:	bne	8f0 <emfc_mfdb_membership_add+0x14c>
+     8b8:	ldr	r3, [r6, #4]
+     8bc:	mov	r1, r6
+     8c0:	ldr	r2, [r6]
+     8c4:	str	r2, [r3]
+     8c8:	ldr	r3, [r6]
+     8cc:	ldr	r2, [r6, #4]
+     8d0:	str	r2, [r3, #4]
+     8d4:	mov	r2, #20
+     8d8:	ldr	r3, [r4, #96]	@ 0x60
+     8dc:	ldr	r0, [r4, #104]	@ 0x68
+     8e0:	cmp	r3, r6
+     8e4:	ldrne	r5, [r4, #92]	@ 0x5c
+     8e8:	str	r5, [r4, #92]	@ 0x5c
+     8ec:	bl	0 <osl_mfree>
+     8f0:	ldr	r0, [r4, #100]	@ 0x64
+     8f4:	bl	1bc4 <OSL_UNLOCK>
+     8f8:	mvn	r0, #0
+     8fc:	pop	{r4, r5, r6, r7, r8, pc}
+     900:	mov	r3, #1
+     904:	mov	r1, r8
+     908:	str	r3, [r5, #12]
+     90c:	mov	r8, #0
+     910:	mov	r0, r4
+     914:	bl	68c <emfc_mfdb_mhif_add>
+     918:	str	r8, [r5, #16]
+     91c:	str	r0, [r5, #8]
+     920:	ldr	r3, [r6, #12]
+     924:	str	r5, [r3, #4]
+     928:	ldr	r3, [r6, #12]
+     92c:	stm	r5, {r3, r7}
+     930:	str	r5, [r6, #12]
+     934:	ldr	r0, [r4, #100]	@ 0x64
+     938:	bl	1bc4 <OSL_UNLOCK>
+     93c:	mov	r0, r8
+     940:	pop	{r4, r5, r6, r7, r8, pc}
+     944:	.word	0x00000120
+     948:	.word	0x0000014d
+
+0000094c <emfc_mfdb_membership_del>:
+     94c:	push	{r4, r5, r6, lr}
+     950:	mov	r4, r1
+     954:	mov	r5, r0
+     958:	ldr	r0, [r0, #100]	@ 0x64
+     95c:	mov	r6, r2
+     960:	bl	1c28 <OSL_LOCK>
+     964:	mov	r1, r4
+     968:	mov	r0, r5
+     96c:	bl	0 <emfc_mfdb_group_find>
+     970:	subs	r1, r0, #0
+     974:	movne	r3, r1
+     978:	ldrne	r4, [r3, #12]!
+     97c:	bne	998 <emfc_mfdb_membership_del+0x4c>
+     980:	b	9ac <emfc_mfdb_membership_del+0x60>
+     984:	ldr	r2, [r4, #8]
+     988:	ldr	r2, [r2, #4]
+     98c:	cmp	r6, r2
+     990:	beq	9a4 <emfc_mfdb_membership_del+0x58>
+     994:	ldr	r4, [r4]
+     998:	cmp	r4, r3
+     99c:	bne	984 <emfc_mfdb_membership_del+0x38>
+     9a0:	b	9ac <emfc_mfdb_membership_del+0x60>
+     9a4:	cmp	r4, #0
+     9a8:	bne	9bc <emfc_mfdb_membership_del+0x70>
+     9ac:	ldr	r0, [r5, #100]	@ 0x64
+     9b0:	bl	1bc4 <OSL_UNLOCK>
+     9b4:	mvn	r0, #0
+     9b8:	pop	{r4, r5, r6, pc}
+     9bc:	ldr	r2, [r4, #12]
+     9c0:	sub	r2, r2, #1
+     9c4:	cmp	r2, #0
+     9c8:	str	r2, [r4, #12]
+     9cc:	beq	9e0 <emfc_mfdb_membership_del+0x94>
+     9d0:	ldr	r0, [r5, #100]	@ 0x64
+     9d4:	bl	1bc4 <OSL_UNLOCK>
+     9d8:	mov	r0, #0
+     9dc:	pop	{r4, r5, r6, pc}
+     9e0:	ldr	r0, [r4, #4]
+     9e4:	ldr	ip, [r4]
+     9e8:	str	ip, [r0]
+     9ec:	ldm	r4, {r0, ip}
+     9f0:	str	ip, [r0, #4]
+     9f4:	ldr	r0, [r1, #12]
+     9f8:	cmp	r0, r3
+     9fc:	bne	a30 <emfc_mfdb_membership_del+0xe4>
+     a00:	ldm	r1, {r0, r3}
+     a04:	str	r0, [r3]
+     a08:	ldr	r3, [r1]
+     a0c:	ldr	r0, [r1, #4]
+     a10:	str	r0, [r3, #4]
+     a14:	ldr	r3, [r5, #96]	@ 0x60
+     a18:	ldr	r0, [r5, #104]	@ 0x68
+     a1c:	cmp	r3, r1
+     a20:	ldrne	r2, [r5, #92]	@ 0x5c
+     a24:	str	r2, [r5, #92]	@ 0x5c
+     a28:	mov	r2, #20
+     a2c:	bl	0 <osl_mfree>
+     a30:	ldr	r0, [r5, #104]	@ 0x68
+     a34:	mov	r1, r4
+     a38:	mov	r2, #20
+     a3c:	bl	0 <osl_mfree>
+     a40:	ldr	r0, [r5, #100]	@ 0x64
+     a44:	bl	1bc4 <OSL_UNLOCK>
+     a48:	mov	r0, #0
+     a4c:	pop	{r4, r5, r6, pc}
+
+00000a50 <emfc_mfdb_clear>:
+     a50:	push	{r4, r5, r6, r7, r8, r9, sl, lr}
+     a54:	mov	r5, r0
+     a58:	mov	r7, r5
+     a5c:	mov	r6, #0
+     a60:	ldr	r0, [r0, #100]	@ 0x64
+     a64:	bl	1c28 <OSL_LOCK>
+     a68:	add	r9, r6, #3
+     a6c:	ldr	r4, [r7, #24]
+     a70:	add	r9, r5, r9, lsl #3
+     a74:	b	ae0 <emfc_mfdb_clear+0x90>
+     a78:	mov	r8, r4
+     a7c:	ldr	r1, [r8, #12]!
+     a80:	b	aac <emfc_mfdb_clear+0x5c>
+     a84:	ldr	r3, [r1, #4]
+     a88:	ldr	sl, [r1]
+     a8c:	str	sl, [r3]
+     a90:	ldr	r2, [r1, #4]
+     a94:	ldr	r3, [r1]
+     a98:	str	r2, [r3, #4]
+     a9c:	mov	r2, #20
+     aa0:	ldr	r0, [r5, #104]	@ 0x68
+     aa4:	bl	0 <osl_mfree>
+     aa8:	mov	r1, sl
+     aac:	cmp	r1, r8
+     ab0:	bne	a84 <emfc_mfdb_clear+0x34>
+     ab4:	ldr	r3, [r4, #4]
+     ab8:	mov	r1, r4
+     abc:	ldr	r8, [r4]
+     ac0:	str	r8, [r3]
+     ac4:	ldr	r2, [r4, #4]
+     ac8:	ldr	r3, [r4]
+     acc:	mov	r4, r8
+     ad0:	str	r2, [r3, #4]
+     ad4:	mov	r2, #20
+     ad8:	ldr	r0, [r5, #104]	@ 0x68
+     adc:	bl	0 <osl_mfree>
+     ae0:	cmp	r4, r9
+     ae4:	bne	a78 <emfc_mfdb_clear+0x28>
+     ae8:	add	r6, r6, #1
+     aec:	add	r7, r7, #8
+     af0:	cmp	r6, #8
+     af4:	bne	a68 <emfc_mfdb_clear+0x18>
+     af8:	mov	r3, #0
+     afc:	ldr	r0, [r5, #100]	@ 0x64
+     b00:	str	r3, [r5, #92]	@ 0x5c
+     b04:	pop	{r4, r5, r6, r7, r8, r9, sl, lr}
+     b08:	b	1bc4 <OSL_UNLOCK>
+
+00000b0c <emfc_stats_get>:
+     b0c:	cmp	r0, #0
+     b10:	push	{r3, r4, r5, lr}
+     b14:	ldreq	r0, [pc, #92]	@ b78 <emfc_stats_get+0x6c>
+     b18:	mov	r5, r1
+     b1c:	beq	b2c <emfc_stats_get+0x20>
+     b20:	cmp	r1, #0
+     b24:	bne	b34 <emfc_stats_get+0x28>
+     b28:	ldr	r0, [pc, #76]	@ b7c <emfc_stats_get+0x70>
+     b2c:	bl	0 <printk>
+     b30:	b	b48 <emfc_stats_get+0x3c>
+     b34:	cmp	r2, #43	@ 0x2b
+     b38:	bhi	b50 <emfc_stats_get+0x44>
+     b3c:	ldr	r0, [pc, #60]	@ b80 <emfc_stats_get+0x74>
+     b40:	mov	r1, r2
+     b44:	bl	0 <printk>
+     b48:	mvn	r0, #0
+     b4c:	pop	{r3, r4, r5, pc}
+     b50:	add	ip, r0, #112	@ 0x70
+     b54:	mov	r4, r5
+     b58:	ldm	ip!, {r0, r1, r2, r3}
+     b5c:	stmia	r4!, {r0, r1, r2, r3}
+     b60:	ldm	ip!, {r0, r1, r2, r3}
+     b64:	stmia	r4!, {r0, r1, r2, r3}
+     b68:	ldm	ip, {r0, r1, r2}
+     b6c:	stm	r4, {r0, r1, r2}
+     b70:	mov	r0, #0
+     b74:	pop	{r3, r4, r5, pc}
+     b78:	.word	0x00000180
+     b7c:	.word	0x0000019c
+     b80:	.word	0x000001b2
+
+00000b84 <emfc_mfdb_list>:
+     b84:	subs	r3, r0, #0
+     b88:	push	{r4, r5, r6, r7, r8, r9, sl, fp, lr}
+     b8c:	ldreq	r0, [pc, #228]	@ c78 <emfc_mfdb_list+0xf4>
+     b90:	sub	sp, sp, #20
+     b94:	mov	r8, r1
+     b98:	beq	ba8 <emfc_mfdb_list+0x24>
+     b9c:	cmp	r1, #0
+     ba0:	bne	bb4 <emfc_mfdb_list+0x30>
+     ba4:	ldr	r0, [pc, #208]	@ c7c <emfc_mfdb_list+0xf8>
+     ba8:	bl	0 <printk>
+     bac:	mvn	r0, #0
+     bb0:	b	c70 <emfc_mfdb_list+0xec>
+     bb4:	mov	r4, #0
+     bb8:	mov	fp, r3
+     bbc:	mov	sl, r4
+     bc0:	mov	ip, #28
+     bc4:	mov	r9, r3
+     bc8:	add	r3, sl, #3
+     bcc:	ldr	r6, [fp, #24]
+     bd0:	add	r3, r9, r3, lsl #3
+     bd4:	str	r3, [sp, #12]
+     bd8:	mov	r3, sl
+     bdc:	b	c4c <emfc_mfdb_list+0xc8>
+     be0:	mla	r7, ip, r4, r8
+     be4:	mov	sl, r6
+     be8:	ldr	r5, [sl, #12]!
+     bec:	add	r7, r7, #4
+     bf0:	b	c3c <emfc_mfdb_list+0xb8>
+     bf4:	ldr	r2, [r6, #8]
+     bf8:	mla	r0, ip, r4, r8
+     bfc:	add	r4, r4, #1
+     c00:	str	r2, [r7, #-28]	@ 0xffffffe4
+     c04:	ldr	r2, [r5, #8]
+     c08:	add	r0, r0, #8
+     c0c:	ldr	r1, [r2, #4]
+     c10:	mov	r2, #16
+     c14:	stmib	sp, {r3, ip}
+     c18:	bl	0 <strncpy>
+     c1c:	ldr	r2, [r5, #16]
+     c20:	str	r2, [r7, #-8]
+     c24:	ldr	r2, [r5, #8]
+     c28:	ldr	r2, [r2, #4]
+     c2c:	str	r2, [r7, #-4]
+     c30:	ldr	ip, [sp, #8]
+     c34:	ldr	r5, [r5]
+     c38:	ldr	r3, [sp, #4]
+     c3c:	cmp	r5, sl
+     c40:	add	r7, r7, #28
+     c44:	bne	bf4 <emfc_mfdb_list+0x70>
+     c48:	ldr	r6, [r6]
+     c4c:	ldr	r2, [sp, #12]
+     c50:	cmp	r6, r2
+     c54:	bne	be0 <emfc_mfdb_list+0x5c>
+     c58:	add	sl, r3, #1
+     c5c:	add	fp, fp, #8
+     c60:	cmp	sl, #8
+     c64:	bne	bc8 <emfc_mfdb_list+0x44>
+     c68:	mov	r0, #0
+     c6c:	str	r4, [r8]
+     c70:	add	sp, sp, #20
+     c74:	pop	{r4, r5, r6, r7, r8, r9, sl, fp, pc}
+     c78:	.word	0x00000180
+     c7c:	.word	0x0000019c
+
+00000c80 <emfc_iflist_add>:
+     c80:	push	{r3, r4, r5, r6, r7, lr}
+     c84:	subs	r6, r1, #0
+     c88:	mov	r5, r0
+     c8c:	bne	c9c <emfc_iflist_add+0x1c>
+     c90:	ldr	r0, [pc, #156]	@ d34 <emfc_iflist_add+0xb4>
+     c94:	bl	0 <printk>
+     c98:	b	cf4 <emfc_iflist_add+0x74>
+     c9c:	ldr	r0, [r0, #180]	@ 0xb4
+     ca0:	bl	1c28 <OSL_LOCK>
+     ca4:	ldr	r4, [r5, #184]	@ 0xb8
+     ca8:	b	cbc <emfc_iflist_add+0x3c>
+     cac:	ldr	r3, [r4, #4]
+     cb0:	cmp	r3, r6
+     cb4:	beq	cc4 <emfc_iflist_add+0x44>
+     cb8:	ldr	r4, [r4]
+     cbc:	cmp	r4, #0
+     cc0:	bne	cac <emfc_iflist_add+0x2c>
+     cc4:	ldr	r0, [r5, #180]	@ 0xb4
+     cc8:	bl	1bc4 <OSL_UNLOCK>
+     ccc:	cmp	r4, #0
+     cd0:	bne	d2c <emfc_iflist_add+0xac>
+     cd4:	ldr	r0, [r5, #104]	@ 0x68
+     cd8:	mov	r1, #16
+     cdc:	bl	0 <osl_malloc>
+     ce0:	subs	r7, r0, #0
+     ce4:	bne	cfc <emfc_iflist_add+0x7c>
+     ce8:	ldr	r0, [pc, #72]	@ d38 <emfc_iflist_add+0xb8>
+     cec:	mov	r1, #16
+     cf0:	bl	0 <printk>
+     cf4:	mvn	r0, #0
+     cf8:	pop	{r3, r4, r5, r6, r7, pc}
+     cfc:	str	r6, [r7, #4]
+     d00:	str	r4, [r7, #8]
+     d04:	str	r4, [r7, #12]
+     d08:	ldr	r0, [r5, #180]	@ 0xb4
+     d0c:	bl	1c28 <OSL_LOCK>
+     d10:	ldr	r3, [r5, #184]	@ 0xb8
+     d14:	str	r3, [r7]
+     d18:	str	r7, [r5, #184]	@ 0xb8
+     d1c:	ldr	r0, [r5, #180]	@ 0xb4
+     d20:	bl	1bc4 <OSL_UNLOCK>
+     d24:	mov	r0, r4
+     d28:	pop	{r3, r4, r5, r6, r7, pc}
+     d2c:	mvn	r0, #0
+     d30:	pop	{r3, r4, r5, r6, r7, pc}
+     d34:	.word	0x000001cf
+     d38:	.word	0x000001ed
+
+00000d3c <emfc_iflist_del>:
+     d3c:	push	{r4, r5, r6, lr}
+     d40:	subs	r6, r1, #0
+     d44:	mov	r4, r0
+     d48:	ldreq	r0, [pc, #124]	@ dcc <emfc_iflist_del+0x90>
+     d4c:	beq	dc0 <emfc_iflist_del+0x84>
+     d50:	ldr	r0, [r4, #180]	@ 0xb4
+     d54:	bl	1c28 <OSL_LOCK>
+     d58:	ldr	r5, [r4, #184]	@ 0xb8
+     d5c:	mov	r3, #0
+     d60:	b	d78 <emfc_iflist_del+0x3c>
+     d64:	ldr	r2, [r5, #4]
+     d68:	cmp	r2, r6
+     d6c:	beq	d84 <emfc_iflist_del+0x48>
+     d70:	mov	r3, r5
+     d74:	ldr	r5, [r5]
+     d78:	cmp	r5, #0
+     d7c:	bne	d64 <emfc_iflist_del+0x28>
+     d80:	b	db4 <emfc_iflist_del+0x78>
+     d84:	ldr	r2, [r5]
+     d88:	cmp	r3, #0
+     d8c:	strne	r2, [r3]
+     d90:	streq	r2, [r4, #184]	@ 0xb8
+     d94:	ldr	r0, [r4, #180]	@ 0xb4
+     d98:	bl	1bc4 <OSL_UNLOCK>
+     d9c:	ldr	r0, [r4, #104]	@ 0x68
+     da0:	mov	r1, r5
+     da4:	mov	r2, #16
+     da8:	bl	0 <osl_mfree>
+     dac:	mov	r0, #0
+     db0:	pop	{r4, r5, r6, pc}
+     db4:	ldr	r0, [r4, #180]	@ 0xb4
+     db8:	bl	1bc4 <OSL_UNLOCK>
+     dbc:	ldr	r0, [pc, #12]	@ dd0 <emfc_iflist_del+0x94>
+     dc0:	bl	0 <printk>
+     dc4:	mvn	r0, #0
+     dc8:	pop	{r4, r5, r6, pc}
+     dcc:	.word	0x000001cf
+     dd0:	.word	0x0000021e
+
+00000dd4 <emfc_rtport_add>:
+     dd4:	push	{r3, r4, r5, lr}
+     dd8:	mov	r4, r0
+     ddc:	mov	r5, r1
+     de0:	bl	c80 <emfc_iflist_add>
+     de4:	ldr	r0, [r4, #180]	@ 0xb4
+     de8:	bl	1c28 <OSL_LOCK>
+     dec:	ldr	r3, [r4, #184]	@ 0xb8
+     df0:	b	e04 <emfc_rtport_add+0x30>
+     df4:	ldr	r2, [r3, #4]
+     df8:	cmp	r2, r5
+     dfc:	beq	e10 <emfc_rtport_add+0x3c>
+     e00:	ldr	r3, [r3]
+     e04:	cmp	r3, #0
+     e08:	bne	df4 <emfc_rtport_add+0x20>
+     e0c:	b	e1c <emfc_rtport_add+0x48>
+     e10:	ldr	r2, [r3, #12]
+     e14:	add	r2, r2, #1
+     e18:	str	r2, [r3, #12]
+     e1c:	ldr	r0, [r4, #180]	@ 0xb4
+     e20:	bl	1bc4 <OSL_UNLOCK>
+     e24:	mov	r0, #0
+     e28:	pop	{r3, r4, r5, pc}
+
+00000e2c <emfc_rtport_del>:
+     e2c:	push	{r3, r4, r5, lr}
+     e30:	mov	r4, r0
+     e34:	ldr	r0, [r0, #180]	@ 0xb4
+     e38:	mov	r5, r1
+     e3c:	bl	1c28 <OSL_LOCK>
+     e40:	ldr	r3, [r4, #184]	@ 0xb8
+     e44:	b	e58 <emfc_rtport_del+0x2c>
+     e48:	ldr	r2, [r3, #4]
+     e4c:	cmp	r2, r5
+     e50:	beq	e64 <emfc_rtport_del+0x38>
+     e54:	ldr	r3, [r3]
+     e58:	cmp	r3, #0
+     e5c:	bne	e48 <emfc_rtport_del+0x1c>
+     e60:	b	ea0 <emfc_rtport_del+0x74>
+     e64:	ldr	r2, [r3, #12]
+     e68:	sub	r2, r2, #1
+     e6c:	cmp	r2, #0
+     e70:	str	r2, [r3, #12]
+     e74:	bne	e90 <emfc_rtport_del+0x64>
+     e78:	ldr	r3, [r3, #8]
+     e7c:	cmp	r3, #0
+     e80:	bne	e90 <emfc_rtport_del+0x64>
+     e84:	mov	r0, r4
+     e88:	mov	r1, r5
+     e8c:	bl	d3c <emfc_iflist_del>
+     e90:	ldr	r0, [r4, #180]	@ 0xb4
+     e94:	bl	1bc4 <OSL_UNLOCK>
+     e98:	mov	r0, #0
+     e9c:	pop	{r3, r4, r5, pc}
+     ea0:	ldr	r0, [r4, #180]	@ 0xb4
+     ea4:	bl	1bc4 <OSL_UNLOCK>
+     ea8:	ldr	r0, [pc, #8]	@ eb8 <emfc_rtport_del+0x8c>
+     eac:	bl	0 <printk>
+     eb0:	mvn	r0, #0
+     eb4:	pop	{r3, r4, r5, pc}
+     eb8:	.word	0x00000234
+
+00000ebc <emfc_cfg_request_process>:
+     ebc:	push	{r0, r1, r2, r4, r5, r6, r7, r8, r9, sl, fp, lr}
+     ec0:	mov	r6, r0
+     ec4:	ldr	r3, [r1, #16]
+     ec8:	mov	r4, r1
+     ecc:	sub	r3, r3, #1
+     ed0:	cmp	r3, #18
+     ed4:	ldrls	pc, [pc, r3, lsl #2]
+     ed8:	b	1354 <emfc_cfg_request_process+0x498>
+     edc:	.word	0x00000f28
+     ee0:	.word	0x00000ff8
+     ee4:	.word	0x00001030
+     ee8:	.word	0x000010a0
+     eec:	.word	0x00001068
+     ef0:	.word	0x00001354
+     ef4:	.word	0x00001354
+     ef8:	.word	0x00001354
+     efc:	.word	0x00001354
+     f00:	.word	0x00001354
+     f04:	.word	0x00001354
+     f08:	.word	0x0000118c
+     f0c:	.word	0x000011dc
+     f10:	.word	0x0000124c
+     f14:	.word	0x000010a8
+     f18:	.word	0x000010d8
+     f1c:	.word	0x00001108
+     f20:	.word	0x000012d4
+     f24:	.word	0x00001304
+     f28:	ldr	r5, [r1, #20]
+     f2c:	cmp	r5, #1
+     f30:	beq	f40 <emfc_cfg_request_process+0x84>
+     f34:	cmp	r5, #2
+     f38:	bne	1340 <emfc_cfg_request_process+0x484>
+     f3c:	b	f54 <emfc_cfg_request_process+0x98>
+     f40:	ldrb	r3, [r0, #176]	@ 0xb0
+     f44:	str	r5, [r1, #28]
+     f48:	str	r5, [r1, #24]
+     f4c:	strb	r3, [r1, #32]
+     f50:	b	1394 <emfc_cfg_request_process+0x4d8>
+     f54:	ldrb	r3, [r1, #32]
+     f58:	ldrb	r2, [r0, #176]	@ 0xb0
+     f5c:	cmp	r2, r3
+     f60:	streq	r5, [r1, #24]
+     f64:	addeq	r0, r1, #32
+     f68:	ldreq	r1, [pc, #1064]	@ 1398 <emfc_cfg_request_process+0x4dc>
+     f6c:	beq	1364 <emfc_cfg_request_process+0x4a8>
+     f70:	cmp	r3, #0
+     f74:	strb	r3, [r0, #176]	@ 0xb0
+     f78:	beq	fbc <emfc_cfg_request_process+0x100>
+     f7c:	ldr	r3, [r0, #168]	@ 0xa8
+     f80:	ldr	r0, [r0, #108]	@ 0x6c
+     f84:	blx	r3
+     f88:	cmp	r0, #0
+     f8c:	strne	r5, [r4, #24]
+     f90:	addne	r0, r4, #32
+     f94:	ldrne	r1, [pc, #1024]	@ 139c <emfc_cfg_request_process+0x4e0>
+     f98:	bne	1364 <emfc_cfg_request_process+0x4a8>
+     f9c:	ldr	r0, [r6, #156]	@ 0x9c
+     fa0:	cmp	r0, #0
+     fa4:	beq	12fc <emfc_cfg_request_process+0x440>
+     fa8:	ldr	r3, [r0, #4]
+     fac:	cmp	r3, #0
+     fb0:	beq	12fc <emfc_cfg_request_process+0x440>
+     fb4:	blx	r3
+     fb8:	b	12fc <emfc_cfg_request_process+0x440>
+     fbc:	ldr	r0, [r0, #156]	@ 0x9c
+     fc0:	cmp	r0, #0
+     fc4:	beq	fd8 <emfc_cfg_request_process+0x11c>
+     fc8:	ldr	r3, [r0, #8]
+     fcc:	cmp	r3, #0
+     fd0:	beq	fd8 <emfc_cfg_request_process+0x11c>
+     fd4:	blx	r3
+     fd8:	ldr	r3, [r6, #172]	@ 0xac
+     fdc:	ldr	r0, [r6, #108]	@ 0x6c
+     fe0:	blx	r3
+     fe4:	mov	r0, r6
+     fe8:	bl	a50 <emfc_mfdb_clear>
+     fec:	mov	r0, r6
+     ff0:	bl	88 <emfc_iflist_clear>
+     ff4:	b	12fc <emfc_cfg_request_process+0x440>
+     ff8:	add	r5, r1, #32
+     ffc:	mov	r3, #0
+    1000:	str	r3, [r1, #28]
+    1004:	ldr	r1, [r1, #32]
+    1008:	ldr	r2, [r5, #20]
+    100c:	bl	7a4 <emfc_mfdb_membership_add>
+    1010:	cmp	r0, #0
+    1014:	beq	12fc <emfc_cfg_request_process+0x440>
+    1018:	mov	r3, #2
+    101c:	ldr	r6, [r4, #28]
+    1020:	str	r3, [r4, #24]
+    1024:	mov	r0, r5
+    1028:	ldr	r1, [pc, #880]	@ 13a0 <emfc_cfg_request_process+0x4e4>
+    102c:	b	1094 <emfc_cfg_request_process+0x1d8>
+    1030:	add	r5, r1, #32
+    1034:	mov	r3, #0
+    1038:	str	r3, [r1, #28]
+    103c:	ldr	r1, [r1, #32]
+    1040:	ldr	r2, [r5, #20]
+    1044:	bl	94c <emfc_mfdb_membership_del>
+    1048:	cmp	r0, #0
+    104c:	beq	12fc <emfc_cfg_request_process+0x440>
+    1050:	mov	r3, #2
+    1054:	ldr	r6, [r4, #28]
+    1058:	str	r3, [r4, #24]
+    105c:	mov	r0, r5
+    1060:	ldr	r1, [pc, #828]	@ 13a4 <emfc_cfg_request_process+0x4e8>
+    1064:	b	1094 <emfc_cfg_request_process+0x1d8>
+    1068:	add	r5, r1, #32
+    106c:	ldr	r2, [r4, #28]
+    1070:	mov	r1, r5
+    1074:	bl	b84 <emfc_mfdb_list>
+    1078:	cmp	r0, #0
+    107c:	beq	12fc <emfc_cfg_request_process+0x440>
+    1080:	ldr	r6, [r4, #28]
+    1084:	mov	r0, r5
+    1088:	ldr	r1, [pc, #792]	@ 13a8 <emfc_cfg_request_process+0x4ec>
+    108c:	mov	r3, #2
+    1090:	str	r3, [r4, #24]
+    1094:	bl	0 <sprintf>
+    1098:	add	r0, r0, r6
+    109c:	b	1390 <emfc_cfg_request_process+0x4d4>
+    10a0:	bl	a50 <emfc_mfdb_clear>
+    10a4:	b	12fc <emfc_cfg_request_process+0x440>
+    10a8:	mov	r3, #0
+    10ac:	str	r3, [r1, #28]
+    10b0:	ldr	r1, [r1, #48]	@ 0x30
+    10b4:	bl	dd4 <emfc_rtport_add>
+    10b8:	cmp	r0, #0
+    10bc:	beq	12fc <emfc_cfg_request_process+0x440>
+    10c0:	mov	r3, #2
+    10c4:	ldr	r5, [r4, #28]
+    10c8:	str	r3, [r4, #24]
+    10cc:	add	r0, r4, #32
+    10d0:	ldr	r1, [pc, #724]	@ 13ac <emfc_cfg_request_process+0x4f0>
+    10d4:	b	1388 <emfc_cfg_request_process+0x4cc>
+    10d8:	mov	r3, #0
+    10dc:	str	r3, [r1, #28]
+    10e0:	ldr	r1, [r1, #48]	@ 0x30
+    10e4:	bl	e2c <emfc_rtport_del>
+    10e8:	cmp	r0, #0
+    10ec:	beq	12fc <emfc_cfg_request_process+0x440>
+    10f0:	mov	r3, #2
+    10f4:	ldr	r5, [r4, #28]
+    10f8:	str	r3, [r4, #24]
+    10fc:	add	r0, r4, #32
+    1100:	ldr	r1, [pc, #680]	@ 13b0 <emfc_cfg_request_process+0x4f4>
+    1104:	b	1388 <emfc_cfg_request_process+0x4cc>
+    1108:	mov	r7, #0
+    110c:	add	sl, r1, #32
+    1110:	ldr	r9, [r1, #28]
+    1114:	mov	r6, r7
+    1118:	ldr	r5, [r0, #184]	@ 0xb8
+    111c:	mov	fp, #20
+    1120:	mov	r3, r7
+    1124:	b	116c <emfc_cfg_request_process+0x2b0>
+    1128:	ldr	r2, [r5, #12]
+    112c:	cmp	r2, #0
+    1130:	beq	1168 <emfc_cfg_request_process+0x2ac>
+    1134:	add	r7, r7, #20
+    1138:	cmp	r7, r9
+    113c:	bhi	1178 <emfc_cfg_request_process+0x2bc>
+    1140:	mla	r8, fp, r6, sl
+    1144:	ldr	r1, [r5, #4]
+    1148:	str	r3, [sp, #4]
+    114c:	mov	r2, #16
+    1150:	add	r6, r6, #1
+    1154:	add	r0, r8, #4
+    1158:	add	r8, r8, #15
+    115c:	bl	0 <strncpy>
+    1160:	ldr	r3, [sp, #4]
+    1164:	strb	r3, [r8, #4]
+    1168:	ldr	r5, [r5]
+    116c:	cmp	r5, #0
+    1170:	bne	1128 <emfc_cfg_request_process+0x26c>
+    1174:	b	12b8 <emfc_cfg_request_process+0x3fc>
+    1178:	mov	r3, #2
+    117c:	add	r0, r4, #32
+    1180:	str	r3, [r4, #24]
+    1184:	ldr	r1, [pc, #552]	@ 13b4 <emfc_cfg_request_process+0x4f8>
+    1188:	b	1364 <emfc_cfg_request_process+0x4a8>
+    118c:	ldr	r5, [r1, #48]	@ 0x30
+    1190:	mov	r3, #0
+    1194:	str	r3, [r1, #28]
+    1198:	mov	r1, r5
+    119c:	bl	c80 <emfc_iflist_add>
+    11a0:	ldr	r0, [r6, #180]	@ 0xb4
+    11a4:	bl	1c28 <OSL_LOCK>
+    11a8:	ldr	r3, [r6, #184]	@ 0xb8
+    11ac:	b	11c0 <emfc_cfg_request_process+0x304>
+    11b0:	ldr	r2, [r3, #4]
+    11b4:	cmp	r2, r5
+    11b8:	beq	11cc <emfc_cfg_request_process+0x310>
+    11bc:	ldr	r3, [r3]
+    11c0:	cmp	r3, #0
+    11c4:	bne	11b0 <emfc_cfg_request_process+0x2f4>
+    11c8:	b	1240 <emfc_cfg_request_process+0x384>
+    11cc:	ldr	r2, [r3, #8]
+    11d0:	add	r2, r2, #1
+    11d4:	str	r2, [r3, #8]
+    11d8:	b	1240 <emfc_cfg_request_process+0x384>
+    11dc:	mov	r3, #0
+    11e0:	ldr	r5, [r1, #48]	@ 0x30
+    11e4:	str	r3, [r1, #28]
+    11e8:	ldr	r0, [r0, #180]	@ 0xb4
+    11ec:	bl	1c28 <OSL_LOCK>
+    11f0:	ldr	r3, [r6, #184]	@ 0xb8
+    11f4:	b	1208 <emfc_cfg_request_process+0x34c>
+    11f8:	ldr	r2, [r3, #4]
+    11fc:	cmp	r2, r5
+    1200:	beq	1214 <emfc_cfg_request_process+0x358>
+    1204:	ldr	r3, [r3]
+    1208:	cmp	r3, #0
+    120c:	bne	11f8 <emfc_cfg_request_process+0x33c>
+    1210:	b	136c <emfc_cfg_request_process+0x4b0>
+    1214:	ldr	r2, [r3, #8]
+    1218:	sub	r2, r2, #1
+    121c:	cmp	r2, #0
+    1220:	str	r2, [r3, #8]
+    1224:	bne	1240 <emfc_cfg_request_process+0x384>
+    1228:	ldr	r3, [r3, #12]
+    122c:	cmp	r3, #0
+    1230:	bne	1240 <emfc_cfg_request_process+0x384>
+    1234:	mov	r0, r6
+    1238:	mov	r1, r5
+    123c:	bl	d3c <emfc_iflist_del>
+    1240:	ldr	r0, [r6, #180]	@ 0xb4
+    1244:	bl	1bc4 <OSL_UNLOCK>
+    1248:	b	12fc <emfc_cfg_request_process+0x440>
+    124c:	mov	r7, #0
+    1250:	add	sl, r1, #32
+    1254:	ldr	r9, [r1, #28]
+    1258:	mov	r6, r7
+    125c:	ldr	r5, [r0, #184]	@ 0xb8
+    1260:	mov	fp, #20
+    1264:	mov	r3, r7
+    1268:	b	12b0 <emfc_cfg_request_process+0x3f4>
+    126c:	ldr	r2, [r5, #8]
+    1270:	cmp	r2, #0
+    1274:	beq	12ac <emfc_cfg_request_process+0x3f0>
+    1278:	add	r7, r7, #20
+    127c:	cmp	r7, r9
+    1280:	bhi	12c0 <emfc_cfg_request_process+0x404>
+    1284:	mla	r8, fp, r6, sl
+    1288:	ldr	r1, [r5, #4]
+    128c:	str	r3, [sp, #4]
+    1290:	mov	r2, #16
+    1294:	add	r6, r6, #1
+    1298:	add	r0, r8, #4
+    129c:	add	r8, r8, #15
+    12a0:	bl	0 <strncpy>
+    12a4:	ldr	r3, [sp, #4]
+    12a8:	strb	r3, [r8, #4]
+    12ac:	ldr	r5, [r5]
+    12b0:	cmp	r5, #0
+    12b4:	bne	126c <emfc_cfg_request_process+0x3b0>
+    12b8:	str	r6, [r4, #32]
+    12bc:	b	12fc <emfc_cfg_request_process+0x440>
+    12c0:	mov	r3, #2
+    12c4:	add	r0, r4, #32
+    12c8:	str	r3, [r4, #24]
+    12cc:	ldr	r1, [pc, #228]	@ 13b8 <emfc_cfg_request_process+0x4fc>
+    12d0:	b	1364 <emfc_cfg_request_process+0x4a8>
+    12d4:	add	r5, r1, #32
+    12d8:	ldr	r2, [r4, #28]
+    12dc:	mov	r1, r5
+    12e0:	bl	b0c <emfc_stats_get>
+    12e4:	cmp	r0, #0
+    12e8:	movne	r3, #2
+    12ec:	movne	r0, r5
+    12f0:	strne	r3, [r4, #24]
+    12f4:	ldrne	r1, [pc, #192]	@ 13bc <emfc_cfg_request_process+0x500>
+    12f8:	bne	1364 <emfc_cfg_request_process+0x4a8>
+    12fc:	mov	r3, #1
+    1300:	b	1338 <emfc_cfg_request_process+0x47c>
+    1304:	ldr	r3, [r1, #20]
+    1308:	cmp	r3, #1
+    130c:	beq	131c <emfc_cfg_request_process+0x460>
+    1310:	cmp	r3, #2
+    1314:	bne	1340 <emfc_cfg_request_process+0x484>
+    1318:	b	1328 <emfc_cfg_request_process+0x46c>
+    131c:	ldrb	r2, [r0, #177]	@ 0xb1
+    1320:	strb	r2, [r1, #32]
+    1324:	b	1334 <emfc_cfg_request_process+0x478>
+    1328:	ldrb	r3, [r1, #32]
+    132c:	strb	r3, [r0, #177]	@ 0xb1
+    1330:	mov	r3, #1
+    1334:	str	r3, [r4, #28]
+    1338:	str	r3, [r4, #24]
+    133c:	b	1394 <emfc_cfg_request_process+0x4d8>
+    1340:	mov	r3, #4
+    1344:	add	r0, r4, #32
+    1348:	str	r3, [r4, #24]
+    134c:	ldr	r1, [pc, #108]	@ 13c0 <emfc_cfg_request_process+0x504>
+    1350:	b	1364 <emfc_cfg_request_process+0x4a8>
+    1354:	mov	r3, #3
+    1358:	add	r0, r1, #32
+    135c:	str	r3, [r1, #24]
+    1360:	ldr	r1, [pc, #92]	@ 13c4 <emfc_cfg_request_process+0x508>
+    1364:	bl	0 <sprintf>
+    1368:	b	1390 <emfc_cfg_request_process+0x4d4>
+    136c:	ldr	r0, [r6, #180]	@ 0xb4
+    1370:	bl	1bc4 <OSL_UNLOCK>
+    1374:	ldr	r5, [r4, #28]
+    1378:	add	r0, r4, #32
+    137c:	ldr	r1, [pc, #68]	@ 13c8 <emfc_cfg_request_process+0x50c>
+    1380:	mov	r3, #2
+    1384:	str	r3, [r4, #24]
+    1388:	bl	0 <sprintf>
+    138c:	add	r0, r0, r5
+    1390:	str	r0, [r4, #28]
+    1394:	pop	{r1, r2, r3, r4, r5, r6, r7, r8, r9, sl, fp, pc}
+    1398:	.word	0x00000262
+    139c:	.word	0x00000283
+    13a0:	.word	0x000002b4
+    13a4:	.word	0x000002c9
+    13a8:	.word	0x000002df
+    13ac:	.word	0x000002f5
+    13b0:	.word	0x0000031b
+    13b4:	.word	0x00000341
+    13b8:	.word	0x00000359
+    13bc:	.word	0x0000036f
+    13c0:	.word	0x000002a1
+    13c4:	.word	0x00000385
+    13c8:	.word	0x00000396
+
+000013cc <emfc_init>:
+    13cc:	push	{r4, r5, r6, r7, r8, lr}
+    13d0:	subs	r7, r3, #0
+    13d4:	mov	r4, r0
+    13d8:	mov	r5, r1
+    13dc:	mov	r8, r2
+    13e0:	bne	13f4 <emfc_init+0x28>
+    13e4:	ldr	r0, [pc, #416]	@ 158c <emfc_init+0x1c0>
+    13e8:	mov	r6, r7
+    13ec:	bl	0 <printk>
+    13f0:	b	1584 <emfc_init+0x1b8>
+    13f4:	mov	r0, r2
+    13f8:	mov	r1, #188	@ 0xbc
+    13fc:	bl	0 <osl_malloc>
+    1400:	subs	r6, r0, #0
+    1404:	bne	1418 <emfc_init+0x4c>
+    1408:	mov	r1, #188	@ 0xbc
+    140c:	ldr	r0, [pc, #380]	@ 1590 <emfc_init+0x1c4>
+    1410:	bl	0 <printk>
+    1414:	b	1584 <emfc_init+0x1b8>
+    1418:	mov	r1, #188	@ 0xbc
+    141c:	bl	0 <__memzero>
+    1420:	mov	r2, r6
+    1424:	mov	r3, #0
+    1428:	str	r8, [r6, #104]	@ 0x68
+    142c:	str	r5, [r6, #108]	@ 0x6c
+    1430:	str	r3, [r6, #92]	@ 0x5c
+    1434:	str	r3, [r6, #96]	@ 0x60
+    1438:	str	r3, [r6, #184]	@ 0xb8
+    143c:	strb	r3, [r6, #176]	@ 0xb0
+    1440:	add	r1, r3, #3
+    1444:	add	r3, r3, #1
+    1448:	add	r1, r6, r1, lsl #3
+    144c:	cmp	r3, #8
+    1450:	str	r1, [r2, #28]
+    1454:	str	r1, [r2, #24]
+    1458:	add	r2, r2, #8
+    145c:	bne	1440 <emfc_init+0x74>
+    1460:	mov	r8, #0
+    1464:	mov	r1, #24
+    1468:	str	r8, [r6, #88]	@ 0x58
+    146c:	mov	r0, r8
+    1470:	bl	0 <osl_malloc>
+    1474:	subs	r5, r0, #0
+    1478:	bne	1488 <emfc_init+0xbc>
+    147c:	ldr	r0, [pc, #272]	@ 1594 <emfc_init+0x1c8>
+    1480:	bl	0 <printk>
+    1484:	b	14a4 <emfc_init+0xd8>
+    1488:	add	r0, r5, #8
+    148c:	ldr	r1, [pc, #260]	@ 1598 <emfc_init+0x1cc>
+    1490:	mov	r2, #15
+    1494:	bl	0 <strncpy>
+    1498:	strb	r8, [r5, #23]
+    149c:	str	r8, [r5]
+    14a0:	str	r8, [r5, #4]
+    14a4:	cmp	r5, #0
+    14a8:	str	r5, [r6, #100]	@ 0x64
+    14ac:	beq	150c <emfc_init+0x140>
+    14b0:	mov	r0, #0
+    14b4:	mov	r1, #24
+    14b8:	bl	0 <osl_malloc>
+    14bc:	subs	r5, r0, #0
+    14c0:	bne	14d0 <emfc_init+0x104>
+    14c4:	ldr	r0, [pc, #200]	@ 1594 <emfc_init+0x1c8>
+    14c8:	bl	0 <printk>
+    14cc:	b	14f0 <emfc_init+0x124>
+    14d0:	add	r0, r5, #8
+    14d4:	ldr	r1, [pc, #192]	@ 159c <emfc_init+0x1d0>
+    14d8:	mov	r2, #15
+    14dc:	bl	0 <strncpy>
+    14e0:	mov	r3, #0
+    14e4:	strb	r3, [r5, #23]
+    14e8:	str	r3, [r5]
+    14ec:	str	r3, [r5, #4]
+    14f0:	cmp	r5, #0
+    14f4:	str	r5, [r6, #180]	@ 0xb4
+    14f8:	bne	1524 <emfc_init+0x158>
+    14fc:	mov	r0, r5
+    1500:	ldr	r1, [r6, #100]	@ 0x64
+    1504:	mov	r2, #24
+    1508:	bl	0 <osl_mfree>
+    150c:	ldr	r0, [r6, #104]	@ 0x68
+    1510:	mov	r1, r6
+    1514:	mov	r2, #188	@ 0xbc
+    1518:	mov	r6, r5
+    151c:	bl	0 <osl_mfree>
+    1520:	b	1584 <emfc_init+0x1b8>
+    1524:	mov	r1, r4
+    1528:	mov	r2, #16
+    152c:	add	r0, r6, #8
+    1530:	ldr	r4, [pc, #104]	@ 15a0 <emfc_init+0x1d4>
+    1534:	bl	0 <strncpy>
+    1538:	mov	r3, #0
+    153c:	strb	r3, [r6, #23]
+    1540:	ldr	r3, [r7]
+    1544:	ldr	r0, [r4]
+    1548:	str	r3, [r6, #160]	@ 0xa0
+    154c:	ldr	r3, [r7, #4]
+    1550:	str	r3, [r6, #164]	@ 0xa4
+    1554:	ldr	r3, [r7, #8]
+    1558:	str	r3, [r6, #168]	@ 0xa8
+    155c:	ldr	r3, [r7, #12]
+    1560:	str	r3, [r6, #172]	@ 0xac
+    1564:	bl	1c28 <OSL_LOCK>
+    1568:	ldr	r3, [pc, #52]	@ 15a4 <emfc_init+0x1d8>
+    156c:	ldr	r0, [r4]
+    1570:	ldr	r2, [r3]
+    1574:	str	r6, [r2, #4]
+    1578:	stm	r6, {r2, r3}
+    157c:	str	r6, [r3]
+    1580:	bl	1bc4 <OSL_UNLOCK>
+    1584:	mov	r0, r6
+    1588:	pop	{r4, r5, r6, r7, r8, pc}
+    158c:	.word	0x000003ba
+    1590:	.word	0x000003dd
+    1594:	.word	0x00000409
+    1598:	.word	0x0000042e
+    159c:	.word	0x00000437
+	...
+
+000015a8 <emfc_exit>:
+    15a8:	push	{r4, r5, r6, lr}
+    15ac:	mov	r4, r0
+    15b0:	ldr	r3, [r0, #172]	@ 0xac
+    15b4:	ldr	r0, [r0, #108]	@ 0x6c
+    15b8:	blx	r3
+    15bc:	mov	r0, r4
+    15c0:	bl	a50 <emfc_mfdb_clear>
+    15c4:	mov	r0, r4
+    15c8:	bl	88 <emfc_iflist_clear>
+    15cc:	mov	r0, #0
+    15d0:	ldr	r1, [r4, #180]	@ 0xb4
+    15d4:	mov	r2, #24
+    15d8:	bl	0 <osl_mfree>
+    15dc:	ldr	r0, [r4, #100]	@ 0x64
+    15e0:	bl	1c28 <OSL_LOCK>
+    15e4:	ldr	r6, [r4, #88]	@ 0x58
+    15e8:	b	1604 <emfc_exit+0x5c>
+    15ec:	ldr	r5, [r6]
+    15f0:	mov	r1, r6
+    15f4:	ldr	r0, [r4, #104]	@ 0x68
+    15f8:	mov	r2, #12
+    15fc:	bl	0 <osl_mfree>
+    1600:	mov	r6, r5
+    1604:	cmp	r6, #0
+    1608:	bne	15ec <emfc_exit+0x44>
+    160c:	ldr	r5, [pc, #76]	@ 1660 <emfc_exit+0xb8>
+    1610:	ldr	r0, [r4, #100]	@ 0x64
+    1614:	bl	1bc4 <OSL_UNLOCK>
+    1618:	ldr	r1, [r4, #100]	@ 0x64
+    161c:	mov	r0, r6
+    1620:	mov	r2, #24
+    1624:	bl	0 <osl_mfree>
+    1628:	ldr	r0, [r5]
+    162c:	bl	1c28 <OSL_LOCK>
+    1630:	ldm	r4, {r2, r3}
+    1634:	ldr	r0, [r5]
+    1638:	str	r2, [r3]
+    163c:	ldr	r2, [r4, #4]
+    1640:	ldr	r3, [r4]
+    1644:	str	r2, [r3, #4]
+    1648:	bl	1bc4 <OSL_UNLOCK>
+    164c:	ldr	r0, [r4, #104]	@ 0x68
+    1650:	mov	r1, r4
+    1654:	mov	r2, #188	@ 0xbc
+    1658:	pop	{r4, r5, r6, lr}
+    165c:	b	0 <osl_mfree>
+    1660:	.word	0x00000000
+
+00001664 <emfc_module_init>:
+    1664:	push	{r4, lr}
+    1668:	mov	r0, #0
+    166c:	mov	r1, #24
+    1670:	bl	0 <osl_malloc>
+    1674:	subs	r4, r0, #0
+    1678:	bne	1688 <emfc_module_init+0x24>
+    167c:	ldr	r0, [pc, #76]	@ 16d0 <emfc_module_init+0x6c>
+    1680:	bl	0 <printk>
+    1684:	b	16a8 <emfc_module_init+0x44>
+    1688:	add	r0, r4, #8
+    168c:	ldr	r1, [pc, #64]	@ 16d4 <emfc_module_init+0x70>
+    1690:	mov	r2, #15
+    1694:	bl	0 <strncpy>
+    1698:	mov	r3, #0
+    169c:	strb	r3, [r4, #23]
+    16a0:	str	r3, [r4]
+    16a4:	str	r3, [r4, #4]
+    16a8:	ldr	r3, [pc, #40]	@ 16d8 <emfc_module_init+0x74>
+    16ac:	cmp	r4, #0
+    16b0:	str	r4, [r3]
+    16b4:	bne	16c8 <emfc_module_init+0x64>
+    16b8:	ldr	r0, [pc, #28]	@ 16dc <emfc_module_init+0x78>
+    16bc:	bl	0 <printk>
+    16c0:	mvn	r0, #0
+    16c4:	pop	{r4, pc}
+    16c8:	mov	r0, #0
+    16cc:	pop	{r4, pc}
+    16d0:	.word	0x00000409
+    16d4:	.word	0x0000044d
+    16d8:	.word	0x00000000
+    16dc:	.word	0x0000045c
+
+000016e0 <emfc_module_exit>:
+    16e0:	ldr	r3, [pc, #12]	@ 16f4 <emfc_module_exit+0x14>
+    16e4:	mov	r0, #0
+    16e8:	mov	r2, #24
+    16ec:	ldr	r1, [r3]
+    16f0:	b	0 <osl_mfree>
+    16f4:	.word	0x00000000
+
+000016f8 <emf_mfdb_list>:
+    16f8:	push	{r4, r5, r6, r7, r8, lr}
+    16fc:	mov	r5, r3
+    1700:	sub	sp, sp, #1072	@ 0x430
+    1704:	mov	r3, #5
+    1708:	mov	r4, r0
+    170c:	mov	r1, sp
+    1710:	str	r3, [sp, #16]
+    1714:	mov	r3, #1
+    1718:	str	r3, [sp, #20]
+    171c:	mov	r3, #1024	@ 0x400
+    1720:	str	r3, [sp, #28]
+    1724:	add	r7, sp, #32
+    1728:	ldr	r3, [sp, #1100]	@ 0x44c
+    172c:	ldr	r0, [r3, #28]
+    1730:	bl	ebc <emfc_cfg_request_process>
+    1734:	ldr	r3, [sp, #24]
+    1738:	cmp	r3, #1
+    173c:	ldrne	r0, [pc, #164]	@ 17e8 <emf_mfdb_list+0xf0>
+    1740:	bne	17d8 <emf_mfdb_list+0xe0>
+    1744:	add	r6, sp, #1056	@ 0x420
+    1748:	mov	r1, r4
+    174c:	mov	r2, r5
+    1750:	mov	r0, r6
+    1754:	bl	0 <bcm_binit>
+    1758:	mov	r0, r6
+    175c:	ldr	r1, [pc, #136]	@ 17ec <emf_mfdb_list+0xf4>
+    1760:	bl	0 <bcm_bprintf>
+    1764:	mov	r5, r7
+    1768:	mov	r4, #0
+    176c:	mov	r8, #28
+    1770:	b	17ac <emf_mfdb_list+0xb4>
+    1774:	ldr	r1, [pc, #116]	@ 17f0 <emf_mfdb_list+0xf8>
+    1778:	mov	r0, r6
+    177c:	ldr	r2, [r5, #-24]	@ 0xffffffe8
+    1780:	bl	0 <bcm_bprintf>
+    1784:	mla	r2, r8, r4, r7
+    1788:	ldr	r1, [pc, #100]	@ 17f4 <emf_mfdb_list+0xfc>
+    178c:	mov	r0, r6
+    1790:	add	r4, r4, #1
+    1794:	add	r2, r2, #8
+    1798:	bl	0 <bcm_bprintf>
+    179c:	mov	r0, r6
+    17a0:	ldr	r1, [pc, #80]	@ 17f8 <emf_mfdb_list+0x100>
+    17a4:	ldr	r2, [r5, #-4]
+    17a8:	bl	0 <bcm_bprintf>
+    17ac:	ldr	r3, [r7]
+    17b0:	add	r5, r5, #28
+    17b4:	cmp	r4, r3
+    17b8:	bcc	1774 <emf_mfdb_list+0x7c>
+    17bc:	ldr	r3, [sp, #1060]	@ 0x424
+    17c0:	cmp	r3, #0
+    17c4:	ldrne	r3, [sp, #1064]	@ 0x428
+    17c8:	ldrne	r0, [sp, #1056]	@ 0x420
+    17cc:	rsbne	r0, r3, r0
+    17d0:	bne	17e0 <emf_mfdb_list+0xe8>
+    17d4:	ldr	r0, [pc, #32]	@ 17fc <emf_mfdb_list+0x104>
+    17d8:	bl	0 <printk>
+    17dc:	mvn	r0, #0
+    17e0:	add	sp, sp, #1072	@ 0x430
+    17e4:	pop	{r4, r5, r6, r7, r8, pc}
+    17e8:	.word	0x0000047a
+    17ec:	.word	0x00000497
+    17f0:	.word	0x000004bc
+    17f4:	.word	0x000004c9
+    17f8:	.word	0x000004cf
+    17fc:	.word	0x000004d3
+
+00001800 <emf_stats_get>:
+    1800:	push	{r4, r5, r6, r7, lr}
+    1804:	sub	sp, sp, #1088	@ 0x440
+    1808:	sub	sp, sp, #4
+    180c:	mov	r7, r3
+    1810:	mov	r3, #18
+    1814:	mov	r6, r0
+    1818:	str	r3, [sp, #32]
+    181c:	mov	r3, #1
+    1820:	str	r3, [sp, #36]	@ 0x24
+    1824:	add	r3, r3, #43	@ 0x2b
+    1828:	str	r3, [sp, #44]	@ 0x2c
+    182c:	add	r1, sp, #16
+    1830:	ldr	r3, [sp, #1116]	@ 0x45c
+    1834:	ldr	r0, [r3, #28]
+    1838:	bl	ebc <emfc_cfg_request_process>
+    183c:	ldr	r3, [sp, #40]	@ 0x28
+    1840:	cmp	r3, #1
+    1844:	ldrne	r0, [pc, #184]	@ 1904 <emf_stats_get+0x104>
+    1848:	bne	18f0 <emf_stats_get+0xf0>
+    184c:	add	r5, sp, #1072	@ 0x430
+    1850:	mov	r2, r7
+    1854:	mov	r0, r5
+    1858:	mov	r1, r6
+    185c:	add	r4, sp, #48	@ 0x30
+    1860:	bl	0 <bcm_binit>
+    1864:	ldr	r1, [pc, #156]	@ 1908 <emf_stats_get+0x108>
+    1868:	mov	r0, r5
+    186c:	bl	0 <bcm_bprintf>
+    1870:	ldr	r3, [r4, #24]
+    1874:	mov	r0, r5
+    1878:	ldr	r1, [pc, #140]	@ 190c <emf_stats_get+0x10c>
+    187c:	str	r3, [sp]
+    1880:	ldr	r3, [r4, #28]
+    1884:	str	r3, [sp, #4]
+    1888:	ldr	r3, [r4, #32]
+    188c:	str	r3, [sp, #8]
+    1890:	ldr	r2, [r4, #16]
+    1894:	ldr	r3, [r4, #20]
+    1898:	bl	0 <bcm_bprintf>
+    189c:	ldr	r1, [pc, #108]	@ 1910 <emf_stats_get+0x110>
+    18a0:	mov	r0, r5
+    18a4:	bl	0 <bcm_bprintf>
+    18a8:	ldr	r3, [sp, #56]	@ 0x38
+    18ac:	mov	r0, r5
+    18b0:	ldr	r1, [pc, #84]	@ 190c <emf_stats_get+0x10c>
+    18b4:	ldr	r2, [sp, #48]	@ 0x30
+    18b8:	str	r3, [sp]
+    18bc:	ldr	r3, [r4, #36]	@ 0x24
+    18c0:	str	r3, [sp, #4]
+    18c4:	ldr	r3, [r4, #40]	@ 0x28
+    18c8:	str	r3, [sp, #8]
+    18cc:	ldr	r3, [sp, #52]	@ 0x34
+    18d0:	bl	0 <bcm_bprintf>
+    18d4:	ldr	r3, [sp, #1076]	@ 0x434
+    18d8:	cmp	r3, #0
+    18dc:	ldrne	r3, [sp, #1080]	@ 0x438
+    18e0:	ldrne	r0, [sp, #1072]	@ 0x430
+    18e4:	rsbne	r0, r3, r0
+    18e8:	bne	18f8 <emf_stats_get+0xf8>
+    18ec:	ldr	r0, [pc, #32]	@ 1914 <emf_stats_get+0x114>
+    18f0:	bl	0 <printk>
+    18f4:	mvn	r0, #0
+    18f8:	add	sp, sp, #68	@ 0x44
+    18fc:	add	sp, sp, #1024	@ 0x400
+    1900:	pop	{r4, r5, r6, r7, pc}
+    1904:	.word	0x000004ea
+    1908:	.word	0x00000507
+    190c:	.word	0x00000559
+    1910:	.word	0x00000575
+    1914:	.word	0x000004d3
+
+00001918 <emf_if_name_validate>:
+    1918:	push	{r3, r4, r5, lr}
+    191c:	mov	r5, r0
+    1920:	mov	r1, r5
+    1924:	ldr	r0, [pc, #56]	@ 1964 <emf_if_name_validate+0x4c>
+    1928:	bl	0 <dev_get_by_name>
+    192c:	subs	r4, r0, #0
+    1930:	bne	1944 <emf_if_name_validate+0x2c>
+    1934:	mov	r1, r5
+    1938:	ldr	r0, [pc, #40]	@ 1968 <emf_if_name_validate+0x50>
+    193c:	bl	0 <printk>
+    1940:	b	195c <emf_if_name_validate+0x44>
+    1944:	add	r3, r4, #608	@ 0x260
+    1948:	ldrex	r2, [r3]
+    194c:	sub	r2, r2, #1
+    1950:	strex	r1, r2, [r3]
+    1954:	teq	r1, #0
+    1958:	bne	1948 <emf_if_name_validate+0x30>
+    195c:	mov	r0, r4
+    1960:	pop	{r3, r4, r5, pc}
+    1964:	.word	0x00000000
+    1968:	.word	0x000005c6
+
+0000196c <emf_hooks_unregister>:
+    196c:	ldr	r3, [pc, #56]	@ 19ac <emf_hooks_unregister+0x40>
+    1970:	push	{r4, lr}
+    1974:	ldr	r3, [r3]
+    1978:	ldr	r2, [r3, #12]
+    197c:	cmp	r2, #0
+    1980:	bne	1990 <emf_hooks_unregister+0x24>
+    1984:	ldr	r0, [pc, #36]	@ 19b0 <emf_hooks_unregister+0x44>
+    1988:	pop	{r4, lr}
+    198c:	b	0 <printk>
+    1990:	sub	r2, r2, #1
+    1994:	ldr	r0, [pc, #24]	@ 19b4 <emf_hooks_unregister+0x48>
+    1998:	str	r2, [r3, #12]
+    199c:	bl	0 <nf_unregister_hook>
+    19a0:	ldr	r0, [pc, #16]	@ 19b8 <emf_hooks_unregister+0x4c>
+    19a4:	pop	{r4, lr}
+    19a8:	b	0 <nf_unregister_hook>
+    19ac:	.word	0x00000004
+    19b0:	.word	0x000005e2
+    19b4:	.word	0x00000008
+    19b8:	.word	0x00000024
+
+000019bc <emf_hooks_register>:
+    19bc:	push	{r3, r4, r5, lr}
+    19c0:	ldr	r5, [pc, #132]	@ 1a4c <emf_hooks_register+0x90>
+    19c4:	ldr	r3, [r5]
+    19c8:	ldr	r4, [r3, #12]
+    19cc:	cmp	r4, #0
+    19d0:	bne	1a44 <emf_hooks_register+0x88>
+    19d4:	ldr	r0, [pc, #116]	@ 1a50 <emf_hooks_register+0x94>
+    19d8:	bl	0 <nf_register_hook>
+    19dc:	cmp	r0, #0
+    19e0:	blt	1a0c <emf_hooks_register+0x50>
+    19e4:	ldr	r0, [pc, #104]	@ 1a54 <emf_hooks_register+0x98>
+    19e8:	bl	0 <nf_register_hook>
+    19ec:	cmp	r0, #0
+    19f0:	blt	1a14 <emf_hooks_register+0x58>
+    19f4:	ldr	r3, [r5]
+    19f8:	mov	r0, r4
+    19fc:	ldr	r2, [r3, #12]
+    1a00:	add	r2, r2, #1
+    1a04:	str	r2, [r3, #12]
+    1a08:	pop	{r3, r4, r5, pc}
+    1a0c:	mov	r5, r4
+    1a10:	b	1a18 <emf_hooks_register+0x5c>
+    1a14:	mov	r5, #1
+    1a18:	ldr	r0, [pc, #56]	@ 1a58 <emf_hooks_register+0x9c>
+    1a1c:	mov	r4, #0
+    1a20:	bl	0 <printk>
+    1a24:	b	1a34 <emf_hooks_register+0x78>
+    1a28:	add	r4, r4, #1
+    1a2c:	ldr	r0, [pc, #28]	@ 1a50 <emf_hooks_register+0x94>
+    1a30:	bl	0 <nf_unregister_hook>
+    1a34:	cmp	r4, r5
+    1a38:	blt	1a28 <emf_hooks_register+0x6c>
+    1a3c:	mvn	r0, #0
+    1a40:	pop	{r3, r4, r5, pc}
+    1a44:	mov	r0, #0
+    1a48:	pop	{r3, r4, r5, pc}
+    1a4c:	.word	0x00000004
+    1a50:	.word	0x00000008
+    1a54:	.word	0x00000024
+    1a58:	.word	0x000005fe
+
+00001a5c <emf_forward>:
+    1a5c:	push	{r4, r5, r6, r7, r8, r9, sl, lr}
+    1a60:	subs	r6, r3, #0
+    1a64:	sub	sp, sp, #104	@ 0x68
+    1a68:	mov	r8, r0
+    1a6c:	mov	r4, r1
+    1a70:	mov	sl, r2
+    1a74:	beq	1aa4 <emf_forward+0x48>
+    1a78:	ldrb	r3, [r6]
+    1a7c:	cmp	r3, #118	@ 0x76
+    1a80:	bne	1ab4 <emf_forward+0x58>
+    1a84:	mov	r0, r2
+    1a88:	bl	0 <bcm_robo_snoop_ip_match>
+    1a8c:	cmp	r0, #0
+    1a90:	beq	1ab4 <emf_forward+0x58>
+    1a94:	ldr	r3, [pc, #256]	@ 1b9c <emf_forward+0x140>
+    1a98:	ldr	r3, [r3]
+    1a9c:	cmp	r3, #0
+    1aa0:	beq	1ab4 <emf_forward+0x58>
+    1aa4:	mov	r0, r4
+    1aa8:	bl	0 <kfree_skb>
+    1aac:	mvn	r0, #0
+    1ab0:	b	1b88 <emf_forward+0x12c>
+    1ab4:	add	r7, sp, #8
+    1ab8:	mov	r2, sl
+    1abc:	str	r7, [sp]
+    1ac0:	mov	r1, r6
+    1ac4:	ldr	r0, [r8, #28]
+    1ac8:	mov	r3, #96	@ 0x60
+    1acc:	bl	700 <emfc_gethostmaclist>
+    1ad0:	subs	sl, r0, #0
+    1ad4:	movge	r8, #0
+    1ad8:	subge	r9, sl, #1
+    1adc:	bge	1b4c <emf_forward+0xf0>
+    1ae0:	b	1b64 <emf_forward+0x108>
+    1ae4:	cmp	r8, r9
+    1ae8:	blt	1b04 <emf_forward+0xa8>
+    1aec:	ldrb	r3, [r4, #188]	@ 0xbc
+    1af0:	and	r3, r3, #2
+    1af4:	uxtb	r3, r3
+    1af8:	cmp	r3, #0
+    1afc:	moveq	r5, r4
+    1b00:	beq	1b18 <emf_forward+0xbc>
+    1b04:	mov	r0, r4
+    1b08:	mov	r1, #32
+    1b0c:	bl	0 <skb_copy>
+    1b10:	subs	r5, r0, #0
+    1b14:	beq	1b64 <emf_forward+0x108>
+    1b18:	mov	r1, #14
+    1b1c:	mov	r0, r5
+    1b20:	bl	0 <skb_push>
+    1b24:	mov	r1, r7
+    1b28:	ldrb	r2, [r6, #277]	@ 0x115
+    1b2c:	bl	0 <memcpy>
+    1b30:	ldr	r3, [r5, #236]	@ 0xec
+    1b34:	add	r8, r8, #1
+    1b38:	add	r7, r7, #6
+    1b3c:	str	r6, [r5, #44]	@ 0x2c
+    1b40:	mov	r0, r5
+    1b44:	str	r3, [r5, #220]	@ 0xdc
+    1b48:	bl	0 <dev_queue_xmit>
+    1b4c:	cmp	r8, sl
+    1b50:	blt	1ae4 <emf_forward+0x88>
+    1b54:	b	1b90 <emf_forward+0x134>
+    1b58:	mov	r0, r4
+    1b5c:	bl	0 <kfree_skb>
+    1b60:	b	1b84 <emf_forward+0x128>
+    1b64:	mov	r0, r4
+    1b68:	mov	r1, #14
+    1b6c:	bl	0 <skb_push>
+    1b70:	ldr	r3, [r4, #236]	@ 0xec
+    1b74:	mov	r0, r4
+    1b78:	str	r6, [r4, #44]	@ 0x2c
+    1b7c:	str	r3, [r4, #220]	@ 0xdc
+    1b80:	bl	0 <dev_queue_xmit>
+    1b84:	mov	r0, #0
+    1b88:	add	sp, sp, #104	@ 0x68
+    1b8c:	pop	{r4, r5, r6, r7, r8, r9, sl, pc}
+    1b90:	cmp	r5, r4
+    1b94:	bne	1b58 <emf_forward+0xfc>
+    1b98:	b	1b84 <emf_forward+0x128>
+    1b9c:	.word	0x00000000
+
+00001ba0 <emf_sendup>:
+    1ba0:	ldr	r3, [r0, #24]
+    1ba4:	mov	r0, r1
+    1ba8:	str	r3, [r1, #44]	@ 0x2c
+    1bac:	ldrb	r3, [r1, #189]	@ 0xbd
+    1bb0:	bfc	r3, #0, #3
+    1bb4:	strb	r3, [r1, #189]	@ 0xbd
+    1bb8:	ldr	r3, [r1, #236]	@ 0xec
+    1bbc:	str	r3, [r1, #220]	@ 0xdc
+    1bc0:	b	0 <netif_rx>
+
+00001bc4 <OSL_UNLOCK>:
+    1bc4:	push	{r4, lr}
+    1bc8:	mov	r2, sp
+    1bcc:	bic	r3, r2, #8128	@ 0x1fc0
+    1bd0:	bic	r3, r3, #63	@ 0x3f
+    1bd4:	ldr	r3, [r3, #20]
+    1bd8:	cmp	r3, #1
+    1bdc:	bls	1bf4 <OSL_UNLOCK+0x30>
+    1be0:	ldr	r1, [pc, #52]	@ 1c1c <OSL_UNLOCK+0x58>
+    1be4:	mov	r2, #124	@ 0x7c
+    1be8:	ldr	r0, [pc, #48]	@ 1c20 <OSL_UNLOCK+0x5c>
+    1bec:	bl	0 <printk>
+    1bf0:	b	1c14 <OSL_UNLOCK+0x50>
+    1bf4:	ldr	r2, [pc, #40]	@ 1c24 <OSL_UNLOCK+0x60>
+    1bf8:	add	r3, r2, r3, lsl #2
+    1bfc:	ldr	r2, [r3, #4]
+    1c00:	sub	r2, r2, #1
+    1c04:	cmp	r2, #0
+    1c08:	str	r2, [r3, #4]
+    1c0c:	bne	1c14 <OSL_UNLOCK+0x50>
+    1c10:	bl	0 <_raw_spin_unlock_bh>
+    1c14:	pop	{r4, lr}
+    1c18:	b	0 <local_bh_enable>
+    1c1c:	.word	0x00000000
+    1c20:	.word	0x00000622
+    1c24:	.word	0x00000004
+
+00001c28 <OSL_LOCK>:
+    1c28:	push	{r4, lr}
+    1c2c:	mov	r4, r0
+    1c30:	bl	0 <local_bh_disable>
+    1c34:	mov	r2, sp
+    1c38:	bic	r3, r2, #8128	@ 0x1fc0
+    1c3c:	bic	r3, r3, #63	@ 0x3f
+    1c40:	ldr	r3, [r3, #20]
+    1c44:	cmp	r3, #1
+    1c48:	bls	1c60 <OSL_LOCK+0x38>
+    1c4c:	ldr	r0, [pc, #52]	@ 1c88 <OSL_LOCK+0x60>
+    1c50:	mov	r2, #105	@ 0x69
+    1c54:	ldr	r1, [pc, #48]	@ 1c8c <OSL_LOCK+0x64>
+    1c58:	pop	{r4, lr}
+    1c5c:	b	0 <printk>
+    1c60:	ldr	r2, [pc, #40]	@ 1c90 <OSL_LOCK+0x68>
+    1c64:	add	r3, r2, r3, lsl #2
+    1c68:	ldr	r2, [r3, #4]
+    1c6c:	add	r2, r2, #1
+    1c70:	cmp	r2, #1
+    1c74:	str	r2, [r3, #4]
+    1c78:	popne	{r4, pc}
+    1c7c:	mov	r0, r4
+    1c80:	pop	{r4, lr}
+    1c84:	b	0 <_raw_spin_lock_bh>
+    1c88:	.word	0x00000622
+    1c8c:	.word	0x0000000c
+    1c90:	.word	0x00000004
+
+00001c94 <emf_instance_del>:
+    1c94:	push	{r4, r5, r6, r7, r8, lr}
+    1c98:	mov	r5, r1
+    1c9c:	sub	sp, sp, #64	@ 0x40
+    1ca0:	mov	r6, r0
+    1ca4:	ldr	r1, [r1, #36]	@ 0x24
+    1ca8:	b	1cc0 <emf_instance_del+0x2c>
+    1cac:	ldr	r4, [r1]
+    1cb0:	mov	r2, #8
+    1cb4:	ldr	r0, [r5, #20]
+    1cb8:	bl	0 <osl_mfree>
+    1cbc:	mov	r1, r4
+    1cc0:	cmp	r1, #0
+    1cc4:	bne	1cac <emf_instance_del+0x18>
+    1cc8:	str	r1, [r5, #36]	@ 0x24
+    1ccc:	ldr	r3, [r6, #4]
+    1cd0:	mov	r4, r3
+    1cd4:	b	1d8c <emf_instance_del+0xf8>
+    1cd8:	cmp	r4, r5
+    1cdc:	bne	1d84 <emf_instance_del+0xf0>
+    1ce0:	cmp	r1, #0
+    1ce4:	add	r8, r5, #4
+    1ce8:	ldrne	r3, [r4]
+    1cec:	mov	r7, sp
+    1cf0:	ldreq	r3, [r3]
+    1cf4:	strne	r3, [r1]
+    1cf8:	streq	r3, [r6, #4]
+    1cfc:	ldr	r3, [r6, #16]
+    1d00:	ldr	r0, [r6, #8]
+    1d04:	sub	r3, r3, #1
+    1d08:	str	r3, [r6, #16]
+    1d0c:	bl	1bc4 <OSL_UNLOCK>
+    1d10:	mov	r0, r4
+    1d14:	bl	196c <emf_hooks_unregister>
+    1d18:	mov	r2, r8
+    1d1c:	ldr	r1, [pc, #140]	@ 1db0 <emf_instance_del+0x11c>
+    1d20:	mov	r0, sp
+    1d24:	bl	0 <sprintf>
+    1d28:	mov	r0, sp
+    1d2c:	mov	r1, #0
+    1d30:	bl	0 <remove_proc_entry>
+    1d34:	mov	r2, r8
+    1d38:	ldr	r1, [pc, #116]	@ 1db4 <emf_instance_del+0x120>
+    1d3c:	mov	r0, sp
+    1d40:	bl	0 <sprintf>
+    1d44:	mov	r1, #0
+    1d48:	mov	r0, sp
+    1d4c:	bl	0 <remove_proc_entry>
+    1d50:	ldr	r0, [r6, #8]
+    1d54:	bl	1c28 <OSL_LOCK>
+    1d58:	ldr	r0, [r4, #28]
+    1d5c:	bl	15a8 <emfc_exit>
+    1d60:	ldr	r6, [r4, #20]
+    1d64:	mov	r1, r4
+    1d68:	ldr	r0, [r5, #20]
+    1d6c:	mov	r2, #40	@ 0x28
+    1d70:	bl	0 <osl_mfree>
+    1d74:	mov	r0, r6
+    1d78:	bl	0 <osl_detach>
+    1d7c:	mov	r0, #0
+    1d80:	b	1d98 <emf_instance_del+0x104>
+    1d84:	mov	r1, r4
+    1d88:	ldr	r4, [r4]
+    1d8c:	cmp	r4, #0
+    1d90:	bne	1cd8 <emf_instance_del+0x44>
+    1d94:	b	1da0 <emf_instance_del+0x10c>
+    1d98:	add	sp, sp, #64	@ 0x40
+    1d9c:	pop	{r4, r5, r6, r7, r8, pc}
+    1da0:	ldr	r0, [pc, #16]	@ 1db8 <emf_instance_del+0x124>
+    1da4:	bl	0 <printk>
+    1da8:	mvn	r0, #0
+    1dac:	b	1d98 <emf_instance_del+0x104>
+    1db0:	.word	0x00000644
+    1db4:	.word	0x00000655
+    1db8:	.word	0x00000662
+
+00001dbc <emf_ip_post_hook>:
+    1dbc:	ldr	r3, [pc, #116]	@ 1e38 <emf_ip_post_hook+0x7c>
+    1dc0:	push	{r0, r1, r2, r4, r5, r6, r7, lr}
+    1dc4:	mov	r6, r1
+    1dc8:	ldr	r7, [r1, #44]	@ 0x2c
+    1dcc:	ldr	r5, [r3]
+    1dd0:	ldr	r0, [r5, #8]
+    1dd4:	bl	1c28 <OSL_LOCK>
+    1dd8:	ldr	r4, [r5, #4]
+    1ddc:	b	1e20 <emf_ip_post_hook+0x64>
+    1de0:	ldr	r3, [r4, #24]
+    1de4:	cmp	r7, r3
+    1de8:	bne	1e1c <emf_ip_post_hook+0x60>
+    1dec:	ldr	r0, [r5, #8]
+    1df0:	bl	1bc4 <OSL_UNLOCK>
+    1df4:	mov	r3, #10
+    1df8:	mov	r1, r6
+    1dfc:	str	r3, [sp]
+    1e00:	mov	r3, #0
+    1e04:	str	r3, [sp, #4]
+    1e08:	ldr	r0, [r4, #28]
+    1e0c:	ldr	r2, [r6, #44]	@ 0x2c
+    1e10:	ldr	r3, [r6, #236]	@ 0xec
+    1e14:	bl	38c <emfc_input>
+    1e18:	b	1e34 <emf_ip_post_hook+0x78>
+    1e1c:	ldr	r4, [r4]
+    1e20:	cmp	r4, #0
+    1e24:	bne	1de0 <emf_ip_post_hook+0x24>
+    1e28:	ldr	r0, [r5, #8]
+    1e2c:	bl	1bc4 <OSL_UNLOCK>
+    1e30:	mov	r0, #1
+    1e34:	pop	{r1, r2, r3, r4, r5, r6, r7, pc}
+    1e38:	.word	0x00000004
+
+00001e3c <emf_br_pre_hook>:
+    1e3c:	ldr	r3, [pc, #208]	@ 1f14 <emf_br_pre_hook+0xd8>
+    1e40:	push	{r0, r1, r2, r4, r5, r6, r7, lr}
+    1e44:	mov	r4, r1
+    1e48:	ldr	r7, [r1, #44]	@ 0x2c
+    1e4c:	ldr	r6, [r3]
+    1e50:	ldr	r0, [r6, #8]
+    1e54:	bl	1c28 <OSL_LOCK>
+    1e58:	ldr	r5, [r6, #4]
+    1e5c:	b	1e9c <emf_br_pre_hook+0x60>
+    1e60:	ldr	r3, [r5, #36]	@ 0x24
+    1e64:	b	1e90 <emf_br_pre_hook+0x54>
+    1e68:	ldr	r2, [r3, #4]
+    1e6c:	cmp	r2, r7
+    1e70:	bne	1e8c <emf_br_pre_hook+0x50>
+    1e74:	ldr	r0, [r6, #8]
+    1e78:	bl	1bc4 <OSL_UNLOCK>
+    1e7c:	ldrh	r3, [r4, #190]	@ 0xbe
+    1e80:	cmp	r3, #8
+    1e84:	bne	1f0c <emf_br_pre_hook+0xd0>
+    1e88:	b	1eb0 <emf_br_pre_hook+0x74>
+    1e8c:	ldr	r3, [r3]
+    1e90:	cmp	r3, #0
+    1e94:	bne	1e68 <emf_br_pre_hook+0x2c>
+    1e98:	ldr	r5, [r5]
+    1e9c:	cmp	r5, #0
+    1ea0:	bne	1e60 <emf_br_pre_hook+0x24>
+    1ea4:	ldr	r0, [r6, #8]
+    1ea8:	bl	1bc4 <OSL_UNLOCK>
+    1eac:	b	1f0c <emf_br_pre_hook+0xd0>
+    1eb0:	ldr	r2, [r4, #44]	@ 0x2c
+    1eb4:	ldr	r0, [pc, #92]	@ 1f18 <emf_br_pre_hook+0xdc>
+    1eb8:	ldrb	r1, [r4, #136]	@ 0x88
+    1ebc:	ldr	r3, [r2]
+    1ec0:	bic	r3, r3, #16711680	@ 0xff0000
+    1ec4:	bic	r3, r3, #65280	@ 0xff00
+    1ec8:	cmp	r3, r0
+    1ecc:	moveq	ip, #4
+    1ed0:	beq	1ee4 <emf_br_pre_hook+0xa8>
+    1ed4:	ldr	ip, [pc, #64]	@ 1f1c <emf_br_pre_hook+0xe0>
+    1ed8:	cmp	r3, ip
+    1edc:	movne	ip, r1
+    1ee0:	moveq	ip, #4
+    1ee4:	ldr	r1, [r4, #220]	@ 0xdc
+    1ee8:	ldr	r0, [r5, #28]
+    1eec:	ldr	r3, [r4, #236]	@ 0xec
+    1ef0:	cmp	r1, #0
+    1ef4:	str	ip, [sp]
+    1ef8:	addne	r1, r1, #6
+    1efc:	str	r1, [sp, #4]
+    1f00:	mov	r1, r4
+    1f04:	bl	38c <emfc_input>
+    1f08:	b	1f10 <emf_br_pre_hook+0xd4>
+    1f0c:	mov	r0, #1
+    1f10:	pop	{r1, r2, r3, r4, r5, r6, r7, pc}
+    1f14:	.word	0x00000004
+    1f18:	.word	0x31000065
+    1f1c:	.word	0x32000065
+
+00001f20 <emf_iflist_del.clone.4>:
+    1f20:	push	{r4, r5, r6, lr}
+    1f24:	mov	r5, r1
+    1f28:	mov	r4, r0
+    1f2c:	ldr	r0, [r0]
+    1f30:	mov	r6, r2
+    1f34:	bl	1c28 <OSL_LOCK>
+    1f38:	ldr	r1, [r5, #36]	@ 0x24
+    1f3c:	mov	r3, #0
+    1f40:	b	1f58 <emf_iflist_del.clone.4+0x38>
+    1f44:	ldr	r2, [r1, #4]
+    1f48:	cmp	r2, r6
+    1f4c:	beq	1f64 <emf_iflist_del.clone.4+0x44>
+    1f50:	mov	r3, r1
+    1f54:	ldr	r1, [r1]
+    1f58:	cmp	r1, #0
+    1f5c:	bne	1f44 <emf_iflist_del.clone.4+0x24>
+    1f60:	b	1f90 <emf_iflist_del.clone.4+0x70>
+    1f64:	ldr	r2, [r1]
+    1f68:	cmp	r3, #0
+    1f6c:	strne	r2, [r3]
+    1f70:	streq	r2, [r5, #36]	@ 0x24
+    1f74:	mov	r2, #8
+    1f78:	ldr	r0, [r5, #20]
+    1f7c:	bl	0 <osl_mfree>
+    1f80:	ldr	r0, [r4]
+    1f84:	bl	1bc4 <OSL_UNLOCK>
+    1f88:	mov	r0, #0
+    1f8c:	pop	{r4, r5, r6, pc}
+    1f90:	ldr	r0, [r4]
+    1f94:	bl	1bc4 <OSL_UNLOCK>
+    1f98:	mvn	r0, #0
+    1f9c:	pop	{r4, r5, r6, pc}
+
+00001fa0 <emf_ucast_to_mcast>:
+    1fa0:	cmp	r0, #0
+    1fa4:	bxeq	lr
+    1fa8:	ldr	r3, [r0, #220]	@ 0xdc
+    1fac:	cmp	r3, #0
+    1fb0:	moveq	r0, r3
+    1fb4:	bxeq	lr
+    1fb8:	ldrb	r2, [r3]
+    1fbc:	ands	r2, r2, #1
+    1fc0:	bne	1ff0 <emf_ucast_to_mcast+0x50>
+    1fc4:	strb	r2, [r3, #1]
+    1fc8:	mov	r2, #94	@ 0x5e
+    1fcc:	strb	r2, [r3, #2]
+    1fd0:	lsr	r2, r1, #8
+    1fd4:	mov	r0, #1
+    1fd8:	strb	r1, [r3, #5]
+    1fdc:	ubfx	r1, r1, #16, #7
+    1fe0:	strb	r0, [r3]
+    1fe4:	strb	r2, [r3, #4]
+    1fe8:	strb	r1, [r3, #3]
+    1fec:	bx	lr
+    1ff0:	mov	r0, #0
+    1ff4:	bx	lr
+
+00001ff8 <emf_iflist_list>:
+    1ff8:	cmp	r0, #0
+    1ffc:	push	{r4, r5, r6, lr}
+    2000:	ldreq	r0, [pc, #84]	@ 205c <emf_iflist_list+0x64>
+    2004:	mov	r6, r1
+    2008:	beq	2020 <emf_iflist_list+0x28>
+    200c:	cmp	r1, #0
+    2010:	ldrne	r4, [r0, #36]	@ 0x24
+    2014:	movne	r5, #0
+    2018:	bne	2048 <emf_iflist_list+0x50>
+    201c:	ldr	r0, [pc, #60]	@ 2060 <emf_iflist_list+0x68>
+    2020:	bl	0 <printk>
+    2024:	mvn	r0, #0
+    2028:	pop	{r4, r5, r6, pc}
+    202c:	add	r0, r6, r5, lsl #4
+    2030:	ldr	r1, [r4, #4]
+    2034:	mov	r2, #16
+    2038:	add	r0, r0, #4
+    203c:	add	r5, r5, #1
+    2040:	bl	0 <strncpy>
+    2044:	ldr	r4, [r4]
+    2048:	cmp	r4, #0
+    204c:	bne	202c <emf_iflist_list+0x34>
+    2050:	str	r5, [r6]
+    2054:	mov	r0, r4
+    2058:	pop	{r4, r5, r6, pc}
+    205c:	.word	0x0000067a
+    2060:	.word	0x0000069e
+
+00002064 <emf_cfg_request_process>:
+    2064:	push	{r4, r5, r6, r7, r8, sl, lr}
+    2068:	subs	r4, r0, #0
+    206c:	sub	sp, sp, #84	@ 0x54
+    2070:	bne	2080 <emf_cfg_request_process+0x1c>
+    2074:	ldr	r0, [pc, #1416]	@ 2604 <emf_cfg_request_process+0x5a0>
+    2078:	mov	r1, #1000	@ 0x3e8
+    207c:	bl	0 <__bug>
+    2080:	bl	1918 <emf_if_name_validate>
+    2084:	subs	sl, r0, #0
+    2088:	moveq	r3, #2
+    208c:	addeq	r0, r4, #32
+    2090:	streq	r3, [r4, #24]
+    2094:	ldreq	r1, [pc, #1388]	@ 2608 <emf_cfg_request_process+0x5a4>
+    2098:	beq	20fc <emf_cfg_request_process+0x98>
+    209c:	ldr	r3, [pc, #1384]	@ 260c <emf_cfg_request_process+0x5a8>
+    20a0:	ldr	r6, [r3]
+    20a4:	ldr	r0, [r6, #8]
+    20a8:	bl	1c28 <OSL_LOCK>
+    20ac:	ldr	r5, [r6, #4]
+    20b0:	b	20d0 <emf_cfg_request_process+0x6c>
+    20b4:	ldr	r3, [r5, #24]
+    20b8:	cmp	sl, r3
+    20bc:	bne	20cc <emf_cfg_request_process+0x68>
+    20c0:	ldr	r0, [r6, #8]
+    20c4:	bl	1bc4 <OSL_UNLOCK>
+    20c8:	b	2104 <emf_cfg_request_process+0xa0>
+    20cc:	ldr	r5, [r5]
+    20d0:	cmp	r5, #0
+    20d4:	bne	20b4 <emf_cfg_request_process+0x50>
+    20d8:	ldr	r0, [r6, #8]
+    20dc:	bl	1bc4 <OSL_UNLOCK>
+    20e0:	ldr	r3, [r4, #16]
+    20e4:	cmp	r3, #6
+    20e8:	beq	2104 <emf_cfg_request_process+0xa0>
+    20ec:	ldr	r1, [pc, #1308]	@ 2610 <emf_cfg_request_process+0x5ac>
+    20f0:	add	r0, r4, #32
+    20f4:	mov	r3, #2
+    20f8:	str	r3, [r4, #24]
+    20fc:	mov	r2, r4
+    2100:	b	25c8 <emf_cfg_request_process+0x564>
+    2104:	ldr	r3, [r4, #16]
+    2108:	sub	r3, r3, #2
+    210c:	cmp	r3, #14
+    2110:	ldrls	pc, [pc, r3, lsl #2]
+    2114:	b	25d4 <emf_cfg_request_process+0x570>
+    2118:	.word	0x00002154
+    211c:	.word	0x00002154
+    2120:	.word	0x000025d4
+    2124:	.word	0x000025d4
+    2128:	.word	0x00002340
+    212c:	.word	0x000024cc
+    2130:	.word	0x000025d4
+    2134:	.word	0x000021e0
+    2138:	.word	0x000021e0
+    213c:	.word	0x00002304
+    2140:	.word	0x00002528
+    2144:	.word	0x00002528
+    2148:	.word	0x000025d4
+    214c:	.word	0x00002538
+    2150:	.word	0x00002538
+    2154:	add	r7, r4, #36	@ 0x24
+    2158:	add	r6, r4, #32
+    215c:	mov	r0, r7
+    2160:	bl	1918 <emf_if_name_validate>
+    2164:	cmp	r0, #0
+    2168:	str	r0, [r6, #20]
+    216c:	moveq	r3, #2
+    2170:	moveq	r0, r6
+    2174:	streq	r3, [r4, #24]
+    2178:	ldreq	r1, [pc, #1172]	@ 2614 <emf_cfg_request_process+0x5b0>
+    217c:	beq	2564 <emf_cfg_request_process+0x500>
+    2180:	ldr	r3, [pc, #1156]	@ 260c <emf_cfg_request_process+0x5a8>
+    2184:	ldr	r3, [r3]
+    2188:	ldr	r0, [r3, #8]
+    218c:	bl	1c28 <OSL_LOCK>
+    2190:	ldr	r3, [r6, #20]
+    2194:	ldr	r6, [r5, #36]	@ 0x24
+    2198:	b	21ac <emf_cfg_request_process+0x148>
+    219c:	ldr	r2, [r6, #4]
+    21a0:	cmp	r2, r3
+    21a4:	beq	21b4 <emf_cfg_request_process+0x150>
+    21a8:	ldr	r6, [r6]
+    21ac:	cmp	r6, #0
+    21b0:	bne	219c <emf_cfg_request_process+0x138>
+    21b4:	ldr	r3, [pc, #1104]	@ 260c <emf_cfg_request_process+0x5a8>
+    21b8:	ldr	r3, [r3]
+    21bc:	ldr	r0, [r3, #8]
+    21c0:	bl	1bc4 <OSL_UNLOCK>
+    21c4:	mov	r0, r7
+    21c8:	ldr	r1, [pc, #1096]	@ 2618 <emf_cfg_request_process+0x5b4>
+    21cc:	mov	r2, #3
+    21d0:	bl	0 <strncmp>
+    21d4:	cmp	r0, #0
+    21d8:	bne	25ac <emf_cfg_request_process+0x548>
+    21dc:	b	25d4 <emf_cfg_request_process+0x570>
+    21e0:	add	r7, r4, #32
+    21e4:	mov	r0, r7
+    21e8:	bl	1918 <emf_if_name_validate>
+    21ec:	subs	r6, r0, #0
+    21f0:	moveq	r3, #2
+    21f4:	moveq	r0, r7
+    21f8:	streq	r3, [r4, #24]
+    21fc:	ldreq	r1, [pc, #1048]	@ 261c <emf_cfg_request_process+0x5b8>
+    2200:	beq	2564 <emf_cfg_request_process+0x500>
+    2204:	ldr	r3, [r4, #16]
+    2208:	cmp	r3, #9
+    220c:	bne	22b0 <emf_cfg_request_process+0x24c>
+    2210:	ldr	r3, [pc, #1012]	@ 260c <emf_cfg_request_process+0x5a8>
+    2214:	ldr	r7, [r3]
+    2218:	ldr	r0, [r7, #8]
+    221c:	bl	1c28 <OSL_LOCK>
+    2220:	ldr	r3, [r5, #36]	@ 0x24
+    2224:	b	2238 <emf_cfg_request_process+0x1d4>
+    2228:	ldr	r2, [r3, #4]
+    222c:	cmp	r2, r6
+    2230:	beq	224c <emf_cfg_request_process+0x1e8>
+    2234:	ldr	r3, [r3]
+    2238:	cmp	r3, #0
+    223c:	bne	2228 <emf_cfg_request_process+0x1c4>
+    2240:	b	25e4 <emf_cfg_request_process+0x580>
+    2244:	ldr	r0, [pc, #980]	@ 2620 <emf_cfg_request_process+0x5bc>
+    2248:	bl	0 <printk>
+    224c:	ldr	r0, [r7, #8]
+    2250:	bl	1bc4 <OSL_UNLOCK>
+    2254:	b	229c <emf_cfg_request_process+0x238>
+    2258:	str	r6, [r0, #4]
+    225c:	ldr	r3, [r5, #36]	@ 0x24
+    2260:	str	r3, [r0]
+    2264:	str	r0, [r5, #36]	@ 0x24
+    2268:	ldr	r0, [r7, #8]
+    226c:	bl	1bc4 <OSL_UNLOCK>
+    2270:	ldr	r0, [r5, #28]
+    2274:	mov	r1, r6
+    2278:	bl	c80 <emfc_iflist_add>
+    227c:	cmp	r0, #0
+    2280:	beq	22b0 <emf_cfg_request_process+0x24c>
+    2284:	ldr	r3, [pc, #896]	@ 260c <emf_cfg_request_process+0x5a8>
+    2288:	mov	r1, r5
+    228c:	mov	r2, r6
+    2290:	ldr	r0, [r3]
+    2294:	add	r0, r0, #8
+    2298:	bl	1f20 <emf_iflist_del.clone.4>
+    229c:	mov	r3, #2
+    22a0:	add	r0, r4, #32
+    22a4:	str	r3, [r4, #24]
+    22a8:	ldr	r1, [pc, #884]	@ 2624 <emf_cfg_request_process+0x5c0>
+    22ac:	b	2564 <emf_cfg_request_process+0x500>
+    22b0:	ldr	r3, [r4, #16]
+    22b4:	cmp	r3, #10
+    22b8:	bne	24ac <emf_cfg_request_process+0x448>
+    22bc:	ldr	r3, [pc, #840]	@ 260c <emf_cfg_request_process+0x5a8>
+    22c0:	mov	r1, r5
+    22c4:	mov	r2, r6
+    22c8:	ldr	r0, [r3]
+    22cc:	add	r0, r0, #8
+    22d0:	bl	1f20 <emf_iflist_del.clone.4>
+    22d4:	cmp	r0, #0
+    22d8:	bne	22f0 <emf_cfg_request_process+0x28c>
+    22dc:	ldr	r0, [r5, #28]
+    22e0:	mov	r1, r6
+    22e4:	bl	d3c <emfc_iflist_del>
+    22e8:	cmp	r0, #0
+    22ec:	beq	24ac <emf_cfg_request_process+0x448>
+    22f0:	mov	r3, #2
+    22f4:	add	r0, r4, #32
+    22f8:	str	r3, [r4, #24]
+    22fc:	ldr	r1, [pc, #804]	@ 2628 <emf_cfg_request_process+0x5c4>
+    2300:	b	2564 <emf_cfg_request_process+0x500>
+    2304:	add	r6, r4, #32
+    2308:	mov	r0, r5
+    230c:	mov	r1, r6
+    2310:	ldr	r2, [r4, #28]
+    2314:	bl	1ff8 <emf_iflist_list>
+    2318:	cmp	r0, #0
+    231c:	beq	24ac <emf_cfg_request_process+0x448>
+    2320:	ldr	r5, [r4, #28]
+    2324:	mov	r3, #2
+    2328:	str	r3, [r4, #24]
+    232c:	mov	r0, r6
+    2330:	ldr	r1, [pc, #756]	@ 262c <emf_cfg_request_process+0x5c8>
+    2334:	bl	0 <sprintf>
+    2338:	add	r0, r0, r5
+    233c:	b	25cc <emf_cfg_request_process+0x568>
+    2340:	cmp	r5, #0
+    2344:	movne	r3, #2
+    2348:	addne	r0, r4, #32
+    234c:	strne	r3, [r4, #24]
+    2350:	ldrne	r1, [pc, #728]	@ 2630 <emf_cfg_request_process+0x5cc>
+    2354:	bne	20fc <emf_cfg_request_process+0x98>
+    2358:	ldr	r3, [pc, #684]	@ 260c <emf_cfg_request_process+0x5a8>
+    235c:	ldr	r8, [r3]
+    2360:	ldr	r3, [r8, #16]
+    2364:	cmp	r3, #8
+    2368:	ble	237c <emf_cfg_request_process+0x318>
+    236c:	mov	r1, #8
+    2370:	ldr	r0, [pc, #700]	@ 2634 <emf_cfg_request_process+0x5d0>
+    2374:	bl	0 <printk>
+    2378:	b	24b8 <emf_cfg_request_process+0x454>
+    237c:	add	r3, r3, #1
+    2380:	mov	r1, #1
+    2384:	str	r3, [r8, #16]
+    2388:	mov	r2, r5
+    238c:	mov	r0, r5
+    2390:	bl	0 <osl_attach>
+    2394:	mov	r1, #40	@ 0x28
+    2398:	mov	r7, r0
+    239c:	bl	0 <osl_malloc>
+    23a0:	subs	r6, r0, #0
+    23a4:	bne	23b4 <emf_cfg_request_process+0x350>
+    23a8:	ldr	r0, [pc, #648]	@ 2638 <emf_cfg_request_process+0x5d4>
+    23ac:	bl	0 <printk>
+    23b0:	b	2428 <emf_cfg_request_process+0x3c4>
+    23b4:	mov	r1, r4
+    23b8:	mov	r2, #16
+    23bc:	str	r7, [r6, #20]
+    23c0:	add	r0, r6, #4
+    23c4:	bl	0 <strncpy>
+    23c8:	ldr	r3, [pc, #620]	@ 263c <emf_cfg_request_process+0x5d8>
+    23cc:	mov	r0, r4
+    23d0:	strb	r5, [r6, #19]
+    23d4:	mov	r1, r6
+    23d8:	str	sl, [r6, #24]
+    23dc:	mov	r2, r7
+    23e0:	str	r3, [sp, #64]	@ 0x40
+    23e4:	ldr	r3, [pc, #596]	@ 2640 <emf_cfg_request_process+0x5dc>
+    23e8:	str	r3, [sp, #68]	@ 0x44
+    23ec:	ldr	r3, [pc, #592]	@ 2644 <emf_cfg_request_process+0x5e0>
+    23f0:	str	r3, [sp, #72]	@ 0x48
+    23f4:	ldr	r3, [pc, #588]	@ 2648 <emf_cfg_request_process+0x5e4>
+    23f8:	str	r3, [sp, #76]	@ 0x4c
+    23fc:	add	r3, sp, #64	@ 0x40
+    2400:	bl	13cc <emfc_init>
+    2404:	cmp	r0, #0
+    2408:	str	r0, [r6, #28]
+    240c:	bne	2434 <emf_cfg_request_process+0x3d0>
+    2410:	ldr	r0, [pc, #564]	@ 264c <emf_cfg_request_process+0x5e8>
+    2414:	bl	0 <printk>
+    2418:	mov	r0, r7
+    241c:	mov	r1, r6
+    2420:	mov	r2, #40	@ 0x28
+    2424:	bl	0 <osl_mfree>
+    2428:	mov	r0, r7
+    242c:	bl	0 <osl_detach>
+    2430:	b	24b8 <emf_cfg_request_process+0x454>
+    2434:	str	r5, [r6, #36]	@ 0x24
+    2438:	mov	r2, r4
+    243c:	ldr	r1, [pc, #524]	@ 2650 <emf_cfg_request_process+0x5ec>
+    2440:	mov	r0, sp
+    2444:	bl	0 <sprintf>
+    2448:	mov	r1, r5
+    244c:	mov	r2, r5
+    2450:	mov	r0, sp
+    2454:	mov	r7, sp
+    2458:	bl	0 <create_proc_entry>
+    245c:	cmp	r0, #0
+    2460:	ldr	r1, [pc, #492]	@ 2654 <emf_cfg_request_process+0x5f0>
+    2464:	ldrne	r3, [pc, #492]	@ 2658 <emf_cfg_request_process+0x5f4>
+    2468:	mov	r2, r4
+    246c:	strne	r6, [r0, #52]	@ 0x34
+    2470:	mov	r5, sp
+    2474:	strne	r3, [r0, #56]	@ 0x38
+    2478:	mov	r0, sp
+    247c:	bl	0 <sprintf>
+    2480:	mov	r1, #0
+    2484:	mov	r0, sp
+    2488:	mov	r2, r1
+    248c:	bl	0 <create_proc_entry>
+    2490:	cmp	r0, #0
+    2494:	ldrne	r3, [pc, #448]	@ 265c <emf_cfg_request_process+0x5f8>
+    2498:	strne	r6, [r0, #52]	@ 0x34
+    249c:	strne	r3, [r0, #56]	@ 0x38
+    24a0:	ldr	r3, [r8, #4]
+    24a4:	str	r3, [r6]
+    24a8:	str	r6, [r8, #4]
+    24ac:	mov	r3, #1
+    24b0:	str	r3, [r4, #24]
+    24b4:	b	25fc <emf_cfg_request_process+0x598>
+    24b8:	mov	r3, #2
+    24bc:	add	r0, r4, #32
+    24c0:	str	r3, [r4, #24]
+    24c4:	ldr	r1, [pc, #404]	@ 2660 <emf_cfg_request_process+0x5fc>
+    24c8:	b	20fc <emf_cfg_request_process+0x98>
+    24cc:	ldr	r6, [pc, #312]	@ 260c <emf_cfg_request_process+0x5a8>
+    24d0:	ldr	r3, [r6]
+    24d4:	ldr	r0, [r3, #8]
+    24d8:	bl	1c28 <OSL_LOCK>
+    24dc:	ldr	r0, [r6]
+    24e0:	mov	r1, r5
+    24e4:	bl	1c94 <emf_instance_del>
+    24e8:	cmp	r0, #0
+    24ec:	moveq	r3, #1
+    24f0:	streq	r3, [r4, #24]
+    24f4:	beq	2514 <emf_cfg_request_process+0x4b0>
+    24f8:	mov	r3, #2
+    24fc:	add	r0, r4, #32
+    2500:	str	r3, [r4, #24]
+    2504:	mov	r2, r4
+    2508:	ldr	r1, [pc, #340]	@ 2664 <emf_cfg_request_process+0x600>
+    250c:	bl	0 <sprintf>
+    2510:	str	r0, [r4, #28]
+    2514:	ldr	r3, [pc, #240]	@ 260c <emf_cfg_request_process+0x5a8>
+    2518:	ldr	r3, [r3]
+    251c:	ldr	r0, [r3, #8]
+    2520:	bl	1bc4 <OSL_UNLOCK>
+    2524:	b	25fc <emf_cfg_request_process+0x598>
+    2528:	add	r6, r4, #32
+    252c:	mov	r0, r6
+    2530:	bl	1918 <emf_if_name_validate>
+    2534:	str	r0, [r6, #16]
+    2538:	add	r6, r4, #32
+    253c:	mov	r0, r6
+    2540:	bl	1918 <emf_if_name_validate>
+    2544:	cmp	r0, #0
+    2548:	mov	r7, r0
+    254c:	str	r0, [r6, #16]
+    2550:	bne	256c <emf_cfg_request_process+0x508>
+    2554:	ldr	r1, [pc, #268]	@ 2668 <emf_cfg_request_process+0x604>
+    2558:	mov	r0, r6
+    255c:	mov	r3, #2
+    2560:	str	r3, [r4, #24]
+    2564:	bl	0 <sprintf>
+    2568:	b	25cc <emf_cfg_request_process+0x568>
+    256c:	ldr	r3, [pc, #152]	@ 260c <emf_cfg_request_process+0x5a8>
+    2570:	ldr	r3, [r3]
+    2574:	ldr	r0, [r3, #8]
+    2578:	bl	1c28 <OSL_LOCK>
+    257c:	ldr	r6, [r5, #36]	@ 0x24
+    2580:	b	2594 <emf_cfg_request_process+0x530>
+    2584:	ldr	r3, [r6, #4]
+    2588:	cmp	r3, r7
+    258c:	beq	259c <emf_cfg_request_process+0x538>
+    2590:	ldr	r6, [r6]
+    2594:	cmp	r6, #0
+    2598:	bne	2584 <emf_cfg_request_process+0x520>
+    259c:	ldr	r3, [pc, #104]	@ 260c <emf_cfg_request_process+0x5a8>
+    25a0:	ldr	r3, [r3]
+    25a4:	ldr	r0, [r3, #8]
+    25a8:	bl	1bc4 <OSL_UNLOCK>
+    25ac:	cmp	r6, #0
+    25b0:	bne	25d4 <emf_cfg_request_process+0x570>
+    25b4:	ldr	r1, [pc, #176]	@ 266c <emf_cfg_request_process+0x608>
+    25b8:	add	r0, r4, #32
+    25bc:	mov	r2, sl
+    25c0:	mov	r3, #2
+    25c4:	str	r3, [r4, #24]
+    25c8:	bl	0 <sprintf>
+    25cc:	str	r0, [r4, #28]
+    25d0:	b	25fc <emf_cfg_request_process+0x598>
+    25d4:	ldr	r0, [r5, #28]
+    25d8:	mov	r1, r4
+    25dc:	bl	ebc <emfc_cfg_request_process>
+    25e0:	b	25fc <emf_cfg_request_process+0x598>
+    25e4:	ldr	r0, [r5, #20]
+    25e8:	mov	r1, #8
+    25ec:	bl	0 <osl_malloc>
+    25f0:	cmp	r0, #0
+    25f4:	bne	2258 <emf_cfg_request_process+0x1f4>
+    25f8:	b	2244 <emf_cfg_request_process+0x1e0>
+    25fc:	add	sp, sp, #84	@ 0x54
+    2600:	pop	{r4, r5, r6, r7, r8, sl, pc}
+    2604:	.word	0x000006b4
+    2608:	.word	0x000006f8
+    260c:	.word	0x00000004
+    2610:	.word	0x00000718
+    2614:	.word	0x00000738
+    2618:	.word	0x00000772
+    261c:	.word	0x00000797
+    2620:	.word	0x000007b4
+    2624:	.word	0x000007d5
+    2628:	.word	0x000007eb
+    262c:	.word	0x00000804
+    2630:	.word	0x0000081c
+    2634:	.word	0x0000083b
+    2638:	.word	0x0000085b
+	...
+    264c:	.word	0x0000087e
+    2650:	.word	0x00000644
+    2654:	.word	0x00000655
+	...
+    2660:	.word	0x00000890
+    2664:	.word	0x000008a6
+    2668:	.word	0x000008bf
+    266c:	.word	0x00000776
+
+00002670 <emf_netlink_sock_cb>:
+    2670:	push	{r4, r5, r6, lr}
+    2674:	mov	r1, #208	@ 0xd0
+    2678:	bl	0 <skb_clone>
+    267c:	mov	r5, r0
+    2680:	ldr	r3, [r0, #168]	@ 0xa8
+    2684:	cmp	r3, #1056	@ 0x420
+    2688:	bcs	269c <emf_netlink_sock_cb+0x2c>
+    268c:	ldr	r0, [pc, #72]	@ 26dc <emf_netlink_sock_cb+0x6c>
+    2690:	mov	r1, #1056	@ 0x420
+    2694:	pop	{r4, r5, r6, lr}
+    2698:	b	0 <printk>
+    269c:	ldr	r4, [r0, #236]	@ 0xec
+    26a0:	add	r0, r4, #16
+    26a4:	bl	2064 <emf_cfg_request_process>
+    26a8:	ldr	r2, [r4, #12]
+    26ac:	add	r3, r5, #48	@ 0x30
+    26b0:	mov	r1, r5
+    26b4:	str	r2, [r3, #12]
+    26b8:	mov	r2, #0
+    26bc:	str	r2, [r3, #16]
+    26c0:	ldr	r3, [pc, #24]	@ 26e0 <emf_netlink_sock_cb+0x70>
+    26c4:	ldr	r2, [r4, #12]
+    26c8:	ldr	r3, [r3]
+    26cc:	ldr	r0, [r3]
+    26d0:	mov	r3, #64	@ 0x40
+    26d4:	pop	{r4, r5, r6, lr}
+    26d8:	b	0 <netlink_unicast>
+    26dc:	.word	0x000008e5
+    26e0:	.word	0x00000004
+
+Disassembly of section .init.text:
+
+00000000 <init_module>:
+   0:	push	{r0, r1, r4, r5, r6, lr}
+   4:	mov	r0, #0
+   8:	mov	r1, #20
+   c:	ldr	r4, [pc, #328]	@ 15c <init_module+0x15c>
+  10:	bl	0 <osl_malloc>
+  14:	cmp	r0, #0
+  18:	str	r0, [r4]
+  1c:	bne	2c <init_module+0x2c>
+  20:	ldr	r0, [pc, #312]	@ 160 <init_module+0x160>
+  24:	bl	0 <printk>
+  28:	b	154 <init_module+0x154>
+  2c:	mov	r1, #20
+  30:	bl	0 <__memzero>
+  34:	mov	r0, #0
+  38:	mov	r1, #24
+  3c:	ldr	r5, [r4]
+  40:	bl	0 <osl_malloc>
+  44:	subs	r4, r0, #0
+  48:	bne	58 <init_module+0x58>
+  4c:	ldr	r0, [pc, #272]	@ 164 <init_module+0x164>
+  50:	bl	0 <printk>
+  54:	b	78 <init_module+0x78>
+  58:	add	r0, r4, #8
+  5c:	ldr	r1, [pc, #260]	@ 168 <init_module+0x168>
+  60:	mov	r2, #15
+  64:	bl	0 <strncpy>
+  68:	mov	r3, #0
+  6c:	strb	r3, [r4, #23]
+  70:	str	r3, [r4]
+  74:	str	r3, [r4, #4]
+  78:	str	r4, [r5, #8]
+  7c:	ldr	r4, [pc, #216]	@ 15c <init_module+0x15c>
+  80:	ldr	r6, [r4]
+  84:	ldr	r5, [r6, #8]
+  88:	cmp	r5, #0
+  8c:	bne	a8 <init_module+0xa8>
+  90:	ldr	r0, [pc, #212]	@ 16c <init_module+0x16c>
+  94:	bl	0 <printk>
+  98:	ldr	r0, [r4]
+  9c:	mov	r1, #20
+  a0:	bl	0 <__memzero>
+  a4:	b	144 <init_module+0x144>
+  a8:	ldr	r3, [pc, #192]	@ 170 <init_module+0x170>
+  ac:	mov	r5, #0
+  b0:	ldr	r0, [pc, #188]	@ 174 <init_module+0x174>
+  b4:	mov	r1, #17
+  b8:	mov	r2, r5
+  bc:	str	r5, [sp]
+  c0:	str	r3, [sp, #4]
+  c4:	ldr	r3, [pc, #172]	@ 178 <init_module+0x178>
+  c8:	bl	0 <netlink_kernel_create>
+  cc:	ldr	r3, [r4]
+  d0:	str	r0, [r6]
+  d4:	ldr	r6, [r3]
+  d8:	cmp	r6, r5
+  dc:	bne	100 <init_module+0x100>
+  e0:	mov	r0, r6
+  e4:	ldr	r1, [r3, #8]
+  e8:	mov	r2, #24
+  ec:	bl	0 <osl_mfree>
+  f0:	ldr	r0, [pc, #132]	@ 17c <init_module+0x17c>
+  f4:	bl	0 <printk>
+  f8:	mov	r0, r6
+  fc:	b	148 <init_module+0x148>
+ 100:	bl	1664 <emfc_module_init>
+ 104:	subs	r6, r0, #0
+ 108:	ldrne	r3, [r4]
+ 10c:	movne	r0, r5
+ 110:	bne	138 <init_module+0x138>
+ 114:	ldr	r0, [pc, #100]	@ 180 <init_module+0x180>
+ 118:	mov	r1, r6
+ 11c:	bl	0 <proc_mkdir>
+ 120:	cmp	r0, #0
+ 124:	mov	r5, r0
+ 128:	str	r0, [r4, #12]
+ 12c:	movne	r0, r6
+ 130:	bne	158 <init_module+0x158>
+ 134:	ldr	r3, [r4]
+ 138:	ldr	r1, [r3, #8]
+ 13c:	mov	r2, #24
+ 140:	bl	0 <osl_mfree>
+ 144:	mov	r0, r5
+ 148:	ldr	r1, [r4]
+ 14c:	mov	r2, #20
+ 150:	bl	0 <osl_mfree>
+ 154:	mvn	r0, #0
+ 158:	pop	{r2, r3, r4, r5, r6, pc}
+ 15c:	.word	0x00000004
+ 160:	.word	0x0000085b
+ 164:	.word	0x0000090a
+ 168:	.word	0x0000092f
+ 16c:	.word	0x00000941
+	...
+ 17c:	.word	0x00000967
+ 180:	.word	0x0000098c
+
+Disassembly of section .exit.text:
+
+00000000 <cleanup_module>:
+   0:	push	{r4, r5, r6, lr}
+   4:	ldr	r4, [pc, #156]	@ a8 <cleanup_module+0xa8>
+   8:	bl	16e0 <emfc_module_exit>
+   c:	ldr	r3, [r4]
+  10:	ldr	r0, [r3]
+  14:	bl	0 <netlink_kernel_release>
+  18:	ldr	r5, [r4]
+  1c:	ldr	r0, [r5, #8]
+  20:	bl	1c28 <OSL_LOCK>
+  24:	ldr	r4, [r5, #4]
+  28:	b	40 <cleanup_module+0x40>
+  2c:	ldr	r6, [r4]
+  30:	mov	r1, r4
+  34:	mov	r0, r5
+  38:	bl	1c94 <emf_instance_del>
+  3c:	mov	r4, r6
+  40:	cmp	r4, #0
+  44:	bne	2c <cleanup_module+0x2c>
+  48:	ldr	r0, [r5, #8]
+  4c:	str	r4, [r5, #4]
+  50:	ldr	r5, [pc, #80]	@ a8 <cleanup_module+0xa8>
+  54:	bl	1bc4 <OSL_UNLOCK>
+  58:	mov	r0, r4
+  5c:	mov	r2, #24
+  60:	ldr	r3, [r5]
+  64:	ldr	r1, [r3, #8]
+  68:	bl	0 <osl_mfree>
+  6c:	ldr	r3, [r5, #12]
+  70:	cmp	r3, #0
+  74:	beq	84 <cleanup_module+0x84>
+  78:	ldr	r0, [pc, #44]	@ ac <cleanup_module+0xac>
+  7c:	mov	r1, r4
+  80:	bl	0 <remove_proc_entry>
+  84:	ldr	r4, [pc, #28]	@ a8 <cleanup_module+0xa8>
+  88:	mov	r1, #20
+  8c:	ldr	r0, [r4]
+  90:	bl	0 <__memzero>
+  94:	mov	r0, #0
+  98:	ldr	r1, [r4]
+  9c:	mov	r2, #20
+  a0:	pop	{r4, r5, r6, lr}
+  a4:	b	0 <osl_mfree>
+  a8:	.word	0x00000004
+  ac:	.word	0x0000098c

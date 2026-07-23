@@ -1,0 +1,203 @@
+IGMP Query send failed
+Failed to allocate memory size %d for rtport list
+Failed to add EMF rtport entry for %p
+MR_PORT_LIST_TIMER
+Failed to allocate memory size %d for timer
+Invalid IGSC handle passed
+Invalid buffer input
+Insufficient buffer size %d
+IGS stats get failed
+IGSDB listing failed
+SNOOP listing failed
+RTPORT list get failed
+Unknown command id %d
+Instance identifier NULL
+wrapper info NULL
+Failed to allocated memory size %d for MFL
+Memory alloc for lock object failed
+SDB Lock
+IGMP Snooper couldn't register with EMF
+Router List Lock
+Membership entry %x %p delete failed
+IGMPV2_GRP_MEM_INTV
+Failed to alloc size %d for IGSDB group entry
+Failed to allocated memory size %d for IGSDB host entry
+Failed to allocate memory size %d for IGSDB timer
+Failed to add MFDB entry for %x %p
+Failed to allocated memory size %d for interface entry
+Invalid IGSC handle passed
+Invalid buffer input
+Invalid interface input
+IGS instance not found
+emf/igs_stats_%s
+emf/igsdb_%s
+Max instance limit %d exceeded
+Out of memory allocating igs_info
+IGSC init failed
+Unable to get the IGSDB list
+Group           Members         Interface
+%08x        
+Input buffer overflow
+Unable to get the IGS stats
+IgmpPkts        IgmpQueries     IgmpReports     IgmpV2Reports   IgmpLeaves
+%-15d %-15d %-15d %-15d %d
+IgmpNotHandled  McastGroups     McastMembers    MemTimeouts
+%-15d %-15d %-15d %d
+Bridge interface %s is down
+Out of memory allocating IGMP Query packet
+Invalid input buffer passed
+Interface %s doesn't exist
+Unknown instance identifier %s
+Invalid instance identifier %s
+IGMP Snooping already enabled on %s
+IGMP Snooping enable on %s failed
+IGMP Snooping disable failed
+Configuration request size not > %d
+Memory alloc for lock object failed
+IGS Instance List
+IGS instance list lock create failed
+Netlink kernel socket create failed
+<3>osl_timer_init: out of memory, malloced %d bytes
+<6>osl_timer_del: Failed to delete timer
+igsc_interface_rtport_del
+igsc_sdb_interface_del
+igsc_exit
+igsc_init
+license=Proprietary
+depends=emf
+vermagic=2.6.36.4brcmarm+ SMP preempt mod_unload ARMv7 
+cGa&T\7=*
+GCC: (Buildroot 2012.02) 4.5.3
+GCC: (Buildroot 2012.02) 4.5.3
+GCC: (Buildroot 2012.02) 4.5.3
+GCC: (Buildroot 2012.02) 4.5.3
+GCC: (Buildroot 2012.02) 4.5.3
+.symtab
+.strtab
+.shstrtab
+.rel.text
+.rel.init.text
+.rel.exit.text
+.rodata
+.rodata.str1.1
+.ARM.extab.init.text
+.rel.ARM.exidx.init.text
+.ARM.extab.exit.text
+.rel.ARM.exidx.exit.text
+__ksymtab_strings
+.modinfo
+.rel__ksymtab
+.ARM.extab
+.rel.gnu.linkonce.this_module
+.rel.ARM.exidx
+.note.gnu.build-id
+.comment
+.note.GNU-stack
+.ARM.attributes
+igsc_is_reserved
+inet_cksum
+igsc_rtlist_clear
+igsc_emf_disabled
+igsc_gethostmaclist
+igsc_igmp_pkt_encap.clone.0
+igsc_igmp_query_send
+igsc_emf_enabled
+igsc_input
+mc_addr_rsvd
+igsc_sdb_group_find
+igsc_sdb_mh_delete
+igsc_sdb_timer
+igs_instance_del
+igs_instance_add
+igs_stats_get
+igs_sdb_list
+igs_netlink_sock_cb
+igs_module_init
+igs_module_exit
+__kstrtab_igsc_interface_rtport_del
+__kstrtab_igsc_sdb_interface_del
+__kstrtab_igsc_exit
+__kstrtab_igsc_init
+__mod_license30
+__ksymtab_igsc_interface_rtport_del
+__ksymtab_igsc_sdb_interface_del
+__ksymtab_igsc_exit
+__ksymtab_igsc_init
+osl_timer
+__module_depends
+__mod_vermagic5
+strcpy
+osl_timer_update
+igsc_snoop_list
+igsc_interface_rtport_del
+igs_get_mcast_mode
+skb_put
+dev_queue_xmit
+__this_module
+osl_malloc
+__aeabi_unwind_cpp_pr0
+igs_get_br_ip
+cleanup_module
+memcpy
+osl_detach
+emfc_rtport_del
+bcm_bprintf
+igsc_rtlist_timer
+igsc_sdb_interface_del
+osl_timer_add
+emfc_igmp_snooper_register
+init_module
+bcm_binit
+create_proc_entry
+igs_broadcast
+bcm_robo_snooping_del
+igsc_cfg_request_process
+igsc_sdb_member_add
+igsc_rtlist_add
+igsc_sdb_list
+OSL_LOCK
+igs_unicast
+init_net
+skb_pull
+igsc_sdb_member_del
+add_timer
+netlink_unicast
+mod_timer
+OSL_UNLOCK
+skb_push
+igsc_stats_get
+osl_attach
+strncpy
+igsc_exit
+netlink_kernel_release
+igsc_init
+inet_select_addr
+memcmp
+printk
+igsc_sdb_clear
+dev_alloc_skb
+netlink_kernel_create
+__memzero
+emfc_rtport_add
+__aeabi_uidiv
+strcmp
+jiffies
+sprintf
+init_timer_key
+igsc_sdb_member_get_maclist
+remove_proc_entry
+emfc_igmp_snooper_unregister
+dev_get_by_name
+skb_clone
+emfc_mfdb_membership_del
+igsc_sdb_init
+igsc_igmp_query_sendto
+osl_mfree
+emfc_mfdb_membership_add
+osl_timer_del
+del_timer
+__aeabi_unwind_cpp_pr1
+osl_timer_init
+bcm_robo_snooping_list
+same_mac_find
+igs_cfg_request_process

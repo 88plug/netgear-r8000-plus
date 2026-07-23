@@ -1,0 +1,76 @@
+# NETGEAR R8000 (bcm53xx / brcmfmac, 3x BCM43602) -- v2 client-steering daemon
+# Workstream: modern roaming/steering/QoS. Rationale/evidence: ../../notes.md
+#
+# Package: usteer (chosen over dawn -- see notes.md "usteer vs dawn").
+# Requires: matching ieee80211k/bss_transition (802.11v) + rrm_neighbor_report
+# on every AP wifi-iface (see ../wireless-roaming.additions) -- usteer's core
+# steering mechanism is probe/assoc-request accept-or-reject plus 802.11v
+# BSS-Transition-Management requests. Without 11k/v on the iface, usteer can
+# still load-balance/kick, but has no polite (non-disruptive) steering path.
+#
+# All three R8000 radios run in the SAME hostapd process group on this
+# device, so usteer's local_mode '0' + ubus discovery finds all of them
+# automatically as local nodes (hostapd.wlan0 / hostapd.wlan1 / hostapd.wlan2)
+# -- no per-radio usteer config section is needed or supported; this is the
+# only "config usteer" instance for the whole device.
+#
+# Upstream default file, trimmed to actually-set values + the handful of
+# tuned overrides for this device. Every other key (documented in full in
+# https://github.com/openwrt/usteer/blob/master/openwrt/usteer/files/etc/config/usteer)
+# is left at its usteer-internal default; add overrides here only as needed
+# after watching real client behavior in the field (`ubus call usteer
+# local_info`, `logread -f | grep usteer`, or `event_log_types` below).
+
+config usteer
+	# Inter-AP sync transport. Single device today, but this is also the
+	# interface a second physical AP would use to join the same steering
+	# domain later -- leave 'lan' even on a single-AP deployment.
+	option network 'lan'
+	option syslog '1'
+	option local_mode '0'
+	option ipv6 '0'
+	option debug_level '2'
+
+	# --- Band steering (the real, present-day win on a single R8000) ---
+	# Push a sticky client from 2.4 GHz up to 5 GHz once every 30s if its
+	# signal is strong enough to make the jump worthwhile. This is usteer's
+	# only mechanism that helps *today*, single-device, no second AP needed.
+	option band_steering_interval '30000'
+	option band_steering_min_snr '-60'
+	option band_steering_signal_threshold '5'
+
+	# --- Roaming assist (SNR-based nudge toward a better AP/band) ---
+	# Needs a value to activate client-roam scanning at all (see notes.md);
+	# -65 dBm SNR is the commonly-used starting point, tune from observed
+	# client behavior (`event_log_types` below) rather than guessing further.
+	option roam_scan_snr '-65'
+	option roam_trigger_snr '-70'
+	option signal_diff_threshold '8'
+
+	# --- BSS-Transition-Management aggressiveness ---
+	# 2 = polite BTM request + disassociation-imminent hint, no forced kick.
+	# Raise to 3/4 only after confirming client fleet honors BTM requests
+	# (many clients -- notably some Windows builds -- ignore "friendly"
+	# steering asks; see notes.md). Forcing (4) a client that ignores BTM
+	# just produces a disconnect/reconnect loop back to the same BSS.
+	option aggressiveness '2'
+
+	# --- Channel-load kicking: off by default ---
+	# Only 3 radios / one physical box; channel-load kicking mainly matters
+	# once a second AP is added and load needs balancing *across* devices.
+	# Leave disabled here; flip on if a radio's channel utilization is
+	# observed to be a real problem (`iw dev wlanX survey dump`).
+	option load_kick_enabled '0'
+
+	# Steer only the SSIDs meant to be steering-managed. Leave unset
+	# (comment out / omit) to steer every SSID; set explicitly once the
+	# SSID layout is finalized with the WPA3 workstream (see
+	# ../wireless-roaming.additions for why SSID alignment matters here).
+	# list ssid_list 'R8000'
+
+	# Useful while tuning: log what usteer accepts/denies/kicks and why.
+	list event_log_types 'probe_req_deny'
+	list event_log_types 'auth_req_deny'
+	list event_log_types 'assoc_req_deny'
+	list event_log_types 'load_kick_trigger'
+	list event_log_types 'signal_kick'

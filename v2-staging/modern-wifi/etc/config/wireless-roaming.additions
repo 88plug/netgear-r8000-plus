@@ -1,0 +1,166 @@
+# NETGEAR R8000 -- v2 fast-roaming / handoff options
+# Workstream: modern roaming/steering/QoS. Rationale/evidence: ../../notes.md
+#
+# THIS IS NOT A STANDALONE UCI FILE. It documents exactly which UCI options
+# to ADD to the WPA3 workstream's existing `config wifi-iface` sections in
+# ../wpa3/etc/config/wireless (or wherever those sections land in the final
+# merged /etc/config/wireless) -- it deliberately does not redefine
+# `wifi-device`/`wifi-iface` sections that workstream already owns.
+#
+# All option names below were verified against this tree's actual UCI
+# schema (package/network/config/wifi-scripts/files-ucode/usr/share/schema/
+# wireless.wifi-iface.json) and confirmed present as compiled-in features in
+# the running /usr/sbin/hostapd binary (see ../../notes.md section 1) --
+# nothing here silently no-ops on this device.
+#
+# ============================================================================
+# PART 1 -- read this before applying anything below
+# ============================================================================
+#
+# 802.11r/k/v only have a roaming effect BETWEEN two BSSes that share the
+# SAME SSID. The WPA3 workstream's current draft uses THREE DIFFERENT SSID
+# names (R8000-5G-WPA3, R8000-5G, R8000-2G) -- one identity per band/security
+# tier. Under that layout there is no same-SSID BSS pair anywhere on this
+# single device, so:
+#   - 802.11r (FT) has *zero* same-device roaming benefit today -- there is
+#     nothing for a client to fast-transition *to*. It still future-proofs a
+#     second physical AP later broadcasting one of these same SSID names.
+#   - usteer's probe/assoc steering and 802.11v BSS-Transition-Management
+#     can't move a client between bands either -- "R8000-5G" and "R8000-2G"
+#     are different networks from the client's point of view; nothing
+#     steers a client from one Wi-Fi network to a differently-named one.
+#   - 802.11k neighbor reports would list only same-SSID neighbors, so
+#     mixed_radio0 and mixed_radio1 (different SSIDs) still report nothing
+#     useful to each other.
+#
+# Two ways forward -- pick per SSID, this is a naming decision, not a
+# capability gap:
+#
+#   OPTION A -- keep the 3-name layout as-is.
+#     Apply PART 2 below anyway. It costs nothing, and it means the moment
+#     a second physical AP is added later broadcasting a matching SSID name,
+#     11r/k/v + usteer start working immediately with no further config
+#     changes. Today: no measurable roaming/steering benefit on this single
+#     device, full future-proofing for multi-AP.
+#
+#   OPTION B -- unify the SSID per security tier for real steering NOW.
+#     Rename mixed_radio0's ssid 'R8000-5G' and mixed_radio1's ssid
+#     'R8000-2G' to the SAME string (e.g. 'R8000') -- still two separate
+#     `wifi-iface` UCI sections/BSSes, just matching SSID text. Do the same
+#     for radio2 once it's brought up (see wpa3/etc/config/wireless's
+#     `default_radio2` comment). Leaving 'R8000-5G-WPA3' as its own distinct
+#     SAE-only name is fine (deliberately gates strict-WPA3 clients) --
+#     unify it too only if the whole client fleet supports WPA3-SAE+PMF.
+#     This is what makes usteer's band_steering_* options in
+#     ../etc/config/usteer actually move clients across the 3 radios today.
+#     This is a decision for whoever owns final SSID naming, not made here.
+#
+# Whichever option is chosen, mobility_domain must be IDENTICAL across every
+# `wifi-iface` that shares an SSID (or is meant to, once unified/multi-AP),
+# and DIFFERENT from the mobility_domain of any other, differently-named
+# SSID on the same device.
+#
+# ============================================================================
+# PART 2 -- options to add to EVERY AP wifi-iface (wpa3_radio0, mixed_radio0,
+# mixed_radio1, and the future default_radio2-pattern SSIDs)
+# ============================================================================
+#
+# 802.11k -- Radio Resource Management (neighbor reports). Helps a client
+# already associated make a faster, better-informed roam decision on its
+# own, and is what feeds usteer's/the client's neighbor list.
+#	option ieee80211k '1'
+#	option rrm_neighbor_report '1'
+#	option rrm_beacon_report '1'
+#
+# 802.11v -- Wireless Network Management / BSS Transition Management. This
+# is what lets usteer (or the AP) *politely ask* a client to move, rather
+# than just refusing/kicking it.
+#	option bss_transition '1'
+#
+# 802.11r -- Fast BSS Transition. Costs nothing to enable even under
+# OPTION A above (see PART 1). ft_psk_generate_local=1 means hostapd derives
+# the FT key hierarchy locally -- no r0kh/r1kh key distribution needed for a
+# single device (would be needed if/when a second, separate physical AP
+# joins the same mobility domain over a wired backhaul).
+#	option ieee80211r '1'
+#	option ft_psk_generate_local '1'
+#	option ft_over_ds '0'
+#	option reassociation_deadline '5000'
+#
+#   mobility_domain -- 2-octet hex, MUST match across every SSID meant to
+#   share a roaming domain (see PART 1), MUST differ from any other SSID's
+#   domain on this device. Suggested distinct values, change if they clash
+#   with a value already chosen elsewhere:
+#     wpa3_radio0 (R8000-5G-WPA3, SAE-only) ......... option mobility_domain 'a8f1'
+#     mixed_radio0 (R8000-5G / OPTION B: unified) ... option mobility_domain 'a8f0'
+#     mixed_radio1 (R8000-2G / OPTION B: unified) ... option mobility_domain 'a8f0'
+#     (OPTION B requires mixed_radio0 and mixed_radio1 to use the SAME
+#     value, 'a8f0', since they'd then share the unified SSID. Under
+#     OPTION A each keeps its own distinct value -- it's inert either way
+#     until a matching-SSID second BSS exists.)
+#
+#   nasid -- unique per BSS/iface, RADIUS NAS-Identifier reused here as the
+#   FT R0 Key Holder ID. Convention: BSSID with colons stripped (fill in the
+#   real per-iface BSSID after the WPA3 workstream's config is applied and
+#   the interfaces exist -- `iw dev` on-device -- these are placeholders):
+#	option nasid 'CHANGE_ME_bssid_no_colons'
+#
+# MBO (Multiband Operation) -- compiled into this hostapd build (see
+# notes.md) but NOT enabled here. MBO's main value (cellular-fallback
+# preference signaling, OCE hotspot behavior) doesn't apply to a home AP,
+# and hostapd refuses to start MBO on a WPA2/PSK BSS without PMF -- would
+# need explicit coordination with the WPA3 workstream's `ieee80211w` value
+# on every SSID it's turned on for (mbo_cell_data_conn_pref forces MFP).
+# Left disabled; revisit only if a client-fleet feature specifically needs
+# it (e.g. Hotspot 2.0 / carrier-Wi-Fi offload, out of scope here).
+#	# option mbo '1'   -- NOT enabled, see above
+#
+# ============================================================================
+# PART 3 -- OWE (Opportunistic Wireless Encryption / "Enhanced Open")
+# ============================================================================
+#
+# New standalone SSIDs, additive -- do not touch the WPA3 workstream's
+# sections. Verified: this device's driver/firmware supports up to 4
+# concurrent AP interfaces per radio (`iw phy phyX info`, "valid interface
+# combinations: #{ AP } <= 4"), so adding one more BSS per radio for OWE is
+# within brcmfmac's advertised limits.
+#
+# OWE transition mode pairs a visible, unencrypted "legacy" SSID with a
+# hidden OWE SSID; OWE-capable clients silently upgrade to the encrypted
+# BSS, everything else falls back to plain open exactly like today. This
+# is the standard, interoperable way to ship OWE without breaking clients
+# that don't support it yet -- do not ship a bare `encryption 'owe'` SSID
+# with no transition pairing, most client OSes still won't show/join it.
+#
+# The two BSSes MUST use different SSIDs (verified against hostapd's own
+# test suite and the upstream OWE transition-mode implementation notes):
+# each BSS's beacon embeds an OWE Transition Mode element naming the
+# *other* BSS's SSID/BSSID, so hostapd requires a non-empty, distinct
+# transition SSID on both sides -- same-SSID pairing is not a supported
+# configuration. ieee80211w '2' (MFP required) on the OWE side is mandatory
+# per the OWE spec, not a local choice -- OWE only ever negotiates CCMP+PMF.
+#
+# One pair shown for radio0 (5 GHz); duplicate the pattern for radio1
+# (2.4 GHz) with distinct SSIDs/section names if an open network is wanted
+# on that band too.
+
+config wifi-iface 'owe_open_radio0'
+	option device 'radio0'
+	option network 'lan'
+	option mode 'ap'
+	option ssid 'R8000-Open'
+	option encryption 'none'
+	option hidden '0'
+	option owe_transition_ifname 'owe_secure_radio0'
+	option disabled '0'
+
+config wifi-iface 'owe_secure_radio0'
+	option device 'radio0'
+	option network 'lan'
+	option mode 'ap'
+	option ssid 'R8000-Open-OWE'
+	option encryption 'owe'
+	option ieee80211w '2'
+	option hidden '1'
+	option owe_transition_ifname 'owe_open_radio0'
+	option disabled '0'

@@ -1,0 +1,119 @@
+# maxpower/etc/config/wireless
+#
+# Workstream: channel-unlock + max-power + regulatory override + best-PHY.
+# Scope: this workstream owns making the FULL channel set + FULL calibrated
+# power AVAILABLE and the regulatory-override plumbing. It does NOT own which
+# channel each radio defaults to at boot (see ../extras/5ghz-channel-defaults/)
+# and does NOT own clm_blob/txcap_blob extraction (see ../firmware/notes.md).
+#
+# This fragment is written as complete 'config wifi-device' stanzas (not a
+# bare option diff) because txpower/country/phy-tuning options have to live
+# in the same stanza as channel/htmode anyway. `channel`/`htmode`/`band` here
+# are copied verbatim from extras/5ghz-channel-defaults/wireless.snippet
+# (already confirmed live on-device, already the OpenWrt board-detection
+# default) purely so this file is directly mergeable -- this workstream did
+# not choose those three values and takes no position on them. Everything
+# else below (country, txpower, rxldpc/short_gi/beamformer) is this
+# workstream's deliverable. See notes.md for full derivation, on-device
+# verification, and -- important -- a hard safety finding on enabling an AP
+# with `country` set on this firmware. READ notes.md's "Interaction with a
+# future clm_blob" and "Known-bad sequence" sections before deploying this
+# against a live AP.
+
+# ---- radio0 = 5 GHz #1 (PCIe 0000:01:00.0) ----
+# Hardware-locked by this device's own DTS (`ieee80211-freq-limit =
+# <5735000 5835000>;` on wifi@0,1,0, confirmed against the live decompiled
+# devicetree at ../leds/router-live.dts:131-136) to 5735-5835MHz i.e.
+# channels 149/153/157/161/165 ONLY. That range is already 100% enabled today
+# (verified live, see verify/before-after.md) -- there is nothing left to
+# "unlock" on this radio; UNII-1/2/2e (34-144) are architecturally
+# unreachable here regardless of regulatory config (separate antenna chains
+# 4-6 + a different Skyworks front-end module than radio2, per
+# ../fccid/specs.md section 3 -- this is a hardware fact, not a software
+# restriction).
+#
+# Calibrated PA ceiling for this radio's only reachable group (UNII-3,
+# 0:maxp5ga*[3]=106 qdbm = 26.5 dBm/chain conducted, 3 chains -- see
+# notes.md "Decoded power ceiling"). txpower '27' requests above that
+# ceiling on purpose: the driver/firmware silently clamps to the true
+# per-channel calibrated max (confirmed empirically: iw reported "31.00 dBm"
+# 3-chain EIRP live, matching 26.5 dBm/chain + 10*log10(3) almost exactly),
+# so requesting slightly high avoids losing headroom to the mac80211.sh
+# shell truncation of any fractional dBm (`${txpower%%.*}00`) -- it cannot
+# and will not exceed the real hardware ceiling.
+config wifi-device 'radio0'
+	option type		'mac80211'
+	option path		'18000000.axi/bcma0:7/pci0000:00/0000:00:00.0/0000:01:00.0'
+	option band		'5g'
+	option channel		'149'
+	option htmode		'VHT80'
+	option country		'US'
+	option txpower		'27'
+	option rxldpc		'1'
+	option short_gi_80	'1'
+	option su_beamformer	'1'
+	option su_beamformee	'1'
+
+# ---- radio1 = 2.4 GHz (PCIe 0001:03:00.0) ----
+# No ieee80211-freq-limit in the DTS for this radio (wifi@0,0) -- full
+# 2.4 GHz band reachable in principle; channels 12-14 stay disabled under
+# US regulatory (correct -- not touched here, matches ccode=US ISM
+# allocation for this SKU).
+#
+# Calibrated PA ceiling: 1:maxp2ga0/1/2=106 qdbm = 26.5 dBm/chain conducted
+# (single group, 2.4 GHz has no sub-band split). Same "request above,
+# firmware clamps" reasoning as radio0.
+#
+# htmode left at HT20 (matches extras' default) rather than forced to HT40:
+# 40 MHz on 2.4 GHz needs a primary channel in ch3-9 per this device's own
+# FCC filing (../fccid/specs.md section 4); channel '1' is extras' choice,
+# not this workstream's, and HT40 on ch1 would be non-compliant with that
+# citation. Width policy here is deliberately conservative pending that
+# coordination -- see notes.md.
+config wifi-device 'radio1'
+	option type		'mac80211'
+	option path		'18000000.axi/bcma0:8/pci0001:00/0001:00:00.0/0001:01:00.0/0001:02:01.0/0001:03:00.0'
+	option band		'2g'
+	option channel		'1'
+	option htmode		'HT20'
+	option country		'US'
+	option txpower		'27'
+
+# ---- radio2 = 5 GHz #2 (PCIe 0001:04:00.0) ----
+# Hardware-locked by this device's own DTS (`ieee80211-freq-limit =
+# <5170000 5730000>;` on wifi@1,4,0, router-live.dts:172-177) to
+# 5170-5730MHz, i.e. channels 34-144: UNII-1 (36-48, non-DFS, always
+# available -- currently the only active subset), UNII-2 (52-64, DFS) and
+# UNII-2e (100-140, DFS). The DFS portion is the one real remaining "more
+# channels" opportunity within this radio's own hardware envelope, and it is
+# gated behind CAC/radar detection, which needs the missing clm_blob --
+# that's ../firmware/'s workstream, not something a regulatory-domain
+# override can supply (see notes.md "Why iw reg set / nvram ccode / nvram
+# regrev / nvram disband5grp do not change this").
+#
+# Calibrated PA ceiling: 2:maxp5ga*=90,90,90,90 qdbm = 22.5 dBm/chain
+# conducted, uniformly across ALL FOUR sub-band groups (unlike radio0, this
+# radio's PA is flat, not peaked in one group) -- so a single txpower value
+# is correct for its entire DTS-permitted range, present and future
+# (once DFS activates). txpower '23' requests above the ceiling on purpose,
+# same clamp reasoning as above.
+config wifi-device 'radio2'
+	option type		'mac80211'
+	option path		'18000000.axi/bcma0:8/pci0001:00/0001:00:00.0/0001:01:00.0/0001:02:02.0/0001:04:00.0'
+	option band		'5g'
+	option channel		'36'
+	option htmode		'VHT80'
+	option country		'US'
+	option txpower		'23'
+	option rxldpc		'1'
+	option short_gi_80	'1'
+	option su_beamformer	'1'
+	option su_beamformee	'1'
+
+# Not set anywhere above, deliberately:
+#  - short_gi_160 / mu_beamformer / mu_beamformee: hardware doesn't support
+#    160 MHz or MU-MIMO on this chip/board (iw phy info: "Supported Channel
+#    Width: neither 160 nor 80+80"; only SU Beamformer/Beamformee listed,
+#    no MU). Setting these would either be a no-op or risk hostapd
+#    rejecting the config against a capability mismatch.
+#  - min_tx_power: a TPC *floor*, unrelated to the max-power goal here.

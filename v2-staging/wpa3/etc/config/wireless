@@ -1,0 +1,95 @@
+# NETGEAR R8000 (bcm53xx / brcmfmac, 3x BCM43602) -- v2 wireless config
+# Workstream: WPA3-SAE + 802.11w (MFP). Rationale/evidence: ../notes.md
+#
+# Package: wpad-basic-mbedtls (unchanged from v1, unchanged from the
+# openwrt/openwrt DEVICE_netgear_r8000_PACKAGES default). It builds with
+# CONFIG_SAE=y unconditionally and 802.11w/MFP is compiled in unconditionally
+# in this hostapd snapshot (2025-08-26, v2.12-devel) -- no package swap to
+# wpad-mbedtls/wpad-openssl is needed for WPA3-Personal + MFP. See notes.md.
+#
+# Radio map (from `iw dev` / `iw phy` on 192.168.1.1, OpenWrt 25.12.5):
+#   radio0 = phy0 = 5 GHz #1 (PCIe 0000:01:00.0) -- ch 149-165 usable,
+#                             34-144 disabled (missing CLM blob; separate
+#                             firmware-calibration workstream, not WPA3)
+#   radio1 = phy1 = 2.4 GHz  (PCIe 0001:03:00.0) -- ch 1-11 usable
+#   radio2 = phy2 = 5 GHz #2 (PCIe 0001:04:00.0) -- ch 36-48ish usable,
+#                             149+ disabled (same CLM issue, inverted range)
+#                             left at v1 baseline; out of scope here
+#
+# Replace every CHANGE_ME_* passphrase (8-63 chars) before deploying.
+# encryption values used below (confirmed against this tree's
+# package/network/config/wifi-scripts/files/lib/netifd/netifd-wireless.sh):
+#   'sae'       -> WPA3-Personal only  (auth_type=sae,      hostapd forces ieee80211w=2)
+#   'sae-mixed' -> WPA2/WPA3 transition (auth_type=psk-sae, hostapd defaults ieee80211w=1)
+
+config wifi-device 'radio0'
+	option type 'mac80211'
+	option path '18000000.axi/bcma0:7/pci0000:00/0000:00:00.0/0000:01:00.0'
+	option band '5g'
+	option channel '149'
+	option htmode 'VHT80'
+
+# WPA3-SAE only (pure WPA3-Personal). ieee80211w '2' (MFP required) is set
+# explicitly for a self-documenting config, even though hostapd.sh already
+# defaults auth_type=sae to ieee80211w=2 on its own.
+config wifi-iface 'wpa3_radio0'
+	option device 'radio0'
+	option network 'lan'
+	option mode 'ap'
+	option ssid 'R8000-5G-WPA3'
+	option encryption 'sae'
+	option ieee80211w '2'
+	option key 'CHANGE_ME_wpa3only_5g_pass'
+	option disabled '0'
+
+# WPA2-PSK / WPA3-SAE transition (mixed). ieee80211w '1' (MFP optional) so
+# WPA2-only clients without PMF support can still associate; this matches
+# hostapd.sh's own default for auth_type=psk-sae on non-6GHz bands.
+config wifi-iface 'mixed_radio0'
+	option device 'radio0'
+	option network 'lan'
+	option mode 'ap'
+	option ssid 'R8000-5G'
+	option encryption 'sae-mixed'
+	option ieee80211w '1'
+	option key 'CHANGE_ME_mixed_5g_pass'
+	option disabled '0'
+
+config wifi-device 'radio1'
+	option type 'mac80211'
+	option path '18000000.axi/bcma0:8/pci0001:00/0001:00:00.0/0001:01:00.0/0001:02:01.0/0001:03:00.0'
+	option band '2g'
+	option channel '1'
+	option htmode 'HT20'
+
+# 2.4 GHz WPA2/WPA3-SAE transition with MFP optional. Kept in "mixed" mode
+# rather than SAE-only because many 2.4 GHz-only IoT/legacy clients still
+# lack WPA3/PMF entirely; ieee80211w=2 here would silently lock them out.
+config wifi-iface 'mixed_radio1'
+	option device 'radio1'
+	option network 'lan'
+	option mode 'ap'
+	option ssid 'R8000-2G'
+	option encryption 'sae-mixed'
+	option ieee80211w '1'
+	option key 'CHANGE_ME_mixed_2g_pass'
+	option disabled '0'
+
+config wifi-device 'radio2'
+	option type 'mac80211'
+	option path '18000000.axi/bcma0:8/pci0001:00/0001:00:00.0/0001:01:00.0/0001:02:02.0/0001:04:00.0'
+	option band '5g'
+	option channel '36'
+	option htmode 'VHT80'
+
+# radio2 (2nd 5 GHz radio) intentionally left disabled at the v1 baseline --
+# out of scope for the WPA3 workstream. To bring it up, copy the radio0
+# 'wpa3_radio0'/'mixed_radio0' pattern above (encryption 'sae' / 'sae-mixed'
+# + matching ieee80211w), pointed at 'device radio2', with distinct SSIDs.
+config wifi-iface 'default_radio2'
+	option device 'radio2'
+	option network 'lan'
+	option mode 'ap'
+	option ssid 'OpenWrt'
+	option encryption 'none'
+	option disabled '1'

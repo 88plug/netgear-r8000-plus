@@ -5,15 +5,34 @@ images/*.zip
 
 # OpenWRT source clone + build artifacts (huge)
 openwrt/
+openwrt-imagebuilder*/
+openwrt-sdk*/
 imagebuilder*/
 *.tar.zst
 build/
 bin/
 
+# backups (contain live device config, kept locally only)
+backups/
+
+# vendor stock-firmware rootfs extraction (huge, third-party binaries)
+hwoffload-research/blob-analysis/rootfs/
+hwoffload-research/blob-analysis/extract/
+*.tar
+
+# ghidra-cli is its own separate tool/repo (has its own .git), not part of this project
+hwoffload-research/ghidra-cli/
+
+# large raw disassembly dumps (research artifacts, kept locally)
+v2-staging/firmware/re-analysis/full_disasm.txt
+v2-staging/firmware/re-analysis/strings_with_offsets.txt
+
 # python / scratch
 __pycache__/
 *.pyc
 extracted/nvram-stock.txt
+v2-staging/maxpower/verify/nvram-backup-pretest.txt
+v2-staging/maxpower/verify/final-state.txt
 v2-files/etc/config/wireless
 v2-files/lib/modules/
 images/packages/*.apk

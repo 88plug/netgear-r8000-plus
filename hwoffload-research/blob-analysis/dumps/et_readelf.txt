@@ -1,0 +1,2900 @@
+ELF Header:
+  Magic:   7f 45 4c 46 01 01 01 00 00 00 00 00 00 00 00 00 
+  Class:                             ELF32
+  Data:                              2's complement, little endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              REL (Relocatable file)
+  Machine:                           ARM
+  Version:                           0x1
+  Entry point address:               0x0
+  Start of program headers:          0 (bytes into file)
+  Start of section headers:          47760 (bytes into file)
+  Flags:                             0x5000000, Version5 EABI
+  Size of this header:               52 (bytes)
+  Size of program headers:           0 (bytes)
+  Number of program headers:         0
+  Size of section headers:           40 (bytes)
+  Number of section headers:         50
+  Section header string table index: 47
+
+Section Headers:
+  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+  [ 0]                   NULL            00000000 000000 000000 00      0   0  0
+  [ 1] .text             PROGBITS        00000000 000034 0072d0 00  AX  0   0  4
+  [ 2] .rel.text         REL             00000000 00f7d8 001858 08     48   1  4
+  [ 3] .text.fastpath    PROGBITS        00000000 007304 002450 00  AX  0   0  4
+  [ 4] .rel.text.fa[...] REL             00000000 011030 0003d8 08     48   3  4
+  [ 5] .devinit.text     PROGBITS        00000000 009754 000628 00  AX  0   0  4
+  [ 6] .rel.devinit.text REL             00000000 011408 0001f0 08     48   5  4
+  [ 7] .init.text        PROGBITS        00000000 009d7c 000174 00  AX  0   0  4
+  [ 8] .rel.init.text    REL             00000000 0115f8 0000f8 08     48   7  4
+  [ 9] .exit.text        PROGBITS        00000000 009ef0 00000c 00  AX  0   0  4
+  [10] .rel.exit.text    REL             00000000 0116f0 000010 08     48   9  4
+  [11] .devexit.text     PROGBITS        00000000 009efc 000054 00  AX  0   0  4
+  [12] .rel.devexit.text REL             00000000 011700 000030 08     48  11  4
+  [13] .rodata           PROGBITS        00000000 009f50 000260 00   A  0   0  4
+  [14] .rel.rodata       REL             00000000 011730 0000a8 08     48  13  4
+  [15] .ARM.extab.t[...] PROGBITS        00000000 00a1b0 000048 00   A  0   0  4
+  [16] .ARM.exidx.t[...] ARM_EXIDX       00000000 00a1f8 0000f8 00  AL  3   0  4
+  [17] .rel.ARM.exi[...] REL             00000000 0117d8 000158 08     48  16  4
+  [18] .ARM.extab.d[...] PROGBITS        00000000 00a2f0 000000 00   A  0   0  1
+  [19] .ARM.exidx.d[...] ARM_EXIDX       00000000 00a2f0 000008 00  AL  5   0  4
+  [20] .rel.ARM.exi[...] REL             00000000 011930 000010 08     48  19  4
+  [21] .ARM.extab.i[...] PROGBITS        00000000 00a2f8 000000 00   A  0   0  1
+  [22] .ARM.exidx.i[...] ARM_EXIDX       00000000 00a2f8 000008 00  AL  7   0  4
+  [23] .rel.ARM.exi[...] REL             00000000 011940 000010 08     48  22  4
+  [24] .ARM.extab.e[...] PROGBITS        00000000 00a300 000000 00   A  0   0  1
+  [25] .ARM.exidx.e[...] ARM_EXIDX       00000000 00a300 000008 00  AL  9   0  4
+  [26] .rel.ARM.exi[...] REL             00000000 011950 000010 08     48  25  4
+  [27] .ARM.extab.d[...] PROGBITS        00000000 00a308 000000 00   A  0   0  1
+  [28] .ARM.exidx.d[...] ARM_EXIDX       00000000 00a308 000008 00  AL 11   0  4
+  [29] .rel.ARM.exi[...] REL             00000000 011960 000010 08     48  28  4
+  [30] .modinfo          PROGBITS        00000000 00a310 00012c 00   A  0   0  4
+  [31] .rodata.str1.1    PROGBITS        00000000 00a43c 000aed 01 AMS  0   0  1
+  [32] __param           PROGBITS        00000000 00af2c 000050 00   A  0   0  4
+  [33] .rel__param       REL             00000000 011970 000078 08     48  32  4
+  [34] .ARM.extab        PROGBITS        00000000 00af7c 0000a8 00   A  0   0  4
+  [35] .data             PROGBITS        00000000 00b024 000200 00  WA  0   0  4
+  [36] .rel.data         REL             00000000 0119e8 000218 08     48  35  4
+  [37] .devinit.data     PROGBITS        00000000 00b224 000054 00  WA  0   0  4
+  [38] .gnu.linkonc[...] PROGBITS        00000000 00b278 000150 00  WA  0   0  4
+  [39] .rel.gnu.lin[...] REL             00000000 011c00 000010 08     48  38  4
+  [40] .ARM.exidx        ARM_EXIDX       00000000 00b3c8 000380 00  AL  1   0  4
+  [41] .rel.ARM.exidx    REL             00000000 011c10 000438 08     48  40  4
+  [42] .note.gnu.bu[...] NOTE            00000000 00b748 000024 00   A  0   0  4
+  [43] .bss              NOBITS          00000000 00b76c 000038 00  WA  0   0  4
+  [44] .comment          PROGBITS        00000000 00b76c 0000c0 01  MS  0   0  1
+  [45] .note.GNU-stack   PROGBITS        00000000 00b82c 000000 00      0   0  1
+  [46] .ARM.attributes   ARM_ATTRIBUTES  00000000 00b82c 00002f 00      0   0  1
+  [47] .shstrtab         STRTAB          00000000 00b85b 000235 00      0   0  1
+  [48] .symtab           SYMTAB          00000000 00c260 0023b0 10     49 370  4
+  [49] .strtab           STRTAB          00000000 00e610 0011c8 00      0   0  1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
+  L (link order), O (extra OS processing required), G (group), T (TLS),
+  C (compressed), x (unknown), o (OS specific), E (exclude),
+  D (mbind), y (purecode), p (processor specific)
+
+There are no section groups in this file.
+
+There are no program headers in this file.
+
+There is no dynamic section in this file.
+
+Relocation section '.rel.text' at offset 0xf7d8 contains 779 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name
+00000144  0002301d R_ARM_JUMP24      00000000   osl_ctfpool_cleanup
+00000174  0002091c R_ARM_CALL        00000000   fwder_dettach
+00000198  0001761c R_ARM_CALL        00000000   free_irq
+000001cc  00018e1c R_ARM_CALL        00000000   unregister_netdev
+000001d4  0002301c R_ARM_CALL        00000000   osl_ctfpool_cleanup
+00000204  0002171c R_ARM_CALL        00001b10   etc_detach
+0000021c  0001931c R_ARM_CALL        00000000   __iounmap
+0000025c  0001e01c R_ARM_CALL        00000000   free_netdev
+0000026c  0001e91c R_ARM_CALL        00000000   osl_malloced
+0000027c  0001e91c R_ARM_CALL        00000000   osl_malloced
+00000288  0001e51c R_ARM_CALL        00000000   printk
+00000294  00019c1d R_ARM_JUMP24      00000000   osl_detach
+00000298  00000d02 R_ARM_ABS32       00000000   .bss
+0000029c  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+000002ec  0001d21c R_ARM_CALL        00000000   down
+000002f8  00021a1c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00000310  0001f61c R_ARM_CALL        00000000   __memzero
+00000408  0001981c R_ARM_CALL        00000000   up
+00000414  0001b41c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00000434  0001f61c R_ARM_CALL        00000000   __memzero
+00000450  00020d1c R_ARM_CALL        00000000   sprintf
+00000460  0001dc1c R_ARM_CALL        00000000   strncpy
+00000470  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00000474  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+0000049c  00019b1c R_ARM_CALL        00000000   memcpy
+000004b0  00019b1c R_ARM_CALL        00000000   memcpy
+000004d4  0001bd1c R_ARM_CALL        00000000   capable
+00000558  0001e21c R_ARM_CALL        00001fac   etc_ioctl
+00000580  0001a21c R_ARM_CALL        00000000   osl_pkt_frmnative
+00000590  00021b1c R_ARM_CALL        00000000   osl_pktfree
+00000674  0002351c R_ARM_CALL        00000000   __copy_from_user
+00000688  0001f61c R_ARM_CALL        00000000   __memzero
+000006f0  00018b1c R_ARM_CALL        00000000   osl_malloc
+00000734  0002351c R_ARM_CALL        00000000   __copy_from_user
+00000748  0001f61c R_ARM_CALL        00000000   __memzero
+00000784  00018b1c R_ARM_CALL        00000000   osl_malloc
+0000079c  00021f1c R_ARM_CALL        00000000   osl_mfree
+000007d0  0002351c R_ARM_CALL        00000000   __copy_from_user
+000007ec  0001f61c R_ARM_CALL        00000000   __memzero
+000007fc  00021f1c R_ARM_CALL        00000000   osl_mfree
+0000080c  00021f1c R_ARM_CALL        00000000   osl_mfree
+00000840  0001d21c R_ARM_CALL        00000000   down
+0000084c  00021a1c R_ARM_CALL        00000000   _raw_spin_lock_bh
+000008bc  0001d21c R_ARM_CALL        00000000   down
+000008c8  00021a1c R_ARM_CALL        00000000   _raw_spin_lock_bh
+000008e0  00018c1c R_ARM_CALL        000026ec   etc_iovar
+000008f8  0001981c R_ARM_CALL        00000000   up
+00000904  0001b41c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00000948  00022a1c R_ARM_CALL        00000000   __copy_to_user
+00000968  00021f1c R_ARM_CALL        00000000   osl_mfree
+00000980  0001d21c R_ARM_CALL        00000000   down
+0000098c  00021a1c R_ARM_CALL        00000000   _raw_spin_lock_bh
+000009a0  0001e21c R_ARM_CALL        00001fac   etc_ioctl
+000009c0  0001981c R_ARM_CALL        00000000   up
+000009cc  0001b41c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00000a18  00022a1c R_ARM_CALL        00000000   __copy_to_user
+00000a2c  00021f1c R_ARM_CALL        00000000   osl_mfree
+00000a70  0001f01c R_ARM_CALL        00000000   nvram_get
+00000a80  0002071c R_ARM_CALL        00000000   strcmp
+00000a90  0001f01c R_ARM_CALL        00000000   nvram_get
+00000aa0  0002071c R_ARM_CALL        00000000   strcmp
+00000abc  0001f01c R_ARM_CALL        00000000   nvram_get
+00000acc  0002071c R_ARM_CALL        00000000   strcmp
+00000adc  0001f01c R_ARM_CALL        00000000   nvram_get
+00000aec  0002071c R_ARM_CALL        00000000   strcmp
+00000b04  0001f01c R_ARM_CALL        00000000   nvram_get
+00000b18  0001741c R_ARM_CALL        00000000   strcpy
+00000b20  0002271c R_ARM_CALL        00000000   strlen
+00000b3c  0001f01c R_ARM_CALL        00000000   nvram_get
+00000b4c  0002071c R_ARM_CALL        00000000   strcmp
+00000b9c  00000b02 R_ARM_ABS32       00000000   .data
+00000ba0  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00000ba4  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00000ba8  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00000bac  00000d02 R_ARM_ABS32       00000000   .bss
+00000bb0  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00000bb4  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00000bb8  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00000bbc  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00000bc0  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00000bc4  0001a302 R_ARM_ABS32       00000034   igmp_snooping_enable
+00000be4  0001d21c R_ARM_CALL        00000000   down
+00000bf0  00021a1c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00000bf8  0002041c R_ARM_CALL        00001c30   etc_watchdog
+00000c1c  0001ce1c R_ARM_CALL        00000000   add_timer
+00000c40  0001951c R_ARM_CALL        00000000   osl_ctfpool_replenish
+00000c58  0001981d R_ARM_JUMP24      00000000   up
+00000c64  0001b41d R_ARM_JUMP24      00000000   _raw_spin_unlock_bh
+00000c68  00020b02 R_ARM_ABS32       00000000   jiffies
+00000c90  0002161d R_ARM_JUMP24      00000000   schedule_work
+00000cb8  0001f31c R_ARM_CALL        00000000   memset
+00000ccc  0001f31c R_ARM_CALL        00000000   memset
+00000cec  0001e41c R_ARM_CALL        00000000   robo_read_link_status
+00000d50  00020d1c R_ARM_CALL        00000000   sprintf
+00000d60  00020d1c R_ARM_CALL        00000000   sprintf
+00000d80  0001e41c R_ARM_CALL        00000000   robo_read_link_status
+00000de4  00020d1c R_ARM_CALL        00000000   sprintf
+00000df4  00020d1c R_ARM_CALL        00000000   sprintf
+00000e08  00020d1c R_ARM_CALL        00000000   sprintf
+00000e10  0002271c R_ARM_CALL        00000000   strlen
+00000e30  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00000e34  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00000e38  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00000e3c  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00000e40  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00000e44  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00000e48  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00000e70  0001f31c R_ARM_CALL        00000000   memset
+00000e90  0001e41c R_ARM_CALL        00000000   robo_read_link_status
+00000ef0  00020d1c R_ARM_CALL        00000000   sprintf
+00000f0c  00020d1c R_ARM_CALL        00000000   sprintf
+00000f1c  00020d1c R_ARM_CALL        00000000   sprintf
+00000f24  0002271c R_ARM_CALL        00000000   strlen
+00000f44  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00000f48  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00000f4c  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00000f50  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00000f54  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00000f58  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00000fac  0001d21c R_ARM_CALL        00000000   down
+00000fb8  00021a1c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00001024  00019b1c R_ARM_CALL        00000000   memcpy
+00001048  0001de1c R_ARM_CALL        00001ba0   etc_init
+0000106c  0001981d R_ARM_JUMP24      00000000   up
+0000107c  0001b41d R_ARM_JUMP24      00000000   _raw_spin_unlock_bh
+0000108c  0001de1d R_ARM_JUMP24      00001ba0   etc_init
+0000109c  0001db1c R_ARM_CALL        00001b54   etc_reset
+000010c8  0001ea1c R_ARM_CALL        00001bb8   etc_up
+000010e4  0001ce1c R_ARM_CALL        00000000   add_timer
+000010fc  0001c61c R_ARM_CALL        00000000   _clear_bit_le
+00001114  00020b02 R_ARM_ABS32       00000000   jiffies
+00001120  00017c1c R_ARM_CALL        00000000   dev_get_drvdata
+0000113c  0001d21c R_ARM_CALL        00000000   down
+00001148  00021a1c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00001150  00021c1c R_ARM_CALL        000010b0   et_up
+00001164  0001981c R_ARM_CALL        00000000   up
+00001170  0001b41c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00001178  0001bb1c R_ARM_CALL        00000000   netif_device_attach
+000011c8  0001d21c R_ARM_CALL        00000000   down
+000011d4  00021a1c R_ARM_CALL        00000000   _raw_spin_lock_bh
+000011dc  00021c1c R_ARM_CALL        000010b0   et_up
+000011f0  0001981c R_ARM_CALL        00000000   up
+000011fc  0001b41c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+0000123c  0001721c R_ARM_CALL        00000000   _set_bit_le
+00001244  0002281c R_ARM_CALL        00000000   del_timer
+00001270  0001981c R_ARM_CALL        00000000   up
+0000127c  0001b41c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00001284  0001c01c R_ARM_CALL        00000000   tasklet_kill
+00001298  0001d21c R_ARM_CALL        00000000   down
+000012a4  00021a1c R_ARM_CALL        00000000   _raw_spin_lock_bh
+000012b8  0001981c R_ARM_CALL        00000000   up
+000012c4  0001b41c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+000012cc  0001c01c R_ARM_CALL        00000000   tasklet_kill
+000012e0  0001d21c R_ARM_CALL        00000000   down
+000012ec  00021a1c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00001300  00021b1c R_ARM_CALL        00000000   osl_pktfree
+0000130c  00000f1c R_ARM_CALL        00000000   et_skb_dequeue
+00001330  0001a11d R_ARM_JUMP24      00001bcc   etc_down
+0000133c  00017c1c R_ARM_CALL        00000000   dev_get_drvdata
+0000134c  0001b71c R_ARM_CALL        00000000   netif_device_detach
+00001360  0001d21c R_ARM_CALL        00000000   down
+0000136c  00021a1c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00001378  0001d81c R_ARM_CALL        00001208   et_down
+0000138c  0001981c R_ARM_CALL        00000000   up
+00001398  0001b41c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+000013d4  0001d21c R_ARM_CALL        00000000   down
+000013e0  00021a1c R_ARM_CALL        00000000   _raw_spin_lock_bh
+000013ec  0001d81c R_ARM_CALL        00001208   et_down
+00001400  0001981c R_ARM_CALL        00000000   up
+0000140c  0001b41c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00001428  0001a41c R_ARM_CALL        00000000   _raw_spin_lock_irqsave
+00001450  0001e61d R_ARM_JUMP24      00000000   _raw_spin_unlock_[...]
+00001470  0001ca1c R_ARM_CALL        00000000   skb_pull
+00001480  0001841c R_ARM_CALL        00000000   bcm_ether_ntoa
+000014dc  00021b1c R_ARM_CALL        00000000   osl_pktfree
+0000153c  00021d1d R_ARM_JUMP24      00000000   fwder_dump
+0000156c  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+0000157c  00021d1d R_ARM_JUMP24      00000000   fwder_dump
+00001580  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00001584  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00001588  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+0000158c  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00001624  00000d02 R_ARM_ABS32       00000000   .bss
+00001648  0001d21c R_ARM_CALL        00000000   down
+00001654  00021a1c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00001688  0001981c R_ARM_CALL        00000000   up
+00001694  0001b41c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+000016c4  0001d21c R_ARM_CALL        00000000   down
+000016d0  00021a1c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00001708  0001981d R_ARM_JUMP24      00000000   up
+00001714  0001b41d R_ARM_JUMP24      00000000   _raw_spin_unlock_bh
+00001794  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+000017a8  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+000017b8  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+000017cc  0001a01d R_ARM_JUMP24      00000000   bcm_bprintf
+000017d4  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+000017d8  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+000017dc  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+000017e0  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00001838  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+00001874  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+000018a0  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+000018d4  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+000018e0  0001841c R_ARM_CALL        00000000   bcm_ether_ntoa
+000018f0  0001841c R_ARM_CALL        00000000   bcm_ether_ntoa
+00001904  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+0000191c  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+00001940  0001841c R_ARM_CALL        00000000   bcm_ether_ntoa
+00001950  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+00001968  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+00001978  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+00001984  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+000019c8  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+00001a0c  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+00001a40  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+00001a64  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+00001a70  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+00001a7c  00000d02 R_ARM_ABS32       00000000   .bss
+00001a80  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00001a84  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00001a88  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00001a8c  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00001a90  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00001a94  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00001a98  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00001a9c  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00001aa0  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00001aa4  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00001aa8  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00001aac  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00001ab0  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00001ab4  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00001ab8  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00001b08  0001c402 R_ARM_ABS32       000000f0   bcm47xx_et_chops
+00001b0c  00022202 R_ARM_ABS32       00000180   bcmgmac_et_chops
+00001b50  00021f1d R_ARM_JUMP24      00000000   osl_mfree
+00001bc8  0001b31d R_ARM_JUMP24      00001088   et_init
+00001bfc  0002381c R_ARM_CALL        00001090   et_reset
+00001c24  00022e1c R_ARM_CALL        00001594   et_link_down
+00001c54  00020a1c R_ARM_CALL        00000000   robo_watchdog
+00001c84  00018a1c R_ARM_CALL        00000000   robo_power_save_toggle
+00001cb0  00018a1c R_ARM_CALL        00000000   robo_power_save_toggle
+00001cf8  0001eb1c R_ARM_CALL        00000000   robo_power_save_m[...]
+00001d5c  0002381c R_ARM_CALL        00001090   et_reset
+00001d68  0001b31c R_ARM_CALL        00001088   et_init
+00001f14  0001e71c R_ARM_CALL        00001590   et_link_up
+00001f38  00022e1c R_ARM_CALL        00001594   et_link_down
+00001f54  0002181c R_ARM_CALL        00000000   __aeabi_uidivmod
+00001f74  00000b02 R_ARM_ABS32       00000000   .data
+00001f78  00000d02 R_ARM_ABS32       00000000   .bss
+00001f90  0001b31d R_ARM_JUMP24      00001088   et_init
+00001fa8  0001b31d R_ARM_JUMP24      00001088   et_init
+00001fd0  00000102 R_ARM_ABS32       00000000   .text
+00001fd4  00000102 R_ARM_ABS32       00000000   .text
+00001fd8  00000102 R_ARM_ABS32       00000000   .text
+00001fdc  00000102 R_ARM_ABS32       00000000   .text
+00001fe0  00000102 R_ARM_ABS32       00000000   .text
+00001fe4  00000102 R_ARM_ABS32       00000000   .text
+00001fe8  00000102 R_ARM_ABS32       00000000   .text
+00001fec  00000102 R_ARM_ABS32       00000000   .text
+00001ff0  00000102 R_ARM_ABS32       00000000   .text
+00001ff4  00000102 R_ARM_ABS32       00000000   .text
+00001ff8  00000102 R_ARM_ABS32       00000000   .text
+00001ffc  00000102 R_ARM_ABS32       00000000   .text
+00002000  00000102 R_ARM_ABS32       00000000   .text
+00002004  00000102 R_ARM_ABS32       00000000   .text
+00002008  00000102 R_ARM_ABS32       00000000   .text
+0000200c  00000102 R_ARM_ABS32       00000000   .text
+00002014  00021c1c R_ARM_CALL        000010b0   et_up
+00002024  0001d81c R_ARM_CALL        00001208   et_down
+00002064  0001b11c R_ARM_CALL        00001f7c   etc_promisc
+0000206c  0002101c R_ARM_CALL        00001f94   etc_qos
+00002148  0001b31c R_ARM_CALL        00001088   et_init
+000023fc  0001791c R_ARM_CALL        00000000   get_robo_ptr
+00002404  0002191c R_ARM_CALL        00000000   bcm_robo_config_vlan
+0000246c  0001791c R_ARM_CALL        00000000   get_robo_ptr
+00002470  0001f21c R_ARM_CALL        00000000   set_iptv_ports
+00002490  00000d02 R_ARM_ABS32       00000000   .bss
+00002494  00017502 R_ARM_ABS32       00000028   wan_debug
+00002498  00017302 R_ARM_ABS32       0000000c   qos_enable
+0000249c  00017a02 R_ARM_ABS32       00000014   qos_do_add_strip_tag
+000024a0  00022002 R_ARM_ABS32       00000010   vlan_enable
+000024a4  0001ee02 R_ARM_ABS32       00000024   do_ctf_bypass_check
+000024a8  0001af02 R_ARM_ABS32       00000020   bypass_ctf
+000024ac  00020602 R_ARM_ABS32       00000000   is_reg_snooping_enable
+000024b0  0001d302 R_ARM_ABS32       00000000   is_reg_mgmt_mode_[...]
+000024b4  00000b02 R_ARM_ABS32       00000000   .data
+000024b8  00000b02 R_ARM_ABS32       00000000   .data
+00002570  00020c1c R_ARM_CALL        00000000   osl_pktget
+00002598  00019b1c R_ARM_CALL        00000000   memcpy
+000025a4  0001ca1c R_ARM_CALL        00000000   skb_pull
+000025cc  0001d51c R_ARM_CALL        00000000   skb_push
+000025e8  00019b1c R_ARM_CALL        00000000   memcpy
+000025f8  00019b1c R_ARM_CALL        00000000   memcpy
+00002718  00000102 R_ARM_ABS32       00000000   .text
+0000271c  00000102 R_ARM_ABS32       00000000   .text
+00002720  00000102 R_ARM_ABS32       00000000   .text
+00002724  00000102 R_ARM_ABS32       00000000   .text
+00002728  00000102 R_ARM_ABS32       00000000   .text
+0000272c  00000102 R_ARM_ABS32       00000000   .text
+00002730  00000102 R_ARM_ABS32       00000000   .text
+00002734  00000102 R_ARM_ABS32       00000000   .text
+00002738  00000102 R_ARM_ABS32       00000000   .text
+0000273c  00000102 R_ARM_ABS32       00000000   .text
+00002740  00000102 R_ARM_ABS32       00000000   .text
+00002744  00000102 R_ARM_ABS32       00000000   .text
+00002748  00000102 R_ARM_ABS32       00000000   .text
+0000274c  00000102 R_ARM_ABS32       00000000   .text
+00002750  00000102 R_ARM_ABS32       00000000   .text
+00002754  00000102 R_ARM_ABS32       00000000   .text
+00002758  00000102 R_ARM_ABS32       00000000   .text
+0000275c  00000102 R_ARM_ABS32       00000000   .text
+00002760  00000102 R_ARM_ABS32       00000000   .text
+00002764  00000102 R_ARM_ABS32       00000000   .text
+00002768  00000102 R_ARM_ABS32       00000000   .text
+0000276c  00000102 R_ARM_ABS32       00000000   .text
+00002784  0001c11c R_ARM_CALL        00000000   robo_power_save_m[...]
+000027a4  00020e1c R_ARM_CALL        00000000   robo_power_save_m[...]
+000027bc  00020e1c R_ARM_CALL        00000000   robo_power_save_m[...]
+00002840  0001d61c R_ARM_CALL        000024bc   etc_quota
+0000288c  0001a81c R_ARM_CALL        00000000   bcm_binit
+000028ac  0001a81c R_ARM_CALL        00000000   bcm_binit
+000028b8  0002051c R_ARM_CALL        000014e8   et_dump_ctf
+000028d0  0001a81c R_ARM_CALL        00000000   bcm_binit
+000028e0  0001ad1c R_ARM_CALL        00001510   et_clear_ctf
+0000290c  0001a81c R_ARM_CALL        00000000   bcm_binit
+00002918  0001971c R_ARM_CALL        00001538   et_dump_fwder
+00002930  0001a81c R_ARM_CALL        00000000   bcm_binit
+00002950  0001f61c R_ARM_CALL        00000000   __memzero
+00002960  0001c71c R_ARM_CALL        0000263c   et_get_portinfo
+000029a0  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+000029ac  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+000029c4  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+000029e8  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+00002a10  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+00002a34  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+00002a54  0001a81c R_ARM_CALL        00000000   bcm_binit
+00002ab0  0002311c R_ARM_CALL        00000000   osl_delay
+00002abc  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+00002ac8  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+00002c64  0001a81c R_ARM_CALL        00000000   bcm_binit
+00002c70  0001f41c R_ARM_CALL        00000000   getvar
+00002c84  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+00002ca4  00000d02 R_ARM_ABS32       00000000   .bss
+00002ca8  00000702 R_ARM_ABS32       00000000   .rodata
+00002cac  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00002cb0  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00002cb4  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00002cb8  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00002cbc  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00002cc0  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00002cc4  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00002cc8  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00002ccc  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00002cd0  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00002cd4  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00002cd8  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00002d34  0001c402 R_ARM_ABS32       000000f0   bcm47xx_et_chops
+00002d38  00022202 R_ARM_ABS32       00000180   bcmgmac_et_chops
+00002d68  00022d1c R_ARM_CALL        00002cdc   etc_unitmap
+00002d74  00018b1c R_ARM_CALL        00000000   osl_malloc
+00002d84  0001f61c R_ARM_CALL        00000000   __memzero
+00002dc0  0001d61c R_ARM_CALL        000024bc   etc_quota
+00002dcc  0001cd1c R_ARM_CALL        00001abc   etc_chipmatch
+00002e00  0002171c R_ARM_CALL        00001b10   etc_detach
+00002e48  00000702 R_ARM_ABS32       00000000   .rodata
+00002e80  00017f02 R_ARM_ABS32       00000000   outer_cache
+00002ee8  00017f02 R_ARM_ABS32       00000000   outer_cache
+00002f08  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00002f58  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00002f9c  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00002fb0  00017f02 R_ARM_ABS32       00000000   outer_cache
+00002fcc  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00003004  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00003028  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+0000304c  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00003074  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00003098  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000030bc  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000030e0  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00003108  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+0000312c  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00003150  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00003174  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+0000319c  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000031c0  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000031e4  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00003208  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00003230  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00003254  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00003278  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+0000329c  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000032c4  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000032e8  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+0000330c  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00003330  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00003358  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+0000337c  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000033a0  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000033c4  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000033ec  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00003410  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00003434  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00003458  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00003484  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000034a8  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000034cc  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000034f0  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00003514  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00003538  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+0000355c  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00003580  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+0000366c  0001dc1c R_ARM_CALL        00000000   strncpy
+0000367c  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+000036b8  0001f81c R_ARM_CALL        00001598   et_phyfind
+000036d8  0001b51c R_ARM_CALL        000016a0   et_phywr
+00003750  0002311c R_ARM_CALL        00000000   osl_delay
+00003764  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00003790  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+0000379c  00017f02 R_ARM_ABS32       00000000   outer_cache
+0000385c  0002311c R_ARM_CALL        00000000   osl_delay
+00003878  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00003894  00017f02 R_ARM_ABS32       00000000   outer_cache
+000038cc  0001f81c R_ARM_CALL        00001598   et_phyfind
+00003904  0002231c R_ARM_CALL        00001628   et_phyrd
+00003978  0002311c R_ARM_CALL        00000000   osl_delay
+0000398c  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000039bc  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000039d4  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000039e4  00017f02 R_ARM_ABS32       00000000   outer_cache
+00003b0c  0002311c R_ARM_CALL        00000000   osl_delay
+00003b64  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00003b80  0001771c R_ARM_CALL        00000000   si_core_cflags
+00003b88  00017f02 R_ARM_ABS32       00000000   outer_cache
+00003bc0  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00003bdc  0001771c R_ARM_CALL        00000000   si_core_cflags
+00003be4  00017f02 R_ARM_ABS32       00000000   outer_cache
+00003c0c  0001f61d R_ARM_JUMP24      00000000   __memzero
+00003c30  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+00003c44  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+00003c68  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+00003c8c  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+00003cb0  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+00003cd4  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+00003cf0  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+00003d0c  0001a01d R_ARM_JUMP24      00000000   bcm_bprintf
+00003d10  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00003d14  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00003d18  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00003d1c  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00003d20  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00003d24  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00003d28  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00003d2c  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00003d6c  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00003dd8  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00003e10  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00003e64  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00003ee4  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00003f28  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000040e0  0002331c R_ARM_CALL        00001418   et_intrson
+00004120  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00004134  00017f02 R_ARM_ABS32       00000000   outer_cache
+00004148  0002031c R_ARM_CALL        00000000   si_iscoreup
+0000416c  0002341c R_ARM_CALL        00000000   si_coreidx
+0000417c  0002141c R_ARM_CALL        00000000   si_pci_setup
+000041d4  0002311c R_ARM_CALL        00000000   osl_delay
+000041fc  0001b61c R_ARM_CALL        00000000   si_core_reset
+00004238  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00004250  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00004268  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00004284  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+0000429c  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000042b4  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000042cc  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000042e8  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00004300  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00004318  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00004330  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+0000434c  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00004364  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+0000437c  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00004394  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000043b0  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000043c8  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000043e0  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000043f8  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00004414  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+0000442c  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00004444  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+0000445c  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00004478  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00004490  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000044a8  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000044c0  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000044dc  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000044f4  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+0000450c  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00004524  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00004540  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00004558  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00004570  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00004588  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000045a4  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000045bc  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000045d4  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000045ec  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00004630  00022b1c R_ARM_CALL        00000000   si_clock
+00004648  0001fd1c R_ARM_CALL        00000000   __aeabi_uidiv
+00004680  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000046c4  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000046fc  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00004710  0002311c R_ARM_CALL        00000000   osl_delay
+00004730  00017f02 R_ARM_ABS32       00000000   outer_cache
+00004758  0001911c R_ARM_CALL        00000000   bcm_robo_detach
+00004768  0001f91c R_ARM_CALL        00004d78   adm_detach
+00004798  00019f1c R_ARM_CALL        00000000   si_core_disable
+000047a0  0001851c R_ARM_CALL        00000000   si_detach
+000047c0  00021f1c R_ARM_CALL        00000000   osl_mfree
+000047d4  00021f1d R_ARM_JUMP24      00000000   osl_mfree
+000047f4  00018b1c R_ARM_CALL        00000000   osl_malloc
+00004804  0001f61c R_ARM_CALL        00000000   __memzero
+00004848  0001e81c R_ARM_CALL        00000000   si_attach
+00004860  0001df1c R_ARM_CALL        00000000   si_setcore
+00004890  0001bf1c R_ARM_CALL        00000000   si_coreid
+0000489c  0001cc1c R_ARM_CALL        00000000   si_corerev
+000048bc  00023a1c R_ARM_CALL        00000000   si_coreunit
+000048cc  0002241c R_ARM_CALL        00000000   getintvar
+000048dc  00022b1c R_ARM_CALL        00000000   si_clock
+000048e4  0001fd1c R_ARM_CALL        00000000   __aeabi_uidiv
+000048f8  00020d1c R_ARM_CALL        00000000   sprintf
+00004904  0001f41c R_ARM_CALL        00000000   getvar
+00004918  0001cf1c R_ARM_CALL        00000000   bcm_ether_atoe
+00004958  00019b1c R_ARM_CALL        00000000   memcpy
+00004968  00020d1c R_ARM_CALL        00000000   sprintf
+00004974  0001f41c R_ARM_CALL        00000000   getvar
+00004980  0002391c R_ARM_CALL        00000000   bcm_atoi
+000049a0  00020d1c R_ARM_CALL        00000000   sprintf
+000049ac  0001f41c R_ARM_CALL        00000000   getvar
+000049b8  0002391c R_ARM_CALL        00000000   bcm_atoi
+000049c8  0002341c R_ARM_CALL        00000000   si_coreidx
+000049d8  0002141c R_ARM_CALL        00000000   si_pci_setup
+000049f0  00020d1c R_ARM_CALL        00000000   sprintf
+00004a40  0001c91c R_ARM_CALL        00000000   dma_attach
+00004aac  0001c21c R_ARM_CALL        00000000   bcm_robo_attach
+00004abc  0001f71c R_ARM_CALL        00000000   bcm_robo_enable_device
+00004ad8  0002191c R_ARM_CALL        00000000   bcm_robo_config_vlan
+00004ae8  0001f51c R_ARM_CALL        00000000   bcm_robo_enable_switch
+00004b04  0002151c R_ARM_CALL        00004d98   adm_attach
+00004b14  0001e31c R_ARM_CALL        000050a0   adm_enable_device
+00004b2c  0001ba1c R_ARM_CALL        00004e4c   adm_config_vlan
+00004b50  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00004b58  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00004b5c  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00004b60  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00004b64  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00004b68  0001c302 R_ARM_ABS32       0000002c   et_msg_level
+00004b70  00000b02 R_ARM_ABS32       00000000   .data
+00004b88  00017b1c R_ARM_CALL        00000000   si_gpioout
+00004b9c  00021e1c R_ARM_CALL        00000000   si_gpioouten
+00004ba8  0002311d R_ARM_JUMP24      00000000   osl_delay
+00004bb8  00021e1c R_ARM_CALL        00000000   si_gpioouten
+00004bc4  0002311d R_ARM_JUMP24      00000000   osl_delay
+00004c34  00017b1c R_ARM_CALL        00000000   si_gpioout
+00004c3c  0002311c R_ARM_CALL        00000000   osl_delay
+00004c54  00017b1c R_ARM_CALL        00000000   si_gpioout
+00004c60  0002311c R_ARM_CALL        00000000   osl_delay
+00004c90  00017b1c R_ARM_CALL        00000000   si_gpioout
+00004c98  0002311c R_ARM_CALL        00000000   osl_delay
+00004cac  00017b1c R_ARM_CALL        00000000   si_gpioout
+00004cb4  0002311c R_ARM_CALL        00000000   osl_delay
+00004cf0  00017b1c R_ARM_CALL        00000000   si_gpioout
+00004cfc  0002311c R_ARM_CALL        00000000   osl_delay
+00004d10  00017b1c R_ARM_CALL        00000000   si_gpioout
+00004d24  00017b1c R_ARM_CALL        00000000   si_gpioout
+00004d2c  0002311c R_ARM_CALL        00000000   osl_delay
+00004d40  00017b1c R_ARM_CALL        00000000   si_gpioout
+00004d48  0002311c R_ARM_CALL        00000000   osl_delay
+00004d84  00017e1c R_ARM_CALL        00000000   si_osh
+00004d94  00021f1d R_ARM_JUMP24      00000000   osl_mfree
+00004da4  00017e1c R_ARM_CALL        00000000   si_osh
+00004dac  00018b1c R_ARM_CALL        00000000   osl_malloc
+00004dbc  0001f61c R_ARM_CALL        00000000   __memzero
+00004dd4  0001821c R_ARM_CALL        00000000   getgpiopin
+00004df8  0001821c R_ARM_CALL        00000000   getgpiopin
+00004e18  0001821c R_ARM_CALL        00000000   getgpiopin
+00004e34  0001f91c R_ARM_CALL        00004d78   adm_detach
+00004e40  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00004e44  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00004e48  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00004e9c  0002341c R_ARM_CALL        00000000   si_coreidx
+00004ea8  0002321c R_ARM_CALL        00000000   si_gpiosetcore
+00004ed0  00019b1c R_ARM_CALL        00000000   memcpy
+00004ee0  00019b1c R_ARM_CALL        00000000   memcpy
+00004ef0  00020d1c R_ARM_CALL        00000000   sprintf
+00004efc  0001f41c R_ARM_CALL        00000000   getvar
+00004f40  0001ae1c R_ARM_CALL        00000000   bcmstrstr
+00004f54  0002271c R_ARM_CALL        00000000   strlen
+00004f78  0001dc1c R_ARM_CALL        00000000   strncpy
+00004f90  0002391c R_ARM_CALL        00000000   bcm_atoi
+00004fc4  00022f1c R_ARM_CALL        00000000   strchr
+00005078  0001a51c R_ARM_CALL        00000000   si_setcoreidx
+00005088  00000702 R_ARM_ABS32       00000000   .rodata
+0000508c  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00005090  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00005094  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+0000509c  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+000050b4  0001821c R_ARM_CALL        00000000   getgpiopin
+000050d0  0002341c R_ARM_CALL        00000000   si_coreidx
+000050dc  0002321c R_ARM_CALL        00000000   si_gpiosetcore
+000050f4  0002311c R_ARM_CALL        00000000   osl_delay
+00005118  0002311c R_ARM_CALL        00000000   osl_delay
+00005150  0002311c R_ARM_CALL        00000000   osl_delay
+00005180  0001a51c R_ARM_CALL        00000000   si_setcoreidx
+0000518c  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+000051cc  00000702 R_ARM_ABS32       00000000   .rodata
+00005204  00017f02 R_ARM_ABS32       00000000   outer_cache
+000052fc  00017f02 R_ARM_ABS32       00000000   outer_cache
+0000531c  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00005374  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000053a8  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000054a0  00017f02 R_ARM_ABS32       00000000   outer_cache
+000054dc  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00005504  0002311c R_ARM_CALL        00000000   osl_delay
+0000550c  00017f02 R_ARM_ABS32       00000000   outer_cache
+00005548  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00005570  0002311c R_ARM_CALL        00000000   osl_delay
+00005578  00017f02 R_ARM_ABS32       00000000   outer_cache
+0000559c  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00005688  00017f02 R_ARM_ABS32       00000000   outer_cache
+000056b0  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00005700  00017f02 R_ARM_ABS32       00000000   outer_cache
+00005764  00000102 R_ARM_ABS32       00000000   .text
+00005768  00000102 R_ARM_ABS32       00000000   .text
+0000576c  00000102 R_ARM_ABS32       00000000   .text
+00005770  00000102 R_ARM_ABS32       00000000   .text
+00005774  00000102 R_ARM_ABS32       00000000   .text
+00005778  00000102 R_ARM_ABS32       00000000   .text
+0000577c  00000102 R_ARM_ABS32       00000000   .text
+000057d4  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+0000582c  00017f02 R_ARM_ABS32       00000000   outer_cache
+00005888  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00005914  0002311c R_ARM_CALL        00000000   osl_delay
+00005928  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00005950  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00005958  00017f02 R_ARM_ABS32       00000000   outer_cache
+000059b4  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00005a1c  0002311c R_ARM_CALL        00000000   osl_delay
+00005a30  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00005a58  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00005a74  00017f02 R_ARM_ABS32       00000000   outer_cache
+00005a90  0001dc1c R_ARM_CALL        00000000   strncpy
+00005aa0  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00005ac8  0001f61d R_ARM_JUMP24      00000000   __memzero
+00005aec  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+00005b00  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+00005b24  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+00005b48  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+00005b6c  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+00005b90  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+00005bac  0001a01c R_ARM_CALL        00000000   bcm_bprintf
+00005bc8  0001a01d R_ARM_JUMP24      00000000   bcm_bprintf
+00005bcc  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00005bd0  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00005bd4  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00005bd8  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00005bdc  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00005be0  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00005be4  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00005be8  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00005c38  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00005c90  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00005d88  00018b1c R_ARM_CALL        00000000   osl_malloc
+00005e80  00000102 R_ARM_ABS32       00000000   .text
+00005e84  00000102 R_ARM_ABS32       00000000   .text
+00005e88  00000102 R_ARM_ABS32       00000000   .text
+00005e8c  00000102 R_ARM_ABS32       00000000   .text
+00005e90  00000102 R_ARM_ABS32       00000000   .text
+00005fc8  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00006044  0002331c R_ARM_CALL        00001418   et_intrson
+00006074  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000060c8  0002311c R_ARM_CALL        00000000   osl_delay
+00006114  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00006160  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000061a0  00017d1c R_ARM_CALL        00000000   si_pmu_chipcontrol
+0000625c  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00006268  00022b1c R_ARM_CALL        00000000   si_clock
+00006274  0001fd1c R_ARM_CALL        00000000   __aeabi_uidiv
+00006280  0001fd1c R_ARM_CALL        00000000   __aeabi_uidiv
+000062ac  00017f02 R_ARM_ABS32       00000000   outer_cache
+000062dc  0001911c R_ARM_CALL        00000000   bcm_robo_detach
+000062ec  0001f91c R_ARM_CALL        00004d78   adm_detach
+00006348  00019f1c R_ARM_CALL        00000000   si_core_disable
+0000635c  0001851c R_ARM_CALL        00000000   si_detach
+00006378  00021f1c R_ARM_CALL        00000000   osl_mfree
+0000638c  00021f1d R_ARM_JUMP24      00000000   osl_mfree
+00006478  00017d1c R_ARM_CALL        00000000   si_pmu_chipcontrol
+0000648c  00017d1c R_ARM_CALL        00000000   si_pmu_chipcontrol
+000065a4  0002311c R_ARM_CALL        00000000   osl_delay
+000065d4  0002031c R_ARM_CALL        00000000   si_iscoreup
+000065f8  0002341c R_ARM_CALL        00000000   si_coreidx
+00006608  0002141c R_ARM_CALL        00000000   si_pci_setup
+00006660  0002311c R_ARM_CALL        00000000   osl_delay
+00006698  00021f1c R_ARM_CALL        00000000   osl_mfree
+000066c0  0002111c R_ARM_CALL        00000000   si_core_sflags
+0000673c  0001b61c R_ARM_CALL        00000000   si_core_reset
+0000679c  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000067bc  0002311c R_ARM_CALL        00000000   osl_delay
+000067d0  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00006818  0001f41c R_ARM_CALL        00000000   getvar
+00006824  0002391c R_ARM_CALL        00000000   bcm_atoi
+000068b0  00017d1c R_ARM_CALL        00000000   si_pmu_chipcontrol
+000068d4  0001771c R_ARM_CALL        00000000   si_core_cflags
+000068fc  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00006980  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+000069ac  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00006a20  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00006a58  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00006a9c  0001771c R_ARM_CALL        00000000   si_core_cflags
+00006acc  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00006b40  0001771c R_ARM_CALL        00000000   si_core_cflags
+00006b58  00017f02 R_ARM_ABS32       00000000   outer_cache
+00006b5c  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00006b88  00018b1c R_ARM_CALL        00000000   osl_malloc
+00006b9c  0001f61c R_ARM_CALL        00000000   __memzero
+00006bdc  0001e81c R_ARM_CALL        00000000   si_attach
+00006bec  0001cc1c R_ARM_CALL        00000000   si_corerev
+00006c08  0001df1c R_ARM_CALL        00000000   si_setcore
+00006c24  0001df1c R_ARM_CALL        00000000   si_setcore
+00006c40  0001cc1c R_ARM_CALL        00000000   si_corerev
+00006c78  0001bf1c R_ARM_CALL        00000000   si_coreid
+00006ca0  0002241c R_ARM_CALL        00000000   getintvar
+00006cb0  00022b1c R_ARM_CALL        00000000   si_clock
+00006cb8  0001fd1c R_ARM_CALL        00000000   __aeabi_uidiv
+00006cc8  0002241c R_ARM_CALL        00000000   getintvar
+00006cdc  0002241c R_ARM_CALL        00000000   getintvar
+00006d00  00020d1c R_ARM_CALL        00000000   sprintf
+00006d0c  0001f41c R_ARM_CALL        00000000   getvar
+00006d20  0001cf1c R_ARM_CALL        00000000   bcm_ether_atoe
+00006d64  00019b1c R_ARM_CALL        00000000   memcpy
+00006d9c  00020d1c R_ARM_CALL        00000000   sprintf
+00006da8  0001f41c R_ARM_CALL        00000000   getvar
+00006db4  0002391c R_ARM_CALL        00000000   bcm_atoi
+00006dd4  0002341c R_ARM_CALL        00000000   si_coreidx
+00006de4  0002141c R_ARM_CALL        00000000   si_pci_setup
+00006e14  0001df1c R_ARM_CALL        00000000   si_setcore
+00006e1c  0002031c R_ARM_CALL        00000000   si_iscoreup
+00006e30  0001b61c R_ARM_CALL        00000000   si_core_reset
+00006e4c  0001df1c R_ARM_CALL        00000000   si_setcore
+00006e6c  00020d1c R_ARM_CALL        00000000   sprintf
+00006ec0  0001c91c R_ARM_CALL        00000000   dma_attach
+00006f00  0001c91c R_ARM_CALL        00000000   dma_attach
+00006f40  0001c91c R_ARM_CALL        00000000   dma_attach
+00006f80  0001c91c R_ARM_CALL        00000000   dma_attach
+000070fc  00020d1c R_ARM_CALL        00000000   sprintf
+00007108  0002241c R_ARM_CALL        00000000   getintvar
+0000713c  0001821c R_ARM_CALL        00000000   getgpiopin
+00007160  00017b1c R_ARM_CALL        00000000   si_gpioout
+00007174  00021e1c R_ARM_CALL        00000000   si_gpioouten
+0000717c  0002311c R_ARM_CALL        00000000   osl_delay
+00007190  00017b1c R_ARM_CALL        00000000   si_gpioout
+00007198  0002311c R_ARM_CALL        00000000   osl_delay
+000071f8  0001c21c R_ARM_CALL        00000000   bcm_robo_attach
+00007208  0001f71c R_ARM_CALL        00000000   bcm_robo_enable_device
+00007224  0002191c R_ARM_CALL        00000000   bcm_robo_config_vlan
+00007234  0001f51c R_ARM_CALL        00000000   bcm_robo_enable_switch
+00007250  0002151c R_ARM_CALL        00004d98   adm_attach
+00007260  0001e31c R_ARM_CALL        000050a0   adm_enable_device
+00007278  0001ba1c R_ARM_CALL        00004e4c   adm_config_vlan
+0000729c  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+000072a4  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+000072a8  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+000072ac  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+000072b0  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+000072b4  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+000072b8  0001c302 R_ARM_ABS32       0000002c   et_msg_level
+000072bc  00000b02 R_ARM_ABS32       00000000   .data
+000072c0  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+000072c4  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+
+Relocation section '.rel.text.fastpath' at offset 0x11030 contains 123 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name
+000000d4  00021a1c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00000100  0001b41c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+0000010c  0001a21c R_ARM_CALL        00000000   osl_pkt_frmnative
+00000150  00021b1c R_ARM_CALL        00000000   osl_pktfree
+000001d4  0001b41c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+000001f8  00019a1c R_ARM_CALL        00000000   _test_and_set_bit_le
+00000208  0001dd1c R_ARM_CALL        00000000   __tasklet_schedule
+00000238  0001a91c R_ARM_CALL        00000000   schedule_work_on
+00000244  0002161c R_ARM_CALL        00000000   schedule_work
+00000250  00021302 R_ARM_ABS32       00000090   up2tc
+00000254  00000d02 R_ARM_ABS32       00000000   .bss
+00000258  00000b02 R_ARM_ABS32       00000000   .data
+000002e8  0002161c R_ARM_CALL        00000000   schedule_work
+000002f8  00019a1c R_ARM_CALL        00000000   _test_and_set_bit_le
+00000308  0001dd1c R_ARM_CALL        00000000   __tasklet_schedule
+00000344  00021a1c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00000398  0001b41c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+000003e4  0001b41c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00000488  0001bc1c R_ARM_CALL        00000000   skb_copy_expand
+0000049c  0001b21c R_ARM_CALL        00000000   kfree_skb
+000004ac  0001d51c R_ARM_CALL        00000000   skb_push
+000004e8  0002011c R_ARM_CALL        00000000   __pskb_pull_tail
+000004f4  0001a21c R_ARM_CALL        00000000   osl_pkt_frmnative
+0000055c  0001d51c R_ARM_CALL        00000000   skb_push
+00000568  00019b1c R_ARM_CALL        00000000   memcpy
+0000063c  0001ed1c R_ARM_CALL        00000000   skb_checksum
+000006d4  0001ed1c R_ARM_CALL        00000000   skb_checksum
+000006fc  00019d1c R_ARM_CALL        00000000   __csum_ipv6_magic
+00000780  0001831c R_ARM_CALL        00000000   skb_put
+0000080c  0001721c R_ARM_CALL        00000000   _set_bit_le
+00000838  0002261c R_ARM_CALL        00000000   _test_and_clear_bit_le
+00000848  0001891c R_ARM_CALL        00000000   __netif_schedule
+000008b4  00021b1c R_ARM_CALL        00000000   osl_pktfree
+000008d0  0001b41d R_ARM_JUMP24      00000000   _raw_spin_unlock_bh
+000008d4  00000d02 R_ARM_ABS32       00000000   .bss
+000008d8  0001e102 R_ARM_ABS32       000000b0   priq_selector
+000008dc  0001d302 R_ARM_ABS32       00000000   is_reg_mgmt_mode_[...]
+000008f8  0001d21c R_ARM_CALL        00000000   down
+00000904  00021a1c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00000924  0001981d R_ARM_JUMP24      00000000   up
+00000930  0001b41d R_ARM_JUMP24      00000000   _raw_spin_unlock_bh
+000009ac  0001ff1c R_ARM_CALL        00000000   osl_pkt_tofwder
+000009bc  00021a1c R_ARM_CALL        00000000   _raw_spin_lock_bh
+000009e0  0001b41c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+000009fc  0001b91c R_ARM_CALL        00000000   osl_pkt_frmfwder
+00000a18  00021b1c R_ARM_CALL        00000000   osl_pktfree
+00000a50  0001f31c R_ARM_CALL        00000000   memset
+00000a84  00019e1c R_ARM_CALL        00000000   osl_pkt_tonative
+00000e80  0001d71c R_ARM_CALL        00000000   warn_slowpath_null
+00000ea4  0001ca1c R_ARM_CALL        00000000   skb_pull
+00000f08  0001ca1c R_ARM_CALL        00000000   skb_pull
+00001074  00019e1c R_ARM_CALL        00000000   osl_pkt_tonative
+0000109c  00021a1c R_ARM_CALL        00000000   _raw_spin_lock_bh
+000010c0  0001b41c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+000010d4  0001a21c R_ARM_CALL        00000000   osl_pkt_frmnative
+00001114  00021b1c R_ARM_CALL        00000000   osl_pktfree
+000011c0  0001d51c R_ARM_CALL        00000000   skb_push
+000011cc  00019b1c R_ARM_CALL        00000000   memcpy
+0000126c  00021b1c R_ARM_CALL        00000000   osl_pktfree
+00001294  0001901c R_ARM_CALL        00000000   osl_ctfpool_add
+000012f0  0001781c R_ARM_CALL        00000000   osl_dma_map
+0000131c  0002371c R_ARM_CALL        00000000   pktsetprio
+00001328  0001ac1c R_ARM_CALL        00000000   eth_type_trans
+00001338  0002021c R_ARM_CALL        00000000   netif_rx
+000013a0  00019e1c R_ARM_CALL        00000000   osl_pkt_tonative
+00001410  0001ab1c R_ARM_CALL        00000000   __bug
+000014b4  0001fb1c R_ARM_CALL        00000000   bcm_robo_snoop_ma[...]
+00001530  0001fe1c R_ARM_CALL        00000000   is_iptv_port
+00001558  0001ca1c R_ARM_CALL        00000000   skb_pull
+000015e4  0002081c R_ARM_CALL        00000000   skb_trim
+00001630  00021a1c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00001658  0001b41c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00001670  0001a21c R_ARM_CALL        00000000   osl_pkt_frmnative
+00001680  00021b1c R_ARM_CALL        00000000   osl_pktfree
+000016fc  00021b1c R_ARM_CALL        00000000   osl_pktfree
+00001728  0001901c R_ARM_CALL        00000000   osl_ctfpool_add
+0000177c  0001781c R_ARM_CALL        00000000   osl_dma_map
+0000179c  0002371c R_ARM_CALL        00000000   pktsetprio
+000017a8  0001ac1c R_ARM_CALL        00000000   eth_type_trans
+000017b4  0002021c R_ARM_CALL        00000000   netif_rx
+00001804  00000d02 R_ARM_ABS32       00000000   .bss
+00001808  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+0000180c  0001a302 R_ARM_ABS32       00000034   igmp_snooping_enable
+00001810  00020602 R_ARM_ABS32       00000000   is_reg_snooping_enable
+0000183c  0001d21c R_ARM_CALL        00000000   down
+00001848  00021a1c R_ARM_CALL        00000000   _raw_spin_lock_bh
+000018f8  0001de1c R_ARM_CALL        00001ba0   etc_init
+0000198c  0001a91c R_ARM_CALL        00000000   schedule_work_on
+00001998  0002161c R_ARM_CALL        00000000   schedule_work
+000019d4  00019a1c R_ARM_CALL        00000000   _test_and_set_bit_le
+000019e4  0001dd1c R_ARM_CALL        00000000   __tasklet_schedule
+000019f0  0002161c R_ARM_CALL        00000000   schedule_work
+00001a30  0001981d R_ARM_JUMP24      00000000   up
+00001a3c  0001b41d R_ARM_JUMP24      00000000   _raw_spin_unlock_bh
+00001a40  00000d02 R_ARM_ABS32       00000000   .bss
+00001a44  00000b02 R_ARM_ABS32       00000000   .data
+00001b90  00017f02 R_ARM_ABS32       00000000   outer_cache
+00001be8  00017f02 R_ARM_ABS32       00000000   outer_cache
+00001cac  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00001cbc  00017f02 R_ARM_ABS32       00000000   outer_cache
+00001ce0  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00001d60  00017f02 R_ARM_ABS32       00000000   outer_cache
+00001e14  00017f02 R_ARM_ABS32       00000000   outer_cache
+00001e80  00017f02 R_ARM_ABS32       00000000   outer_cache
+00001f4c  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00001f7c  00017f02 R_ARM_ABS32       00000000   outer_cache
+00001fa0  0002001c R_ARM_CALL        00000000   osl_pcie_rreg
+00002038  00017f02 R_ARM_ABS32       00000000   outer_cache
+0000207c  0001c51c R_ARM_CALL        00001454   et_discard
+0000210c  0001021c R_ARM_CALL        0000520c   gmac_mf_lkup
+00002130  00021b1c R_ARM_CALL        00000000   osl_pktfree
+000021b4  00021b1c R_ARM_CALL        00000000   osl_pktfree
+000021e0  0001ca1c R_ARM_CALL        00000000   skb_pull
+000021fc  0001021c R_ARM_CALL        0000520c   gmac_mf_lkup
+00002240  0001d51c R_ARM_CALL        00000000   skb_push
+00002254  00021b1c R_ARM_CALL        00000000   osl_pktfree
+000022c0  0001ef1c R_ARM_CALL        000024f0   etc_bcm53115_war
+000022dc  00021b1c R_ARM_CALL        00000000   osl_pktfree
+00002304  00021b1c R_ARM_CALL        00000000   osl_pktfree
+00002338  0001d71c R_ARM_CALL        00000000   warn_slowpath_null
+00002420  0001d71c R_ARM_CALL        00000000   warn_slowpath_null
+00002448  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+0000244c  00021302 R_ARM_ABS32       00000090   up2tc
+
+Relocation section '.rel.devinit.text' at offset 0x11408 contains 62 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name
+00000020  0001cd1c R_ARM_CALL        00001abc   etc_chipmatch
+0000003c  00022d1c R_ARM_CALL        00002cdc   etc_unitmap
+0000005c  00020d1c R_ARM_CALL        00000000   sprintf
+00000068  0001f41c R_ARM_CALL        00000000   getvar
+00000080  0001d91c R_ARM_CALL        00000000   osl_attach
+0000008c  0001fa1c R_ARM_CALL        00000000   pci_set_master
+00000094  0001811c R_ARM_CALL        00000000   pci_enable_device
+000000a4  00019c1c R_ARM_CALL        00000000   osl_detach
+000000b4  0001f11c R_ARM_CALL        00000000   alloc_etherdev_mq
+000000c8  00019c1c R_ARM_CALL        00000000   osl_detach
+000000dc  0001f61c R_ARM_CALL        00000000   __memzero
+000000ec  0002251c R_ARM_CALL        00000000   dev_set_drvdata
+00000100  00018f1c R_ARM_CALL        00000000   __arm_ioremap
+00000124  0001f31c R_ARM_CALL        00000000   memset
+000001b0  0001921c R_ARM_CALL        00002d3c   etc_attach
+000001e0  0001dc1c R_ARM_CALL        00000000   strncpy
+000001f4  0002361c R_ARM_CALL        000024dc   etc_rxlazy
+0000021c  0001b01c R_ARM_CALL        00000000   fwder_attach
+000002ec  0001aa1c R_ARM_CALL        00000000   create_proc_entry
+0000030c  0001aa1c R_ARM_CALL        00000000   create_proc_entry
+00000324  0001f01c R_ARM_CALL        00000000   nvram_get
+00000334  0002071c R_ARM_CALL        00000000   strcmp
+00000350  00019b1c R_ARM_CALL        00000000   memcpy
+00000360  00020f1c R_ARM_CALL        00000000   init_timer_key
+00000380  0001941c R_ARM_CALL        00000000   __sw_hweight32
+000003b4  0001d01c R_ARM_CALL        00000000   tasklet_init
+000003c4  0001d01c R_ARM_CALL        00000000   tasklet_init
+0000048c  0001cb1c R_ARM_CALL        00000000   request_threaded_irq
+000004bc  0001861c R_ARM_CALL        00000000   fwder_affinity
+000004f4  0001da1c R_ARM_CALL        00000000   register_netdev
+00000538  0001e51c R_ARM_CALL        00000000   printk
+00000584  0000151c R_ARM_CALL        00000148   et_free
+000005a0  0001871c R_ARM_CALL        00000000   osl_ctfpool_init
+000005b0  0000281c R_ARM_CALL        00000a4c   et_qos_init
+000005b8  00000d02 R_ARM_ABS32       00000000   .bss
+000005bc  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+000005c0  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+000005c4  00000b02 R_ARM_ABS32       00000000   .data
+000005c8  00002402 R_ARM_ABS32       0000025c   et_forward
+000005cc  0001d102 R_ARM_ABS32       00000000   ctf_attach_fn
+000005d0  0001c302 R_ARM_ABS32       0000002c   et_msg_level
+000005d4  00001402 R_ARM_ABS32       00000138   et_ctf_detach
+000005d8  0001d402 R_ARM_ABS32       00000000   num_physpages
+000005dc  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+000005e0  00002d02 R_ARM_ABS32       00000e4c   et_proc_wan_status
+000005e4  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+000005e8  00002e02 R_ARM_ABS32       00000c94   et_proc_net_status
+000005ec  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+000005f0  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+000005f4  00002f02 R_ARM_ABS32       00000c78   et_watchdog
+000005f8  00022102 R_ARM_ABS32       00000000   cpu_online_mask
+000005fc  00003002 R_ARM_ABS32       00001814   et_dpc
+00000600  00003102 R_ARM_ABS32       00000934   et_tx_tasklet
+00000604  00003202 R_ARM_ABS32       00001a48   et_dpc_work
+00000608  00003302 R_ARM_ABS32       000008e0   et_txq_work
+0000060c  00003402 R_ARM_ABS32       00000c6c   et_watchdog_task
+00000610  00002602 R_ARM_ABS32       0000028c   et_isr
+00000614  00000702 R_ARM_ABS32       00000000   .rodata
+00000618  00000702 R_ARM_ABS32       00000000   .rodata
+0000061c  00000702 R_ARM_ABS32       00000000   .rodata
+00000620  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00000624  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+
+Relocation section '.rel.init.text' at offset 0x115f8 contains 31 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name
+0000000c  0001f41c R_ARM_CALL        00000000   getvar
+00000020  0002121c R_ARM_CALL        00000000   bcm_strtoul
+0000003c  0001e51c R_ARM_CALL        00000000   printk
+00000048  0001f41c R_ARM_CALL        00000000   getvar
+0000005c  0002121c R_ARM_CALL        00000000   bcm_strtoul
+00000074  0001e51c R_ARM_CALL        00000000   printk
+00000080  0001f41c R_ARM_CALL        00000000   getvar
+00000094  0002121c R_ARM_CALL        00000000   bcm_strtoul
+000000ac  0001e51c R_ARM_CALL        00000000   printk
+000000b8  0001f41c R_ARM_CALL        00000000   getvar
+000000cc  0002121c R_ARM_CALL        00000000   bcm_strtoul
+000000e8  0001e51c R_ARM_CALL        00000000   printk
+000000f4  0001f41c R_ARM_CALL        00000000   getvar
+00000108  0002121c R_ARM_CALL        00000000   bcm_strtoul
+00000120  0001e51c R_ARM_CALL        00000000   printk
+00000134  0001961d R_ARM_JUMP24      00000000   __pci_register_driver
+00000138  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+0000013c  00000d02 R_ARM_ABS32       00000000   .bss
+00000140  00000702 R_ARM_ABS32       00000000   .rodata
+00000144  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00000148  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+0000014c  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00000150  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00000154  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00000158  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+0000015c  00000b02 R_ARM_ABS32       00000000   .data
+00000160  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00000164  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00000168  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+0000016c  00018802 R_ARM_ABS32       00000000   __this_module
+00000170  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+
+Relocation section '.rel.exit.text' at offset 0x116f0 contains 2 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name
+00000004  0001a61d R_ARM_JUMP24      00000000   pci_unregister_driver
+00000008  00000b02 R_ARM_ABS32       00000000   .data
+
+Relocation section '.rel.devexit.text' at offset 0x11700 contains 6 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name
+00000010  0001cd1c R_ARM_CALL        00001abc   etc_chipmatch
+0000001c  0001be1c R_ARM_CALL        00000000   fwder_exit
+0000002c  0000541c R_ARM_CALL        00001334   et_suspend
+00000034  00017c1c R_ARM_CALL        00000000   dev_get_drvdata
+00000040  0000151c R_ARM_CALL        00000148   et_free
+00000050  0002251d R_ARM_JUMP24      00000000   dev_set_drvdata
+
+Relocation section '.rel.rodata' at offset 0x11730 contains 21 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name
+00000008  00005302 R_ARM_ABS32       00001184   et_open
+0000000c  00005802 R_ARM_ABS32       000013a4   et_close
+00000010  00002002 R_ARM_ABS32       0000056c   et_dummy_start
+00000020  00003f02 R_ARM_ABS32       00000f5c   et_set_multicast_list
+00000024  00001c02 R_ARM_ABS32       00000478   et_set_mac_address
+0000002c  00002702 R_ARM_ABS32       0000059c   et_ioctl
+00000044  00001802 R_ARM_ABS32       000002a0   et_get_stats
+00000074  00005302 R_ARM_ABS32       00001184   et_open
+00000078  00005802 R_ARM_ABS32       000013a4   et_close
+0000007c  00002102 R_ARM_ABS32       00000090   et_start
+0000008c  00003f02 R_ARM_ABS32       00000f5c   et_set_multicast_list
+00000090  00001c02 R_ARM_ABS32       00000478   et_set_mac_address
+00000098  00002702 R_ARM_ABS32       0000059c   et_ioctl
+000000b0  00001802 R_ARM_ABS32       000002a0   et_get_stats
+000000d8  00001202 R_ARM_ABS32       00000000   et_get_settings
+000000dc  00001d02 R_ARM_ABS32       000004c4   et_set_settings
+000000e0  00001902 R_ARM_ABS32       00000420   et_get_driver_info
+000001f8  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+000001fc  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00000200  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+00000204  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+
+Relocation section '.rel.ARM.exidx.text.fastpath' at offset 0x117d8 contains 43 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name
+00000000  0000022a R_ARM_PREL31      00000000   .text.fastpath
+00000000  00018d00 R_ARM_NONE        00000000   __aeabi_unwind_cpp_pr0
+00000008  0000022a R_ARM_PREL31      00000000   .text.fastpath
+00000010  0000022a R_ARM_PREL31      00000000   .text.fastpath
+00000010  00022900 R_ARM_NONE        00000000   __aeabi_unwind_cpp_pr1
+00000014  0000082a R_ARM_PREL31      00000000   .ARM.extab.text.f[...]
+00000018  0000022a R_ARM_PREL31      00000000   .text.fastpath
+00000020  0000022a R_ARM_PREL31      00000000   .text.fastpath
+00000028  0000022a R_ARM_PREL31      00000000   .text.fastpath
+00000030  0000022a R_ARM_PREL31      00000000   .text.fastpath
+00000038  0000022a R_ARM_PREL31      00000000   .text.fastpath
+00000040  0000022a R_ARM_PREL31      00000000   .text.fastpath
+00000048  0000022a R_ARM_PREL31      00000000   .text.fastpath
+00000050  0000022a R_ARM_PREL31      00000000   .text.fastpath
+00000050  00018d00 R_ARM_NONE        00000000   __aeabi_unwind_cpp_pr0
+00000058  0000022a R_ARM_PREL31      00000000   .text.fastpath
+00000060  0000022a R_ARM_PREL31      00000000   .text.fastpath
+00000068  0000022a R_ARM_PREL31      00000000   .text.fastpath
+00000070  0000022a R_ARM_PREL31      00000000   .text.fastpath
+00000078  0000022a R_ARM_PREL31      00000000   .text.fastpath
+00000078  00022900 R_ARM_NONE        00000000   __aeabi_unwind_cpp_pr1
+0000007c  0000082a R_ARM_PREL31      00000000   .ARM.extab.text.f[...]
+00000080  0000022a R_ARM_PREL31      00000000   .text.fastpath
+00000088  0000022a R_ARM_PREL31      00000000   .text.fastpath
+00000090  0000022a R_ARM_PREL31      00000000   .text.fastpath
+00000098  0000022a R_ARM_PREL31      00000000   .text.fastpath
+000000a0  0000022a R_ARM_PREL31      00000000   .text.fastpath
+000000a0  00022900 R_ARM_NONE        00000000   __aeabi_unwind_cpp_pr1
+000000a4  0000082a R_ARM_PREL31      00000000   .ARM.extab.text.f[...]
+000000a8  0000022a R_ARM_PREL31      00000000   .text.fastpath
+000000a8  00018d00 R_ARM_NONE        00000000   __aeabi_unwind_cpp_pr0
+000000b0  0000022a R_ARM_PREL31      00000000   .text.fastpath
+000000b4  0000082a R_ARM_PREL31      00000000   .ARM.extab.text.f[...]
+000000b8  0000022a R_ARM_PREL31      00000000   .text.fastpath
+000000bc  0000082a R_ARM_PREL31      00000000   .ARM.extab.text.f[...]
+000000c0  0000022a R_ARM_PREL31      00000000   .text.fastpath
+000000c8  0000022a R_ARM_PREL31      00000000   .text.fastpath
+000000d0  0000022a R_ARM_PREL31      00000000   .text.fastpath
+000000d8  0000022a R_ARM_PREL31      00000000   .text.fastpath
+000000e0  0000022a R_ARM_PREL31      00000000   .text.fastpath
+000000e8  0000022a R_ARM_PREL31      00000000   .text.fastpath
+000000ec  0000082a R_ARM_PREL31      00000000   .ARM.extab.text.f[...]
+000000f0  0000022a R_ARM_PREL31      00000000   .text.fastpath
+
+Relocation section '.rel.ARM.exidx.devinit.text' at offset 0x11930 contains 2 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name
+00000000  0000032a R_ARM_PREL31      00000000   .devinit.text
+00000000  00018d00 R_ARM_NONE        00000000   __aeabi_unwind_cpp_pr0
+
+Relocation section '.rel.ARM.exidx.init.text' at offset 0x11940 contains 2 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name
+00000000  0000042a R_ARM_PREL31      00000000   .init.text
+00000000  00018d00 R_ARM_NONE        00000000   __aeabi_unwind_cpp_pr0
+
+Relocation section '.rel.ARM.exidx.exit.text' at offset 0x11950 contains 2 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name
+00000000  0000052a R_ARM_PREL31      00000000   .exit.text
+00000000  00018d00 R_ARM_NONE        00000000   __aeabi_unwind_cpp_pr0
+
+Relocation section '.rel.ARM.exidx.devexit.text' at offset 0x11960 contains 2 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name
+00000000  0000062a R_ARM_PREL31      00000000   .devexit.text
+00000000  00018d00 R_ARM_NONE        00000000   __aeabi_unwind_cpp_pr0
+
+Relocation section '.rel__param' at offset 0x11970 contains 15 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name
+00000000  00000702 R_ARM_ABS32       00000000   .rodata
+00000004  00018002 R_ARM_ABS32       00000000   param_ops_uint
+0000000c  00000b02 R_ARM_ABS32       00000000   .data
+00000010  00000702 R_ARM_ABS32       00000000   .rodata
+00000014  00018002 R_ARM_ABS32       00000000   param_ops_uint
+0000001c  00000b02 R_ARM_ABS32       00000000   .data
+00000020  00000702 R_ARM_ABS32       00000000   .rodata
+00000024  00022c02 R_ARM_ABS32       00000000   param_ops_int
+0000002c  00000d02 R_ARM_ABS32       00000000   .bss
+00000030  00000702 R_ARM_ABS32       00000000   .rodata
+00000034  00022c02 R_ARM_ABS32       00000000   param_ops_int
+0000003c  00000d02 R_ARM_ABS32       00000000   .bss
+00000040  00000702 R_ARM_ABS32       00000000   .rodata
+00000044  00022c02 R_ARM_ABS32       00000000   param_ops_int
+0000004c  00000d02 R_ARM_ABS32       00000000   .bss
+
+Relocation section '.rel.data' at offset 0x119e8 contains 67 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name
+00000018  00000902 R_ARM_ABS32       00000000   .rodata.str1.1
+0000001c  00000c02 R_ARM_ABS32       00000000   .devinit.data
+00000020  00002b02 R_ARM_ABS32       00000000   et_probe
+00000024  00005602 R_ARM_ABS32       00000000   et_remove
+00000028  00005402 R_ARM_ABS32       00001334   et_suspend
+00000034  00005202 R_ARM_ABS32       00001118   et_resume
+000000f0  0000a002 R_ARM_ABS32       00002e0c   chipid
+000000f4  0000e702 R_ARM_ABS32       000047d8   chipattach
+000000f8  0000e602 R_ARM_ABS32       0000473c   chipdetach
+000000fc  0000e302 R_ARM_ABS32       00004138   chipreset
+00000100  0000e002 R_ARM_ABS32       00003d30   chipinit
+00000104  0000a902 R_ARM_ABS32       00001a50   chiptx
+00000108  0000ac02 R_ARM_ABS32       00001ac0   chiprx
+0000010c  0000ad02 R_ARM_ABS32       00001aec   chiprxquota
+00000110  0000ae02 R_ARM_ABS32       00001b50   chiprxlazy
+00000114  0000b202 R_ARM_ABS32       00001b94   chiprxfill
+00000118  0000c402 R_ARM_ABS32       00001cc0   chipgetintrevents
+0000011c  0000b702 R_ARM_ABS32       00001bec   chiperrors
+00000124  0000b402 R_ARM_ABS32       00001bac   chipintrson
+00000128  0000c102 R_ARM_ABS32       00001c6c   chipintrsoff
+0000012c  0000ab02 R_ARM_ABS32       00001a8c   chiptxreclaim
+00000130  0000b002 R_ARM_ABS32       00002e88   chiprxreclaim
+00000134  0000c002 R_ARM_ABS32       00002fd8   chipstatsupd
+00000138  0000dd02 R_ARM_ABS32       00003be8   chipdumpmib
+0000013c  0000da02 R_ARM_ABS32       00003b8c   chipenablepme
+00000140  0000d702 R_ARM_ABS32       00003b30   chipdisablepme
+00000144  0000b802 R_ARM_ABS32       00002eb0   chipconfigtimer
+00000148  0000d002 R_ARM_ABS32       00003ae8   chipphyreset
+0000014c  0000cf02 R_ARM_ABS32       00003898   chipphyrd
+00000150  0000c902 R_ARM_ABS32       00003680   chipphywr
+00000154  0000be02 R_ARM_ABS32       00002fb4   chipmacrd
+00000158  0000a402 R_ARM_ABS32       00002e4c   chipmacwr
+0000015c  0000a702 R_ARM_ABS32       00002e84   chipdump
+00000160  0000c602 R_ARM_ABS32       00003654   chiplongname
+00000164  0000bb02 R_ARM_ABS32       00002eec   chipduplexupd
+00000180  0000fa02 R_ARM_ABS32       00005190   chipid
+00000184  00015002 R_ARM_ABS32       00006b6c   chipattach
+00000188  00014a02 R_ARM_ABS32       000062c0   chipdetach
+0000018c  00014d02 R_ARM_ABS32       000065c4   chipreset
+00000190  00014502 R_ARM_ABS32       00005bec   chipinit
+00000194  00014202 R_ARM_ABS32       00002294   chiptx
+00000198  00014102 R_ARM_ABS32       00002170   chiprx
+0000019c  00014002 R_ARM_ABS32       0000203c   chiprxquota
+000001a0  00010702 R_ARM_ABS32       00001dd4   chiprxlazy
+000001a4  00010c02 R_ARM_ABS32       00001e30   chiprxfill
+000001a8  00011f02 R_ARM_ABS32       00001f80   chipgetintrevents
+000001ac  00011002 R_ARM_ABS32       00001e84   chiperrors
+000001b0  00011102 R_ARM_ABS32       0000529c   chipdmaerrors
+000001b4  00010d02 R_ARM_ABS32       00001e48   chipintrson
+000001b8  00011c02 R_ARM_ABS32       00001f04   chipintrsoff
+000001bc  00010402 R_ARM_ABS32       00001d64   chiptxreclaim
+000001c0  00010902 R_ARM_ABS32       00005274   chiprxreclaim
+000001c4  00011a02 R_ARM_ABS32       00005328   chipstatsupd
+000001c8  00013d02 R_ARM_ABS32       00005aa4   chipdumpmib
+000001cc  00011302 R_ARM_ABS32       000052b8   chipenablepme
+000001d0  00011402 R_ARM_ABS32       000052bc   chipdisablepme
+000001d4  00011502 R_ARM_ABS32       000052c0   chipconfigtimer
+000001d8  00014c02 R_ARM_ABS32       00006580   chipphyreset
+000001dc  00013702 R_ARM_ABS32       0000595c   chipphyrd
+000001e0  00013402 R_ARM_ABS32       00005830   chipphywr
+000001e4  00011902 R_ARM_ABS32       00005304   chipmacrd
+000001e8  0000fe02 R_ARM_ABS32       000051d0   chipmacwr
+000001ec  00010102 R_ARM_ABS32       00005208   chipdump
+000001f0  00013a02 R_ARM_ABS32       00005a78   chiplongname
+000001f4  00012802 R_ARM_ABS32       0000557c   chipduplexupd
+000001f8  00011802 R_ARM_ABS32       00005300   chipunitmap
+000001fc  00010b02 R_ARM_ABS32       00001e18   chipactiverxbuf
+
+Relocation section '.rel.gnu.linkonce.this_module' at offset 0x11c00 contains 2 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name
+000000bc  0001a702 R_ARM_ABS32       00000000   init_module
+00000140  00019902 R_ARM_ABS32       00000000   cleanup_module
+
+Relocation section '.rel.ARM.exidx' at offset 0x11c10 contains 135 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name
+00000000  0000012a R_ARM_PREL31      00000000   .text
+00000000  00018d00 R_ARM_NONE        00000000   __aeabi_unwind_cpp_pr0
+00000008  0000012a R_ARM_PREL31      00000000   .text
+00000010  0000012a R_ARM_PREL31      00000000   .text
+00000018  0000012a R_ARM_PREL31      00000000   .text
+00000020  0000012a R_ARM_PREL31      00000000   .text
+00000028  0000012a R_ARM_PREL31      00000000   .text
+00000030  0000012a R_ARM_PREL31      00000000   .text
+00000038  0000012a R_ARM_PREL31      00000000   .text
+00000040  0000012a R_ARM_PREL31      00000000   .text
+00000048  0000012a R_ARM_PREL31      00000000   .text
+00000050  0000012a R_ARM_PREL31      00000000   .text
+00000058  0000012a R_ARM_PREL31      00000000   .text
+00000060  0000012a R_ARM_PREL31      00000000   .text
+00000068  0000012a R_ARM_PREL31      00000000   .text
+00000068  00022900 R_ARM_NONE        00000000   __aeabi_unwind_cpp_pr1
+0000006c  00000a2a R_ARM_PREL31      00000000   .ARM.extab
+00000070  0000012a R_ARM_PREL31      00000000   .text
+00000074  00000a2a R_ARM_PREL31      00000000   .ARM.extab
+00000078  0000012a R_ARM_PREL31      00000000   .text
+00000080  0000012a R_ARM_PREL31      00000000   .text
+00000088  0000012a R_ARM_PREL31      00000000   .text
+00000090  0000012a R_ARM_PREL31      00000000   .text
+00000098  0000012a R_ARM_PREL31      00000000   .text
+000000a0  0000012a R_ARM_PREL31      00000000   .text
+000000a8  0000012a R_ARM_PREL31      00000000   .text
+000000b0  0000012a R_ARM_PREL31      00000000   .text
+000000b8  0000012a R_ARM_PREL31      00000000   .text
+000000c0  0000012a R_ARM_PREL31      00000000   .text
+000000c8  0000012a R_ARM_PREL31      00000000   .text
+000000d0  0000012a R_ARM_PREL31      00000000   .text
+000000d4  00000a2a R_ARM_PREL31      00000000   .ARM.extab
+000000d8  0000012a R_ARM_PREL31      00000000   .text
+000000dc  00000a2a R_ARM_PREL31      00000000   .ARM.extab
+000000e0  0000012a R_ARM_PREL31      00000000   .text
+000000e8  0000012a R_ARM_PREL31      00000000   .text
+000000f0  0000012a R_ARM_PREL31      00000000   .text
+000000f8  0000012a R_ARM_PREL31      00000000   .text
+00000100  0000012a R_ARM_PREL31      00000000   .text
+00000108  0000012a R_ARM_PREL31      00000000   .text
+00000110  0000012a R_ARM_PREL31      00000000   .text
+00000118  0000012a R_ARM_PREL31      00000000   .text
+00000118  00018d00 R_ARM_NONE        00000000   __aeabi_unwind_cpp_pr0
+00000120  0000012a R_ARM_PREL31      00000000   .text
+00000128  0000012a R_ARM_PREL31      00000000   .text
+00000130  0000012a R_ARM_PREL31      00000000   .text
+00000138  0000012a R_ARM_PREL31      00000000   .text
+00000140  0000012a R_ARM_PREL31      00000000   .text
+00000140  00022900 R_ARM_NONE        00000000   __aeabi_unwind_cpp_pr1
+00000144  00000a2a R_ARM_PREL31      00000000   .ARM.extab
+00000148  0000012a R_ARM_PREL31      00000000   .text
+00000150  0000012a R_ARM_PREL31      00000000   .text
+00000158  0000012a R_ARM_PREL31      00000000   .text
+00000160  0000012a R_ARM_PREL31      00000000   .text
+00000168  0000012a R_ARM_PREL31      00000000   .text
+00000170  0000012a R_ARM_PREL31      00000000   .text
+00000178  0000012a R_ARM_PREL31      00000000   .text
+00000180  0000012a R_ARM_PREL31      00000000   .text
+00000188  0000012a R_ARM_PREL31      00000000   .text
+00000190  0000012a R_ARM_PREL31      00000000   .text
+00000198  0000012a R_ARM_PREL31      00000000   .text
+000001a0  0000012a R_ARM_PREL31      00000000   .text
+000001a8  0000012a R_ARM_PREL31      00000000   .text
+000001b0  0000012a R_ARM_PREL31      00000000   .text
+000001b4  00000a2a R_ARM_PREL31      00000000   .ARM.extab
+000001b8  0000012a R_ARM_PREL31      00000000   .text
+000001b8  00018d00 R_ARM_NONE        00000000   __aeabi_unwind_cpp_pr0
+000001c0  0000012a R_ARM_PREL31      00000000   .text
+000001c8  0000012a R_ARM_PREL31      00000000   .text
+000001d0  0000012a R_ARM_PREL31      00000000   .text
+000001d8  0000012a R_ARM_PREL31      00000000   .text
+000001e0  0000012a R_ARM_PREL31      00000000   .text
+000001e8  0000012a R_ARM_PREL31      00000000   .text
+000001e8  00022900 R_ARM_NONE        00000000   __aeabi_unwind_cpp_pr1
+000001ec  00000a2a R_ARM_PREL31      00000000   .ARM.extab
+000001f0  0000012a R_ARM_PREL31      00000000   .text
+000001f4  00000a2a R_ARM_PREL31      00000000   .ARM.extab
+000001f8  0000012a R_ARM_PREL31      00000000   .text
+00000200  0000012a R_ARM_PREL31      00000000   .text
+00000208  0000012a R_ARM_PREL31      00000000   .text
+00000210  0000012a R_ARM_PREL31      00000000   .text
+00000218  0000012a R_ARM_PREL31      00000000   .text
+00000220  0000012a R_ARM_PREL31      00000000   .text
+00000228  0000012a R_ARM_PREL31      00000000   .text
+00000230  0000012a R_ARM_PREL31      00000000   .text
+00000238  0000012a R_ARM_PREL31      00000000   .text
+00000240  0000012a R_ARM_PREL31      00000000   .text
+00000248  0000012a R_ARM_PREL31      00000000   .text
+0000024c  00000a2a R_ARM_PREL31      00000000   .ARM.extab
+00000250  0000012a R_ARM_PREL31      00000000   .text
+00000258  0000012a R_ARM_PREL31      00000000   .text
+00000260  0000012a R_ARM_PREL31      00000000   .text
+00000268  0000012a R_ARM_PREL31      00000000   .text
+00000268  00018d00 R_ARM_NONE        00000000   __aeabi_unwind_cpp_pr0
+00000270  0000012a R_ARM_PREL31      00000000   .text
+00000278  0000012a R_ARM_PREL31      00000000   .text
+00000280  0000012a R_ARM_PREL31      00000000   .text
+00000288  0000012a R_ARM_PREL31      00000000   .text
+00000290  0000012a R_ARM_PREL31      00000000   .text
+00000298  0000012a R_ARM_PREL31      00000000   .text
+000002a0  0000012a R_ARM_PREL31      00000000   .text
+000002a0  00018d00 R_ARM_NONE        00000000   __aeabi_unwind_cpp_pr0
+000002a8  0000012a R_ARM_PREL31      00000000   .text
+000002b0  0000012a R_ARM_PREL31      00000000   .text
+000002b8  0000012a R_ARM_PREL31      00000000   .text
+000002c0  0000012a R_ARM_PREL31      00000000   .text
+000002c8  0000012a R_ARM_PREL31      00000000   .text
+000002c8  00022900 R_ARM_NONE        00000000   __aeabi_unwind_cpp_pr1
+000002cc  00000a2a R_ARM_PREL31      00000000   .ARM.extab
+000002d0  0000012a R_ARM_PREL31      00000000   .text
+000002d8  0000012a R_ARM_PREL31      00000000   .text
+000002e0  0000012a R_ARM_PREL31      00000000   .text
+000002e8  0000012a R_ARM_PREL31      00000000   .text
+000002f0  0000012a R_ARM_PREL31      00000000   .text
+000002f4  00000a2a R_ARM_PREL31      00000000   .ARM.extab
+000002f8  0000012a R_ARM_PREL31      00000000   .text
+00000300  0000012a R_ARM_PREL31      00000000   .text
+00000308  0000012a R_ARM_PREL31      00000000   .text
+00000310  0000012a R_ARM_PREL31      00000000   .text
+00000318  0000012a R_ARM_PREL31      00000000   .text
+00000320  0000012a R_ARM_PREL31      00000000   .text
+00000324  00000a2a R_ARM_PREL31      00000000   .ARM.extab
+00000328  0000012a R_ARM_PREL31      00000000   .text
+00000330  0000012a R_ARM_PREL31      00000000   .text
+00000338  0000012a R_ARM_PREL31      00000000   .text
+0000033c  00000a2a R_ARM_PREL31      00000000   .ARM.extab
+00000340  0000012a R_ARM_PREL31      00000000   .text
+00000348  0000012a R_ARM_PREL31      00000000   .text
+00000350  0000012a R_ARM_PREL31      00000000   .text
+00000358  0000012a R_ARM_PREL31      00000000   .text
+00000360  0000012a R_ARM_PREL31      00000000   .text
+00000368  0000012a R_ARM_PREL31      00000000   .text
+00000370  0000012a R_ARM_PREL31      00000000   .text
+00000374  00000a2a R_ARM_PREL31      00000000   .ARM.extab
+00000378  0000012a R_ARM_PREL31      00000000   .text
+
+Unwind section '.ARM.exidx.text.fastpath' at offset 0xa1f8 contains 31 entries:
+
+0x0: 0x80a8b0b0
+  Compact model index: 0
+  0xa8      pop {r4, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x90 <et_start>: 0x80acb0b0
+  Compact model index: 0
+  0xac      pop {r4, r5, r6, r7, r8, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x25c <et_forward>: @0x0
+  Compact model index: 1
+  0xb1 0x08 pop {r3}
+  0x84 0x00 pop {r14}
+  0xb0      finish
+  0xb0      finish
+
+0x28c <et_isr>: 0x80b108ab
+  Compact model index: 0
+  0xb1 0x08 pop {r3}
+  0xab      pop {r4, r5, r6, r7, r14}
+
+0x314 <et_sendnext>: 0x800aafb0
+  Compact model index: 0
+  0x0a      vsp = vsp + 44
+  0xaf      pop {r4, r5, r6, r7, r8, r9, r10, r11, r14}
+  0xb0      finish
+
+0x8e0 <et_txq_work>: 0x80a8b0b0
+  Compact model index: 0
+  0xa8      pop {r4, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x934 <et_tx_tasklet>: 0x80b10faa
+  Compact model index: 0
+  0xb1 0x0f pop {r0, r1, r2, r3}
+  0xaa      pop {r4, r5, r6, r14}
+
+0x94c <et_rxevent.clone.13>: 0x80163faf
+  Compact model index: 0
+  0x16      vsp = vsp + 92
+  0x3f      vsp = vsp + 256
+  0xaf      pop {r4, r5, r6, r7, r8, r9, r10, r11, r14}
+
+0x1814 <et_dpc>: 0x80acb0b0
+  Compact model index: 0
+  0xac      pop {r4, r5, r6, r7, r8, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x1a48 <et_dpc_work>: 0x80b0b0b0
+  Compact model index: 0
+  0xb0      finish
+  0xb0      finish
+  0xb0      finish
+
+0x1a50 <chiptx>: 0x80a8b0b0
+  Compact model index: 0
+  0xa8      pop {r4, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x1a8c <chiptxreclaim>: 0x80a8b0b0
+  Compact model index: 0
+  0xa8      pop {r4, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x1ac0 <chiprx>: 0x80a8b0b0
+  Compact model index: 0
+  0xa8      pop {r4, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x1aec <chiprxquota>: 0x80b108ab
+  Compact model index: 0
+  0xb1 0x08 pop {r3}
+  0xab      pop {r4, r5, r6, r7, r14}
+
+0x1b50 <chiprxlazy>: 0x80b108a9
+  Compact model index: 0
+  0xb1 0x08 pop {r3}
+  0xa9      pop {r4, r5, r14}
+
+0x1b94 <chiprxfill>: @0xc
+  Compact model index: 1
+  0xb1 0x08 pop {r3}
+  0x84 0x00 pop {r14}
+  0xb0      finish
+  0xb0      finish
+
+0x1bac <chipintrson>: 0x80a8b0b0
+  Compact model index: 0
+  0xa8      pop {r4, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x1bec <chiperrors>: 0x80b0b0b0
+  Compact model index: 0
+  0xb0      finish
+  0xb0      finish
+  0xb0      finish
+
+0x1c6c <chipintrsoff>: 0x80b107a9
+  Compact model index: 0
+  0xb1 0x07 pop {r0, r1, r2}
+  0xa9      pop {r4, r5, r14}
+
+0x1cc0 <chipgetintrevents>: 0x80b103aa
+  Compact model index: 0
+  0xb1 0x03 pop {r0, r1}
+  0xaa      pop {r4, r5, r6, r14}
+
+0x1d64 <chiptxreclaim>: @0x18
+  Compact model index: 1
+  0xb1 0x08 pop {r3}
+  0x84 0x5f pop {r4, r5, r6, r7, r8, r10, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x1dd4 <chiprxlazy>: 0x80b108a9
+  Compact model index: 0
+  0xb1 0x08 pop {r3}
+  0xa9      pop {r4, r5, r14}
+
+0x1e18 <chipactiverxbuf>: @0x24
+  Compact model index: 1
+  0xb1 0x08 pop {r3}
+  0x84 0x00 pop {r14}
+  0xb0      finish
+  0xb0      finish
+
+0x1e30 <chiprxfill>: @0x30
+  Compact model index: 1
+  0xb1 0x08 pop {r3}
+  0x84 0x00 pop {r14}
+  0xb0      finish
+  0xb0      finish
+
+0x1e48 <chipintrson>: 0x80a8b0b0
+  Compact model index: 0
+  0xa8      pop {r4, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x1e84 <chiperrors>: 0x80b0b0b0
+  Compact model index: 0
+  0xb0      finish
+  0xb0      finish
+  0xb0      finish
+
+0x1f04 <chipintrsoff>: 0x80b103a8
+  Compact model index: 0
+  0xb1 0x03 pop {r0, r1}
+  0xa8      pop {r4, r14}
+
+0x1f80 <chipgetintrevents>: 0x80b103aa
+  Compact model index: 0
+  0xb1 0x03 pop {r0, r1}
+  0xaa      pop {r4, r5, r6, r14}
+
+0x203c <chiprxquota>: 0x80b107af
+  Compact model index: 0
+  0xb1 0x07 pop {r0, r1, r2}
+  0xaf      pop {r4, r5, r6, r7, r8, r9, r10, r11, r14}
+
+0x2170 <chiprx>: @0x3c
+  Compact model index: 1
+  0xb1 0x08 pop {r3}
+  0x84 0x5f pop {r4, r5, r6, r7, r8, r10, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x2294 <chiptx>: 0x80b108ab
+  Compact model index: 0
+  0xb1 0x08 pop {r3}
+  0xab      pop {r4, r5, r6, r7, r14}
+
+
+Unwind section '.ARM.exidx.devinit.text' at offset 0xa2f0 contains 1 entry:
+
+0x0: 0x8024afb0
+  Compact model index: 0
+  0x24      vsp = vsp + 148
+  0xaf      pop {r4, r5, r6, r7, r8, r9, r10, r11, r14}
+  0xb0      finish
+
+
+Unwind section '.ARM.exidx.init.text' at offset 0xa2f8 contains 1 entry:
+
+0x0: 0x80a8b0b0
+  Compact model index: 0
+  0xa8      pop {r4, r14}
+  0xb0      finish
+  0xb0      finish
+
+
+Unwind section '.ARM.exidx.exit.text' at offset 0xa300 contains 1 entry:
+
+0x0: 0x80b0b0b0
+  Compact model index: 0
+  0xb0      finish
+  0xb0      finish
+  0xb0      finish
+
+
+Unwind section '.ARM.exidx.devexit.text' at offset 0xa308 contains 1 entry:
+
+0x0: 0x80a8b0b0
+  Compact model index: 0
+  0xa8      pop {r4, r14}
+  0xb0      finish
+  0xb0      finish
+
+
+Unwind section '.ARM.exidx' at offset 0xb3c8 contains 112 entries:
+
+0x0: 0x80b0b0b0
+  Compact model index: 0
+  0xb0      finish
+  0xb0      finish
+  0xb0      finish
+
+0x138 <et_ctf_detach>: 0x80b0b0b0
+  Compact model index: 0
+  0xb0      finish
+  0xb0      finish
+  0xb0      finish
+
+0x148 <et_free>: 0x80aab0b0
+  Compact model index: 0
+  0xaa      pop {r4, r5, r6, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x2a0 <et_get_stats>: 0x80acb0b0
+  Compact model index: 0
+  0xac      pop {r4, r5, r6, r7, r8, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x420 <et_get_driver_info>: 0x80b108a9
+  Compact model index: 0
+  0xb1 0x08 pop {r3}
+  0xa9      pop {r4, r5, r14}
+
+0x478 <et_set_mac_address>: 0x80b108a9
+  Compact model index: 0
+  0xb1 0x08 pop {r3}
+  0xa9      pop {r4, r5, r14}
+
+0x4c4 <et_set_settings>: 0x80b107a9
+  Compact model index: 0
+  0xb1 0x07 pop {r0, r1, r2}
+  0xa9      pop {r4, r5, r14}
+
+0x56c <et_dummy_start>: 0x80b108a9
+  Compact model index: 0
+  0xb1 0x08 pop {r3}
+  0xa9      pop {r4, r5, r14}
+
+0x59c <et_ioctl>: 0x8006afb0
+  Compact model index: 0
+  0x06      vsp = vsp + 28
+  0xaf      pop {r4, r5, r6, r7, r8, r9, r10, r11, r14}
+  0xb0      finish
+
+0xa4c <et_qos_init>: 0x803f3fa8
+  Compact model index: 0
+  0x3f      vsp = vsp + 256
+  0x3f      vsp = vsp + 256
+  0xa8      pop {r4, r14}
+
+0xbc8 <_et_watchdog>: 0x80aab0b0
+  Compact model index: 0
+  0xaa      pop {r4, r5, r6, r14}
+  0xb0      finish
+  0xb0      finish
+
+0xc6c <et_watchdog_task>: 0x80b0b0b0
+  Compact model index: 0
+  0xb0      finish
+  0xb0      finish
+  0xb0      finish
+
+0xc78 <et_watchdog>: 0x80b0b0b0
+  Compact model index: 0
+  0xb0      finish
+  0xb0      finish
+  0xb0      finish
+
+0xc94 <et_proc_net_status>: @0x0
+  Compact model index: 1
+  0xb2 0x84 0x01 vsp = vsp + 1044
+  0xa9      pop {r4, r5, r14}
+  0xb0      finish
+  0xb0      finish
+
+0xe4c <et_proc_wan_status>: @0xc
+  Compact model index: 1
+  0xb2 0x84 0x01 vsp = vsp + 1044
+  0xa9      pop {r4, r5, r14}
+  0xb0      finish
+  0xb0      finish
+
+0xf5c <et_set_multicast_list>: 0x80b101af
+  Compact model index: 0
+  0xb1 0x01 pop {r0}
+  0xaf      pop {r4, r5, r6, r7, r8, r9, r10, r11, r14}
+
+0x1088 <et_init>: 0x80b0b0b0
+  Compact model index: 0
+  0xb0      finish
+  0xb0      finish
+  0xb0      finish
+
+0x1090 <et_reset>: 0x80a8b0b0
+  Compact model index: 0
+  0xa8      pop {r4, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x10b0 <et_up>: 0x80aab0b0
+  Compact model index: 0
+  0xaa      pop {r4, r5, r6, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x1118 <et_resume>: 0x80a8b0b0
+  Compact model index: 0
+  0xa8      pop {r4, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x1184 <et_open>: 0x80b108a9
+  Compact model index: 0
+  0xb1 0x08 pop {r3}
+  0xa9      pop {r4, r5, r14}
+
+0x1208 <et_down>: 0x80acb0b0
+  Compact model index: 0
+  0xac      pop {r4, r5, r6, r7, r8, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x1334 <et_suspend>: 0x80a8b0b0
+  Compact model index: 0
+  0xa8      pop {r4, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x13a4 <et_close>: 0x80b108a9
+  Compact model index: 0
+  0xb1 0x08 pop {r3}
+  0xa9      pop {r4, r5, r14}
+
+0x1418 <et_intrson>: 0x80aab0b0
+  Compact model index: 0
+  0xaa      pop {r4, r5, r6, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x1454 <et_discard>: 0x8007aab0
+  Compact model index: 0
+  0x07      vsp = vsp + 32
+  0xaa      pop {r4, r5, r6, r14}
+  0xb0      finish
+
+0x14e8 <et_dump_ctf>: @0x18
+  Compact model index: 1
+  0xb1 0x08 pop {r3}
+  0x84 0x00 pop {r14}
+  0xb0      finish
+  0xb0      finish
+
+0x1510 <et_clear_ctf>: @0x24
+  Compact model index: 1
+  0xb1 0x08 pop {r3}
+  0x84 0x00 pop {r14}
+  0xb0      finish
+  0xb0      finish
+
+0x1538 <et_dump_fwder>: 0x80b0b0b0
+  Compact model index: 0
+  0xb0      finish
+  0xb0      finish
+  0xb0      finish
+
+0x1540 <et_dump>: 0x80b103a8
+  Compact model index: 0
+  0xb1 0x03 pop {r0, r1}
+  0xa8      pop {r4, r14}
+
+0x1590 <et_link_up>: 0x80b0b0b0
+  Compact model index: 0
+  0xb0      finish
+  0xb0      finish
+  0xb0      finish
+
+0x1594 <et_link_down>: 0x80b0b0b0
+  Compact model index: 0
+  0xb0      finish
+  0xb0      finish
+  0xb0      finish
+
+0x1598 <et_phyfind>: 0x80aab0b0
+  Compact model index: 0
+  0xaa      pop {r4, r5, r6, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x1628 <et_phyrd>: 0x80aab0b0
+  Compact model index: 0
+  0xaa      pop {r4, r5, r6, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x16a0 <et_phywr>: 0x80acb0b0
+  Compact model index: 0
+  0xac      pop {r4, r5, r6, r7, r8, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x1718 <et_dump_arl_entry>: 0x80aeb0b0
+  Compact model index: 0
+  0xae      pop {r4, r5, r6, r7, r8, r9, r10, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x17e4 <etc_dumpetc>: 0x8015acb0
+  Compact model index: 0
+  0x15      vsp = vsp + 88
+  0xac      pop {r4, r5, r6, r7, r8, r14}
+  0xb0      finish
+
+0x1abc <etc_chipmatch>: 0x80aab0b0
+  Compact model index: 0
+  0xaa      pop {r4, r5, r6, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x1b10 <etc_detach>: 0x80a8b0b0
+  Compact model index: 0
+  0xa8      pop {r4, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x1b54 <etc_reset>: 0x80a8b0b0
+  Compact model index: 0
+  0xa8      pop {r4, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x1ba0 <etc_init>: @0x30
+  Compact model index: 1
+  0xb1 0x08 pop {r3}
+  0x84 0x00 pop {r14}
+  0xb0      finish
+  0xb0      finish
+
+0x1bb8 <etc_up>: 0x80b0b0b0
+  Compact model index: 0
+  0xb0      finish
+  0xb0      finish
+  0xb0      finish
+
+0x1bcc <etc_down>: 0x80b108a9
+  Compact model index: 0
+  0xb1 0x08 pop {r3}
+  0xa9      pop {r4, r5, r14}
+
+0x1c30 <etc_watchdog>: 0x80acb0b0
+  Compact model index: 0
+  0xac      pop {r4, r5, r6, r7, r8, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x1f7c <etc_promisc>: 0x80b0b0b0
+  Compact model index: 0
+  0xb0      finish
+  0xb0      finish
+  0xb0      finish
+
+0x1f94 <etc_qos>: 0x80b0b0b0
+  Compact model index: 0
+  0xb0      finish
+  0xb0      finish
+  0xb0      finish
+
+0x1fac <etc_ioctl>: 0x80b10faa
+  Compact model index: 0
+  0xb1 0x0f pop {r0, r1, r2, r3}
+  0xaa      pop {r4, r5, r6, r14}
+
+0x24bc <etc_quota>: 0x80b0b0b0
+  Compact model index: 0
+  0xb0      finish
+  0xb0      finish
+  0xb0      finish
+
+0x24dc <etc_rxlazy>: 0x80b0b0b0
+  Compact model index: 0
+  0xb0      finish
+  0xb0      finish
+  0xb0      finish
+
+0x24f0 <etc_bcm53115_war>: 0x8005acb0
+  Compact model index: 0
+  0x05      vsp = vsp + 24
+  0xac      pop {r4, r5, r6, r7, r8, r14}
+  0xb0      finish
+
+0x261c <etc_totlen>: 0x80b0b0b0
+  Compact model index: 0
+  0xb0      finish
+  0xb0      finish
+  0xb0      finish
+
+0x263c <et_get_portinfo>: 0x80b10fac
+  Compact model index: 0
+  0xb1 0x0f pop {r0, r1, r2, r3}
+  0xac      pop {r4, r5, r6, r7, r8, r14}
+
+0x26ec <etc_iovar>: 0x8014afb0
+  Compact model index: 0
+  0x14      vsp = vsp + 84
+  0xaf      pop {r4, r5, r6, r7, r8, r9, r10, r11, r14}
+  0xb0      finish
+
+0x2cdc <etc_unitmap>: 0x80acb0b0
+  Compact model index: 0
+  0xac      pop {r4, r5, r6, r7, r8, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x2d3c <etc_attach>: @0x3c
+  Compact model index: 1
+  0xb1 0x07 pop {r0, r1, r2}
+  0x84 0x5f pop {r4, r5, r6, r7, r8, r10, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x2e0c <chipid>: 0x80b0b0b0
+  Compact model index: 0
+  0xb0      finish
+  0xb0      finish
+  0xb0      finish
+
+0x2e4c <chipmacwr>: 0x80aab0b0
+  Compact model index: 0
+  0xaa      pop {r4, r5, r6, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x2e84 <chipdump>: 0x80b0b0b0
+  Compact model index: 0
+  0xb0      finish
+  0xb0      finish
+  0xb0      finish
+
+0x2e88 <chiprxreclaim>: 0x80a8b0b0
+  Compact model index: 0
+  0xa8      pop {r4, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x2eb0 <chipconfigtimer>: 0x80b108a9
+  Compact model index: 0
+  0xb1 0x08 pop {r3}
+  0xa9      pop {r4, r5, r14}
+
+0x2eec <chipduplexupd>: 0x80b107a9
+  Compact model index: 0
+  0xb1 0x07 pop {r0, r1, r2}
+  0xa9      pop {r4, r5, r14}
+
+0x2fb4 <chipmacrd>: @0x48
+  Compact model index: 1
+  0xb1 0x07 pop {r0, r1, r2}
+  0x84 0x00 pop {r14}
+  0xb0      finish
+  0xb0      finish
+
+0x2fd8 <chipstatsupd>: @0x54
+  Compact model index: 1
+  0xb1 0x07 pop {r0, r1, r2}
+  0x84 0x5f pop {r4, r5, r6, r7, r8, r10, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x3654 <chiplongname>: 0x80b108a9
+  Compact model index: 0
+  0xb1 0x08 pop {r3}
+  0xa9      pop {r4, r5, r14}
+
+0x3680 <chipphywr>: 0x80b103ac
+  Compact model index: 0
+  0xb1 0x03 pop {r0, r1}
+  0xac      pop {r4, r5, r6, r7, r8, r14}
+
+0x37a0 <chipwrcam>: 0x80b107ab
+  Compact model index: 0
+  0xb1 0x07 pop {r0, r1, r2}
+  0xab      pop {r4, r5, r6, r7, r14}
+
+0x3898 <chipphyrd>: 0x80b103ac
+  Compact model index: 0
+  0xb1 0x03 pop {r0, r1}
+  0xac      pop {r4, r5, r6, r7, r8, r14}
+
+0x39e8 <chipphyor>: 0x80acb0b0
+  Compact model index: 0
+  0xac      pop {r4, r5, r6, r7, r8, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x3a1c <chipphyinit>: 0x80aab0b0
+  Compact model index: 0
+  0xaa      pop {r4, r5, r6, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x3ae8 <chipphyreset>: 0x80aab0b0
+  Compact model index: 0
+  0xaa      pop {r4, r5, r6, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x3b30 <chipdisablepme>: 0x80b107a9
+  Compact model index: 0
+  0xb1 0x07 pop {r0, r1, r2}
+  0xa9      pop {r4, r5, r14}
+
+0x3b8c <chipenablepme>: 0x80b107a9
+  Compact model index: 0
+  0xb1 0x07 pop {r0, r1, r2}
+  0xa9      pop {r4, r5, r14}
+
+0x3be8 <chipdumpmib>: 0x80b107a9
+  Compact model index: 0
+  0xb1 0x07 pop {r0, r1, r2}
+  0xa9      pop {r4, r5, r14}
+
+0x3d30 <chipinit>: @0x60
+  Compact model index: 1
+  0xb1 0x07 pop {r0, r1, r2}
+  0x84 0x5f pop {r4, r5, r6, r7, r8, r10, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x4138 <chipreset>: 0x80b103ac
+  Compact model index: 0
+  0xb1 0x03 pop {r0, r1}
+  0xac      pop {r4, r5, r6, r7, r8, r14}
+
+0x473c <chipdetach>: 0x80a8b0b0
+  Compact model index: 0
+  0xa8      pop {r4, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x47d8 <chipattach>: 0x800baeb0
+  Compact model index: 0
+  0x0b      vsp = vsp + 48
+  0xae      pop {r4, r5, r6, r7, r8, r9, r10, r14}
+  0xb0      finish
+
+0x4b74 <adm_enout.clone.0>: 0x80aab0b0
+  Compact model index: 0
+  0xaa      pop {r4, r5, r6, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x4bac <adm_disout.clone.1>: 0x80a8b0b0
+  Compact model index: 0
+  0xa8      pop {r4, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x4bc8 <adm_wreg>: 0x80b103ac
+  Compact model index: 0
+  0xb1 0x03 pop {r0, r1}
+  0xac      pop {r4, r5, r6, r7, r8, r14}
+
+0x4d78 <adm_detach>: 0x80a8b0b0
+  Compact model index: 0
+  0xa8      pop {r4, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x4d98 <adm_attach>: 0x80aab0b0
+  Compact model index: 0
+  0xaa      pop {r4, r5, r6, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x4e4c <adm_config_vlan>: 0x8018afb0
+  Compact model index: 0
+  0x18      vsp = vsp + 100
+  0xaf      pop {r4, r5, r6, r7, r8, r9, r10, r11, r14}
+  0xb0      finish
+
+0x50a0 <adm_enable_device>: 0x80aab0b0
+  Compact model index: 0
+  0xaa      pop {r4, r5, r6, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x5190 <chipid>: 0x80b0b0b0
+  Compact model index: 0
+  0xb0      finish
+  0xb0      finish
+  0xb0      finish
+
+0x51d0 <chipmacwr>: 0x80aab0b0
+  Compact model index: 0
+  0xaa      pop {r4, r5, r6, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x5208 <chipdump>: 0x80b0b0b0
+  Compact model index: 0
+  0xb0      finish
+  0xb0      finish
+  0xb0      finish
+
+0x520c <gmac_mf_lkup>: 0x80b0b0b0
+  Compact model index: 0
+  0xb0      finish
+  0xb0      finish
+  0xb0      finish
+
+0x5274 <chiprxreclaim>: 0x80a8b0b0
+  Compact model index: 0
+  0xa8      pop {r4, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x529c <chipdmaerrors>: @0x6c
+  Compact model index: 1
+  0xb1 0x08 pop {r3}
+  0x84 0x00 pop {r14}
+  0xb0      finish
+  0xb0      finish
+
+0x52b8 <chipenablepme>: 0x80b0b0b0
+  Compact model index: 0
+  0xb0      finish
+  0xb0      finish
+  0xb0      finish
+
+0x52bc <chipdisablepme>: 0x80b0b0b0
+  Compact model index: 0
+  0xb0      finish
+  0xb0      finish
+  0xb0      finish
+
+0x52c0 <chipconfigtimer>: 0x80b108a9
+  Compact model index: 0
+  0xb1 0x08 pop {r3}
+  0xa9      pop {r4, r5, r14}
+
+0x5300 <chipunitmap>: 0x80b0b0b0
+  Compact model index: 0
+  0xb0      finish
+  0xb0      finish
+  0xb0      finish
+
+0x5304 <chipmacrd>: @0x78
+  Compact model index: 1
+  0xb1 0x07 pop {r0, r1, r2}
+  0x84 0x00 pop {r14}
+  0xb0      finish
+  0xb0      finish
+
+0x5328 <chipstatsupd>: 0x80b103ae
+  Compact model index: 0
+  0xb1 0x03 pop {r0, r1}
+  0xae      pop {r4, r5, r6, r7, r8, r9, r10, r14}
+
+0x54a4 <gmac_init_reset>: 0x80b107a9
+  Compact model index: 0
+  0xb1 0x07 pop {r0, r1, r2}
+  0xa9      pop {r4, r5, r14}
+
+0x5510 <gmac_clear_reset>: 0x80b107a9
+  Compact model index: 0
+  0xb1 0x07 pop {r0, r1, r2}
+  0xa9      pop {r4, r5, r14}
+
+0x557c <chipduplexupd>: 0x80b107a9
+  Compact model index: 0
+  0xb1 0x07 pop {r0, r1, r2}
+  0xa9      pop {r4, r5, r14}
+
+0x568c <gmac_macloopback>: 0x80b103aa
+  Compact model index: 0
+  0xb1 0x03 pop {r0, r1}
+  0xaa      pop {r4, r5, r6, r14}
+
+0x5704 <gmac_loopback>: @0x84
+  Compact model index: 1
+  0xb1 0x08 pop {r3}
+  0x84 0x00 pop {r14}
+  0xb0      finish
+  0xb0      finish
+
+0x574c <gmac_speed>: 0x80b107ab
+  Compact model index: 0
+  0xb1 0x07 pop {r0, r1, r2}
+  0xab      pop {r4, r5, r6, r7, r14}
+
+0x5830 <chipphywr>: 0x80b107af
+  Compact model index: 0
+  0xb1 0x07 pop {r0, r1, r2}
+  0xaf      pop {r4, r5, r6, r7, r8, r9, r10, r11, r14}
+
+0x595c <chipphyrd>: @0x90
+  Compact model index: 1
+  0xb1 0x07 pop {r0, r1, r2}
+  0x84 0x5f pop {r4, r5, r6, r7, r8, r10, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x5a78 <chiplongname>: 0x80b108a9
+  Compact model index: 0
+  0xb1 0x08 pop {r3}
+  0xa9      pop {r4, r5, r14}
+
+0x5aa4 <chipdumpmib>: 0x80b107a9
+  Compact model index: 0
+  0xb1 0x07 pop {r0, r1, r2}
+  0xa9      pop {r4, r5, r14}
+
+0x5bec <chipinit>: 0x80b107af
+  Compact model index: 0
+  0xb1 0x07 pop {r0, r1, r2}
+  0xaf      pop {r4, r5, r6, r7, r8, r9, r10, r11, r14}
+
+0x62c0 <chipdetach>: 0x80acb0b0
+  Compact model index: 0
+  0xac      pop {r4, r5, r6, r7, r8, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x6390 <chipphyinit.clone.0>: 0x80b108a9
+  Compact model index: 0
+  0xb1 0x08 pop {r3}
+  0xa9      pop {r4, r5, r14}
+
+0x6580 <chipphyreset>: 0x80aab0b0
+  Compact model index: 0
+  0xaa      pop {r4, r5, r6, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x65c4 <chipreset>: @0x9c
+  Compact model index: 1
+  0xb1 0x07 pop {r0, r1, r2}
+  0x84 0x5f pop {r4, r5, r6, r7, r8, r10, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x6b6c <chipattach>: 0x800cafb0
+  Compact model index: 0
+  0x0c      vsp = vsp + 52
+  0xaf      pop {r4, r5, r6, r7, r8, r9, r10, r11, r14}
+  0xb0      finish
+
+
+Symbol table '.symtab' contains 571 entries:
+   Num:    Value  Size Type    Bind   Vis      Ndx Name
+     0: 00000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 00000000     0 SECTION LOCAL  DEFAULT    1 .text
+     2: 00000000     0 SECTION LOCAL  DEFAULT    3 .text.fastpath
+     3: 00000000     0 SECTION LOCAL  DEFAULT    5 .devinit.text
+     4: 00000000     0 SECTION LOCAL  DEFAULT    7 .init.text
+     5: 00000000     0 SECTION LOCAL  DEFAULT    9 .exit.text
+     6: 00000000     0 SECTION LOCAL  DEFAULT   11 .devexit.text
+     7: 00000000     0 SECTION LOCAL  DEFAULT   13 .rodata
+     8: 00000000     0 SECTION LOCAL  DEFAULT   15 .ARM.extab.text.[...]
+     9: 00000000     0 SECTION LOCAL  DEFAULT   31 .rodata.str1.1
+    10: 00000000     0 SECTION LOCAL  DEFAULT   34 .ARM.extab
+    11: 00000000     0 SECTION LOCAL  DEFAULT   35 .data
+    12: 00000000     0 SECTION LOCAL  DEFAULT   37 .devinit.data
+    13: 00000000     0 SECTION LOCAL  DEFAULT   43 .bss
+    14: 00000000     0 NOTYPE  LOCAL  DEFAULT    3 $a
+    15: 00000000   144 FUNC    LOCAL  DEFAULT    3 et_skb_dequeue
+    16: 00000000     0 NOTYPE  LOCAL  DEFAULT   16 $d
+    17: 00000000     0 NOTYPE  LOCAL  DEFAULT    1 $a
+    18: 00000000   312 FUNC    LOCAL  DEFAULT    1 et_get_settings
+    19: 00000000     0 NOTYPE  LOCAL  DEFAULT   40 $d
+    20: 00000138    16 FUNC    LOCAL  DEFAULT    1 et_ctf_detach
+    21: 00000148   344 FUNC    LOCAL  DEFAULT    1 et_free
+    22: 00000298     0 NOTYPE  LOCAL  DEFAULT    1 $d
+    23: 000002a0     0 NOTYPE  LOCAL  DEFAULT    1 $a
+    24: 000002a0   384 FUNC    LOCAL  DEFAULT    1 et_get_stats
+    25: 00000420    88 FUNC    LOCAL  DEFAULT    1 et_get_driver_info
+    26: 00000470     0 NOTYPE  LOCAL  DEFAULT    1 $d
+    27: 00000478     0 NOTYPE  LOCAL  DEFAULT    1 $a
+    28: 00000478    76 FUNC    LOCAL  DEFAULT    1 et_set_mac_address
+    29: 000004c4   168 FUNC    LOCAL  DEFAULT    1 et_set_settings
+    30: 00000560     0 NOTYPE  LOCAL  DEFAULT    1 $d
+    31: 0000056c     0 NOTYPE  LOCAL  DEFAULT    1 $a
+    32: 0000056c    48 FUNC    LOCAL  DEFAULT    1 et_dummy_start
+    33: 00000090   460 FUNC    LOCAL  DEFAULT    3 et_start
+    34: 00000250     0 NOTYPE  LOCAL  DEFAULT    3 $d
+    35: 0000025c     0 NOTYPE  LOCAL  DEFAULT    3 $a
+    36: 0000025c    48 FUNC    LOCAL  DEFAULT    3 et_forward
+    37: 00000000     0 NOTYPE  LOCAL  DEFAULT   15 $d
+    38: 0000028c   136 FUNC    LOCAL  DEFAULT    3 et_isr
+    39: 0000059c  1200 FUNC    LOCAL  DEFAULT    1 et_ioctl
+    40: 00000a4c   380 FUNC    LOCAL  DEFAULT    1 et_qos_init
+    41: 00000b9c     0 NOTYPE  LOCAL  DEFAULT    1 $d
+    42: 00000000     0 NOTYPE  LOCAL  DEFAULT    5 $a
+    43: 00000000  1576 FUNC    LOCAL  DEFAULT    5 et_probe
+    44: 000005b8     0 NOTYPE  LOCAL  DEFAULT    5 $d
+    45: 00000e4c   272 FUNC    LOCAL  DEFAULT    1 et_proc_wan_status
+    46: 00000c94   440 FUNC    LOCAL  DEFAULT    1 et_proc_net_status
+    47: 00000c78    28 FUNC    LOCAL  DEFAULT    1 et_watchdog
+    48: 00001814   564 FUNC    LOCAL  DEFAULT    3 et_dpc
+    49: 00000934    24 FUNC    LOCAL  DEFAULT    3 et_tx_tasklet
+    50: 00001a48     8 FUNC    LOCAL  DEFAULT    3 et_dpc_work
+    51: 000008e0    84 FUNC    LOCAL  DEFAULT    3 et_txq_work
+    52: 00000c6c    12 FUNC    LOCAL  DEFAULT    1 et_watchdog_task
+    53: 00000000     0 NOTYPE  LOCAL  DEFAULT   19 $d
+    54: 00000bc8     0 NOTYPE  LOCAL  DEFAULT    1 $a
+    55: 00000bc8   164 FUNC    LOCAL  DEFAULT    1 _et_watchdog
+    56: 00000c68     0 NOTYPE  LOCAL  DEFAULT    1 $d
+    57: 00000c6c     0 NOTYPE  LOCAL  DEFAULT    1 $a
+    58: 00000e30     0 NOTYPE  LOCAL  DEFAULT    1 $d
+    59: 00000000     0 NOTYPE  LOCAL  DEFAULT   34 $d
+    60: 00000e4c     0 NOTYPE  LOCAL  DEFAULT    1 $a
+    61: 00000f44     0 NOTYPE  LOCAL  DEFAULT    1 $d
+    62: 00000f5c     0 NOTYPE  LOCAL  DEFAULT    1 $a
+    63: 00000f5c   300 FUNC    LOCAL  DEFAULT    1 et_set_multicast_list
+    64: 00000314  1484 FUNC    LOCAL  DEFAULT    3 et_sendnext
+    65: 000008d4     0 NOTYPE  LOCAL  DEFAULT    3 $d
+    66: 000008e0     0 NOTYPE  LOCAL  DEFAULT    3 $a
+    67: 0000094c  3784 FUNC    LOCAL  DEFAULT    3 et_rxevent.clone.13
+    68: 00001804     0 NOTYPE  LOCAL  DEFAULT    3 $d
+    69: 00001814     0 NOTYPE  LOCAL  DEFAULT    3 $a
+    70: 00001a40     0 NOTYPE  LOCAL  DEFAULT    3 $d
+    71: 00001a48     0 NOTYPE  LOCAL  DEFAULT    3 $a
+    72: 00000000     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    73: 00000000   372 FUNC    LOCAL  DEFAULT    7 et_module_init
+    74: 00000138     0 NOTYPE  LOCAL  DEFAULT    7 $d
+    75: 00000000     0 NOTYPE  LOCAL  DEFAULT   22 $d
+    76: 00000000     0 NOTYPE  LOCAL  DEFAULT    9 $a
+    77: 00000000    12 FUNC    LOCAL  DEFAULT    9 et_module_exit
+    78: 00000008     0 NOTYPE  LOCAL  DEFAULT    9 $d
+    79: 00000000     0 NOTYPE  LOCAL  DEFAULT   25 $d
+    80: 00001114     0 NOTYPE  LOCAL  DEFAULT    1 $d
+    81: 00001118     0 NOTYPE  LOCAL  DEFAULT    1 $a
+    82: 00001118   108 FUNC    LOCAL  DEFAULT    1 et_resume
+    83: 00001184   132 FUNC    LOCAL  DEFAULT    1 et_open
+    84: 00001334   112 FUNC    LOCAL  DEFAULT    1 et_suspend
+    85: 00000000     0 NOTYPE  LOCAL  DEFAULT   11 $a
+    86: 00000000    84 FUNC    LOCAL  DEFAULT   11 et_remove
+    87: 00000000     0 NOTYPE  LOCAL  DEFAULT   28 $d
+    88: 000013a4   116 FUNC    LOCAL  DEFAULT    1 et_close
+    89: 00001580     0 NOTYPE  LOCAL  DEFAULT    1 $d
+    90: 00001590     0 NOTYPE  LOCAL  DEFAULT    1 $a
+    91: 00001624     0 NOTYPE  LOCAL  DEFAULT    1 $d
+    92: 00001628     0 NOTYPE  LOCAL  DEFAULT    1 $a
+    93: 00000000    84 OBJECT  LOCAL  DEFAULT   37 et_id_table
+    94: 00000000     0 NOTYPE  LOCAL  DEFAULT   13 $d
+    95: 00000000   108 OBJECT  LOCAL  DEFAULT   13 et_gmac3_netdev_ops
+    96: 0000006c   108 OBJECT  LOCAL  DEFAULT   13 et_netdev_ops
+    97: 000000d8   196 OBJECT  LOCAL  DEFAULT   13 et_ethtool_ops
+    98: 0000019c    15 OBJECT  LOCAL  DEFAULT   13 __func__.37026
+    99: 000001ac    19 OBJECT  LOCAL  DEFAULT   13 __param_str_et_r[...]
+   100: 000001c0    18 OBJECT  LOCAL  DEFAULT   13 __param_str_et_r[...]
+   101: 000001d4    14 OBJECT  LOCAL  DEFAULT   13 __param_str_et_t[...]
+   102: 000001e4     8 OBJECT  LOCAL  DEFAULT   13 __param_str_txworkq
+   103: 000001ec    12 OBJECT  LOCAL  DEFAULT   13 __param_str_pass[...]
+   104: 00000000     0 NOTYPE  LOCAL  DEFAULT   30 $d
+   105: 00000000    33 OBJECT  LOCAL  DEFAULT   30 __mod_et_rxlazy_[...]
+   106: 00000024    32 OBJECT  LOCAL  DEFAULT   30 __mod_et_rxlazy_[...]
+   107: 00000044    27 OBJECT  LOCAL  DEFAULT   30 __mod_et_txq_thr[...]
+   108: 00000060    21 OBJECT  LOCAL  DEFAULT   30 __mod_txworkqtype414
+   109: 00000078    25 OBJECT  LOCAL  DEFAULT   30 __mod_passivemod[...]
+   110: 00000094    20 OBJECT  LOCAL  DEFAULT   30 __mod_license145
+   111: 00000000     0 NOTYPE  LOCAL  DEFAULT   37 $d
+   112: 00000000     0 NOTYPE  LOCAL  DEFAULT   35 $d
+   113: 00000000     4 OBJECT  LOCAL  DEFAULT   35 online_cpus
+   114: 00000004     4 OBJECT  LOCAL  DEFAULT   35 first_time.36816
+   115: 00000008     4 OBJECT  LOCAL  DEFAULT   35 et_rxlazy_timeout
+   116: 0000000c     4 OBJECT  LOCAL  DEFAULT   35 et_rxlazy_framecnt
+   117: 00000010   116 OBJECT  LOCAL  DEFAULT   35 et_pci_driver
+   118: 00000000     0 NOTYPE  LOCAL  DEFAULT   32 $d
+   119: 00000000    16 OBJECT  LOCAL  DEFAULT   32 __param_et_rxlaz[...]
+   120: 00000010    16 OBJECT  LOCAL  DEFAULT   32 __param_et_rxlaz[...]
+   121: 00000020    16 OBJECT  LOCAL  DEFAULT   32 __param_et_txq_thresh
+   122: 00000004     4 OBJECT  LOCAL  DEFAULT   43 et_txq_thresh
+   123: 00000030    16 OBJECT  LOCAL  DEFAULT   32 __param_txworkq
+   124: 00000008     4 OBJECT  LOCAL  DEFAULT   43 txworkq
+   125: 00000040    16 OBJECT  LOCAL  DEFAULT   32 __param_passivemode
+   126: 0000001c     4 OBJECT  LOCAL  DEFAULT   43 passivemode
+   127: 00000000     0 NOTYPE  LOCAL  DEFAULT   43 $d
+   128: 00000000     4 OBJECT  LOCAL  DEFAULT   43 et_list
+   129: 00000018     4 OBJECT  LOCAL  DEFAULT   43 et_found
+   130: 00001718     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   131: 00001718   204 FUNC    LOCAL  DEFAULT    1 et_dump_arl_entry
+   132: 000017d0     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   133: 00000118     0 NOTYPE  LOCAL  DEFAULT   40 $d
+   134: 000017e4     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   135: 000017e4   728 FUNC    LOCAL  DEFAULT    1 etc_dumpetc
+   136: 00001a7c     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   137: 00001abc     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   138: 00001b08     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   139: 00001b10     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   140: 00000030     0 NOTYPE  LOCAL  DEFAULT   34 $d
+   141: 00001f74     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   142: 00001f7c     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   143: 00001fd0     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   144: 00002010     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   145: 00002490     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   146: 000024bc     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   147: 00002718     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   148: 00002770     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   149: 00002ca4     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   150: 00002cdc     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   151: 00002d34     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   152: 00002d3c     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   153: 000001f8     0 NOTYPE  LOCAL  DEFAULT   13 $d
+   154: 000001f8    16 OBJECT  LOCAL  DEFAULT   13 C.35.32054
+   155: 00000084     0 NOTYPE  LOCAL  DEFAULT   35 $d
+   156: 00000084     4 OBJECT  LOCAL  DEFAULT   35 sleep_timer.27535
+   157: 0000002c     0 NOTYPE  LOCAL  DEFAULT   43 $d
+   158: 00000030     4 OBJECT  LOCAL  DEFAULT   43 wake_timer.27536
+   159: 00002e0c     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   160: 00002e0c    64 FUNC    LOCAL  DEFAULT    1 chipid
+   161: 00002e48     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   162: 000001b8     0 NOTYPE  LOCAL  DEFAULT   40 $d
+   163: 00002e4c     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   164: 00002e4c    56 FUNC    LOCAL  DEFAULT    1 chipmacwr
+   165: 00002e80     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   166: 00002e84     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   167: 00002e84     4 FUNC    LOCAL  DEFAULT    1 chipdump
+   168: 00001a50     0 NOTYPE  LOCAL  DEFAULT    3 $a
+   169: 00001a50    60 FUNC    LOCAL  DEFAULT    3 chiptx
+   170: 00000050     0 NOTYPE  LOCAL  DEFAULT   16 $d
+   171: 00001a8c    52 FUNC    LOCAL  DEFAULT    3 chiptxreclaim
+   172: 00001ac0    44 FUNC    LOCAL  DEFAULT    3 chiprx
+   173: 00001aec   100 FUNC    LOCAL  DEFAULT    3 chiprxquota
+   174: 00001b50    68 FUNC    LOCAL  DEFAULT    3 chiprxlazy
+   175: 00001b90     0 NOTYPE  LOCAL  DEFAULT    3 $d
+   176: 00002e88    40 FUNC    LOCAL  DEFAULT    1 chiprxreclaim
+   177: 00001b94     0 NOTYPE  LOCAL  DEFAULT    3 $a
+   178: 00001b94    24 FUNC    LOCAL  DEFAULT    3 chiprxfill
+   179: 0000000c     0 NOTYPE  LOCAL  DEFAULT   15 $d
+   180: 00001bac    64 FUNC    LOCAL  DEFAULT    3 chipintrson
+   181: 00001be4     0 NOTYPE  LOCAL  DEFAULT    3 $d
+   182: 00001bec     0 NOTYPE  LOCAL  DEFAULT    3 $a
+   183: 00001bec   128 FUNC    LOCAL  DEFAULT    3 chiperrors
+   184: 00002eb0    60 FUNC    LOCAL  DEFAULT    1 chipconfigtimer
+   185: 00002ee8     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   186: 00002eec     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   187: 00002eec   200 FUNC    LOCAL  DEFAULT    1 chipduplexupd
+   188: 00002fb0     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   189: 00002fb4     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   190: 00002fb4    36 FUNC    LOCAL  DEFAULT    1 chipmacrd
+   191: 00000048     0 NOTYPE  LOCAL  DEFAULT   34 $d
+   192: 00002fd8  1660 FUNC    LOCAL  DEFAULT    1 chipstatsupd
+   193: 00001c6c    84 FUNC    LOCAL  DEFAULT    3 chipintrsoff
+   194: 00001cbc     0 NOTYPE  LOCAL  DEFAULT    3 $d
+   195: 00001cc0     0 NOTYPE  LOCAL  DEFAULT    3 $a
+   196: 00001cc0   164 FUNC    LOCAL  DEFAULT    3 chipgetintrevents
+   197: 00001d5c     0 NOTYPE  LOCAL  DEFAULT    3 $d
+   198: 00003654    44 FUNC    LOCAL  DEFAULT    1 chiplongname
+   199: 0000367c     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   200: 00003680     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   201: 00003680   288 FUNC    LOCAL  DEFAULT    1 chipphywr
+   202: 0000379c     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   203: 000037a0     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   204: 000037a0   248 FUNC    LOCAL  DEFAULT    1 chipwrcam
+   205: 00003894     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   206: 00003898     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   207: 00003898   336 FUNC    LOCAL  DEFAULT    1 chipphyrd
+   208: 00003ae8    72 FUNC    LOCAL  DEFAULT    1 chipphyreset
+   209: 000039e4     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   210: 000039e8     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   211: 000039e8    52 FUNC    LOCAL  DEFAULT    1 chipphyor
+   212: 00003a1c   204 FUNC    LOCAL  DEFAULT    1 chipphyinit
+   213: 00003ae4     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   214: 00003ae8     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   215: 00003b30    92 FUNC    LOCAL  DEFAULT    1 chipdisablepme
+   216: 00003b88     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   217: 00003b8c     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   218: 00003b8c    92 FUNC    LOCAL  DEFAULT    1 chipenablepme
+   219: 00003be4     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   220: 00003be8     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   221: 00003be8   328 FUNC    LOCAL  DEFAULT    1 chipdumpmib
+   222: 00003d10     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   223: 00003d30     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   224: 00003d30  1032 FUNC    LOCAL  DEFAULT    1 chipinit
+   225: 00004134     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   226: 00004138     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   227: 00004138  1540 FUNC    LOCAL  DEFAULT    1 chipreset
+   228: 00004730     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   229: 0000473c     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   230: 0000473c   156 FUNC    LOCAL  DEFAULT    1 chipdetach
+   231: 000047d8   924 FUNC    LOCAL  DEFAULT    1 chipattach
+   232: 00004b50     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   233: 00000208     0 NOTYPE  LOCAL  DEFAULT   13 $d
+   234: 00000208     8 OBJECT  LOCAL  DEFAULT   13 devices
+   235: 000000f0     0 NOTYPE  LOCAL  DEFAULT   35 $d
+   236: 00004b74     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   237: 00004b74    56 FUNC    LOCAL  DEFAULT    1 adm_enout.clone.0
+   238: 00000268     0 NOTYPE  LOCAL  DEFAULT   40 $d
+   239: 00004bac    28 FUNC    LOCAL  DEFAULT    1 adm_disout.clone.1
+   240: 00004bc8   432 FUNC    LOCAL  DEFAULT    1 adm_wreg
+   241: 00004e40     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   242: 00004e4c     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   243: 00005088     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   244: 000050a0     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   245: 0000518c     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   246: 00000210     0 NOTYPE  LOCAL  DEFAULT   13 $d
+   247: 00000210    48 OBJECT  LOCAL  DEFAULT   13 C.1.31354
+   248: 00000240    16 OBJECT  LOCAL  DEFAULT   13 C.2.31355
+   249: 00005190     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   250: 00005190    64 FUNC    LOCAL  DEFAULT    1 chipid
+   251: 000051cc     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   252: 000002a0     0 NOTYPE  LOCAL  DEFAULT   40 $d
+   253: 000051d0     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   254: 000051d0    56 FUNC    LOCAL  DEFAULT    1 chipmacwr
+   255: 00005204     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   256: 00005208     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   257: 00005208     4 FUNC    LOCAL  DEFAULT    1 chipdump
+   258: 0000520c   104 FUNC    LOCAL  DEFAULT    1 gmac_mf_lkup
+   259: 00001d64     0 NOTYPE  LOCAL  DEFAULT    3 $a
+   260: 00001d64   112 FUNC    LOCAL  DEFAULT    3 chiptxreclaim
+   261: 00000018     0 NOTYPE  LOCAL  DEFAULT   15 $d
+   262: 000000a0     0 NOTYPE  LOCAL  DEFAULT   16 $d
+   263: 00001dd4    68 FUNC    LOCAL  DEFAULT    3 chiprxlazy
+   264: 00001e14     0 NOTYPE  LOCAL  DEFAULT    3 $d
+   265: 00005274    40 FUNC    LOCAL  DEFAULT    1 chiprxreclaim
+   266: 00001e18     0 NOTYPE  LOCAL  DEFAULT    3 $a
+   267: 00001e18    24 FUNC    LOCAL  DEFAULT    3 chipactiverxbuf
+   268: 00001e30    24 FUNC    LOCAL  DEFAULT    3 chiprxfill
+   269: 00001e48    60 FUNC    LOCAL  DEFAULT    3 chipintrson
+   270: 00001e80     0 NOTYPE  LOCAL  DEFAULT    3 $d
+   271: 00001e84     0 NOTYPE  LOCAL  DEFAULT    3 $a
+   272: 00001e84   128 FUNC    LOCAL  DEFAULT    3 chiperrors
+   273: 0000529c    28 FUNC    LOCAL  DEFAULT    1 chipdmaerrors
+   274: 0000006c     0 NOTYPE  LOCAL  DEFAULT   34 $d
+   275: 000052b8     4 FUNC    LOCAL  DEFAULT    1 chipenablepme
+   276: 000052bc     4 FUNC    LOCAL  DEFAULT    1 chipdisablepme
+   277: 000052c0    64 FUNC    LOCAL  DEFAULT    1 chipconfigtimer
+   278: 000052fc     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   279: 00005300     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   280: 00005300     4 FUNC    LOCAL  DEFAULT    1 chipunitmap
+   281: 00005304    36 FUNC    LOCAL  DEFAULT    1 chipmacrd
+   282: 00005328   380 FUNC    LOCAL  DEFAULT    1 chipstatsupd
+   283: 000054a0     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   284: 00001f04   124 FUNC    LOCAL  DEFAULT    3 chipintrsoff
+   285: 00001f7c     0 NOTYPE  LOCAL  DEFAULT    3 $d
+   286: 00001f80     0 NOTYPE  LOCAL  DEFAULT    3 $a
+   287: 00001f80   188 FUNC    LOCAL  DEFAULT    3 chipgetintrevents
+   288: 00002038     0 NOTYPE  LOCAL  DEFAULT    3 $d
+   289: 000054a4     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   290: 000054a4   108 FUNC    LOCAL  DEFAULT    1 gmac_init_reset
+   291: 0000550c     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   292: 00005510     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   293: 00005510   108 FUNC    LOCAL  DEFAULT    1 gmac_clear_reset
+   294: 00005578     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   295: 0000557c     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   296: 0000557c   272 FUNC    LOCAL  DEFAULT    1 chipduplexupd
+   297: 00005688     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   298: 0000568c     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   299: 0000568c   120 FUNC    LOCAL  DEFAULT    1 gmac_macloopback
+   300: 00005700     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   301: 00005704     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   302: 00005704    72 FUNC    LOCAL  DEFAULT    1 gmac_loopback
+   303: 0000574c   228 FUNC    LOCAL  DEFAULT    1 gmac_speed
+   304: 00005764     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   305: 00005780     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   306: 0000582c     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   307: 00005830     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   308: 00005830   300 FUNC    LOCAL  DEFAULT    1 chipphywr
+   309: 00005958     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   310: 0000595c     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   311: 0000595c   284 FUNC    LOCAL  DEFAULT    1 chipphyrd
+   312: 00005a74     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   313: 00005a78     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   314: 00005a78    44 FUNC    LOCAL  DEFAULT    1 chiplongname
+   315: 00005aa0     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   316: 00005aa4     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   317: 00005aa4   328 FUNC    LOCAL  DEFAULT    1 chipdumpmib
+   318: 00005bcc     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   319: 0000203c     0 NOTYPE  LOCAL  DEFAULT    3 $a
+   320: 0000203c   308 FUNC    LOCAL  DEFAULT    3 chiprxquota
+   321: 00002170   292 FUNC    LOCAL  DEFAULT    3 chiprx
+   322: 00002294   444 FUNC    LOCAL  DEFAULT    3 chiptx
+   323: 00002448     0 NOTYPE  LOCAL  DEFAULT    3 $d
+   324: 00005bec     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   325: 00005bec  1748 FUNC    LOCAL  DEFAULT    1 chipinit
+   326: 00005e80     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   327: 00005e94     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   328: 000062ac     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   329: 000062c0     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   330: 000062c0   208 FUNC    LOCAL  DEFAULT    1 chipdetach
+   331: 00006390   496 FUNC    LOCAL  DEFAULT    1 chipphyinit.clone.0
+   332: 00006580    68 FUNC    LOCAL  DEFAULT    1 chipphyreset
+   333: 000065c4  1448 FUNC    LOCAL  DEFAULT    1 chipreset
+   334: 00006b58     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   335: 00006b6c     0 NOTYPE  LOCAL  DEFAULT    1 $a
+   336: 00006b6c  1892 FUNC    LOCAL  DEFAULT    1 chipattach
+   337: 0000729c     0 NOTYPE  LOCAL  DEFAULT    1 $d
+   338: 00000250     0 NOTYPE  LOCAL  DEFAULT   13 $d
+   339: 00000250    16 OBJECT  LOCAL  DEFAULT   13 devices
+   340: 00000170     0 NOTYPE  LOCAL  DEFAULT   35 $d
+   341: 00000170    16 OBJECT  LOCAL  DEFAULT   35 dmactl.29146
+   342: 00000000     0 NOTYPE  LOCAL  DEFAULT   31 $d
+   343: 00000227     0 NOTYPE  LOCAL  DEFAULT   31 $d
+   344: 0000059b     0 NOTYPE  LOCAL  DEFAULT   31 $d
+   345: 000007fc     0 NOTYPE  LOCAL  DEFAULT   31 $d
+   346: 0000083f     0 NOTYPE  LOCAL  DEFAULT   31 $d
+   347: 000000a8     0 NOTYPE  LOCAL  DEFAULT   30 $d
+   348: 000000a8    31 OBJECT  LOCAL  DEFAULT   30 __mod_alias23
+   349: 000000c8    31 OBJECT  LOCAL  DEFAULT   30 __mod_alias22
+   350: 000000e8     9 OBJECT  LOCAL  DEFAULT   30 __module_depends
+   351: 000000f4    56 OBJECT  LOCAL  DEFAULT   30 __mod_vermagic5
+   352: 00000000     0 NOTYPE  LOCAL  DEFAULT   38 $d
+   353: 00000000     0 SECTION LOCAL  DEFAULT   16 .ARM.exidx.text.[...]
+   354: 00000000     0 SECTION LOCAL  DEFAULT   18 .ARM.extab.devin[...]
+   355: 00000000     0 SECTION LOCAL  DEFAULT   19 .ARM.exidx.devin[...]
+   356: 00000000     0 SECTION LOCAL  DEFAULT   21 .ARM.extab.init.text
+   357: 00000000     0 SECTION LOCAL  DEFAULT   22 .ARM.exidx.init.text
+   358: 00000000     0 SECTION LOCAL  DEFAULT   24 .ARM.extab.exit.text
+   359: 00000000     0 SECTION LOCAL  DEFAULT   25 .ARM.exidx.exit.text
+   360: 00000000     0 SECTION LOCAL  DEFAULT   27 .ARM.extab.devex[...]
+   361: 00000000     0 SECTION LOCAL  DEFAULT   28 .ARM.exidx.devex[...]
+   362: 00000000     0 SECTION LOCAL  DEFAULT   30 .modinfo
+   363: 00000000     0 SECTION LOCAL  DEFAULT   32 __param
+   364: 00000000     0 SECTION LOCAL  DEFAULT   38 .gnu.linkonce.th[...]
+   365: 00000000     0 SECTION LOCAL  DEFAULT   40 .ARM.exidx
+   366: 00000000     0 SECTION LOCAL  DEFAULT   42 .note.gnu.build-id
+   367: 00000000     0 SECTION LOCAL  DEFAULT   44 .comment
+   368: 00000000     0 SECTION LOCAL  DEFAULT   45 .note.GNU-stack
+   369: 00000000     0 SECTION LOCAL  DEFAULT   46 .ARM.attributes
+   370: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND _set_bit_le
+   371: 0000000c     4 OBJECT  GLOBAL DEFAULT   43 qos_enable
+   372: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND strcpy
+   373: 00000028     4 OBJECT  GLOBAL DEFAULT   43 wan_debug
+   374: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND free_irq
+   375: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND si_core_cflags
+   376: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND osl_dma_map
+   377: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND get_robo_ptr
+   378: 00000014     4 OBJECT  GLOBAL DEFAULT   43 qos_do_add_strip_tag
+   379: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND si_gpioout
+   380: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND dev_get_drvdata
+   381: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND si_pmu_chipcontrol
+   382: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND si_osh
+   383: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND outer_cache
+   384: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND param_ops_uint
+   385: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND pci_enable_device
+   386: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND getgpiopin
+   387: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND skb_put
+   388: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND bcm_ether_ntoa
+   389: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND si_detach
+   390: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND fwder_affinity
+   391: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND osl_ctfpool_init
+   392: 00000000   336 OBJECT  GLOBAL DEFAULT   38 __this_module
+   393: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND __netif_schedule
+   394: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND robo_power_save_[...]
+   395: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND osl_malloc
+   396: 000026ec  1520 FUNC    GLOBAL DEFAULT    1 etc_iovar
+   397: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND __aeabi_unwind_c[...]
+   398: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND unregister_netdev
+   399: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND __arm_ioremap
+   400: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND osl_ctfpool_add
+   401: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND bcm_robo_detach
+   402: 00002d3c   208 FUNC    GLOBAL DEFAULT    1 etc_attach
+   403: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND __iounmap
+   404: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND __sw_hweight32
+   405: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND osl_ctfpool_replenish
+   406: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND __pci_register_driver
+   407: 00001538     8 FUNC    GLOBAL DEFAULT    1 et_dump_fwder
+   408: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND up
+   409: 00000000    12 FUNC    GLOBAL DEFAULT    9 cleanup_module
+   410: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND _test_and_set_bit_le
+   411: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND memcpy
+   412: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND osl_detach
+   413: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND __csum_ipv6_magic
+   414: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND osl_pkt_tonative
+   415: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND si_core_disable
+   416: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND bcm_bprintf
+   417: 00001bcc   100 FUNC    GLOBAL DEFAULT    1 etc_down
+   418: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND osl_pkt_frmnative
+   419: 00000034     4 OBJECT  GLOBAL DEFAULT   43 igmp_snooping_enable
+   420: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND _raw_spin_lock_i[...]
+   421: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND si_setcoreidx
+   422: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND pci_unregister_driver
+   423: 00000000   372 FUNC    GLOBAL DEFAULT    7 init_module
+   424: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND bcm_binit
+   425: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND schedule_work_on
+   426: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND create_proc_entry
+   427: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND __bug
+   428: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND eth_type_trans
+   429: 00001510    40 FUNC    GLOBAL DEFAULT    1 et_clear_ctf
+   430: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND bcmstrstr
+   431: 00000020     4 OBJECT  GLOBAL DEFAULT   43 bypass_ctf
+   432: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND fwder_attach
+   433: 00001f7c    24 FUNC    GLOBAL DEFAULT    1 etc_promisc
+   434: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND kfree_skb
+   435: 00001088     8 FUNC    GLOBAL DEFAULT    1 et_init
+   436: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND _raw_spin_unlock_bh
+   437: 000016a0   120 FUNC    GLOBAL DEFAULT    1 et_phywr
+   438: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND si_core_reset
+   439: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND netif_device_detach
+   440: 00000088     6 OBJECT  GLOBAL DEFAULT   35 mac
+   441: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND osl_pkt_frmfwder
+   442: 00004e4c   596 FUNC    GLOBAL DEFAULT    1 adm_config_vlan
+   443: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND netif_device_attach
+   444: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND skb_copy_expand
+   445: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND capable
+   446: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND fwder_exit
+   447: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND si_coreid
+   448: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND tasklet_kill
+   449: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND robo_power_save_[...]
+   450: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND bcm_robo_attach
+   451: 0000002c     4 OBJECT  GLOBAL DEFAULT   43 et_msg_level
+   452: 000000f0   128 OBJECT  GLOBAL DEFAULT   35 bcm47xx_et_chops
+   453: 00001454   148 FUNC    GLOBAL DEFAULT    1 et_discard
+   454: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND _clear_bit_le
+   455: 0000263c   176 FUNC    GLOBAL DEFAULT    1 et_get_portinfo
+   456: 00000000    84 OBJECT  GLOBAL DEFAULT   37 __mod_pci_device[...]
+   457: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND dma_attach
+   458: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND skb_pull
+   459: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND request_threaded_irq
+   460: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND si_corerev
+   461: 00001abc    84 FUNC    GLOBAL DEFAULT    1 etc_chipmatch
+   462: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND add_timer
+   463: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND bcm_ether_atoe
+   464: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND tasklet_init
+   465: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND ctf_attach_fn
+   466: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND down
+   467: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND is_reg_mgmt_mode[...]
+   468: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND num_physpages
+   469: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND skb_push
+   470: 000024bc    32 FUNC    GLOBAL DEFAULT    1 etc_quota
+   471: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND warn_slowpath_null
+   472: 00001208   300 FUNC    GLOBAL DEFAULT    1 et_down
+   473: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND osl_attach
+   474: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND register_netdev
+   475: 00001b54    76 FUNC    GLOBAL DEFAULT    1 etc_reset
+   476: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND strncpy
+   477: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND __tasklet_schedule
+   478: 00001ba0    24 FUNC    GLOBAL DEFAULT    1 etc_init
+   479: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND si_setcore
+   480: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND free_netdev
+   481: 000000b0    64 OBJECT  GLOBAL DEFAULT   35 priq_selector
+   482: 00001fac  1296 FUNC    GLOBAL DEFAULT    1 etc_ioctl
+   483: 000050a0   240 FUNC    GLOBAL DEFAULT    1 adm_enable_device
+   484: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND robo_read_link_status
+   485: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND printk
+   486: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND _raw_spin_unlock[...]
+   487: 00001590     4 FUNC    GLOBAL DEFAULT    1 et_link_up
+   488: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND si_attach
+   489: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND osl_malloced
+   490: 00001bb8    20 FUNC    GLOBAL DEFAULT    1 etc_up
+   491: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND robo_power_save_[...]
+   492: 0000261c    32 FUNC    GLOBAL DEFAULT    1 etc_totlen
+   493: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND skb_checksum
+   494: 00000024     4 OBJECT  GLOBAL DEFAULT   43 do_ctf_bypass_check
+   495: 000024f0   300 FUNC    GLOBAL DEFAULT    1 etc_bcm53115_war
+   496: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND nvram_get
+   497: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND alloc_etherdev_mq
+   498: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND set_iptv_ports
+   499: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND memset
+   500: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND getvar
+   501: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND bcm_robo_enable_[...]
+   502: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND __memzero
+   503: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND bcm_robo_enable_[...]
+   504: 00001598   144 FUNC    GLOBAL DEFAULT    1 et_phyfind
+   505: 00004d78    32 FUNC    GLOBAL DEFAULT    1 adm_detach
+   506: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND pci_set_master
+   507: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND bcm_robo_snoop_m[...]
+   508: 00001540    80 FUNC    GLOBAL DEFAULT    1 et_dump
+   509: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND __aeabi_uidiv
+   510: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND is_iptv_port
+   511: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND osl_pkt_tofwder
+   512: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND osl_pcie_rreg
+   513: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND __pskb_pull_tail
+   514: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND netif_rx
+   515: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND si_iscoreup
+   516: 00001c30   844 FUNC    GLOBAL DEFAULT    1 etc_watchdog
+   517: 000014e8    40 FUNC    GLOBAL DEFAULT    1 et_dump_ctf
+   518: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND is_reg_snooping_[...]
+   519: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND strcmp
+   520: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND skb_trim
+   521: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND fwder_dettach
+   522: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND robo_watchdog
+   523: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND jiffies
+   524: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND osl_pktget
+   525: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND sprintf
+   526: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND robo_power_save_[...]
+   527: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND init_timer_key
+   528: 00001f94    24 FUNC    GLOBAL DEFAULT    1 etc_qos
+   529: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND si_core_sflags
+   530: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND bcm_strtoul
+   531: 00000090    32 OBJECT  GLOBAL DEFAULT   35 up2tc
+   532: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND si_pci_setup
+   533: 00004d98   180 FUNC    GLOBAL DEFAULT    1 adm_attach
+   534: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND schedule_work
+   535: 00001b10    68 FUNC    GLOBAL DEFAULT    1 etc_detach
+   536: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND __aeabi_uidivmod
+   537: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND bcm_robo_config_vlan
+   538: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND _raw_spin_lock_bh
+   539: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND osl_pktfree
+   540: 000010b0   104 FUNC    GLOBAL DEFAULT    1 et_up
+   541: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND fwder_dump
+   542: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND si_gpioouten
+   543: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND osl_mfree
+   544: 00000010     4 OBJECT  GLOBAL DEFAULT   43 vlan_enable
+   545: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND cpu_online_mask
+   546: 00000180   128 OBJECT  GLOBAL DEFAULT   35 bcmgmac_et_chops
+   547: 00001628   120 FUNC    GLOBAL DEFAULT    1 et_phyrd
+   548: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND getintvar
+   549: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND dev_set_drvdata
+   550: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND _test_and_clear_[...]
+   551: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND strlen
+   552: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND del_timer
+   553: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND __aeabi_unwind_c[...]
+   554: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND __copy_to_user
+   555: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND si_clock
+   556: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND param_ops_int
+   557: 00002cdc    96 FUNC    GLOBAL DEFAULT    1 etc_unitmap
+   558: 00001594     4 FUNC    GLOBAL DEFAULT    1 et_link_down
+   559: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND strchr
+   560: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND osl_ctfpool_cleanup
+   561: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND osl_delay
+   562: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND si_gpiosetcore
+   563: 00001418    60 FUNC    GLOBAL DEFAULT    1 et_intrson
+   564: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND si_coreidx
+   565: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND __copy_from_user
+   566: 000024dc    20 FUNC    GLOBAL DEFAULT    1 etc_rxlazy
+   567: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND pktsetprio
+   568: 00001090    32 FUNC    GLOBAL DEFAULT    1 et_reset
+   569: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND bcm_atoi
+   570: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND si_coreunit
+
+No version information found in this file.
+
+There is no GOT section in this file.
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)
+    Build ID: ed6876a0f730176181ea8927556f7036e87846ea
+Attribute Section: aeabi
+File Attributes
+  Tag_CPU_name: "7-A"
+  Tag_CPU_arch: v7
+  Tag_CPU_arch_profile: Application
+  Tag_ARM_ISA_use: Yes
+  Tag_THUMB_ISA_use: Thumb-2
+  Tag_ABI_PCS_wchar_t: 4
+  Tag_ABI_FP_denormal: Needed
+  Tag_ABI_FP_exceptions: Needed
+  Tag_ABI_FP_number_model: IEEE 754
+  Tag_ABI_align_needed: 8-byte
+  Tag_ABI_align_preserved: 8-byte, except leaf SP
+  Tag_ABI_enum_size: int
+  Tag_ABI_optimization_goals: Aggressive Size
+  Tag_DIV_use: Not allowed

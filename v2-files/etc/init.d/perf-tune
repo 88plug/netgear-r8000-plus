@@ -1,0 +1,150 @@
+#!/bin/sh /etc/rc.common
+#
+# perf-tune -- corrects RPS/IRQ-affinity/ethtool-offload tuning that the
+# stock bcm53xx `packet-steering.sh` platform hook does not (correctly)
+# cover on the R8000's specific board wiring.
+#
+# See ../notes.md for the full verdict (real win vs proprietary/hardware
+# wall) per item. Summary of *why this file exists*:
+#
+#   - Stock `/usr/libexec/platform/packet-steering.sh` only ever touches
+#     `br-lan` and `eth0`'s `rps_cpus`. On the R8000, the DSA conduit that
+#     actually carries 100% of switch (LAN+WAN) traffic is `eth2` --
+#     confirmed live via `ip -br link show` (eth2 UP, traffic counters
+#     incrementing; eth0 DOWN, 0 packets ever) and via
+#     `ip -d link show wan` (`dsa conduit eth2`). `eth0` is a second,
+#     unused on-chip GMAC controller with no switch ports wired to it on
+#     this board. The stock hook's assumption holds on other bcm53xx
+#     boards where GMAC0 *is* the conduit; it does not hold here. Net
+#     effect before this fix: RPS was steering an idle interface while the
+#     interface actually carrying every packet had RPS *disabled*, so all
+#     forwarding softirq work stayed pinned to whichever CPU owns eth2's
+#     hardware IRQ (confirmed CPU0, 100% of eth2 IRQs, 0 on CPU1) --  i.e.
+#     the second Cortex-A9 core did zero packet-forwarding work despite
+#     `flow_offloading=1` being set. This is the single biggest fixable
+#     item on this hardware.
+#   - RPS is asserted unconditionally (all offload states), not
+#     conditioned on `flow_offloading`/`flow_offloading_hw` like the stock
+#     hook -- spreading softirq processing across both cores is never
+#     harmful, regardless of whether the flowtable shortcut is also
+#     active for a given flow.
+#   - XPS is intentionally NOT touched anywhere: every netdev on this
+#     board (bgmac/DSA conduit+slaves, brcmfmac AP interfaces) exposes
+#     exactly 1 TX queue (`numtxqueues 1`, confirmed live). XPS steers
+#     among multiple TX queues; with one queue there is nothing to steer
+#     between. Not a missed win -- a hardware queue-count constraint.
+#   - IRQ affinity: no active balancer is installed (no irqbalance
+#     package on this build) and the in-kernel default has left every
+#     packet-relevant hardware IRQ (wired MAC, both wifi PCIe functions)
+#     on CPU0 with CPU1 doing zero hardware interrupt service. This file
+#     statically splits wired vs wifi IRQs across the two cores instead of
+#     pulling in a persistent irqbalance daemon for a fixed 3-source,
+#     2-CPU topology that a boot-time echo covers just as well.
+#   - ethtool offloads: best-effort only. `ethtool` is not present in this
+#     build and the router has no WAN uplink to `apk add` it live -- see
+#     notes.md. Guarded so it's a silent no-op today and self-activates
+#     once a future image ships the package.
+
+START=26
+STOP=10
+USE_PROCD=1
+
+PERF_TUNE_LOG_TAG="perf-tune"
+
+log() { logger -t "$PERF_TUNE_LOG_TAG" "$1"; }
+
+# ---------------------------------------------------------------------
+# RPS: spread softirq packet processing across every available CPU on
+# every netdev that actually carries forwarded/bridged traffic.
+# ---------------------------------------------------------------------
+apply_rps() {
+	ncpus="$(grep -c '^processor' /proc/cpuinfo 2>/dev/null)"
+	[ -z "$ncpus" ] && ncpus=1
+	mask_dec=$(( (1 << ncpus) - 1 ))
+	mask_hex="$(printf '%x' "$mask_dec")"
+
+	for qdir in /sys/class/net/*/queues; do
+		dev="$(basename "$(dirname "$qdir")")"
+		case "$dev" in
+		# real DSA conduit (all switch traffic) + its DSA slave
+		# netdevs + the LAN bridge + every wifi AP BSS (phyN-apM,
+		# any count -- br-* is matched too for a future guest/VLAN
+		# bridge without needing to edit this list).
+		eth2|wan|lan1|lan2|lan3|lan4|br-*|phy*-ap*)
+			for f in "$qdir"/rx-*/rps_cpus; do
+				[ -e "$f" ] || continue
+				cur="$(cat "$f" 2>/dev/null)"
+				[ "$cur" = "$mask_hex" ] || echo "$mask_hex" > "$f" 2>/dev/null
+			done
+			;;
+		esac
+	done
+	log "RPS mask $mask_hex applied to conduit/DSA/bridge/AP netdevs (ncpus=$ncpus)"
+}
+
+# ---------------------------------------------------------------------
+# IRQ affinity: pin the wired MAC's IRQ to CPU0 and both wifi PCIe
+# function IRQs to CPU1, so hardware interrupt *service* is split across
+# cores instead of both NIC families landing on CPU0. Skips cleanly if
+# irqbalance is installed and enabled (don't fight an active balancer).
+# ---------------------------------------------------------------------
+irq_for() {
+	# /proc/interrupts: "<n>:  <percpu counts...>  GIC-0  <hwirq>  <type>  <name1>[, <name2>...]"
+	# match $1 as a whole comma/space-delimited token in the name field.
+	grep -E "(^| |,)$1(,|\$)" /proc/interrupts | while read -r line; do
+		echo "$line" | awk -F: '{n=$1; gsub(/^[ \t]+|[ \t]+$/,"",n); print n}'
+	done
+}
+
+apply_irq_affinity() {
+	if [ -x /etc/init.d/irqbalance ] && /etc/init.d/irqbalance enabled 2>/dev/null; then
+		log "irqbalance is installed and enabled -- leaving IRQ affinity to it"
+		return 0
+	fi
+
+	wired_irqs="$(irq_for eth2)"
+	wifi_irqs="$(irq_for brcmf_pcie_intr)"
+
+	for irq in $wired_irqs; do
+		[ -w "/proc/irq/$irq/smp_affinity" ] && echo 1 > "/proc/irq/$irq/smp_affinity" 2>/dev/null
+	done
+	for irq in $wifi_irqs; do
+		[ -w "/proc/irq/$irq/smp_affinity" ] && echo 2 > "/proc/irq/$irq/smp_affinity" 2>/dev/null
+	done
+	log "IRQ affinity: eth2 [$wired_irqs] -> CPU0, brcmf_pcie_intr [$wifi_irqs] -> CPU1"
+}
+
+# ---------------------------------------------------------------------
+# ethtool offloads: best-effort, silent no-op if ethtool isn't installed
+# (it isn't, on this build -- see notes.md). One feature per invocation
+# so an unsupported flag on this driver never blocks the rest.
+# ---------------------------------------------------------------------
+apply_ethtool_offloads() {
+	if ! command -v ethtool >/dev/null 2>&1; then
+		log "ethtool not installed -- skipping offload tuning (add 'ethtool' to the ImageBuilder PACKAGES list)"
+		return 0
+	fi
+	for dev in eth2 wan br-lan; do
+		[ -e "/sys/class/net/$dev" ] || continue
+		for feat in rx tx sg tso gso gro; do
+			ethtool -K "$dev" "$feat" on >/dev/null 2>&1
+		done
+	done
+	log "ethtool offloads (rx/tx checksum, sg, tso, gso, gro) requested on eth2/wan/br-lan"
+}
+
+reload_service() {
+	apply_rps
+	apply_irq_affinity
+	apply_ethtool_offloads
+}
+
+start_service() {
+	reload_service
+}
+
+service_triggers() {
+	procd_add_reload_trigger "network"
+	procd_add_reload_trigger "firewall"
+	procd_add_raw_trigger "interface.*" 1000 /etc/init.d/perf-tune reload
+}

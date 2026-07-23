@@ -1,0 +1,119 @@
+/*
+ * Reference excerpt, NOT a patch.
+ *
+ * Decompiled with `dtc -I dtb -O dts` straight off the live router's
+ * /sys/firmware/fdt (see router.dtb / router-live.dts in this directory,
+ * captured 2026-07-23 from a running OpenWrt 25.12.5 r33051 / kernel
+ * 6.12.94 netgear,r8000). This is ground truth for what's actually
+ * compiled into the running kernel today -- not the upstream/local source
+ * .dts, which is not vendored in this repo's openwrt/ tree (bcm53xx pulls
+ * arch/arm/boot/dts/broadcom/bcm4708-netgear-r8000.dts from the fetched
+ * Linux kernel source at build time, not from target/linux/bcm53xx/).
+ *
+ * Conclusion after reviewing this against /sys/class/leds and
+ * /etc/config/system on the live box: the LED device-tree nodes
+ * themselves are complete and correct (11 gpio-leds, right GPIO
+ * numbers, right labels, right default-triggers on power/wan). No DTS
+ * changes are needed or made. The bug is entirely in userspace: only
+ * usb2/usb3 were ever wired up in board.d/01_leds. See notes.md.
+ */
+
+/ {
+	leds {
+		compatible = "gpio-leds";
+
+		led-power-white {
+			label = "bcm53xx:white:power";
+			gpios = <&chipcommon 2 GPIO_ACTIVE_LOW>;	/* gpio 2 */
+			linux,default-trigger = "default-on";
+		};
+
+		led-power-amber {
+			label = "bcm53xx:amber:power";
+			gpios = <&chipcommon 3 GPIO_ACTIVE_LOW>;	/* gpio 3 */
+		};
+
+		led-wan-white {
+			label = "bcm53xx:white:wan";
+			gpios = <&chipcommon 8 GPIO_ACTIVE_LOW>;	/* gpio 8 */
+			linux,default-trigger = "default-on";
+		};
+
+		led-wan-amber {
+			label = "bcm53xx:amber:wan";
+			gpios = <&chipcommon 9 GPIO_ACTIVE_HIGH>;	/* gpio 9 */
+		};
+
+		led-5ghz-1 {
+			label = "bcm53xx:white:5ghz-1";
+			gpios = <&chipcommon 12 GPIO_ACTIVE_LOW>;	/* gpio 12 -- radio slot 0, phy0 */
+		};
+
+		led-2ghz {
+			label = "bcm53xx:white:2ghz";
+			gpios = <&chipcommon 13 GPIO_ACTIVE_LOW>;	/* gpio 13 -- radio slot 1, phy1 */
+		};
+
+		led-wireless {
+			label = "bcm53xx:white:wireless";
+			gpios = <&chipcommon 14 GPIO_ACTIVE_HIGH>;	/* gpio 14 -- no confirmed distinct icon */
+		};
+
+		led-wps {
+			label = "bcm53xx:white:wps";
+			gpios = <&chipcommon 15 GPIO_ACTIVE_HIGH>;	/* gpio 15 */
+		};
+
+		led-5ghz-2 {
+			label = "bcm53xx:white:5ghz-2";
+			gpios = <&chipcommon 16 GPIO_ACTIVE_LOW>;	/* gpio 16 -- radio slot 2, phy2 */
+		};
+
+		led-usb3 {
+			label = "bcm53xx:white:usb3";
+			gpios = <&chipcommon 17 GPIO_ACTIVE_LOW>;	/* gpio 17 */
+		};
+
+		led-usb2 {
+			label = "bcm53xx:white:usb2";
+			gpios = <&chipcommon 18 GPIO_ACTIVE_LOW>;	/* gpio 18 */
+		};
+	};
+
+	gpio-keys {
+		compatible = "gpio-keys";
+
+		button-rfkill {
+			label = "WiFi";
+			linux,code = <KEY_RFKILL>;
+			gpios = <&chipcommon 4 GPIO_ACTIVE_LOW>;
+		};
+
+		button-wps {
+			label = "WPS";
+			linux,code = <KEY_WPS_BUTTON>;
+			gpios = <&chipcommon 5 GPIO_ACTIVE_LOW>;
+		};
+
+		button-restart {
+			label = "Reset";
+			linux,code = <KEY_RESTART>;
+			gpios = <&chipcommon 6 GPIO_ACTIVE_LOW>;
+		};
+
+		button-brightness {
+			label = "Backlight";
+			linux,code = <KEY_BRIGHTNESS_TOGGLE>;
+			gpios = <&chipcommon 19 GPIO_ACTIVE_LOW>;	/* front-panel LED dimmer button; not wired to any LED behavior in this build, see notes.md */
+		};
+	};
+};
+
+/*
+ * &chipcommon == axi@18000000/chipcommon@0, the BCM4709 ChipCommon
+ * GPIO controller (phandle 6 in the live blob). Every LED and every
+ * button on this board hangs off this ONE controller -- confirmed no
+ * wifi-chip-local (BCM43602) LED GPIOs are used anywhere in this DT.
+ * GPIO flag 1 = GPIO_ACTIVE_LOW, 0 = GPIO_ACTIVE_HIGH (raw values from
+ * the live blob; symbolic macros substituted here for readability).
+ */

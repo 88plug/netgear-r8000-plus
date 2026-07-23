@@ -1,0 +1,557 @@
+
+./lib/modules/2.6.36.4brcmarm+/kernel/drivers/net/dpsta/dpsta.ko:     file format elf32-littlearm
+
+
+Disassembly of section .text:
+
+00000000 <dpsta_get_stats>:
+   0:	push	{r3, r4, r5, r6, r7, r8, r9, sl, fp, lr}
+   4:	mov	r8, r0
+   8:	add	r5, r0, #932	@ 0x3a4
+   c:	mov	r1, #92	@ 0x5c
+  10:	add	r4, r0, #896	@ 0x380
+  14:	add	r7, r8, #916	@ 0x394
+  18:	mov	r0, r5
+  1c:	mov	r6, r4
+  20:	bl	0 <__memzero>
+  24:	mov	r0, r7
+  28:	add	r8, r8, #984	@ 0x3d8
+  2c:	bl	0 <_raw_spin_lock_irqsave>
+  30:	mov	sl, r0
+  34:	ldr	r3, [r6, #144]	@ 0x90
+  38:	subs	r0, r3, #0
+  3c:	beq	12c <dpsta_get_stats+0x12c>
+  40:	ldr	r3, [r3, #204]	@ 0xcc
+  44:	ldr	r3, [r3, #68]	@ 0x44
+  48:	blx	r3
+  4c:	ldr	r1, [r4, #36]	@ 0x24
+  50:	ldr	r3, [r0]
+  54:	ldr	r2, [r4, #44]	@ 0x2c
+  58:	ldr	r9, [r4, #52]	@ 0x34
+  5c:	add	r3, r1, r3
+  60:	ldr	fp, [r4, #40]	@ 0x28
+  64:	str	r3, [r4, #36]	@ 0x24
+  68:	ldr	r3, [r0, #8]
+  6c:	ldr	lr, [r4, #48]	@ 0x30
+  70:	ldr	ip, [r4, #56]	@ 0x38
+  74:	add	r3, r2, r3
+  78:	ldr	r1, [r4, #72]	@ 0x48
+  7c:	str	r3, [r4, #44]	@ 0x2c
+  80:	ldr	r3, [r0, #16]
+  84:	add	r9, r9, r3
+  88:	ldr	r3, [r4, #84]	@ 0x54
+  8c:	str	r9, [r4, #52]	@ 0x34
+  90:	ldr	r9, [r0, #4]
+  94:	add	r9, fp, r9
+  98:	str	r9, [r4, #40]	@ 0x28
+  9c:	ldr	r9, [r0, #12]
+  a0:	add	lr, lr, r9
+  a4:	str	lr, [r4, #48]	@ 0x30
+  a8:	ldr	lr, [r0, #20]
+  ac:	add	ip, ip, lr
+  b0:	str	ip, [r4, #56]	@ 0x38
+  b4:	ldr	ip, [r0, #36]	@ 0x24
+  b8:	add	r1, r1, ip
+  bc:	ldr	ip, [r4, #76]	@ 0x4c
+  c0:	str	r1, [r4, #72]	@ 0x48
+  c4:	ldr	r1, [r0, #40]	@ 0x28
+  c8:	add	r2, ip, r1
+  cc:	ldr	r1, [r4, #80]	@ 0x50
+  d0:	str	r2, [r4, #76]	@ 0x4c
+  d4:	ldr	r2, [r0, #44]	@ 0x2c
+  d8:	ldr	ip, [r4, #92]	@ 0x5c
+  dc:	add	r2, r1, r2
+  e0:	str	r2, [r4, #80]	@ 0x50
+  e4:	ldr	r2, [r0, #48]	@ 0x30
+  e8:	add	r3, r3, r2
+  ec:	ldr	r2, [r4, #88]	@ 0x58
+  f0:	str	r3, [r4, #84]	@ 0x54
+  f4:	ldr	r3, [r0, #52]	@ 0x34
+  f8:	add	r3, r2, r3
+  fc:	str	r3, [r4, #88]	@ 0x58
+ 100:	ldr	r3, [r0, #56]	@ 0x38
+ 104:	add	r3, ip, r3
+ 108:	str	r3, [r4, #92]	@ 0x5c
+ 10c:	ldr	r3, [r0, #60]	@ 0x3c
+ 110:	ldr	r1, [r4, #96]	@ 0x60
+ 114:	ldr	r2, [r4, #108]	@ 0x6c
+ 118:	add	r3, r1, r3
+ 11c:	str	r3, [r4, #96]	@ 0x60
+ 120:	ldr	r3, [r0, #72]	@ 0x48
+ 124:	add	r3, r2, r3
+ 128:	str	r3, [r4, #108]	@ 0x6c
+ 12c:	add	r6, r6, #44	@ 0x2c
+ 130:	cmp	r6, r8
+ 134:	bne	34 <dpsta_get_stats+0x34>
+ 138:	mov	r0, r7
+ 13c:	mov	r1, sl
+ 140:	bl	0 <_raw_spin_unlock_irqrestore>
+ 144:	mov	r0, r5
+ 148:	pop	{r3, r4, r5, r6, r7, r8, r9, sl, fp, pc}
+
+0000014c <dpsta_ioctl>:
+ 14c:	push	{r4, r5, r6, r7, r8, sl, lr}
+ 150:	subs	r4, r0, #0
+ 154:	sub	sp, sp, #60	@ 0x3c
+ 158:	bne	168 <dpsta_ioctl+0x1c>
+ 15c:	mvn	r0, #99	@ 0x63
+ 160:	add	sp, sp, #60	@ 0x3c
+ 164:	pop	{r4, r5, r6, r7, r8, sl, pc}
+ 168:	adds	r5, r4, #896	@ 0x380
+ 16c:	beq	15c <dpsta_ioctl+0x10>
+ 170:	mov	r0, #12
+ 174:	str	r1, [sp, #4]
+ 178:	str	r2, [sp]
+ 17c:	bl	0 <capable>
+ 180:	cmp	r0, #0
+ 184:	ldr	r1, [sp, #4]
+ 188:	ldr	r2, [sp]
+ 18c:	mvneq	r0, #0
+ 190:	beq	160 <dpsta_ioctl+0x14>
+ 194:	movw	r3, #35312	@ 0x89f0
+ 198:	cmp	r2, r3
+ 19c:	mvnne	r0, #94	@ 0x5e
+ 1a0:	bne	160 <dpsta_ioctl+0x14>
+ 1a4:	mov	r2, sp
+ 1a8:	ldr	r1, [r1, #16]
+ 1ac:	bic	r3, r2, #8128	@ 0x1fc0
+ 1b0:	bic	r3, r3, #63	@ 0x3f
+ 1b4:	ldr	r3, [r3, #8]
+ 1b8:	adds	r2, r1, #44	@ 0x2c
+ 1bc:	sbcscc	r2, r2, r3
+ 1c0:	movcc	r3, #0
+ 1c4:	cmp	r3, #0
+ 1c8:	bne	2c8 <dpsta_ioctl+0x17c>
+ 1cc:	add	r6, sp, #12
+ 1d0:	mov	r2, #44	@ 0x2c
+ 1d4:	mov	r0, r6
+ 1d8:	bl	0 <__copy_from_user>
+ 1dc:	subs	sl, r0, #0
+ 1e0:	mvnne	r0, #13
+ 1e4:	bne	160 <dpsta_ioctl+0x14>
+ 1e8:	ldrb	r3, [sp, #12]
+ 1ec:	add	r8, r4, #1024	@ 0x400
+ 1f0:	add	r1, r6, #12
+ 1f4:	mov	r2, #16
+ 1f8:	mov	r0, r8
+ 1fc:	add	r7, r5, #172	@ 0xac
+ 200:	strb	r3, [r4, #905]	@ 0x389
+ 204:	ldr	r3, [sp, #16]
+ 208:	str	r3, [r5, #12]
+ 20c:	ldr	r3, [sp, #20]
+ 210:	str	r3, [r5, #16]
+ 214:	bl	0 <strncpy>
+ 218:	mov	r0, r7
+ 21c:	add	r1, r6, #28
+ 220:	mov	r2, #16
+ 224:	bl	0 <strncpy>
+ 228:	ldrb	r0, [r4, #905]	@ 0x389
+ 22c:	cmp	r0, #0
+ 230:	beq	160 <dpsta_ioctl+0x14>
+ 234:	ldr	r3, [r5, #12]
+ 238:	cmp	r3, #2
+ 23c:	bhi	2dc <dpsta_ioctl+0x190>
+ 240:	ldr	r3, [r5, #16]
+ 244:	cmp	r3, #3
+ 248:	bhi	2dc <dpsta_ioctl+0x190>
+ 24c:	ldr	r0, [pc, #148]	@ 2e8 <dpsta_ioctl+0x19c>
+ 250:	mov	r1, r8
+ 254:	bl	0 <dev_get_by_name>
+ 258:	cmp	r0, #0
+ 25c:	moveq	r3, #0
+ 260:	mvneq	r0, #18
+ 264:	strbeq	r3, [r4, #905]	@ 0x389
+ 268:	beq	160 <dpsta_ioctl+0x14>
+ 26c:	str	r0, [r5, #144]	@ 0x90
+ 270:	add	r3, r0, #608	@ 0x260
+ 274:	ldrex	r2, [r3]
+ 278:	sub	r2, r2, #1
+ 27c:	strex	r1, r2, [r3]
+ 280:	teq	r1, #0
+ 284:	bne	274 <dpsta_ioctl+0x128>
+ 288:	ldr	r0, [pc, #88]	@ 2e8 <dpsta_ioctl+0x19c>
+ 28c:	mov	r1, r7
+ 290:	bl	0 <dev_get_by_name>
+ 294:	cmp	r0, #0
+ 298:	strbeq	r0, [r4, #905]	@ 0x389
+ 29c:	mvneq	r0, #18
+ 2a0:	beq	160 <dpsta_ioctl+0x14>
+ 2a4:	str	r0, [r4, #1084]	@ 0x43c
+ 2a8:	add	r3, r0, #608	@ 0x260
+ 2ac:	ldrex	r2, [r3]
+ 2b0:	sub	r2, r2, #1
+ 2b4:	strex	r1, r2, [r3]
+ 2b8:	teq	r1, #0
+ 2bc:	bne	2ac <dpsta_ioctl+0x160>
+ 2c0:	mov	r0, #0
+ 2c4:	b	160 <dpsta_ioctl+0x14>
+ 2c8:	add	r0, sp, #12
+ 2cc:	mov	r1, #44	@ 0x2c
+ 2d0:	bl	0 <__memzero>
+ 2d4:	mvn	r0, #13
+ 2d8:	b	160 <dpsta_ioctl+0x14>
+ 2dc:	strb	sl, [r4, #905]	@ 0x389
+ 2e0:	mvn	r0, #21
+ 2e4:	b	160 <dpsta_ioctl+0x14>
+ 2e8:	.word	0x00000000
+
+000002ec <dpsta_set_mac_address>:
+ 2ec:	push	{r4, lr}
+ 2f0:	subs	r4, r0, #0
+ 2f4:	sub	sp, sp, #8
+ 2f8:	bne	308 <dpsta_set_mac_address+0x1c>
+ 2fc:	mvn	r0, #99	@ 0x63
+ 300:	add	sp, sp, #8
+ 304:	pop	{r4, pc}
+ 308:	cmn	r4, #896	@ 0x380
+ 30c:	beq	2fc <dpsta_set_mac_address+0x10>
+ 310:	mov	r0, #12
+ 314:	str	r1, [sp, #4]
+ 318:	bl	0 <capable>
+ 31c:	cmp	r0, #0
+ 320:	ldr	r1, [sp, #4]
+ 324:	mvneq	r0, #0
+ 328:	beq	300 <dpsta_set_mac_address+0x14>
+ 32c:	ldr	r0, [r4, #356]	@ 0x164
+ 330:	add	r1, r1, #2
+ 334:	mov	r2, #6
+ 338:	bl	0 <memcpy>
+ 33c:	mov	r0, #0
+ 340:	b	300 <dpsta_set_mac_address+0x14>
+
+00000344 <dpsta_start>:
+ 344:	push	{r3, r4, r5, r6, r7, lr}
+ 348:	mov	r4, r1
+ 34c:	ldrb	r3, [r1, #905]	@ 0x389
+ 350:	mov	r5, r0
+ 354:	add	r6, r1, #896	@ 0x380
+ 358:	cmp	r3, #0
+ 35c:	bne	368 <dpsta_start+0x24>
+ 360:	mov	r0, #0
+ 364:	pop	{r3, r4, r5, r6, r7, pc}
+ 368:	ldr	r7, [r0, #184]	@ 0xb8
+ 36c:	mov	r2, #6
+ 370:	ldr	r3, [r6, #144]	@ 0x90
+ 374:	add	r7, r7, r2
+ 378:	ldr	r0, [r3, #356]	@ 0x164
+ 37c:	mov	r1, r7
+ 380:	bl	0 <memcmp>
+ 384:	cmp	r0, #0
+ 388:	bne	3a4 <dpsta_start+0x60>
+ 38c:	ldr	r3, [r6, #144]	@ 0x90
+ 390:	str	r3, [r5, #36]	@ 0x24
+ 394:	mov	r0, r5
+ 398:	bl	0 <dev_queue_xmit>
+ 39c:	mov	r0, #0
+ 3a0:	pop	{r3, r4, r5, r6, r7, pc}
+ 3a4:	ldr	r3, [r4, #1084]	@ 0x43c
+ 3a8:	mov	r1, r7
+ 3ac:	mov	r2, #6
+ 3b0:	ldr	r0, [r3, #356]	@ 0x164
+ 3b4:	bl	0 <memcmp>
+ 3b8:	cmp	r0, #0
+ 3bc:	beq	418 <dpsta_start+0xd4>
+ 3c0:	ldrb	r3, [r6, #8]
+ 3c4:	cmp	r3, #0
+ 3c8:	beq	480 <dpsta_start+0x13c>
+ 3cc:	ldr	r3, [r4, #1052]	@ 0x41c
+ 3d0:	mov	r1, r7
+ 3d4:	ldr	r0, [r4, #1044]	@ 0x414
+ 3d8:	blx	r3
+ 3dc:	cmp	r0, #0
+ 3e0:	beq	4a0 <dpsta_start+0x15c>
+ 3e4:	ldr	r3, [r6, #12]
+ 3e8:	cmp	r3, #0
+ 3ec:	beq	4d8 <dpsta_start+0x194>
+ 3f0:	cmp	r3, #1
+ 3f4:	beq	4cc <dpsta_start+0x188>
+ 3f8:	ldr	r3, [r4, #1084]	@ 0x43c
+ 3fc:	str	r3, [r5, #36]	@ 0x24
+ 400:	b	394 <dpsta_start+0x50>
+ 404:	cmp	r0, #0
+ 408:	beq	38c <dpsta_start+0x48>
+ 40c:	ldr	r3, [r6, #16]
+ 410:	cmp	r3, #3
+ 414:	bne	38c <dpsta_start+0x48>
+ 418:	ldr	r3, [r4, #1084]	@ 0x43c
+ 41c:	str	r3, [r5, #36]	@ 0x24
+ 420:	b	394 <dpsta_start+0x50>
+ 424:	ldr	r3, [r6, #32]
+ 428:	mov	r1, r7
+ 42c:	mov	r2, #6
+ 430:	ldr	r0, [r3, #356]	@ 0x164
+ 434:	bl	0 <memcmp>
+ 438:	cmp	r0, #0
+ 43c:	beq	454 <dpsta_start+0x110>
+ 440:	ldr	r3, [r6, #16]
+ 444:	cmp	r3, #1
+ 448:	beq	38c <dpsta_start+0x48>
+ 44c:	cmp	r3, #2
+ 450:	beq	418 <dpsta_start+0xd4>
+ 454:	ldr	r3, [r4, #1060]	@ 0x424
+ 458:	ldr	r0, [r4, #1048]	@ 0x418
+ 45c:	blx	r3
+ 460:	ldr	r3, [r6, #208]	@ 0xd0
+ 464:	mov	r7, r0
+ 468:	ldr	r0, [r4, #1092]	@ 0x444
+ 46c:	blx	r3
+ 470:	cmp	r7, #0
+ 474:	bne	404 <dpsta_start+0xc0>
+ 478:	cmp	r0, #0
+ 47c:	bne	3f8 <dpsta_start+0xb4>
+ 480:	mov	r1, r5
+ 484:	ldr	r0, [r4, #896]	@ 0x380
+ 488:	bl	0 <osl_pkt_frmnative>
+ 48c:	ldr	r0, [r4, #896]	@ 0x380
+ 490:	mov	r1, r5
+ 494:	mov	r2, #1
+ 498:	bl	0 <osl_pktfree>
+ 49c:	b	360 <dpsta_start+0x1c>
+ 4a0:	ldr	r3, [r4, #1096]	@ 0x448
+ 4a4:	mov	r1, r7
+ 4a8:	ldr	r0, [r6, #192]	@ 0xc0
+ 4ac:	blx	r3
+ 4b0:	cmp	r0, #0
+ 4b4:	beq	424 <dpsta_start+0xe0>
+ 4b8:	ldr	r3, [r6, #12]
+ 4bc:	cmp	r3, #0
+ 4c0:	beq	4f4 <dpsta_start+0x1b0>
+ 4c4:	cmp	r3, #1
+ 4c8:	beq	3f8 <dpsta_start+0xb4>
+ 4cc:	ldr	r3, [r6, #144]	@ 0x90
+ 4d0:	str	r3, [r5, #36]	@ 0x24
+ 4d4:	b	394 <dpsta_start+0x50>
+ 4d8:	ldr	r3, [r4, #1060]	@ 0x424
+ 4dc:	ldr	r0, [r4, #1048]	@ 0x418
+ 4e0:	blx	r3
+ 4e4:	cmp	r0, #0
+ 4e8:	beq	3f8 <dpsta_start+0xb4>
+ 4ec:	ldr	r3, [r6, #144]	@ 0x90
+ 4f0:	b	4d0 <dpsta_start+0x18c>
+ 4f4:	ldr	r3, [r6, #208]	@ 0xd0
+ 4f8:	ldr	r0, [r4, #1092]	@ 0x444
+ 4fc:	blx	r3
+ 500:	cmp	r0, #0
+ 504:	beq	4cc <dpsta_start+0x188>
+ 508:	ldr	r3, [r4, #1084]	@ 0x43c
+ 50c:	b	3fc <dpsta_start+0xb8>
+
+00000510 <dpsta_register>:
+ 510:	push	{r3, r4, r5, lr}
+ 514:	subs	r4, r1, #0
+ 518:	mov	r5, r0
+ 51c:	beq	574 <dpsta_register+0x64>
+ 520:	cmp	r0, #1
+ 524:	bhi	588 <dpsta_register+0x78>
+ 528:	ldr	r3, [pc, #108]	@ 59c <dpsta_register+0x8c>
+ 52c:	mov	r0, #44	@ 0x2c
+ 530:	mov	r2, #20
+ 534:	ldr	r4, [r3]
+ 538:	mla	r0, r0, r5, r4
+ 53c:	add	r0, r0, #148	@ 0x94
+ 540:	bl	0 <memcpy>
+ 544:	ldr	r3, [r4, #156]	@ 0x9c
+ 548:	cmp	r3, #0
+ 54c:	beq	55c <dpsta_register+0x4c>
+ 550:	ldr	r3, [r4, #200]	@ 0xc8
+ 554:	subs	r3, r3, #0
+ 558:	movne	r3, #1
+ 55c:	mov	r0, #44	@ 0x2c
+ 560:	strb	r3, [r4, #8]
+ 564:	mul	r0, r0, r5
+ 568:	add	r0, r0, #128	@ 0x80
+ 56c:	add	r0, r4, r0
+ 570:	pop	{r3, r4, r5, pc}
+ 574:	ldr	r0, [pc, #36]	@ 5a0 <dpsta_register+0x90>
+ 578:	ldr	r1, [pc, #36]	@ 5a4 <dpsta_register+0x94>
+ 57c:	bl	0 <printk>
+ 580:	mov	r0, r4
+ 584:	pop	{r3, r4, r5, pc}
+ 588:	ldr	r0, [pc, #24]	@ 5a8 <dpsta_register+0x98>
+ 58c:	ldr	r1, [pc, #16]	@ 5a4 <dpsta_register+0x94>
+ 590:	bl	0 <printk>
+ 594:	mov	r0, #0
+ 598:	pop	{r3, r4, r5, pc}
+	...
+ 5a8:	.word	0x0000002c
+
+000005ac <dpsta_recv>:
+ 5ac:	push	{r3, r4, r5, lr}
+ 5b0:	mov	r5, r0
+ 5b4:	ldr	r3, [pc, #104]	@ 624 <dpsta_recv+0x78>
+ 5b8:	ldr	r4, [r3]
+ 5bc:	ldrb	r0, [r4, #9]
+ 5c0:	cmp	r0, #0
+ 5c4:	popeq	{r3, r4, r5, pc}
+ 5c8:	ldrb	r0, [r4, #8]
+ 5cc:	cmp	r0, #0
+ 5d0:	popeq	{r3, r4, r5, pc}
+ 5d4:	ldr	r2, [r4, #144]	@ 0x90
+ 5d8:	ldr	r3, [r5, #36]	@ 0x24
+ 5dc:	cmp	r3, r2
+ 5e0:	addeq	r2, r4, #192	@ 0xc0
+ 5e4:	beq	5fc <dpsta_recv+0x50>
+ 5e8:	ldr	r2, [r4, #188]	@ 0xbc
+ 5ec:	cmp	r3, r2
+ 5f0:	movne	r0, #0
+ 5f4:	popne	{r3, r4, r5, pc}
+ 5f8:	add	r2, r4, #148	@ 0x94
+ 5fc:	ldr	r1, [r5, #184]	@ 0xb8
+ 600:	ldr	r3, [r2, #12]
+ 604:	ldr	r0, [r2]
+ 608:	add	r1, r1, #6
+ 60c:	blx	r3
+ 610:	cmp	r0, #0
+ 614:	ldreq	r3, [r4, #32]
+ 618:	mvnne	r0, #0
+ 61c:	streq	r3, [r5, #36]	@ 0x24
+ 620:	pop	{r3, r4, r5, pc}
+ 624:	.word	0x00000000
+
+Disassembly of section .init.text:
+
+00000000 <init_module>:
+   0:	push	{r4, r5, r6, r7, r8, lr}
+   4:	sub	sp, sp, #24
+   8:	ldr	r6, [pc, #404]	@ 1a4 <init_module+0x1a4>
+   c:	mov	r2, #10
+  10:	add	r8, sp, #8
+  14:	ldm	r6, {r0, r1}
+  18:	str	r0, [sp, #8]
+  1c:	add	r0, sp, #14
+  20:	strh	r1, [sp, #12]
+  24:	mov	r1, #0
+  28:	bl	0 <memset>
+  2c:	mov	r0, #0
+  30:	mov	r1, #1
+  34:	mov	r2, r0
+  38:	bl	0 <osl_attach>
+  3c:	mov	r1, r8
+  40:	mov	r7, r0
+  44:	ldr	r2, [pc, #348]	@ 1a8 <init_module+0x1a8>
+  48:	mov	r0, #220	@ 0xdc
+  4c:	mov	r3, #1
+  50:	bl	0 <alloc_netdev_mq>
+  54:	subs	r4, r0, #0
+  58:	bne	70 <init_module+0x70>
+  5c:	ldr	r0, [pc, #328]	@ 1ac <init_module+0x1ac>
+  60:	add	r1, r6, #16
+  64:	bl	0 <printk>
+  68:	mvn	r0, #11
+  6c:	b	19c <init_module+0x19c>
+  70:	mov	r3, #0
+  74:	add	r5, r4, #896	@ 0x380
+  78:	add	r2, r6, #28
+  7c:	str	r3, [r5, #4]
+  80:	str	r4, [r5, #32]
+  84:	str	r7, [r4, #896]	@ 0x380
+  88:	str	r3, [r4, #560]	@ 0x230
+  8c:	str	r2, [r4, #204]	@ 0xcc
+  90:	bl	0 <register_netdev>
+  94:	subs	r3, r0, #0
+  98:	beq	cc <init_module+0xcc>
+  9c:	add	r2, r6, #16
+  a0:	mov	r1, r8
+  a4:	ldr	r0, [pc, #260]	@ 1b0 <init_module+0x1b0>
+  a8:	bl	0 <printk>
+  ac:	mov	r0, r4
+  b0:	bl	0 <free_netdev>
+  b4:	mov	r0, r7
+  b8:	mov	r1, r5
+  bc:	mov	r2, #220	@ 0xdc
+  c0:	bl	0 <osl_mfree>
+  c4:	mvn	r0, #4
+  c8:	b	19c <init_module+0x19c>
+  cc:	mov	r2, #1
+  d0:	str	r5, [r4, #1064]	@ 0x428
+  d4:	strb	r2, [r5, #28]
+  d8:	ldr	r2, [pc, #212]	@ 1b4 <init_module+0x1b4>
+  dc:	str	r5, [r4, #1108]	@ 0x454
+  e0:	ldr	ip, [r2]
+  e4:	cmp	ip, #0
+  e8:	moveq	r0, ip
+  ec:	beq	104 <init_module+0x104>
+  f0:	str	r3, [sp]
+  f4:	mov	r0, r7
+  f8:	mov	r1, r4
+  fc:	ldr	r2, [pc, #180]	@ 1b8 <init_module+0x1b8>
+ 100:	blx	ip
+ 104:	cmp	r0, #0
+ 108:	str	r0, [r4, #1112]	@ 0x458
+ 10c:	beq	134 <init_module+0x134>
+ 110:	ldrb	r3, [r0]
+ 114:	cmp	r3, #0
+ 118:	beq	134 <init_module+0x134>
+ 11c:	ldr	r3, [r0, #80]	@ 0x50
+ 120:	mov	r1, r4
+ 124:	mov	r2, #0
+ 128:	blx	r3
+ 12c:	cmp	r0, #0
+ 130:	bne	168 <init_module+0x168>
+ 134:	ldr	r0, [r4, #1112]	@ 0x458
+ 138:	cmp	r0, #0
+ 13c:	beq	190 <init_module+0x190>
+ 140:	ldrb	r3, [r0]
+ 144:	cmp	r3, #0
+ 148:	beq	190 <init_module+0x190>
+ 14c:	ldr	ip, [r0, #76]	@ 0x4c
+ 150:	mov	r1, r4
+ 154:	mov	r2, #1
+ 158:	mov	r3, #0
+ 15c:	blx	ip
+ 160:	cmp	r0, #0
+ 164:	beq	190 <init_module+0x190>
+ 168:	ldr	r0, [pc, #76]	@ 1bc <init_module+0x1bc>
+ 16c:	bl	0 <printk>
+ 170:	mov	r0, r4
+ 174:	bl	0 <free_netdev>
+ 178:	mov	r0, r7
+ 17c:	mov	r1, r5
+ 180:	mov	r2, #220	@ 0xdc
+ 184:	bl	0 <osl_mfree>
+ 188:	mvn	r0, #11
+ 18c:	b	19c <init_module+0x19c>
+ 190:	ldr	r3, [pc, #40]	@ 1c0 <init_module+0x1c0>
+ 194:	mov	r0, #0
+ 198:	str	r5, [r3]
+ 19c:	add	sp, sp, #24
+ 1a0:	pop	{r4, r5, r6, r7, r8, pc}
+ 1a4:	.word	0x00000010
+ 1a8:	.word	0x00000000
+ 1ac:	.word	0x00000048
+ 1b0:	.word	0x00000070
+	...
+ 1bc:	.word	0x0000009c
+ 1c0:	.word	0x00000000
+
+Disassembly of section .exit.text:
+
+00000000 <cleanup_module>:
+   0:	ldr	r3, [pc, #100]	@ 6c <cleanup_module+0x6c>
+   4:	push	{r4, lr}
+   8:	ldr	r4, [r3]
+   c:	ldr	r0, [r4, #216]	@ 0xd8
+  10:	cmp	r0, #0
+  14:	beq	50 <cleanup_module+0x50>
+  18:	ldrb	r3, [r0]
+  1c:	cmp	r3, #0
+  20:	beq	30 <cleanup_module+0x30>
+  24:	ldr	r3, [r0, #84]	@ 0x54
+  28:	ldr	r1, [r4, #32]
+  2c:	blx	r3
+  30:	ldr	r0, [r4, #216]	@ 0xd8
+  34:	cmp	r0, #0
+  38:	beq	50 <cleanup_module+0x50>
+  3c:	ldrb	r3, [r0]
+  40:	cmp	r3, #0
+  44:	beq	50 <cleanup_module+0x50>
+  48:	ldr	r3, [r0, #4]
+  4c:	blx	r3
+  50:	ldr	r0, [r4, #32]
+  54:	bl	0 <free_netdev>
+  58:	ldr	r0, [r4]
+  5c:	mov	r1, r4
+  60:	mov	r2, #220	@ 0xdc
+  64:	pop	{r4, lr}
+  68:	b	0 <osl_mfree>
+  6c:	.word	0x00000000

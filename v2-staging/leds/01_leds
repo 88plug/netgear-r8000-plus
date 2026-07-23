@@ -1,0 +1,65 @@
+
+. /lib/functions/uci-defaults.sh
+
+board_config_update
+
+case "$(board_name)" in
+meraki,mx64|\
+meraki,mx64-a0)
+	ucidef_set_led_netdev "wan" "WAN Port" "green:activity-9" "wan"
+	ucidef_set_led_netdev "lan1" "LAN Port 1" "green:activity-1" "lan1"
+	ucidef_set_led_netdev "lan2" "LAN Port 2" "green:activity-3" "lan2"
+	ucidef_set_led_netdev "lan3" "LAN Port 3" "green:activity-5" "lan3"
+	ucidef_set_led_netdev "lan4" "LAN Port 4" "green:activity-7" "lan4"
+	;;
+meraki,mx65)
+	ucidef_set_led_netdev "wan1" "WAN Port 1" "green:activity-1" "wan1"
+	ucidef_set_led_netdev "wan2" "WAN Port 2" "green:activity-3" "wan2"
+	;;
+netgear,r8000)
+	# Power (white) is handled automatically by the shared bcm53xx
+	# /etc/diag.sh (auto-picks the first "*:power" LED that isn't
+	# amber/red and drives it via status_led_on/blink_*). Verified
+	# working on this unit: bcm53xx:white:power trigger=none
+	# brightness=1 once boot reaches the "done" state.
+	#
+	# WAN (Internet) status: follow the "wan" netdev's physical link
+	# state instead of the DTS default-on (always-lit) trigger.
+	ucidef_set_led_netdev "wan" "Internet" "bcm53xx:white:wan" "wan" "link"
+
+	# Per-band wireless status LEDs. GPIO order on this board does
+	# NOT match radio/PCI slot order 0/1/2 sequentially, and the
+	# wlanN <-> phy assignment is probe-order dependent, not name-
+	# stable by spec. Verified on THIS unit/kernel via macaddr
+	# cross-reference against extracted/calibration.txt:
+	#   radio slot 0 (phy0, 5GHz, mac ...f1:38) -> wlan2 -> 5GHz-1 LED
+	#   radio slot 1 (phy1, 2.4GHz, mac ...f1:37) -> wlan1 -> 2.4GHz LED
+	#   radio slot 2 (phy2, 5GHz, mac ...f1:36) -> wlan0 -> 5GHz-2 LED
+	# Re-verify with `for w in /sys/class/net/wlan*; do echo "$w
+	# $(cat $w/address) phy=$(readlink $w/phy80211)"; done` after any
+	# brcmfmac/kernel update, since probe order is what assigns wlanN.
+	ucidef_set_led_netdev "wlan2g" "2.4GHz" "bcm53xx:white:2ghz" "wlan1" "link"
+	ucidef_set_led_netdev "wlan5g1" "5GHz-1" "bcm53xx:white:5ghz-1" "wlan2" "link"
+	ucidef_set_led_netdev "wlan5g2" "5GHz-2" "bcm53xx:white:5ghz-2" "wlan0" "link"
+
+	# WPS: no automatic pairing-blink hook exists in this tree (no
+	# package wires a WPS LED trigger for hostapd/wpad on this
+	# target). Bring it under explicit UCI management, off by
+	# default, instead of leaving it an orphaned kernel default
+	# (trigger=none, brightness=0 either way, but now managed by
+	# `/etc/init.d/led turnon|turnoff|blink`).
+	ucidef_set_led_default "wps" "WPS" "bcm53xx:white:wps" "0"
+
+	# "wireless" (gpio 14) has no confirmed distinct front-panel icon
+	# separate from the three per-band LEDs above; left explicitly
+	# off/managed rather than guessing at a combined-activity meaning.
+	ucidef_set_led_default "wireless" "Wireless" "bcm53xx:white:wireless" "0"
+
+	ucidef_set_led_usbport "usb2" "USB 2.0" "bcm53xx:white:usb2" "usb1-port2" "usb2-port2"
+	ucidef_set_led_usbport "usb3" "USB 3.0" "bcm53xx:white:usb3" "usb1-port1" "usb2-port1" "usb4-port1"
+	;;
+esac
+
+board_config_flush
+
+exit 0

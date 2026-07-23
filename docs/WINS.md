@@ -68,8 +68,58 @@ The `-95`/EOPNOTSUPP that made OWE, guest networks, and multi-SSID-per-radio
 - **Built package:** `images/packages/kmod-brcmfmac-*.apk`.
 - **Docs:** [README](README.md) · [RUNBOOK](RUNBOOK.md) (access/flash/recovery) · [FINDINGS](FINDINGS.md) (technical detail §1–8).
 
+## v5/v6 — app-plus pass, sysupgrade bug caught live, packaging regression found+fixed
+
+Scoped app-plus graveyard-mining pass (bcm53xx + brcmfmac only, not the full
+openwrt/openwrt monorepo) plus a direct anti-dogma re-investigation of two
+claimed walls, under live-hardware testing. Full detail: FINDINGS.md §9–12.
+
+- **radio-watchdog shipped** (v5+): an escalating brcmfmac-wedge recovery
+  daemon, fully written earlier but never wired into the image, confirmed
+  against still-open upstream issue #14685. Zero regression risk, pure
+  addition.
+- **OWE confirmed unfixable, with real rigor this time.** Traced the actual
+  mechanism via Broadcom's own proprietary DHD driver source (not just
+  reading the absence of code): OWE requires a firmware-emitted event
+  (`WLC_E_OWE_INFO`) carrying DH key material for host-side ECDH — this has
+  to be compiled into the wl0 firmware binary. Our firmware (2015-09-18)
+  predates OWE's 2016 RFC by a year; no driver patch can add a firmware-side
+  protocol handler. Removed from the shipped config.
+- **DFS/clm_blob root cause found — real, not a wall, but a hazard.**
+  v2's "fatal clmload -52" was traced to a genuine bug in our OWN extraction:
+  the CLM blob was paired with a *different, newer* firmware build (2021)
+  than what's actually loaded (2015). Live-tested the correctly-paired
+  firmware+CLM: it loads cleanly (proving the mismatch theory) but the newer
+  firmware **regresses MBSS** (`interface_create` now fails `-52` instead of
+  the `EOPNOTSUPP` patches/861 targets) and DFS channels **still** stayed
+  disabled (confirms the separate DTS-gating wall). Reverted to the
+  known-good 2015 firmware/no-CLM combination. Real finding, not re-shipped.
+- **Found and fixed our own v5 packaging regression.** Rebuilding v5 via
+  plain ImageBuilder `make image` silently pulled the *stock* upstream
+  `kmod-brcmfmac` from the official binary repo instead of our
+  patches/861-patched local build (the patched `.apk` had been archived to
+  `images/packages/` but never copied into ImageBuilder's own `packages/`
+  dir for this rebuild) — silently reverting the MBSS fix. Caught via
+  `iw dev` interface-count verification, confirmed via module checksum diff,
+  fixed by placing the patched apk correctly and rebuilding as v6.
+  **Lesson: verify the actual deployed artifact, not just the package list.**
+- **Live-confirmed upstream #21655 (sysupgrade config-loss) on our own
+  device**, twice (v5 and v6 flashes) — `/etc/config/{wireless,firewall,sqm,
+  system,usteer}` reset to defaults on both config-preserving sysupgrades,
+  exactly matching the bug thread's description. Recovered cleanly both
+  times because a pre-flight `sysupgrade -b` backup was already
+  standard procedure by then. **This is now mandatory before every future
+  sysupgrade** — see RUNBOOK.md.
+
+**v6 is the current shipping image**: v4's proven wins + radio-watchdog +
+OWE cleanly removed (no dead interfaces) + the packaging regression fixed +
+5GHz/MBSS/WPA3/802.11r-k-v/guest-network all independently re-verified live
+after two full flash-and-recovery cycles.
+
 ## Outstanding (user tasks, not bugs)
 
 - Change temp passphrases: `ChangeMe-R8000-2026`, `GuestChangeMe2026`.
 - Set SQM WAN bandwidth to activate bufferbloat control.
 - Move `R8000-Guest` to an isolated network/VLAN for true guest isolation.
+- Always run `sysupgrade -b` and download the backup **before** any future
+  sysupgrade — config loss on this device is confirmed, not hypothetical.

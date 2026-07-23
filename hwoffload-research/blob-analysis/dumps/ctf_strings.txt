@@ -1,0 +1,153 @@
+ctf_init
+clear all ctf entries success
+Clear Port %d ctf entries
+Invalid tuple
+Flow is not suspended
+Protocol %d not supported
+Default forwarding %d invalid
+Unknown 0x%x command
+IP connection cache: %d entries
+%-35s %-35s %5s %7s %7s %4s Hits
+DestIP
+SrcPort
+DstPort
+%-35.08x %-35.08x 
+%08x.%08x.%08x.%08x %08x.%08x.%08x.%08x 
+%-5s %-7.04x %-7.04x %-4.04s %d
+Bridge cache:
+MacAddr				Interface	Hits
+%s		%s		%d
+Hot Bridge cache:
+%d.%d: %s
+Fast pool stats:
+ctf_disable
+%s: ctf_kattach failed
+%s: Netlink kernel socket create failed
+license=Proprietary
+depends=
+vermagic=2.6.36.4brcmarm+ SMP preempt mod_unload ARMv7 
+ctf_kdetach
+ctf_kattach
+_ctf_attach
+GCC: (Buildroot 2012.02) 4.5.3
+GCC: (Buildroot 2012.02) 4.5.3
+GCC: (Buildroot 2012.02) 4.5.3
+GCC: (Buildroot 2012.02) 4.5.3
+.symtab
+.strtab
+.shstrtab
+.rel.text
+.rel.text.fastpath
+.rel.init.text
+.rel.exit.text
+.rodata
+.ARM.extab.text.fastpath
+.rel.ARM.exidx.text.fastpath
+.rodata.str1.4
+.ARM.extab.init.text
+.rel.ARM.exidx.init.text
+.ARM.extab.exit.text
+.rel.ARM.exidx.exit.text
+.modinfo
+__ksymtab_strings
+.rel__ksymtab
+.rel__kcrctab
+.ARM.extab
+.rel.gnu.linkonce.this_module
+.rel.ARM.exidx
+.note.gnu.build-id
+.comment
+.note.GNU-stack
+.ARM.attributes
+_ctf_brc_lkup_ll
+_ctf_ipc_count_get
+_ctf_ipc_lkup_l4proto_v6
+_ctf_fwdcb_register
+_ctf_detach
+_ctf_ipc_detach_brcp
+_ctf_dev_vlan_delete
+_ctf_dev_vlan_add
+_ctf_enable
+_ctf_ipc_release
+_ctf_ipc_delete_multi
+.LANCHOR0
+_ctf_brc_release
+_ctf_brc_lkup
+_ctf_brc_update
+_ctf_isbridge
+_ctf_isenabled
+_ctf_brc_hot_invalidate
+_ctf_dev_unregister
+_ctf_brc_delete
+_ctf_clear
+_ctf_ipc_lkup_ll
+_ctf_ipc_lkup
+_ctf_cfg_req_process
+_ctf_ipc_lkup_fn
+_ctf_is_ipc_in_range
+_ctf_ipc_action
+_ctf_ipc_delete_range
+_ctf_ipc_delete
+_ctf_dump
+_ctf_dev_register
+_ctf_ipc_add
+_ctf_brc_add
+_ctf_forward
+ci_head
+ctf_msg_level
+attached.27295
+ctf_netlink_sock_cb
+ctf_init
+ctf_exit
+__func__.31262
+__mod_license19
+__kstrtab_ctf_kdetach
+__kstrtab_ctf_kattach
+__kstrtab__ctf_attach
+__ksymtab_ctf_kdetach
+__ksymtab_ctf_kattach
+__ksymtab__ctf_attach
+__kcrctab_ctf_kdetach
+__kcrctab_ctf_kattach
+__kcrctab__ctf_attach
+__module_depends
+__mod_vermagic5
+_ctf_attach
+dev_queue_xmit
+bcm_ether_ntoa
+csum_partial
+__this_module
+osl_malloc
+__aeabi_unwind_cpp_pr0
+cleanup_module
+ppp_txstats_upd
+memcpy
+bcm_bprintf
+ctf_kdetach
+osl_pkt_frmnative
+init_module
+ppp_rxstats_upd
+_raw_spin_unlock_bh
+osl_ctfpool_stats
+init_net
+__crc__ctf_attach
+skb_pull
+__crc_ctf_kdetach
+netlink_unicast
+ctf_attach_fn
+skb_push
+strncpy
+netlink_kernel_release
+memcmp
+printk
+netlink_kernel_create
+__memzero
+ctf_kattach
+__crc_ctf_kattach
+jiffies
+sprintf
+skb_clone
+_raw_spin_lock_bh
+osl_pktfree
+osl_mfree
+getintvar

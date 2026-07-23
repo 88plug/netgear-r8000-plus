@@ -1,0 +1,36 @@
+########## MODINFO ctf ##########
+filename:       /home/andrew/netgearr8000/hwoffload-research/blob-analysis/rootfs/./lib/modules/2.6.36.4brcmarm+/kernel/drivers/net/ctf/ctf.ko
+license:        Proprietary
+depends:        
+vermagic:       2.6.36.4brcmarm+ SMP preempt mod_unload ARMv7 
+
+########## MODINFO et ##########
+filename:       /home/andrew/netgearr8000/hwoffload-research/blob-analysis/rootfs/./lib/modules/2.6.36.4brcmarm+/kernel/drivers/net/et/et.ko
+license:        Proprietary
+alias:          pci:v*d*sv*sd*bc02sc00i*
+alias:          pci:v*d*sv*sd*bc02sc80i*
+depends:        
+vermagic:       2.6.36.4brcmarm+ SMP preempt mod_unload ARMv7 
+parm:           passivemode:int
+parm:           txworkq:int
+parm:           et_txq_thresh:int
+parm:           et_rxlazy_timeout:uint
+parm:           et_rxlazy_framecnt:uint
+
+########## MODINFO dpsta ##########
+filename:       /home/andrew/netgearr8000/hwoffload-research/blob-analysis/rootfs/./lib/modules/2.6.36.4brcmarm+/kernel/drivers/net/dpsta/dpsta.ko
+depends:        
+vermagic:       2.6.36.4brcmarm+ SMP preempt mod_unload ARMv7 
+
+########## MODINFO igs ##########
+filename:       /home/andrew/netgearr8000/hwoffload-research/blob-analysis/rootfs/./lib/modules/2.6.36.4brcmarm+/kernel/drivers/net/igs/igs.ko
+license:        Proprietary
+depends:        emf
+vermagic:       2.6.36.4brcmarm+ SMP preempt mod_unload ARMv7 
+
+########## MODINFO emf ##########
+filename:       /home/andrew/netgearr8000/hwoffload-research/blob-analysis/rootfs/./lib/modules/2.6.36.4brcmarm+/kernel/drivers/net/emf/emf.ko
+license:        Proprietary
+depends:        
+vermagic:       2.6.36.4brcmarm+ SMP preempt mod_unload ARMv7 
+

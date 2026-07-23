@@ -181,3 +181,213 @@ R8000-Open-OWE, R8000-Guest). Upstreamable to OpenWrt mac80211 / linux brcmfmac.
 Caveat: the patched module is currently deployed as a `/lib/modules` overlay
 (persists across reboot). A clean reproducible image (v3) folding the patched
 `kmod-brcmfmac.apk` into ImageBuilder is the remaining packaging step.
+
+## 9. OWE (Enhanced Open) — confirmed unfixable, the honest wall
+
+With patches/861 unlocking multi-BSS, OWE-transition and guest SSIDs both
+became reachable as *interfaces* — but OWE specifically never beacons.
+Isolation testing ruled out multi-BSS-cap and transition-mode as the cause:
+
+* Plain multi-SSID (3 BSSes/radio): works.
+* Plain guest (2nd BSS): works.
+* OWE transition pair (`owe_open`+`owe_secure`): both fail, hostapd exits 0
+  but no beacon.
+* Standalone plain OWE (no transition pair): also fails, identical error.
+
+Device log: `ieee80211 phy0: brcmf_cfg80211_start_ap: brcmf_parse_configure_security error`.
+
+Read the actual driver (`drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c`,
+kernel 6.12.y, function `brcmf_parse_configure_security()`): it parses the
+RSN IE's AKM-suite list and switches on suite number — `RSN_AKM_NONE(0)`,
+`RSN_AKM_UNSPECIFIED(1)`, `RSN_AKM_PSK(2)`, `RSN_AKM_SHA256_1X(5)`,
+`RSN_AKM_SHA256_PSK(6)`, `RSN_AKM_SAE(8)` are all handled — **there is no
+case for OWE (AKM suite 18)**. It falls through to `default:` (`"Invalid key
+mgmt info"`), `wpa_auth` is never set to anything OWE-related, and the
+firmware rejects the resulting beacon config. `WPA3_AUTH_OWE` does not exist
+anywhere in brcmfmac; this was never implemented, on any chip, in-tree.
+
+**Why this isn't a driver bug like the MBSS one:** the R8000's BCM43602
+firmware is dated **2015-09-18** (`7.35.177.56`, confirmed via extracted
+calibration and firmware version strings in kernel logs). **OWE (RFC 8110)
+was published in 2016** — a full year later. The firmware predates the
+standard it would need to speak; there is no missing case to add, no
+fallback path to unblock. Confirmed unfixable — not effort-gapped, not
+"2015 dogma," a genuine chronology wall. OWE was removed from the shipped
+wireless config (`v2-files/etc/config/wireless`); the driver-level multi-BSS
+fix it rode in on is otherwise fully intact (guest network, unified-SSID
+roaming all unaffected).
+
+## 10. app-plus pass — scoped to bcm53xx + brcmfmac (2026-07-23)
+
+Ran the graveyard-mining methodology against `openwrt/openwrt` scoped to
+`target/linux/bcm53xx` + brcmfmac (not the full monorepo — thousands of
+issues/PRs across every other target would be noise here).
+
+**Shipped (v5):**
+- **radio-watchdog** — an escalating brcmfmac-wedge recovery daemon
+  (tier 1: `wifi reload`; tier 2: full module reload; tier 3: rate-limited
+  reboot, 6h cooldown) was fully written earlier this session
+  (`v2-staging/extras/radio-watchdog/`) but never wired into `image-files/`,
+  so it shipped in none of v1–v4. Confirmed against **still-open** upstream
+  issue [openwrt/openwrt#14685](https://github.com/openwrt/openwrt/issues/14685)
+  ("brcmfmac makes CPU stalls" on R8000, PSM-watchdog/msgbuf-timeout
+  signatures matching this daemon's detection patterns exactly, 2+ years
+  open, Broadcom's own brcmfmac maintainer looped in with no resolution).
+  Wired into `image-files/etc/init.d/radio-watchdog`,
+  `image-files/usr/sbin/radio-watchdog-check`, enabled via
+  `image-files/etc/rc.d/S99radio-watchdog`. Its cron dependency is provided
+  by busybox itself (`/etc/init.d/cron`) — no extra package needed; the
+  daemon's own `start()` enables+starts it.
+
+**Documented, not fixed (out of scope):**
+- **sysupgrade config-loss** — [openwrt/openwrt#21655](https://github.com/openwrt/openwrt/issues/21655),
+  open, confirmed by a commenter to affect R8000 directly ("same problem for
+  Netgear R7000 R8000 and Asus RT-AC68U"), but reproduced across totally
+  unrelated targets (ath79, gl-inet, DIR-890L, Luxul, Phicomm K3) — this is a
+  cross-target base-files/fstools regression, not a bcm53xx/brcmfmac bug, and
+  genuinely out of this pass's scope to root-cause. Mitigation: an explicit
+  off-device config backup is taken before every sysupgrade from here on (see
+  RUNBOOK.md) rather than trusting sysupgrade's own preservation.
+
+**Considered, not adopted:**
+- PR [#11534](https://github.com/openwrt/openwrt/pull/11534) (`base-files:
+  fix bcm53xx sysupgrade`, open since Dec 2022) — targets a different device
+  (Phicomm K3) and a different symptom (upgrade fails to flash at all, not
+  config loss after a successful flash); stale, zero maintainer engagement,
+  not confirmed applicable to R8000.
+- PR [#23463](https://github.com/openwrt/openwrt/pull/23463) (`bcm53xx:
+  enable GRO`) — live on-hardware iperf3 data in the PR thread shows a
+  **disputed, mixed result** on the same `bgmac` ethernet driver family: TX
+  throughput regressed 690→550 Mbit/s with fraglist GRO enabled, root-caused
+  in-thread to missing RX checksum offload on `bgmac`, still being debugged
+  by reviewers, unmerged for a real reason. Adopting an unresolved PR with a
+  measured regression on our own ethernet driver would be exactly the
+  un-vetted "ship because it sounds good" mistake this methodology exists to
+  prevent.
+- PR [#21654](https://github.com/openwrt/openwrt/pull/21654) (`bcm53xx: drop
+  vendor wl*_ runtime NVRAM before brcmfmac attach`) — closed/wontfix; a
+  maintainer explicitly rejected cleaning up carried-over vendor NVRAM,
+  preferring a proper CFE NVRAM reset. This **validates** our own approach
+  (patches/0001 provides curated, explicit calibration via
+  `nvram-bcm53xx.init` rather than carrying raw vendor NVRAM forward) — no
+  action needed.
+- Dedup check: zero existing OpenWrt issues/PRs discuss the
+  `interface_create`/EOPNOTSUPP MBSS-fallback bug fixed in patches/861 — a
+  genuinely novel, unclaimed contribution, worth upstreaming as-is.
+
+## 11. DFS/clm_blob wall — root cause found, real trade-off discovered (not re-shipped)
+
+Re-investigated the v2 "clm_blob firmware-rejected, fatal" finding under
+direct challenge: was `-52` genuinely a policy rejection, or a mistake in
+our own extraction? Traced the actual meaning of `-52`
+([community precedent](https://github.com/RPi-Distro/firmware-nonfree/issues/16))
+— it is consistently a **firmware/CLM version-pairing mismatch**, not a
+categorical refusal.
+
+Checked the extracted `brcmfmac43602-pcie.clm_blob`'s own trailing
+compatibility stamp against our *actually loaded* firmware:
+
+| | Version | Date | FWID |
+|---|---|---|---|
+| our loaded AP firmware | 7.35.177.56 | 2015-09-18 | `01-6cb8e269` |
+| our v2 clm_blob's stamp | 7.10.274.3.REBASE.R493518 | 2021-06-02 | `01-a20087dc` |
+
+**Confirmed mismatch** — the v2 clm_blob came from `dhd.ko`'s embedded
+`dlarray_43602a1` array in a *newer* stock firmware package
+(`R8000-V1.0.4.88`), paired internally with a 2021 firmware build, then
+mixed with our *separately-sourced* 2015 linux-firmware `.ap.bin`. Two
+firmware generations of the same chip, forced together — genuinely our own
+extraction mistake, not a firmware policy wall.
+
+**Fix attempted, live-tested (2026-07-23):** re-carved the *whole*
+`dlarray_43602a1` array (firmware portion + CLM as one matched, self-paired
+unit — confirmed byte-identical CLM to the earlier extraction, sha256
+`39d018bc...`) and deployed both together via a reversible live firmware-file
+swap + `rmmod`/`modprobe brcmfmac` (not baked into an image — this was a
+direct hardware test, backed up first).
+
+**Result — genuinely mixed, not a clean win:**
+- ✅ **No `clmload -52` abort.** All 3 radios registered and beaconed. The
+  version-mismatch hypothesis is confirmed correct — a matched firmware+CLM
+  pair loads cleanly.
+- ❌ **DFS channels (52–64, 100–144) stayed `disabled`** in `iw phy phy0
+  channels` even with clean CLM load. Consistent with the earlier §6 finding
+  that channel availability here is gated by the devicetree
+  `ieee80211-freq-limit` (hardware antenna diplexing), not by CLM/regdb —
+  fixing the CLM mismatch didn't touch that separate gate.
+- ❌ **Regression: MBSS broke.** With the 2021 firmware, `interface_create`
+  version-query now fails with `-52` (was `EOPNOTSUPP` on the 2015 build) and
+  the guest-network 2nd BSS on radio1 failed with `err=-95` — patches/861's
+  fallback trigger (originally written for `EOPNOTSUPP`) doesn't catch this
+  firmware's different failure code the same way. Guest network dropped from
+  4 beaconing interfaces to 3.
+- **Reverted to the known-good 2015 firmware + no clm_blob** (sha256
+  `7f735b72...`, the state already proven and shipped in v1–v5) and
+  **rebooted** — a driver `rmmod`/`modprobe` cycle alone was *not* sufficient
+  to fully reset radio-chip state after a firmware/CLM download; only a full
+  power-cycle restored clean MBSS behavior.
+
+## 12. OWE — 10-agent static disassembly of the actual firmware binary (2026-07-23)
+
+Under direct challenge to prove the OWE wall with real evidence rather than
+driver-source inference, ran a 10-agent parallel static analysis pass
+(objdump/capstone, Thumb-2 disassembly, no vendor SDK, no symbols) directly
+on `brcmfmac43602-pcie.ap.bin` (595,472 bytes, the exact file live on the
+router, byte-for-byte SHA256-verified against the deployed copy). Full
+output in `v2-staging/firmware/re-analysis/`.
+
+**Structural findings, independently corroborated 3 separate ways:**
+1. **This is a "roml" (ROM + RAM-overlay) build** — confirmed by (a) the
+   literal build-tag string `43602a1-roml/...` at EOF, (b) exhaustive string
+   search finding **zero** occurrences of any core security iovar name the
+   Linux driver actually sends (`wsec`, `auth`, `wpa_auth`, `sae`, `chanspec`,
+   `clmload`, `clmver`, `cur_etheraddr`, `down`, `bcn_prd`, `dtim_prd` — 12/19
+   targeted names, 0 hits, cross-verified by an independent full-file entropy
+   scan that found no other hidden low-entropy pocket), and (c) real
+   disassembly showing 5 of the firmware's 10 hottest `bl` call targets
+   (up to 445 calls each) resolve to addresses like `0xffe83644` —
+   **completely outside this file's own address range**, i.e. genuine calls
+   into a separate, fixed-address on-die mask-ROM region not present in this
+   or any loadable file. Mask ROM is fixed into the silicon at fabrication;
+   it cannot be read, dumped, or modified by any means available to us.
+2. **Load base confirmed:** `0x180000`, both from a literal header field
+   (`0x00180000` at file offset 0x7c) and cross-validated 5/5 against real
+   branch targets resolving to clean code — high confidence.
+3. **The AKM-suite dispatch logic that DOES exist in this RAM overlay was
+   located and fully characterized — and it has no room for OWE.** One
+   genuine multi-AKM enumeration routine exists (offset `0x01ad7e`–`0x01aecc`):
+   it sequentially tests `WPA2_AUTH_UNSPECIFIED(0x40)`,
+   `WPA2_AUTH_1X_SHA256(0x1000)`, `WPA2_AUTH_PSK(0x80)`,
+   `WPA2_AUTH_PSK_SHA256(0x8000)`, and one undocumented bit (`0x2000`) — each
+   appends a suite entry to a list — then **returns cleanly, before ever
+   testing for SAE (`0x40000`).** SAE is checked entirely separately, via 9
+   scattered standalone `if (wpa_auth & 0x40000)` binary flag tests elsewhere
+   in the association-handling code, each with its own isolated branch — not
+   part of any table or chain. Scanned 500 bytes after all 9 SAE-check sites:
+   **zero instances** of any further AKM-bitmask test anywhere nearby. There
+   is no structural "next case" slot, no dead code suggesting an unfinished
+   switch, nothing to extend — the routine that enumerates AKMs stops one
+   case short of SAE and returns; SAE itself is a dead-end flag test with
+   nothing chained after it.
+
+**Verdict: unchanged, now on much stronger evidence.** This isn't "we didn't
+find OWE support" (absence from a component-scale search) — it's "we
+mapped the actual AKM-dispatch code paths that exist in the only
+firmware file we have access to, confirmed none of them have any
+extensibility point beyond what's already active (PSK/1X/SAE), and confirmed
+the remaining ~30% of this firmware's hottest logic calls out to a
+physically separate, fixed, unreadable, unmodifiable ROM region." Even a
+skilled disassembler with unlimited time hits a hard boundary here that
+open-source-driver patching (patches/0001, patches/861) never had: there is
+no source, and a meaningful fraction of the relevant logic isn't even present
+in any file that exists outside the chip's silicon.
+
+**Standing conclusion:** DFS-channel unlock is *not* re-classified as
+achievable — it independently re-failed even with the CLM mismatch fixed,
+confirming §6's DTS-gated conclusion rather than overturning it. But the
+*root cause* of why v2's clm_blob attempt was fatal is now understood
+precisely (version pairing, not policy), and a real avenue exists for a
+*future, non-live, test-environment* pass: extend patches/861 to also
+recognize `-52` (not just `EOPNOTSUPP`) as an `interface_create`-unsupported
+signal before attempting this firmware pairing again — that would need to be
+proven on a bench/spare unit, not the operator's live router.

@@ -50,14 +50,48 @@ Set a root password after first boot (`passwd`) to lock it down.
 
 Single `.chk` = both factory-flash AND sysupgrade image (bcm53xx convention).
 
+**MANDATORY before every sysupgrade: back up config off-device first.**
+Upstream [openwrt/openwrt#21655](https://github.com/openwrt/openwrt/issues/21655)
+(confirmed live on this exact device, twice — v5 and v6 flashes both hit it)
+means a config-preserving sysupgrade can silently reset
+`/etc/config/{wireless,firewall,sqm,system,usteer}` (and possibly others) to
+defaults even without `-n`. There is no warning when this happens — the
+upgrade reports success either way. This is not optional:
+
+```bash
+ssh root@192.168.1.1 'sysupgrade -b /tmp/backup.tar.gz && echo OK'
+ssh root@192.168.1.1 'cat /tmp/backup.tar.gz' > backups/pre-flash-config-$(date +%Y%m%d).tar.gz
+tar tzf backups/pre-flash-config-*.tar.gz | grep wireless   # sanity check it's non-empty/real
+```
+
+This minimal build has no `sftp-server`, so plain `scp`/`sftp` fail — use
+`ssh ... "cat file" > local` / `ssh ... "cat > file" < local` for all file
+transfer to/from the router (both directions, both image upload and backup
+download).
+
 - **Stock GUI (from stock firmware):** browser → `http://192.168.1.1/UPG_upgrade.htm`
   (bypasses the genie setup-wizard, which loops when WAN is down) → Browse →
   select `.chk` → Upload → OK. ~2 min, do not cut power.
 - **sysupgrade (from running OpenWrt, easiest):**
   ```bash
-  scp openwrt-...-netgear_r8000-squashfs.chk root@192.168.1.1:/tmp/
-  ssh root@192.168.1.1 'sysupgrade -v /tmp/openwrt-...-squashfs.chk'   # add -n to wipe config
+  ssh root@192.168.1.1 'cat > /tmp/openwrt-....chk' < openwrt-...-netgear_r8000-squashfs.chk
+  ssh root@192.168.1.1 'sha256sum /tmp/openwrt-....chk'   # compare to local sha256sum before flashing
+  ssh root@192.168.1.1 'sysupgrade /tmp/openwrt-....chk'   # add -n to wipe config
   ```
+  **After it reboots**, check config actually survived before assuming
+  success:
+  ```bash
+  ssh root@192.168.1.1 'wc -c /etc/config/wireless /etc/config/firewall /etc/config/system'
+  ```
+  If any come back small/default-sized, restore from the pre-flight backup:
+  ```bash
+  ssh root@192.168.1.1 'cat > /tmp/restore.tar.gz' < backups/pre-flash-config-YYYYMMDD.tar.gz
+  ssh root@192.168.1.1 'cd / && tar xzf /tmp/restore.tar.gz && uci commit && /etc/init.d/network restart'
+  ```
+  A driver/module reload alone was **not** sufficient to fully reset radio
+  state after a firmware change on this hardware — if network/wireless
+  services look wrong after a config restore, reboot the device fully rather
+  than trusting a service restart.
 - **nmrpflash (headless recovery / from a brick):**
   ```bash
   sudo nmrpflash -i enp103s0f3u1 -f <image.chk> -a 192.168.1.252 -A 192.168.1.253

@@ -1,0 +1,3676 @@
+
+./lib/modules/2.6.36.4brcmarm+/kernel/drivers/net/ctf/ctf.ko:     file format elf32-littlearm
+
+
+Disassembly of section .text:
+
+00000000 <_ctf_ipc_count_get>:
+       0:	cmp	r0, #0
+       4:	mvneq	r0, #1
+       8:	bxeq	lr
+       c:	ldr	r3, [r0, #148]	@ 0x94
+      10:	cmp	r3, #0
+      14:	ldrne	r3, [pc, #8]	@ 24 <_ctf_ipc_count_get+0x24>
+      18:	mvneq	r0, #1
+      1c:	ldrne	r0, [r3, #164]	@ 0xa4
+      20:	bx	lr
+      24:	.word	0x00000000
+
+00000028 <_ctf_fwdcb_register>:
+      28:	cmp	r1, #0
+      2c:	ldrne	r2, [pc, #32]	@ 54 <_ctf_fwdcb_register+0x2c>
+      30:	movne	r3, #0
+      34:	ldreq	r2, [pc, #24]	@ 54 <_ctf_fwdcb_register+0x2c>
+      38:	mvneq	r3, #0
+      3c:	strne	r1, [r2, #184]	@ 0xb8
+      40:	streq	r1, [r2, #184]	@ 0xb8
+      44:	strne	r1, [r0, #184]	@ 0xb8
+      48:	streq	r1, [r0, #184]	@ 0xb8
+      4c:	mov	r0, r3
+      50:	bx	lr
+      54:	.word	0x00000000
+
+00000058 <_ctf_detach>:
+      58:	push	{r4, lr}
+      5c:	subs	r4, r0, #0
+      60:	popeq	{r4, pc}
+      64:	ldr	r3, [pc, #112]	@ dc <_ctf_detach+0x84>
+      68:	ldr	r2, [r3, #188]	@ 0xbc
+      6c:	cmp	r2, #0
+      70:	popeq	{r4, pc}
+      74:	cmp	r2, r4
+      78:	bne	84 <_ctf_detach+0x2c>
+      7c:	b	d0 <_ctf_detach+0x78>
+      80:	mov	r2, r3
+      84:	ldr	r3, [r2, #180]	@ 0xb4
+      88:	cmp	r3, #0
+      8c:	beq	cc <_ctf_detach+0x74>
+      90:	cmp	r3, r4
+      94:	bne	80 <_ctf_detach+0x28>
+      98:	ldr	r3, [r4, #180]	@ 0xb4
+      9c:	str	r3, [r2, #180]	@ 0xb4
+      a0:	ldr	r3, [r4, #88]	@ 0x58
+      a4:	cmp	r3, #0
+      a8:	beq	b8 <_ctf_detach+0x60>
+      ac:	mov	r0, r4
+      b0:	ldr	r1, [r4, #92]	@ 0x5c
+      b4:	blx	r3
+      b8:	ldr	r0, [r4, #128]	@ 0x80
+      bc:	mov	r1, r4
+      c0:	mov	r2, #188	@ 0xbc
+      c4:	pop	{r4, lr}
+      c8:	b	0 <osl_mfree>
+      cc:	pop	{r4, pc}
+      d0:	ldr	r2, [r4, #180]	@ 0xb4
+      d4:	str	r2, [r3, #188]	@ 0xbc
+      d8:	b	a0 <_ctf_detach+0x48>
+      dc:	.word	0x00000000
+
+000000e0 <_ctf_ipc_detach_brcp>:
+      e0:	push	{r4, lr}
+      e4:	mov	r4, r0
+      e8:	sub	sp, sp, #8
+      ec:	ldr	r0, [r0, #152]	@ 0x98
+      f0:	str	r1, [sp, #4]
+      f4:	bl	0 <_raw_spin_lock_bh>
+      f8:	ldr	r1, [sp, #4]
+      fc:	mov	r0, #0
+     100:	mov	ip, r0
+     104:	ldr	r3, [r4, #148]	@ 0x94
+     108:	ldr	r3, [r3, r0]
+     10c:	cmp	r3, #0
+     110:	beq	12c <_ctf_ipc_detach_brcp+0x4c>
+     114:	ldr	r2, [r3, #72]	@ 0x48
+     118:	cmp	r2, r1
+     11c:	streq	ip, [r3, #72]	@ 0x48
+     120:	ldr	r3, [r3]
+     124:	cmp	r3, #0
+     128:	bne	114 <_ctf_ipc_detach_brcp+0x34>
+     12c:	add	r0, r0, #4
+     130:	cmp	r0, #512	@ 0x200
+     134:	bne	104 <_ctf_ipc_detach_brcp+0x24>
+     138:	ldr	r0, [r4, #152]	@ 0x98
+     13c:	add	sp, sp, #8
+     140:	pop	{r4, lr}
+     144:	b	0 <_raw_spin_unlock_bh>
+
+00000148 <_ctf_dev_vlan_delete>:
+     148:	cmp	r0, #0
+     14c:	cmpne	r1, #0
+     150:	push	{r4, r5, lr}
+     154:	mov	r4, r0
+     158:	sub	sp, sp, #12
+     15c:	bne	16c <_ctf_dev_vlan_delete+0x24>
+     160:	mvn	r0, #1
+     164:	add	sp, sp, #12
+     168:	pop	{r4, r5, pc}
+     16c:	cmp	r2, #32
+     170:	bhi	160 <_ctf_dev_vlan_delete+0x18>
+     174:	ldr	r3, [r0, #156]	@ 0x9c
+     178:	ldr	r0, [r3, #4]
+     17c:	str	r1, [sp, #4]
+     180:	str	r2, [sp]
+     184:	bl	0 <_raw_spin_lock_bh>
+     188:	ldr	r5, [r4, #156]	@ 0x9c
+     18c:	ldr	r1, [sp, #4]
+     190:	ldr	r2, [sp]
+     194:	cmp	r5, #0
+     198:	beq	240 <_ctf_dev_vlan_delete+0xf8>
+     19c:	ldr	r0, [r5]
+     1a0:	cmp	r0, #0
+     1a4:	bne	1b8 <_ctf_dev_vlan_delete+0x70>
+     1a8:	b	240 <_ctf_dev_vlan_delete+0xf8>
+     1ac:	ldr	r0, [r0]
+     1b0:	cmp	r0, #0
+     1b4:	beq	240 <_ctf_dev_vlan_delete+0xf8>
+     1b8:	ldr	r3, [r0, #8]
+     1bc:	cmp	r1, r3
+     1c0:	bne	1ac <_ctf_dev_vlan_delete+0x64>
+     1c4:	mov	r3, r0
+     1c8:	mov	ip, #0
+     1cc:	b	1dc <_ctf_dev_vlan_delete+0x94>
+     1d0:	add	ip, ip, #1
+     1d4:	cmp	ip, #32
+     1d8:	beq	240 <_ctf_dev_vlan_delete+0xf8>
+     1dc:	ldrh	lr, [r3, #16]
+     1e0:	add	r3, r3, #8
+     1e4:	cmp	lr, r2
+     1e8:	bne	1d0 <_ctf_dev_vlan_delete+0x88>
+     1ec:	add	ip, ip, #2
+     1f0:	mov	r3, #0
+     1f4:	lsl	ip, ip, #3
+     1f8:	add	lr, r0, ip
+     1fc:	strh	r3, [r0, ip]
+     200:	str	r3, [lr, #4]
+     204:	cmp	r2, #7
+     208:	movhi	r0, #0
+     20c:	movls	r0, #1
+     210:	ldr	r1, [r1, #104]	@ 0x68
+     214:	cmp	r1, #7
+     218:	movgt	r0, #0
+     21c:	cmp	r0, r3
+     220:	ldrne	r0, [r4, #160]	@ 0xa0
+     224:	addne	r2, r2, r1, lsl #3
+     228:	strne	r3, [r0, r2, lsl #2]
+     22c:	ldr	r3, [r4, #156]	@ 0x9c
+     230:	ldr	r0, [r3, #4]
+     234:	bl	0 <_raw_spin_unlock_bh>
+     238:	mov	r0, #0
+     23c:	b	164 <_ctf_dev_vlan_delete+0x1c>
+     240:	ldr	r0, [r5, #4]
+     244:	bl	0 <_raw_spin_unlock_bh>
+     248:	mvn	r0, #29
+     24c:	b	164 <_ctf_dev_vlan_delete+0x1c>
+
+00000250 <_ctf_dev_vlan_add>:
+     250:	push	{r4, r5, lr}
+     254:	subs	r4, r0, #0
+     258:	sub	sp, sp, #20
+     25c:	bne	26c <_ctf_dev_vlan_add+0x1c>
+     260:	mvn	r0, #1
+     264:	add	sp, sp, #20
+     268:	pop	{r4, r5, pc}
+     26c:	rsbs	r0, r1, #1
+     270:	movcc	r0, #0
+     274:	cmp	r2, #32
+     278:	orrhi	r0, r0, #1
+     27c:	cmp	r0, #0
+     280:	bne	260 <_ctf_dev_vlan_add+0x10>
+     284:	cmp	r3, #0
+     288:	beq	260 <_ctf_dev_vlan_add+0x10>
+     28c:	ldr	r0, [r4, #156]	@ 0x9c
+     290:	ldr	r0, [r0, #4]
+     294:	str	r1, [sp, #12]
+     298:	str	r2, [sp, #8]
+     29c:	str	r3, [sp, #4]
+     2a0:	bl	0 <_raw_spin_lock_bh>
+     2a4:	ldr	lr, [r4, #156]	@ 0x9c
+     2a8:	ldr	r1, [sp, #12]
+     2ac:	ldr	r2, [sp, #8]
+     2b0:	cmp	lr, #0
+     2b4:	ldr	r3, [sp, #4]
+     2b8:	beq	35c <_ctf_dev_vlan_add+0x10c>
+     2bc:	ldr	ip, [lr]
+     2c0:	cmp	ip, #0
+     2c4:	bne	2d8 <_ctf_dev_vlan_add+0x88>
+     2c8:	b	35c <_ctf_dev_vlan_add+0x10c>
+     2cc:	ldr	ip, [ip]
+     2d0:	cmp	ip, #0
+     2d4:	beq	35c <_ctf_dev_vlan_add+0x10c>
+     2d8:	ldr	r0, [ip, #8]
+     2dc:	cmp	r1, r0
+     2e0:	bne	2cc <_ctf_dev_vlan_add+0x7c>
+     2e4:	mov	r0, ip
+     2e8:	mov	lr, #0
+     2ec:	b	2fc <_ctf_dev_vlan_add+0xac>
+     2f0:	add	lr, lr, #1
+     2f4:	cmp	lr, #32
+     2f8:	beq	320 <_ctf_dev_vlan_add+0xd0>
+     2fc:	ldr	r5, [r0, #20]
+     300:	add	r0, r0, #8
+     304:	cmp	r5, #0
+     308:	bne	2f0 <_ctf_dev_vlan_add+0xa0>
+     30c:	add	r0, lr, #2
+     310:	lsl	r0, r0, #3
+     314:	add	lr, ip, r0
+     318:	strh	r2, [ip, r0]
+     31c:	str	r3, [lr, #4]
+     320:	ldr	r1, [r1, #104]	@ 0x68
+     324:	cmp	r2, #7
+     328:	movhi	r0, #0
+     32c:	movls	r0, #1
+     330:	cmp	r1, #7
+     334:	movgt	r0, #0
+     338:	cmp	r0, #0
+     33c:	ldrne	r0, [r4, #160]	@ 0xa0
+     340:	addne	r2, r2, r1, lsl #3
+     344:	strne	r3, [r0, r2, lsl #2]
+     348:	ldr	r3, [r4, #156]	@ 0x9c
+     34c:	ldr	r0, [r3, #4]
+     350:	bl	0 <_raw_spin_unlock_bh>
+     354:	mov	r0, #0
+     358:	b	264 <_ctf_dev_vlan_add+0x14>
+     35c:	ldr	r0, [lr, #4]
+     360:	bl	0 <_raw_spin_unlock_bh>
+     364:	mvn	r0, #29
+     368:	b	264 <_ctf_dev_vlan_add+0x14>
+
+0000036c <_ctf_enable>:
+     36c:	cmp	r0, #0
+     370:	cmpne	r1, #0
+     374:	push	{r3, r4, r5, r6, r7, lr}
+     378:	mov	r4, r1
+     37c:	mov	r5, r0
+     380:	mov	r6, r2
+     384:	mov	r7, r3
+     388:	bne	394 <_ctf_enable+0x28>
+     38c:	mvn	r0, #1
+     390:	pop	{r3, r4, r5, r6, r7, pc}
+     394:	ldr	r3, [r0, #156]	@ 0x9c
+     398:	ldr	r0, [r3, #4]
+     39c:	bl	0 <_raw_spin_lock_bh>
+     3a0:	ldr	r1, [r5, #156]	@ 0x9c
+     3a4:	cmp	r1, #0
+     3a8:	beq	40c <_ctf_enable+0xa0>
+     3ac:	ldr	r3, [r1]
+     3b0:	cmp	r3, #0
+     3b4:	bne	3c8 <_ctf_enable+0x5c>
+     3b8:	b	40c <_ctf_enable+0xa0>
+     3bc:	ldr	r3, [r3]
+     3c0:	cmp	r3, #0
+     3c4:	beq	40c <_ctf_enable+0xa0>
+     3c8:	ldr	r2, [r3, #8]
+     3cc:	cmp	r4, r2
+     3d0:	bne	3bc <_ctf_enable+0x50>
+     3d4:	cmp	r7, #0
+     3d8:	strb	r6, [r3, #12]
+     3dc:	beq	3f8 <_ctf_enable+0x8c>
+     3e0:	ldr	r3, [r4, #104]	@ 0x68
+     3e4:	ldr	r2, [r5, #144]	@ 0x90
+     3e8:	and	r3, r3, #3
+     3ec:	add	r3, r3, r3, lsl #1
+     3f0:	add	r3, r2, r3, lsl #4
+     3f4:	str	r3, [r7]
+     3f8:	ldr	r3, [r5, #156]	@ 0x9c
+     3fc:	ldr	r0, [r3, #4]
+     400:	bl	0 <_raw_spin_unlock_bh>
+     404:	mov	r0, #0
+     408:	pop	{r3, r4, r5, r6, r7, pc}
+     40c:	ldr	r0, [r1, #4]
+     410:	bl	0 <_raw_spin_unlock_bh>
+     414:	mvn	r0, #29
+     418:	pop	{r3, r4, r5, r6, r7, pc}
+
+0000041c <_ctf_ipc_release>:
+     41c:	ldr	r0, [r0, #152]	@ 0x98
+     420:	b	0 <_raw_spin_unlock_bh>
+
+00000424 <_ctf_ipc_delete_multi>:
+     424:	cmp	r0, #0
+     428:	push	{r4, r5, r6, r7, r8, r9, sl, fp, lr}
+     42c:	sub	sp, sp, #44	@ 0x2c
+     430:	mov	r4, r1
+     434:	mov	r5, r2
+     438:	str	r0, [sp, #32]
+     43c:	str	r3, [sp, #16]
+     440:	bne	450 <_ctf_ipc_delete_multi+0x2c>
+     444:	mvn	r0, #1
+     448:	add	sp, sp, #44	@ 0x2c
+     44c:	pop	{r4, r5, r6, r7, r8, r9, sl, fp, pc}
+     450:	ldr	r3, [r0, #148]	@ 0x94
+     454:	cmp	r3, #0
+     458:	beq	444 <_ctf_ipc_delete_multi+0x20>
+     45c:	cmp	r1, #0
+     460:	cmpne	r2, #0
+     464:	movne	r3, #0
+     468:	moveq	r3, #1
+     46c:	beq	444 <_ctf_ipc_delete_multi+0x20>
+     470:	ldr	r0, [r0, #152]	@ 0x98
+     474:	str	r3, [sp, #28]
+     478:	bl	0 <_raw_spin_lock_bh>
+     47c:	movw	r0, #0
+     480:	movt	r0, #0
+     484:	ldr	r0, [r0, #164]	@ 0xa4
+     488:	str	r0, [sp, #36]	@ 0x24
+     48c:	ldr	r1, [sp, #32]
+     490:	ldr	r2, [sp, #28]
+     494:	ldr	r3, [r1, #148]	@ 0x94
+     498:	ldr	r1, [r3, r2]
+     49c:	cmp	r1, #0
+     4a0:	movne	r3, #0
+     4a4:	strne	r3, [sp, #20]
+     4a8:	beq	73c <_ctf_ipc_delete_multi+0x318>
+     4ac:	ldrb	r2, [r1, #88]	@ 0x58
+     4b0:	ldrb	r3, [r4, #88]	@ 0x58
+     4b4:	ldrb	r0, [r4, #89]	@ 0x59
+     4b8:	ldrb	lr, [r1, #89]	@ 0x59
+     4bc:	ldrb	r6, [r5, #88]	@ 0x58
+     4c0:	eor	r3, r2, r3
+     4c4:	ldrb	r2, [r5, #89]	@ 0x59
+     4c8:	ldrb	ip, [r1, #90]	@ 0x5a
+     4cc:	eor	lr, lr, r0
+     4d0:	ldrb	r0, [r4, #90]	@ 0x5a
+     4d4:	and	r3, r3, r6
+     4d8:	and	lr, lr, r2
+     4dc:	ldrb	r7, [r5, #90]	@ 0x5a
+     4e0:	ldrb	r6, [r1, #91]	@ 0x5b
+     4e4:	orr	lr, lr, r3
+     4e8:	ldrb	r3, [r4, #91]	@ 0x5b
+     4ec:	eor	r0, ip, r0
+     4f0:	ldrb	ip, [r5, #91]	@ 0x5b
+     4f4:	and	r0, r0, r7
+     4f8:	orr	lr, lr, r0
+     4fc:	ldrb	r2, [r1, #92]	@ 0x5c
+     500:	ldrb	r0, [r4, #92]	@ 0x5c
+     504:	eor	r3, r6, r3
+     508:	and	r3, r3, ip
+     50c:	ldrb	r6, [r5, #92]	@ 0x5c
+     510:	orr	lr, lr, r3
+     514:	ldrb	ip, [r1, #93]	@ 0x5d
+     518:	ldrb	r3, [r4, #93]	@ 0x5d
+     51c:	eor	r2, r2, r0
+     520:	ldrb	r0, [r5, #93]	@ 0x5d
+     524:	and	r2, r2, r6
+     528:	orr	r2, lr, r2
+     52c:	ldr	r6, [r1]
+     530:	eor	r3, ip, r3
+     534:	and	r3, r3, r0
+     538:	orrs	r3, r2, r3
+     53c:	bne	650 <_ctf_ipc_delete_multi+0x22c>
+     540:	ldrb	ip, [r1, #46]	@ 0x2e
+     544:	ldrb	r3, [r4, #47]	@ 0x2f
+     548:	ldrb	r2, [r4, #46]	@ 0x2e
+     54c:	ldrb	lr, [r1, #47]	@ 0x2f
+     550:	ldrb	r0, [r5, #46]	@ 0x2e
+     554:	ldrb	r7, [r5, #47]	@ 0x2f
+     558:	eor	r2, ip, r2
+     55c:	eor	lr, lr, r3
+     560:	ldrb	ip, [r1, #48]	@ 0x30
+     564:	ldrb	r3, [r4, #48]	@ 0x30
+     568:	and	r2, r2, r0
+     56c:	and	lr, lr, r7
+     570:	ldrb	r0, [r5, #48]	@ 0x30
+     574:	ldrb	r7, [r1, #49]	@ 0x31
+     578:	orr	lr, lr, r2
+     57c:	ldrb	r2, [r4, #49]	@ 0x31
+     580:	eor	r3, ip, r3
+     584:	ldrb	ip, [r5, #49]	@ 0x31
+     588:	and	r3, r3, r0
+     58c:	orr	lr, lr, r3
+     590:	ldrb	r0, [r1, #50]	@ 0x32
+     594:	ldrb	r3, [r4, #50]	@ 0x32
+     598:	eor	r2, r7, r2
+     59c:	and	r2, r2, ip
+     5a0:	ldrb	r7, [r5, #50]	@ 0x32
+     5a4:	orr	lr, lr, r2
+     5a8:	ldrb	ip, [r1, #51]	@ 0x33
+     5ac:	ldrb	r2, [r4, #51]	@ 0x33
+     5b0:	eor	r0, r0, r3
+     5b4:	ldrb	r3, [r5, #51]	@ 0x33
+     5b8:	and	r0, r0, r7
+     5bc:	orr	r0, lr, r0
+     5c0:	eor	r2, ip, r2
+     5c4:	and	r3, r2, r3
+     5c8:	orrs	r0, r0, r3
+     5cc:	bne	650 <_ctf_ipc_delete_multi+0x22c>
+     5d0:	add	r7, r4, #16
+     5d4:	add	lr, r1, #16
+     5d8:	add	ip, r5, #16
+     5dc:	mov	r3, r0
+     5e0:	mov	r2, r0
+     5e4:	str	r1, [sp, #4]
+     5e8:	str	r6, [sp, #24]
+     5ec:	ldr	r1, [sp, #4]
+     5f0:	add	r8, r4, r3
+     5f4:	add	r6, r5, r3
+     5f8:	add	sl, r1, r3
+     5fc:	ldr	r1, [sp, #16]
+     600:	add	r3, r3, #4
+     604:	cmp	r1, #0
+     608:	moveq	r9, #1
+     60c:	movne	r9, #4
+     610:	cmp	r2, r9
+     614:	add	r2, r2, #1
+     618:	bcs	664 <_ctf_ipc_delete_multi+0x240>
+     61c:	ldr	fp, [lr, #4]!
+     620:	ldr	r9, [r7, #4]!
+     624:	ldr	sl, [sl, #4]
+     628:	ldr	r8, [r8, #4]
+     62c:	ldr	r1, [ip, #4]!
+     630:	eor	r9, fp, r9
+     634:	ldr	r6, [r6, #4]
+     638:	eor	r8, sl, r8
+     63c:	and	r9, r9, r1
+     640:	and	r8, r8, r6
+     644:	orr	r9, r9, r8
+     648:	orr	r0, r0, r9
+     64c:	b	5ec <_ctf_ipc_delete_multi+0x1c8>
+     650:	cmp	r6, #0
+     654:	str	r1, [sp, #20]
+     658:	beq	73c <_ctf_ipc_delete_multi+0x318>
+     65c:	mov	r1, r6
+     660:	b	4ac <_ctf_ipc_delete_multi+0x88>
+     664:	ldr	r1, [sp, #4]
+     668:	ldrh	ip, [r4, #38]	@ 0x26
+     66c:	ldrh	r2, [r4, #36]	@ 0x24
+     670:	ldrh	lr, [r1, #38]	@ 0x26
+     674:	ldrh	r8, [r1, #36]	@ 0x24
+     678:	ldrh	r3, [r5, #38]	@ 0x26
+     67c:	eor	lr, lr, ip
+     680:	ldrh	r7, [r5, #36]	@ 0x24
+     684:	eor	r8, r8, r2
+     688:	ldrb	ip, [r1, #40]	@ 0x28
+     68c:	ldrb	r2, [r4, #40]	@ 0x28
+     690:	and	lr, lr, r3
+     694:	ldrb	r3, [r5, #40]	@ 0x28
+     698:	and	r7, r8, r7
+     69c:	orr	lr, lr, r7
+     6a0:	ldr	r6, [sp, #24]
+     6a4:	eor	r2, ip, r2
+     6a8:	and	r3, r2, r3
+     6ac:	orr	r7, lr, r3
+     6b0:	orrs	r7, r7, r0
+     6b4:	bne	650 <_ctf_ipc_delete_multi+0x22c>
+     6b8:	ldr	r2, [sp, #16]
+     6bc:	cmp	r2, #0
+     6c0:	bne	6f4 <_ctf_ipc_delete_multi+0x2d0>
+     6c4:	ldr	r0, [r1, #80]	@ 0x50
+     6c8:	ldr	r3, [r4, #80]	@ 0x50
+     6cc:	ldrh	lr, [r1, #84]	@ 0x54
+     6d0:	ldrh	r2, [r4, #84]	@ 0x54
+     6d4:	eor	r3, r0, r3
+     6d8:	ldr	ip, [r5, #80]	@ 0x50
+     6dc:	ldrh	r0, [r5, #84]	@ 0x54
+     6e0:	eor	r2, lr, r2
+     6e4:	and	r3, r3, ip
+     6e8:	and	r2, r2, r0
+     6ec:	orrs	r2, r2, r3
+     6f0:	bne	650 <_ctf_ipc_delete_multi+0x22c>
+     6f4:	ldr	r3, [sp, #20]
+     6f8:	cmp	r3, #0
+     6fc:	ldreq	r0, [sp, #32]
+     700:	ldreq	r2, [sp, #28]
+     704:	strne	r6, [r3]
+     708:	ldreq	r3, [r0, #148]	@ 0x94
+     70c:	movw	r0, #0
+     710:	movt	r0, #0
+     714:	streq	r6, [r3, r2]
+     718:	mov	r2, #124	@ 0x7c
+     71c:	ldr	r3, [r0, #164]	@ 0xa4
+     720:	sub	r3, r3, #1
+     724:	str	r3, [r0, #164]	@ 0xa4
+     728:	ldr	r3, [sp, #32]
+     72c:	ldr	r0, [r3, #128]	@ 0x80
+     730:	bl	0 <osl_mfree>
+     734:	cmp	r6, #0
+     738:	bne	65c <_ctf_ipc_delete_multi+0x238>
+     73c:	ldr	r0, [sp, #28]
+     740:	add	r0, r0, #4
+     744:	cmp	r0, #512	@ 0x200
+     748:	str	r0, [sp, #28]
+     74c:	bne	48c <_ctf_ipc_delete_multi+0x68>
+     750:	ldr	r2, [sp, #32]
+     754:	movw	r1, #0
+     758:	movt	r1, #0
+     75c:	ldr	r4, [r1, #164]	@ 0xa4
+     760:	ldr	r0, [r2, #152]	@ 0x98
+     764:	bl	0 <_raw_spin_unlock_bh>
+     768:	ldr	r3, [sp, #36]	@ 0x24
+     76c:	cmp	r3, r4
+     770:	movne	r0, #0
+     774:	mvneq	r0, #29
+     778:	b	448 <_ctf_ipc_delete_multi+0x24>
+
+0000077c <_ctf_brc_release>:
+     77c:	ldr	r0, [r0, #140]	@ 0x8c
+     780:	b	0 <_raw_spin_unlock_bh>
+
+00000784 <_ctf_brc_lkup>:
+     784:	push	{r3, r4, r5, lr}
+     788:	mov	r5, r1
+     78c:	mov	r4, r0
+     790:	ldr	r0, [r0, #140]	@ 0x8c
+     794:	bl	0 <_raw_spin_lock_bh>
+     798:	mov	r1, r5
+     79c:	mov	r0, r4
+     7a0:	bl	0 <_ctf_ipc_count_get>
+     7a4:	subs	r5, r0, #0
+     7a8:	beq	7b4 <_ctf_brc_lkup+0x30>
+     7ac:	mov	r0, r5
+     7b0:	pop	{r3, r4, r5, pc}
+     7b4:	ldr	r0, [r4, #140]	@ 0x8c
+     7b8:	bl	0 <_raw_spin_unlock_bh>
+     7bc:	mov	r0, r5
+     7c0:	pop	{r3, r4, r5, pc}
+
+000007c4 <_ctf_brc_update>:
+     7c4:	cmp	r0, #0
+     7c8:	cmpne	r1, #0
+     7cc:	push	{r4, r5, r6, lr}
+     7d0:	mov	r5, r0
+     7d4:	mov	r4, r1
+     7d8:	movne	r6, #0
+     7dc:	moveq	r6, #1
+     7e0:	mvneq	r0, #1
+     7e4:	popeq	{r4, r5, r6, pc}
+     7e8:	ldr	r3, [r5, #136]	@ 0x88
+     7ec:	cmp	r3, #0
+     7f0:	beq	848 <_ctf_brc_update+0x84>
+     7f4:	ldr	r0, [r5, #140]	@ 0x8c
+     7f8:	bl	0 <_raw_spin_lock_bh>
+     7fc:	mov	r0, r5
+     800:	add	r1, r4, #4
+     804:	bl	0 <_ctf_ipc_count_get>
+     808:	cmp	r0, #0
+     80c:	beq	850 <_ctf_brc_update+0x8c>
+     810:	ldrh	r3, [r4, #10]
+     814:	strh	r3, [r0, #10]
+     818:	ldr	r3, [r4, #12]
+     81c:	str	r3, [r0, #12]
+     820:	ldr	r3, [r4, #16]
+     824:	str	r6, [r0, #20]
+     828:	str	r3, [r0, #16]
+     82c:	ldr	r3, [r4, #36]	@ 0x24
+     830:	cmp	r3, #0
+     834:	strne	r3, [r0, #36]	@ 0x24
+     838:	ldr	r0, [r5, #140]	@ 0x8c
+     83c:	bl	0 <_raw_spin_unlock_bh>
+     840:	mov	r0, #0
+     844:	pop	{r4, r5, r6, pc}
+     848:	mvn	r0, #1
+     84c:	pop	{r4, r5, r6, pc}
+     850:	ldr	r0, [r5, #140]	@ 0x8c
+     854:	bl	0 <_raw_spin_unlock_bh>
+     858:	mvn	r0, #29
+     85c:	pop	{r4, r5, r6, pc}
+
+00000860 <_ctf_isbridge>:
+     860:	push	{r3, r4, r5, lr}
+     864:	mov	r4, r0
+     868:	ldr	r3, [r0, #156]	@ 0x9c
+     86c:	mov	r5, r1
+     870:	ldr	r0, [r3, #4]
+     874:	bl	0 <_raw_spin_lock_bh>
+     878:	ldr	r2, [r4, #156]	@ 0x9c
+     87c:	cmp	r2, #0
+     880:	moveq	r4, r2
+     884:	beq	8b4 <_ctf_isbridge+0x54>
+     888:	ldr	r4, [r2]
+     88c:	cmp	r4, #0
+     890:	bne	8a4 <_ctf_isbridge+0x44>
+     894:	b	8b4 <_ctf_isbridge+0x54>
+     898:	ldr	r4, [r4]
+     89c:	cmp	r4, #0
+     8a0:	beq	8b4 <_ctf_isbridge+0x54>
+     8a4:	ldr	r3, [r4, #8]
+     8a8:	cmp	r5, r3
+     8ac:	bne	898 <_ctf_isbridge+0x38>
+     8b0:	ldrb	r4, [r4, #13]
+     8b4:	ldr	r0, [r2, #4]
+     8b8:	bl	0 <_raw_spin_unlock_bh>
+     8bc:	mov	r0, r4
+     8c0:	pop	{r3, r4, r5, pc}
+
+000008c4 <_ctf_isenabled>:
+     8c4:	cmp	r0, #0
+     8c8:	cmpne	r1, #0
+     8cc:	push	{r3, r4, r5, lr}
+     8d0:	mov	r4, r1
+     8d4:	mov	r5, r0
+     8d8:	moveq	r4, #0
+     8dc:	bne	8e8 <_ctf_isenabled+0x24>
+     8e0:	mov	r0, r4
+     8e4:	pop	{r3, r4, r5, pc}
+     8e8:	ldr	r3, [r0, #156]	@ 0x9c
+     8ec:	ldr	r0, [r3, #4]
+     8f0:	bl	0 <_raw_spin_lock_bh>
+     8f4:	ldr	r1, [r5, #156]	@ 0x9c
+     8f8:	cmp	r1, #0
+     8fc:	moveq	r4, r1
+     900:	beq	930 <_ctf_isenabled+0x6c>
+     904:	ldr	r3, [r1]
+     908:	cmp	r3, #0
+     90c:	bne	920 <_ctf_isenabled+0x5c>
+     910:	b	940 <_ctf_isenabled+0x7c>
+     914:	ldr	r3, [r3]
+     918:	cmp	r3, #0
+     91c:	beq	940 <_ctf_isenabled+0x7c>
+     920:	ldr	r2, [r3, #8]
+     924:	cmp	r4, r2
+     928:	bne	914 <_ctf_isenabled+0x50>
+     92c:	ldrb	r4, [r3, #12]
+     930:	ldr	r0, [r1, #4]
+     934:	bl	0 <_raw_spin_unlock_bh>
+     938:	mov	r0, r4
+     93c:	pop	{r3, r4, r5, pc}
+     940:	ldr	r0, [r1, #4]
+     944:	mov	r4, r3
+     948:	bl	0 <_raw_spin_unlock_bh>
+     94c:	b	938 <_ctf_isenabled+0x74>
+
+00000950 <_ctf_brc_hot_invalidate>:
+     950:	push	{r4, r5, r6, r7, r8, r9, sl, lr}
+     954:	mov	r8, r0
+     958:	mov	r7, #0
+     95c:	add	r6, r1, #4
+     960:	and	r3, r7, #3
+     964:	mov	r5, #4
+     968:	lsl	r4, r3, #3
+     96c:	mla	r4, r3, r5, r4
+     970:	lsl	r4, r4, #2
+     974:	ldr	r3, [r8, #144]	@ 0x90
+     978:	ldrh	ip, [r6, #2]
+     97c:	ldrh	sl, [r6, #4]
+     980:	add	r0, r3, r4
+     984:	ldrh	r1, [r3, r4]
+     988:	ldrh	r9, [r0, #2]
+     98c:	add	r4, r4, #12
+     990:	ldrh	r2, [r0, #4]
+     994:	ldrh	r3, [r6]
+     998:	eor	ip, r9, ip
+     99c:	eor	r2, r2, sl
+     9a0:	orr	r2, ip, r2
+     9a4:	eor	r3, r1, r3
+     9a8:	orrs	r3, r2, r3
+     9ac:	beq	9c8 <_ctf_brc_hot_invalidate+0x78>
+     9b0:	subs	r5, r5, #1
+     9b4:	bne	974 <_ctf_brc_hot_invalidate+0x24>
+     9b8:	add	r7, r7, #1
+     9bc:	cmp	r7, #4
+     9c0:	bne	960 <_ctf_brc_hot_invalidate+0x10>
+     9c4:	pop	{r4, r5, r6, r7, r8, r9, sl, pc}
+     9c8:	mov	r1, #12
+     9cc:	bl	0 <__memzero>
+     9d0:	b	9b0 <_ctf_brc_hot_invalidate+0x60>
+
+000009d4 <_ctf_dev_unregister>:
+     9d4:	push	{r4, r5, r6, r7, r8, r9, sl, lr}
+     9d8:	subs	r5, r0, #0
+     9dc:	mov	r4, r1
+     9e0:	popeq	{r4, r5, r6, r7, r8, r9, sl, pc}
+     9e4:	cmp	r1, #0
+     9e8:	popeq	{r4, r5, r6, r7, r8, r9, sl, pc}
+     9ec:	ldr	r3, [r5, #156]	@ 0x9c
+     9f0:	mov	r7, #0
+     9f4:	ldr	r6, [pc, #452]	@ bc0 <_ctf_dev_unregister+0x1ec>
+     9f8:	ldr	r0, [r3, #4]
+     9fc:	bl	0 <_raw_spin_lock_bh>
+     a00:	ldr	r0, [r6, #140]	@ 0x8c
+     a04:	bl	0 <_raw_spin_lock_bh>
+     a08:	ldr	r3, [r6, #136]	@ 0x88
+     a0c:	ldr	r8, [r3, r7]
+     a10:	cmp	r8, #0
+     a14:	beq	a88 <_ctf_dev_unregister+0xb4>
+     a18:	mov	sl, #0
+     a1c:	b	a30 <_ctf_dev_unregister+0x5c>
+     a20:	mov	sl, r8
+     a24:	ldr	r8, [r8]
+     a28:	cmp	r8, #0
+     a2c:	beq	a88 <_ctf_dev_unregister+0xb4>
+     a30:	ldr	r3, [r8, #12]
+     a34:	cmp	r4, r3
+     a38:	bne	a20 <_ctf_dev_unregister+0x4c>
+     a3c:	cmp	sl, #0
+     a40:	mov	r1, r8
+     a44:	ldreq	r2, [r8]
+     a48:	ldrne	r3, [r8]
+     a4c:	ldreq	r3, [r6, #136]	@ 0x88
+     a50:	ldr	r0, [pc, #360]	@ bc0 <_ctf_dev_unregister+0x1ec>
+     a54:	strne	r3, [sl]
+     a58:	streq	r2, [r3, r7]
+     a5c:	ldr	r9, [r8]
+     a60:	bl	e0 <_ctf_ipc_detach_brcp>
+     a64:	mov	r1, r8
+     a68:	ldr	r0, [pc, #336]	@ bc0 <_ctf_dev_unregister+0x1ec>
+     a6c:	bl	950 <_ctf_brc_hot_invalidate>
+     a70:	mov	r1, r8
+     a74:	ldr	r0, [r6, #128]	@ 0x80
+     a78:	mov	r2, #40	@ 0x28
+     a7c:	mov	r8, r9
+     a80:	bl	0 <osl_mfree>
+     a84:	b	a28 <_ctf_dev_unregister+0x54>
+     a88:	add	r7, r7, #4
+     a8c:	cmp	r7, #128	@ 0x80
+     a90:	bne	a08 <_ctf_dev_unregister+0x34>
+     a94:	ldr	r0, [r6, #140]	@ 0x8c
+     a98:	mov	sl, #0
+     a9c:	bl	0 <_raw_spin_unlock_bh>
+     aa0:	ldr	r0, [r6, #152]	@ 0x98
+     aa4:	bl	0 <_raw_spin_lock_bh>
+     aa8:	ldr	r3, [r6, #148]	@ 0x94
+     aac:	ldr	r8, [r3, sl]
+     ab0:	cmp	r8, #0
+     ab4:	beq	b2c <_ctf_dev_unregister+0x158>
+     ab8:	mov	r7, #0
+     abc:	b	ae4 <_ctf_dev_unregister+0x110>
+     ac0:	ldr	r3, [r8, #100]	@ 0x64
+     ac4:	cmp	r3, #0
+     ac8:	beq	ad4 <_ctf_dev_unregister+0x100>
+     acc:	cmp	r4, r3
+     ad0:	beq	af0 <_ctf_dev_unregister+0x11c>
+     ad4:	mov	r7, r8
+     ad8:	ldr	r8, [r8]
+     adc:	cmp	r8, #0
+     ae0:	beq	b2c <_ctf_dev_unregister+0x158>
+     ae4:	ldr	r3, [r8, #60]	@ 0x3c
+     ae8:	cmp	r4, r3
+     aec:	bne	ac0 <_ctf_dev_unregister+0xec>
+     af0:	cmp	r7, #0
+     af4:	mov	r1, r8
+     af8:	ldrne	r3, [r8]
+     afc:	ldreq	r2, [r8]
+     b00:	ldreq	r3, [r6, #148]	@ 0x94
+     b04:	strne	r3, [r7]
+     b08:	streq	r2, [r3, sl]
+     b0c:	mov	r2, #124	@ 0x7c
+     b10:	ldr	r3, [r6, #164]	@ 0xa4
+     b14:	ldr	r8, [r8]
+     b18:	ldr	r0, [r6, #128]	@ 0x80
+     b1c:	sub	r3, r3, #1
+     b20:	str	r3, [r6, #164]	@ 0xa4
+     b24:	bl	0 <osl_mfree>
+     b28:	b	adc <_ctf_dev_unregister+0x108>
+     b2c:	add	sl, sl, #4
+     b30:	cmp	sl, #512	@ 0x200
+     b34:	bne	aa8 <_ctf_dev_unregister+0xd4>
+     b38:	ldr	r0, [r6, #152]	@ 0x98
+     b3c:	bl	0 <_raw_spin_unlock_bh>
+     b40:	ldr	r1, [r5, #156]	@ 0x9c
+     b44:	ldr	r3, [r1]
+     b48:	cmp	r3, #0
+     b4c:	beq	ba4 <_ctf_dev_unregister+0x1d0>
+     b50:	ldr	r2, [r3, #8]
+     b54:	cmp	r2, r4
+     b58:	bne	b64 <_ctf_dev_unregister+0x190>
+     b5c:	b	bb0 <_ctf_dev_unregister+0x1dc>
+     b60:	mov	r3, r6
+     b64:	ldr	r6, [r3]
+     b68:	cmp	r6, #0
+     b6c:	beq	ba4 <_ctf_dev_unregister+0x1d0>
+     b70:	ldr	r2, [r6, #8]
+     b74:	cmp	r2, r4
+     b78:	bne	b60 <_ctf_dev_unregister+0x18c>
+     b7c:	ldr	r2, [r6]
+     b80:	str	r2, [r3]
+     b84:	ldr	r3, [r5, #156]	@ 0x9c
+     b88:	ldr	r0, [r3, #4]
+     b8c:	bl	0 <_raw_spin_unlock_bh>
+     b90:	ldr	r0, [r5, #128]	@ 0x80
+     b94:	mov	r1, r6
+     b98:	mov	r2, #272	@ 0x110
+     b9c:	pop	{r4, r5, r6, r7, r8, r9, sl, lr}
+     ba0:	b	0 <osl_mfree>
+     ba4:	ldr	r0, [r1, #4]
+     ba8:	pop	{r4, r5, r6, r7, r8, r9, sl, lr}
+     bac:	b	0 <_raw_spin_unlock_bh>
+     bb0:	ldr	r2, [r3]
+     bb4:	mov	r6, r3
+     bb8:	str	r2, [r1]
+     bbc:	b	b84 <_ctf_dev_unregister+0x1b0>
+     bc0:	.word	0x00000000
+
+00000bc4 <_ctf_brc_delete>:
+     bc4:	cmp	r0, #0
+     bc8:	cmpne	r1, #0
+     bcc:	push	{r4, r5, r6, r7, lr}
+     bd0:	mov	r4, r0
+     bd4:	sub	sp, sp, #12
+     bd8:	bne	be8 <_ctf_brc_delete+0x24>
+     bdc:	mvn	r0, #1
+     be0:	add	sp, sp, #12
+     be4:	pop	{r4, r5, r6, r7, pc}
+     be8:	ldr	r3, [r0, #136]	@ 0x88
+     bec:	cmp	r3, #0
+     bf0:	beq	bdc <_ctf_brc_delete+0x18>
+     bf4:	ldrb	r2, [r1, #5]
+     bf8:	ldrb	r7, [r1, #4]
+     bfc:	ldrb	r0, [r1, #3]
+     c00:	ldrb	ip, [r1, #2]
+     c04:	add	r7, r7, r2
+     c08:	ldrb	r2, [r1, #1]
+     c0c:	add	r7, r7, r0
+     c10:	ldr	r0, [r4, #140]	@ 0x8c
+     c14:	add	r7, r7, ip
+     c18:	add	r7, r7, r2
+     c1c:	and	r7, r7, #31
+     c20:	ldr	r6, [r3, r7, lsl #2]
+     c24:	str	r1, [sp, #4]
+     c28:	bl	0 <_raw_spin_lock_bh>
+     c2c:	cmp	r6, #0
+     c30:	ldr	r1, [sp, #4]
+     c34:	beq	cf8 <_ctf_brc_delete+0x134>
+     c38:	add	r3, r6, #4
+     c3c:	ldrh	r0, [r1, #2]
+     c40:	ldrh	r2, [r1, #4]
+     c44:	ldrh	lr, [r3, #2]
+     c48:	ldrh	ip, [r3, #4]
+     c4c:	ldrh	r3, [r1]
+     c50:	ldrh	r1, [r6, #4]
+     c54:	eor	lr, r0, lr
+     c58:	eor	ip, r2, ip
+     c5c:	orr	ip, lr, ip
+     c60:	eor	r1, r3, r1
+     c64:	orrs	r1, ip, r1
+     c68:	bne	cb8 <_ctf_brc_delete+0xf4>
+     c6c:	ldr	r3, [r4, #136]	@ 0x88
+     c70:	mov	r5, r6
+     c74:	ldr	r2, [r6]
+     c78:	str	r2, [r3, r7, lsl #2]
+     c7c:	mov	r0, r4
+     c80:	mov	r1, r5
+     c84:	bl	e0 <_ctf_ipc_detach_brcp>
+     c88:	mov	r1, r5
+     c8c:	mov	r0, r4
+     c90:	bl	950 <_ctf_brc_hot_invalidate>
+     c94:	ldr	r0, [r4, #140]	@ 0x8c
+     c98:	bl	0 <_raw_spin_unlock_bh>
+     c9c:	ldr	r0, [r4, #128]	@ 0x80
+     ca0:	mov	r1, r5
+     ca4:	mov	r2, #40	@ 0x28
+     ca8:	bl	0 <osl_mfree>
+     cac:	mov	r0, #0
+     cb0:	b	be0 <_ctf_brc_delete+0x1c>
+     cb4:	mov	r6, r5
+     cb8:	ldr	r5, [r6]
+     cbc:	cmp	r5, #0
+     cc0:	add	r1, r5, #4
+     cc4:	beq	cf8 <_ctf_brc_delete+0x134>
+     cc8:	ldrh	lr, [r1, #2]
+     ccc:	ldrh	ip, [r1, #4]
+     cd0:	ldrh	r1, [r5, #4]
+     cd4:	eor	lr, r0, lr
+     cd8:	eor	ip, r2, ip
+     cdc:	orr	ip, lr, ip
+     ce0:	eor	r1, r3, r1
+     ce4:	orrs	r1, ip, r1
+     ce8:	bne	cb4 <_ctf_brc_delete+0xf0>
+     cec:	ldr	r3, [r5]
+     cf0:	str	r3, [r6]
+     cf4:	b	c7c <_ctf_brc_delete+0xb8>
+     cf8:	ldr	r0, [r4, #140]	@ 0x8c
+     cfc:	bl	0 <_raw_spin_unlock_bh>
+     d00:	mvn	r0, #29
+     d04:	b	be0 <_ctf_brc_delete+0x1c>
+
+00000d08 <_ctf_clear>:
+     d08:	cmp	r1, #255	@ 0xff
+     d0c:	push	{r4, r5, r6, r7, r8, r9, sl, fp, lr}
+     d10:	mov	r9, r1
+     d14:	sub	sp, sp, #4
+     d18:	mov	r6, r0
+     d1c:	mov	fp, r2
+     d20:	beq	de4 <_ctf_clear+0xdc>
+     d24:	cmp	r0, #0
+     d28:	beq	dcc <_ctf_clear+0xc4>
+     d2c:	mov	r5, #1
+     d30:	ldr	r7, [pc, #384]	@ eb8 <_ctf_clear+0x1b0>
+     d34:	lsl	r5, r5, r9
+     d38:	mov	sl, #0
+     d3c:	ldr	r0, [r0, #152]	@ 0x98
+     d40:	bl	0 <_raw_spin_lock_bh>
+     d44:	ldr	r3, [r6, #148]	@ 0x94
+     d48:	ldr	r8, [r3, sl]
+     d4c:	cmp	r8, #0
+     d50:	beq	db8 <_ctf_clear+0xb0>
+     d54:	mov	r4, #0
+     d58:	b	d6c <_ctf_clear+0x64>
+     d5c:	mov	r4, r8
+     d60:	ldr	r8, [r8]
+     d64:	cmp	r8, #0
+     d68:	beq	db8 <_ctf_clear+0xb0>
+     d6c:	ldrb	r3, [r8, #120]	@ 0x78
+     d70:	cmp	r3, r5
+     d74:	bne	d5c <_ctf_clear+0x54>
+     d78:	cmp	r4, #0
+     d7c:	mov	r1, r8
+     d80:	ldrne	r3, [r8]
+     d84:	ldreq	r2, [r8]
+     d88:	ldreq	r3, [r6, #148]	@ 0x94
+     d8c:	strne	r3, [r4]
+     d90:	streq	r2, [r3, sl]
+     d94:	mov	r2, #124	@ 0x7c
+     d98:	ldr	r3, [r7, #164]	@ 0xa4
+     d9c:	ldr	r8, [r8]
+     da0:	sub	r3, r3, #1
+     da4:	str	r3, [r7, #164]	@ 0xa4
+     da8:	ldr	r0, [r6, #128]	@ 0x80
+     dac:	bl	0 <osl_mfree>
+     db0:	cmp	r8, #0
+     db4:	bne	d6c <_ctf_clear+0x64>
+     db8:	add	sl, sl, #4
+     dbc:	cmp	sl, #512	@ 0x200
+     dc0:	bne	d44 <_ctf_clear+0x3c>
+     dc4:	ldr	r0, [r6, #152]	@ 0x98
+     dc8:	bl	0 <_raw_spin_unlock_bh>
+     dcc:	mov	r0, fp
+     dd0:	ldr	r1, [pc, #228]	@ ebc <_ctf_clear+0x1b4>
+     dd4:	mov	r2, r9
+     dd8:	add	sp, sp, #4
+     ddc:	pop	{r4, r5, r6, r7, r8, r9, sl, fp, lr}
+     de0:	b	0 <bcm_bprintf>
+     de4:	ldr	r0, [r0, #152]	@ 0x98
+     de8:	mov	r4, #0
+     dec:	bl	0 <_raw_spin_lock_bh>
+     df0:	ldr	r3, [r6, #148]	@ 0x94
+     df4:	b	e10 <_ctf_clear+0x108>
+     df8:	ldr	r0, [r1]
+     dfc:	mov	r2, #124	@ 0x7c
+     e00:	str	r0, [r3, r4]
+     e04:	ldr	r0, [r6, #128]	@ 0x80
+     e08:	bl	0 <osl_mfree>
+     e0c:	ldr	r3, [r6, #148]	@ 0x94
+     e10:	ldr	r1, [r3, r4]
+     e14:	cmp	r1, #0
+     e18:	bne	df8 <_ctf_clear+0xf0>
+     e1c:	add	r4, r4, #4
+     e20:	cmp	r4, #512	@ 0x200
+     e24:	bne	e10 <_ctf_clear+0x108>
+     e28:	ldr	r0, [r6, #152]	@ 0x98
+     e2c:	mov	r5, #0
+     e30:	bl	0 <_raw_spin_unlock_bh>
+     e34:	ldr	r3, [pc, #124]	@ eb8 <_ctf_clear+0x1b0>
+     e38:	mov	r4, r5
+     e3c:	str	r5, [r3, #164]	@ 0xa4
+     e40:	ldr	r0, [r6, #140]	@ 0x8c
+     e44:	bl	0 <_raw_spin_lock_bh>
+     e48:	ldr	r3, [r6, #136]	@ 0x88
+     e4c:	b	e84 <_ctf_clear+0x17c>
+     e50:	ldr	r2, [r5]
+     e54:	mov	r1, r5
+     e58:	mov	r0, r6
+     e5c:	str	r2, [r3, r4]
+     e60:	bl	e0 <_ctf_ipc_detach_brcp>
+     e64:	mov	r0, r6
+     e68:	mov	r1, r5
+     e6c:	bl	950 <_ctf_brc_hot_invalidate>
+     e70:	mov	r1, r5
+     e74:	ldr	r0, [r6, #128]	@ 0x80
+     e78:	mov	r2, #40	@ 0x28
+     e7c:	bl	0 <osl_mfree>
+     e80:	ldr	r3, [r6, #136]	@ 0x88
+     e84:	ldr	r5, [r3, r4]
+     e88:	cmp	r5, #0
+     e8c:	bne	e50 <_ctf_clear+0x148>
+     e90:	add	r4, r4, #4
+     e94:	cmp	r4, #128	@ 0x80
+     e98:	bne	e84 <_ctf_clear+0x17c>
+     e9c:	ldr	r0, [r6, #140]	@ 0x8c
+     ea0:	bl	0 <_raw_spin_unlock_bh>
+     ea4:	mov	r0, fp
+     ea8:	ldr	r1, [pc, #16]	@ ec0 <_ctf_clear+0x1b8>
+     eac:	add	sp, sp, #4
+     eb0:	pop	{r4, r5, r6, r7, r8, r9, sl, fp, lr}
+     eb4:	b	0 <bcm_bprintf>
+     eb8:	.word	0x00000000
+     ebc:	.word	0x00000020
+     ec0:	.word	0x00000000
+
+00000ec4 <_ctf_ipc_lkup>:
+     ec4:	push	{r4, r5, r6, r7, r8, r9, sl, lr}
+     ec8:	sub	sp, sp, #16
+     ecc:	ldrh	r5, [sp, #52]	@ 0x34
+     ed0:	mov	r4, r0
+     ed4:	mov	sl, r1
+     ed8:	mov	r8, r2
+     edc:	ldrb	r6, [sp, #48]	@ 0x30
+     ee0:	mov	r7, r3
+     ee4:	ldrh	r9, [sp, #56]	@ 0x38
+     ee8:	ldr	r0, [r0, #152]	@ 0x98
+     eec:	bl	0 <_raw_spin_lock_bh>
+     ef0:	mov	r0, r4
+     ef4:	mov	r1, sl
+     ef8:	mov	r2, r8
+     efc:	mov	r3, r7
+     f00:	str	r5, [sp, #4]
+     f04:	str	r6, [sp]
+     f08:	str	r9, [sp, #8]
+     f0c:	bl	140 <_ctf_ipc_detach_brcp+0x60>
+     f10:	subs	r5, r0, #0
+     f14:	beq	f24 <_ctf_ipc_lkup+0x60>
+     f18:	mov	r0, r5
+     f1c:	add	sp, sp, #16
+     f20:	pop	{r4, r5, r6, r7, r8, r9, sl, pc}
+     f24:	ldr	r0, [r4, #152]	@ 0x98
+     f28:	bl	0 <_raw_spin_unlock_bh>
+     f2c:	b	f18 <_ctf_ipc_lkup+0x54>
+
+00000f30 <_ctf_cfg_req_process>:
+     f30:	push	{r4, r5, r6, r7, r8, lr}
+     f34:	mov	r4, r1
+     f38:	ldr	r2, [r1]
+     f3c:	sub	sp, sp, #16
+     f40:	mov	r5, r0
+     f44:	cmp	r2, #7
+     f48:	bhi	f5c <_ctf_cfg_req_process+0x2c>
+     f4c:	mov	r3, #1
+     f50:	lsl	r3, r3, r2
+     f54:	tst	r3, #206	@ 0xce
+     f58:	bne	fd0 <_ctf_cfg_req_process+0xa0>
+     f5c:	mov	r7, #0
+     f60:	sub	r3, r2, #1
+     f64:	cmp	r3, #6
+     f68:	ldrls	pc, [pc, r3, lsl #2]
+     f6c:	b	1030 <_ctf_cfg_req_process+0x100>
+     f70:	.word	0x0000104c
+     f74:	.word	0x00001068
+     f78:	.word	0x00000fa4
+     f7c:	.word	0x00001090
+     f80:	.word	0x000010d0
+     f84:	.word	0x00001148
+     f88:	.word	0x00000f8c
+     f8c:	ldr	r3, [r7, #64]	@ 0x40
+     f90:	cmp	r3, #0
+     f94:	beq	fb4 <_ctf_cfg_req_process+0x84>
+     f98:	ldr	r3, [r7, #68]	@ 0x44
+     f9c:	orr	r3, r3, #1024	@ 0x400
+     fa0:	str	r3, [r7, #68]	@ 0x44
+     fa4:	mov	r3, #1
+     fa8:	str	r3, [r4, #4]
+     fac:	mov	r3, #0
+     fb0:	str	r3, [r4, #8]
+     fb4:	cmp	r7, #0
+     fb8:	beq	1028 <_ctf_cfg_req_process+0xf8>
+     fbc:	mov	r0, r5
+     fc0:	mov	r1, r7
+     fc4:	add	sp, sp, #16
+     fc8:	pop	{r4, r5, r6, r7, r8, lr}
+     fcc:	b	41c <_ctf_ipc_release>
+     fd0:	add	r6, r1, #12
+     fd4:	ldr	r1, [r1, #12]
+     fd8:	ldrb	r7, [r6, #40]	@ 0x28
+     fdc:	add	r2, r4, #16
+     fe0:	ldrh	lr, [r6, #36]	@ 0x24
+     fe4:	add	r3, r4, #32
+     fe8:	ldrh	ip, [r6, #38]	@ 0x26
+     fec:	cmp	r1, #10
+     ff0:	movne	r1, #0
+     ff4:	moveq	r1, #1
+     ff8:	stm	sp, {r7, lr}
+     ffc:	str	ip, [sp, #8]
+    1000:	bl	ec4 <_ctf_ipc_lkup>
+    1004:	subs	r7, r0, #0
+    1008:	ldrne	r2, [r4]
+    100c:	bne	f60 <_ctf_cfg_req_process+0x30>
+    1010:	mov	r3, #3
+    1014:	mov	r0, r6
+    1018:	str	r3, [r4, #4]
+    101c:	ldr	r1, [pc, #492]	@ 1210 <_ctf_cfg_req_process+0x2e0>
+    1020:	bl	0 <sprintf>
+    1024:	str	r0, [r4, #8]
+    1028:	add	sp, sp, #16
+    102c:	pop	{r4, r5, r6, r7, r8, pc}
+    1030:	mov	r3, #2
+    1034:	add	r0, r4, #12
+    1038:	str	r3, [r4, #4]
+    103c:	ldr	r1, [pc, #464]	@ 1214 <_ctf_cfg_req_process+0x2e4>
+    1040:	bl	0 <sprintf>
+    1044:	str	r0, [r4, #8]
+    1048:	b	fb4 <_ctf_cfg_req_process+0x84>
+    104c:	ldr	r2, [r7, #116]	@ 0x74
+    1050:	ldr	r3, [r7, #68]	@ 0x44
+    1054:	add	r2, r2, #1
+    1058:	orr	r3, r3, #16
+    105c:	str	r2, [r7, #116]	@ 0x74
+    1060:	str	r3, [r7, #68]	@ 0x44
+    1064:	b	fa4 <_ctf_cfg_req_process+0x74>
+    1068:	ldr	r3, [r7, #116]	@ 0x74
+    106c:	cmp	r3, #0
+    1070:	beq	1170 <_ctf_cfg_req_process+0x240>
+    1074:	sub	r3, r3, #1
+    1078:	cmp	r3, #0
+    107c:	str	r3, [r7, #116]	@ 0x74
+    1080:	ldreq	r3, [r7, #68]	@ 0x44
+    1084:	biceq	r3, r3, #16
+    1088:	streq	r3, [r7, #68]	@ 0x44
+    108c:	b	fa4 <_ctf_cfg_req_process+0x74>
+    1090:	ldrb	r6, [r4, #12]
+    1094:	ldr	r0, [r5, #132]	@ 0x84
+    1098:	bl	0 <_raw_spin_lock_bh>
+    109c:	cmp	r6, #6
+    10a0:	beq	11a8 <_ctf_cfg_req_process+0x278>
+    10a4:	cmp	r6, #17
+    10a8:	beq	11cc <_ctf_cfg_req_process+0x29c>
+    10ac:	mov	r3, #0
+    10b0:	str	r3, [r4, #12]
+    10b4:	ldr	r0, [r5, #132]	@ 0x84
+    10b8:	bl	0 <_raw_spin_unlock_bh>
+    10bc:	mov	r3, #1
+    10c0:	str	r3, [r4, #4]
+    10c4:	mov	r3, #4
+    10c8:	str	r3, [r4, #8]
+    10cc:	b	fb4 <_ctf_cfg_req_process+0x84>
+    10d0:	ldrb	r6, [r4, #17]
+    10d4:	ldrb	r2, [r4, #16]
+    10d8:	cmp	r2, #6
+    10dc:	lsleq	r6, r6, #1
+    10e0:	moveq	r3, #1
+    10e4:	lsleq	r6, r3, r6
+    10e8:	beq	1100 <_ctf_cfg_req_process+0x1d0>
+    10ec:	cmp	r2, #17
+    10f0:	lsleq	r6, r6, #1
+    10f4:	moveq	r3, #2
+    10f8:	lsleq	r6, r3, r6
+    10fc:	bne	118c <_ctf_cfg_req_process+0x25c>
+    1100:	ldr	r0, [r5, #132]	@ 0x84
+    1104:	add	r8, r4, #12
+    1108:	bl	0 <_raw_spin_lock_bh>
+    110c:	ldr	r2, [r4, #12]
+    1110:	cmp	r2, #0
+    1114:	beq	1160 <_ctf_cfg_req_process+0x230>
+    1118:	cmp	r2, #1
+    111c:	bne	11e8 <_ctf_cfg_req_process+0x2b8>
+    1120:	ldr	r3, [r5, #124]	@ 0x7c
+    1124:	orr	r6, r3, r6
+    1128:	str	r6, [r5, #124]	@ 0x7c
+    112c:	ldr	r0, [r5, #132]	@ 0x84
+    1130:	bl	0 <_raw_spin_unlock_bh>
+    1134:	mov	r3, #1
+    1138:	str	r3, [r4, #4]
+    113c:	mov	r3, #0
+    1140:	str	r3, [r4, #8]
+    1144:	b	fb4 <_ctf_cfg_req_process+0x84>
+    1148:	ldr	r3, [r7, #68]	@ 0x44
+    114c:	ldr	r2, [r4, #56]	@ 0x38
+    1150:	orr	r3, r3, #64	@ 0x40
+    1154:	str	r2, [r7, #112]	@ 0x70
+    1158:	str	r3, [r7, #68]	@ 0x44
+    115c:	b	fa4 <_ctf_cfg_req_process+0x74>
+    1160:	ldr	r3, [r5, #124]	@ 0x7c
+    1164:	bic	r6, r3, r6
+    1168:	str	r6, [r5, #124]	@ 0x7c
+    116c:	b	112c <_ctf_cfg_req_process+0x1fc>
+    1170:	mov	r3, #5
+    1174:	add	r0, r4, #12
+    1178:	str	r3, [r4, #4]
+    117c:	ldr	r1, [pc, #148]	@ 1218 <_ctf_cfg_req_process+0x2e8>
+    1180:	bl	0 <sprintf>
+    1184:	str	r0, [r4, #8]
+    1188:	b	fb4 <_ctf_cfg_req_process+0x84>
+    118c:	mov	r3, #7
+    1190:	add	r0, r4, #12
+    1194:	str	r3, [r4, #4]
+    1198:	ldr	r1, [pc, #124]	@ 121c <_ctf_cfg_req_process+0x2ec>
+    119c:	bl	0 <sprintf>
+    11a0:	str	r0, [r4, #8]
+    11a4:	b	1028 <_ctf_cfg_req_process+0xf8>
+    11a8:	ldr	r2, [r5, #124]	@ 0x7c
+    11ac:	movw	r3, #21845	@ 0x5555
+    11b0:	movt	r3, #21845	@ 0x5555
+    11b4:	and	r3, r2, r3
+    11b8:	cmp	r3, #0
+    11bc:	beq	10ac <_ctf_cfg_req_process+0x17c>
+    11c0:	mov	r3, #1
+    11c4:	str	r3, [r4, #12]
+    11c8:	b	10b4 <_ctf_cfg_req_process+0x184>
+    11cc:	ldr	r2, [r5, #124]	@ 0x7c
+    11d0:	movw	r3, #43690	@ 0xaaaa
+    11d4:	movt	r3, #43690	@ 0xaaaa
+    11d8:	and	r3, r2, r3
+    11dc:	cmp	r3, #0
+    11e0:	beq	10ac <_ctf_cfg_req_process+0x17c>
+    11e4:	b	11c0 <_ctf_cfg_req_process+0x290>
+    11e8:	mov	r3, #6
+    11ec:	mov	r0, r8
+    11f0:	str	r3, [r4, #4]
+    11f4:	ldr	r1, [pc, #36]	@ 1220 <_ctf_cfg_req_process+0x2f0>
+    11f8:	bl	0 <sprintf>
+    11fc:	str	r0, [r4, #8]
+    1200:	ldr	r0, [r5, #132]	@ 0x84
+    1204:	add	sp, sp, #16
+    1208:	pop	{r4, r5, r6, r7, r8, lr}
+    120c:	b	0 <_raw_spin_unlock_bh>
+    1210:	.word	0x0000003c
+    1214:	.word	0x000000a0
+    1218:	.word	0x0000004c
+    121c:	.word	0x00000064
+    1220:	.word	0x00000080
+
+00001224 <_ctf_ipc_lkup_fn>:
+    1224:	cmp	r0, #0
+    1228:	cmpne	r1, #0
+    122c:	push	{lr}		@ (str lr, [sp, #-4]!)
+    1230:	mov	r3, r0
+    1234:	sub	sp, sp, #20
+    1238:	mov	ip, r1
+    123c:	moveq	r0, #0
+    1240:	bne	124c <_ctf_ipc_lkup_fn+0x28>
+    1244:	add	sp, sp, #20
+    1248:	ldmfd	sp!, {pc}
+    124c:	ldr	r3, [r3, #148]	@ 0x94
+    1250:	cmp	r3, #0
+    1254:	moveq	r0, r3
+    1258:	beq	1244 <_ctf_ipc_lkup_fn+0x20>
+    125c:	ldrb	lr, [r1, #40]	@ 0x28
+    1260:	add	r3, ip, #20
+    1264:	mov	r1, r2
+    1268:	add	r2, ip, #4
+    126c:	str	lr, [sp]
+    1270:	ldrh	lr, [ip, #36]	@ 0x24
+    1274:	str	lr, [sp, #4]
+    1278:	ldrh	ip, [ip, #38]	@ 0x26
+    127c:	str	ip, [sp, #8]
+    1280:	bl	ec4 <_ctf_ipc_lkup>
+    1284:	b	1244 <_ctf_ipc_lkup_fn+0x20>
+
+00001288 <_ctf_is_ipc_in_range>:
+    1288:	cmp	r0, #0
+    128c:	cmpne	r1, #0
+    1290:	push	{r4, r5, r6, r7, r8, sl, lr}
+    1294:	mov	r5, r0
+    1298:	sub	sp, sp, #12
+    129c:	mov	r4, r1
+    12a0:	movne	r0, #0
+    12a4:	moveq	r0, #1
+    12a8:	mov	r6, r2
+    12ac:	beq	14ec <_ctf_is_ipc_in_range+0x264>
+    12b0:	ldr	r2, [r1, #60]	@ 0x3c
+    12b4:	cmp	r2, #0
+    12b8:	beq	12d0 <_ctf_is_ipc_in_range+0x48>
+    12bc:	ldr	r1, [r5, #60]	@ 0x3c
+    12c0:	cmp	r2, r1
+    12c4:	beq	12d0 <_ctf_is_ipc_in_range+0x48>
+    12c8:	add	sp, sp, #12
+    12cc:	pop	{r4, r5, r6, r7, r8, sl, pc}
+    12d0:	ldrb	r0, [r4, #89]	@ 0x59
+    12d4:	ldrb	r1, [r4, #88]	@ 0x58
+    12d8:	ldrb	r2, [r4, #90]	@ 0x5a
+    12dc:	ldrb	ip, [r4, #91]	@ 0x5b
+    12e0:	orr	r1, r0, r1
+    12e4:	ldrb	r0, [r4, #92]	@ 0x5c
+    12e8:	orr	r1, r1, r2
+    12ec:	ldrb	r2, [r4, #93]	@ 0x5d
+    12f0:	orr	r1, r1, ip
+    12f4:	orr	r1, r1, r0
+    12f8:	orrs	r2, r1, r2
+    12fc:	bne	14f4 <_ctf_is_ipc_in_range+0x26c>
+    1300:	ldrb	r0, [r4, #47]	@ 0x2f
+    1304:	ldrb	r1, [r4, #46]	@ 0x2e
+    1308:	ldrb	r2, [r4, #48]	@ 0x30
+    130c:	ldrb	ip, [r4, #49]	@ 0x31
+    1310:	orr	r1, r0, r1
+    1314:	ldrb	r0, [r4, #50]	@ 0x32
+    1318:	orr	r1, r1, r2
+    131c:	ldrb	r2, [r4, #51]	@ 0x33
+    1320:	orr	r1, r1, ip
+    1324:	orr	r1, r1, r0
+    1328:	orrs	r2, r1, r2
+    132c:	bne	14cc <_ctf_is_ipc_in_range+0x244>
+    1330:	ldr	r0, [r5, #12]
+    1334:	ldr	r1, [r5, #8]
+    1338:	ldr	r2, [r5, #16]
+    133c:	orr	r0, r0, r1
+    1340:	orrs	r0, r0, r2
+    1344:	bne	151c <_ctf_is_ipc_in_range+0x294>
+    1348:	cmp	r3, #0
+    134c:	bne	12c8 <_ctf_is_ipc_in_range+0x40>
+    1350:	cmp	r6, #0
+    1354:	moveq	r6, r4
+    1358:	cmp	r3, #0
+    135c:	bne	152c <_ctf_is_ipc_in_range+0x2a4>
+    1360:	ldr	r1, [r5, #4]
+    1364:	ldr	r2, [r4, #4]
+    1368:	cmp	r1, r2
+    136c:	bcc	1380 <_ctf_is_ipc_in_range+0xf8>
+    1370:	ldr	r0, [r6, #4]
+    1374:	cmp	r1, r0
+    1378:	movls	r0, #1
+    137c:	bls	1398 <_ctf_is_ipc_in_range+0x110>
+    1380:	cmp	r2, #0
+    1384:	movne	r0, #0
+    1388:	bne	1398 <_ctf_is_ipc_in_range+0x110>
+    138c:	ldr	r0, [r6, #4]
+    1390:	rsbs	r0, r0, #1
+    1394:	movcc	r0, #0
+    1398:	ldr	r2, [r5, #20]
+    139c:	ldr	r1, [r4, #20]
+    13a0:	cmp	r2, r1
+    13a4:	bcc	15bc <_ctf_is_ipc_in_range+0x334>
+    13a8:	ldr	ip, [r6, #20]
+    13ac:	cmp	r2, ip
+    13b0:	bhi	15bc <_ctf_is_ipc_in_range+0x334>
+    13b4:	and	r1, r0, #1
+    13b8:	ldrh	r0, [r5, #36]	@ 0x24
+    13bc:	ldrh	r2, [r4, #36]	@ 0x24
+    13c0:	cmp	r0, r2
+    13c4:	bcc	13d8 <_ctf_is_ipc_in_range+0x150>
+    13c8:	ldrh	ip, [r6, #36]	@ 0x24
+    13cc:	cmp	ip, r0
+    13d0:	movcs	r7, #1
+    13d4:	bcs	13f0 <_ctf_is_ipc_in_range+0x168>
+    13d8:	cmp	r2, #0
+    13dc:	movne	r7, #0
+    13e0:	bne	13f0 <_ctf_is_ipc_in_range+0x168>
+    13e4:	ldrh	r7, [r6, #36]	@ 0x24
+    13e8:	rsbs	r7, r7, #1
+    13ec:	movcc	r7, #0
+    13f0:	ldrh	r0, [r5, #38]	@ 0x26
+    13f4:	ldrh	r2, [r4, #38]	@ 0x26
+    13f8:	cmp	r0, r2
+    13fc:	bcc	1410 <_ctf_is_ipc_in_range+0x188>
+    1400:	ldrh	ip, [r6, #38]	@ 0x26
+    1404:	cmp	ip, r0
+    1408:	movcs	ip, #1
+    140c:	bcs	1428 <_ctf_is_ipc_in_range+0x1a0>
+    1410:	cmp	r2, #0
+    1414:	movne	ip, #0
+    1418:	bne	1428 <_ctf_is_ipc_in_range+0x1a0>
+    141c:	ldrh	ip, [r6, #38]	@ 0x26
+    1420:	rsbs	ip, ip, #1
+    1424:	movcc	ip, #0
+    1428:	ldrb	r2, [r5, #40]	@ 0x28
+    142c:	ldrb	r0, [r4, #40]	@ 0x28
+    1430:	cmp	r2, r0
+    1434:	bcc	15d8 <_ctf_is_ipc_in_range+0x350>
+    1438:	ldrb	r8, [r6, #40]	@ 0x28
+    143c:	cmp	r8, r2
+    1440:	bcc	15d8 <_ctf_is_ipc_in_range+0x350>
+    1444:	and	r1, r1, r7
+    1448:	ands	r1, r1, ip
+    144c:	moveq	r0, r1
+    1450:	beq	12c8 <_ctf_is_ipc_in_range+0x40>
+    1454:	cmp	r3, #0
+    1458:	movne	r0, #1
+    145c:	bne	12c8 <_ctf_is_ipc_in_range+0x40>
+    1460:	ldr	r2, [r5, #80]	@ 0x50
+    1464:	ldr	r3, [r4, #80]	@ 0x50
+    1468:	cmp	r2, r3
+    146c:	bcc	1480 <_ctf_is_ipc_in_range+0x1f8>
+    1470:	ldr	r1, [r6, #80]	@ 0x50
+    1474:	cmp	r2, r1
+    1478:	movls	r0, #1
+    147c:	bls	1498 <_ctf_is_ipc_in_range+0x210>
+    1480:	cmp	r3, #0
+    1484:	movne	r0, #0
+    1488:	bne	1498 <_ctf_is_ipc_in_range+0x210>
+    148c:	ldr	r0, [r6, #80]	@ 0x50
+    1490:	rsbs	r0, r0, #1
+    1494:	movcc	r0, #0
+    1498:	ldrh	r1, [r5, #84]	@ 0x54
+    149c:	ldrh	r2, [r4, #84]	@ 0x54
+    14a0:	cmp	r1, r2
+    14a4:	bcc	14b4 <_ctf_is_ipc_in_range+0x22c>
+    14a8:	ldrh	r3, [r6, #84]	@ 0x54
+    14ac:	cmp	r3, r1
+    14b0:	bcs	12c8 <_ctf_is_ipc_in_range+0x40>
+    14b4:	cmp	r2, #0
+    14b8:	bne	14ec <_ctf_is_ipc_in_range+0x264>
+    14bc:	ldrh	r3, [r6, #84]	@ 0x54
+    14c0:	cmp	r3, #0
+    14c4:	movne	r0, r2
+    14c8:	b	12c8 <_ctf_is_ipc_in_range+0x40>
+    14cc:	add	r0, r5, #46	@ 0x2e
+    14d0:	add	r1, r4, #46	@ 0x2e
+    14d4:	mov	r2, #6
+    14d8:	str	r3, [sp, #4]
+    14dc:	bl	0 <memcmp>
+    14e0:	cmp	r0, #0
+    14e4:	ldr	r3, [sp, #4]
+    14e8:	beq	1330 <_ctf_is_ipc_in_range+0xa8>
+    14ec:	mov	r0, #0
+    14f0:	b	12c8 <_ctf_is_ipc_in_range+0x40>
+    14f4:	add	r0, r5, #88	@ 0x58
+    14f8:	add	r1, r4, #88	@ 0x58
+    14fc:	mov	r2, #6
+    1500:	str	r3, [sp, #4]
+    1504:	bl	0 <memcmp>
+    1508:	cmp	r0, #0
+    150c:	ldr	r3, [sp, #4]
+    1510:	beq	1300 <_ctf_is_ipc_in_range+0x78>
+    1514:	mov	r0, #0
+    1518:	b	12c8 <_ctf_is_ipc_in_range+0x40>
+    151c:	cmp	r3, #0
+    1520:	moveq	r0, r3
+    1524:	bne	1350 <_ctf_is_ipc_in_range+0xc8>
+    1528:	b	12c8 <_ctf_is_ipc_in_range+0x40>
+    152c:	ldr	r7, [r4, #4]
+    1530:	ldr	r1, [r4, #8]
+    1534:	ldr	r0, [r4, #12]
+    1538:	ldr	r2, [r4, #16]
+    153c:	orr	r1, r7, r1
+    1540:	orr	r1, r1, r0
+    1544:	orrs	r2, r1, r2
+    1548:	bne	156c <_ctf_is_ipc_in_range+0x2e4>
+    154c:	ldmib	r6, {r1, ip}
+    1550:	ldr	r0, [r6, #12]
+    1554:	ldr	r2, [r6, #16]
+    1558:	orr	r1, ip, r1
+    155c:	orr	r1, r1, r0
+    1560:	orrs	r2, r1, r2
+    1564:	mvneq	r1, #0
+    1568:	beq	15f0 <_ctf_is_ipc_in_range+0x368>
+    156c:	mov	r0, r4
+    1570:	mov	r2, #0
+    1574:	mvn	r1, #0
+    1578:	add	ip, r5, r2
+    157c:	add	r8, r6, r2
+    1580:	ldr	ip, [ip, #4]
+    1584:	cmp	ip, r7
+    1588:	bcc	15b4 <_ctf_is_ipc_in_range+0x32c>
+    158c:	ldr	r7, [r8, #4]
+    1590:	and	r1, r1, #1
+    1594:	cmp	ip, r7
+    1598:	bhi	15b4 <_ctf_is_ipc_in_range+0x32c>
+    159c:	add	r2, r2, #4
+    15a0:	cmp	r2, #16
+    15a4:	beq	15f0 <_ctf_is_ipc_in_range+0x368>
+    15a8:	ldr	r7, [r0, #8]
+    15ac:	add	r0, r0, #4
+    15b0:	b	1578 <_ctf_is_ipc_in_range+0x2f0>
+    15b4:	mov	r1, #0
+    15b8:	b	159c <_ctf_is_ipc_in_range+0x314>
+    15bc:	cmp	r1, #0
+    15c0:	movne	r1, #0
+    15c4:	bne	13b8 <_ctf_is_ipc_in_range+0x130>
+    15c8:	ldr	r2, [r6, #20]
+    15cc:	cmp	r2, #0
+    15d0:	bne	13b8 <_ctf_is_ipc_in_range+0x130>
+    15d4:	b	13b4 <_ctf_is_ipc_in_range+0x12c>
+    15d8:	cmp	r0, #0
+    15dc:	bne	14ec <_ctf_is_ipc_in_range+0x264>
+    15e0:	ldrb	r2, [r6, #40]	@ 0x28
+    15e4:	cmp	r2, #0
+    15e8:	bne	12c8 <_ctf_is_ipc_in_range+0x40>
+    15ec:	b	1444 <_ctf_is_ipc_in_range+0x1bc>
+    15f0:	ldr	r7, [r4, #20]
+    15f4:	ldr	r0, [r4, #24]
+    15f8:	ldr	ip, [r4, #28]
+    15fc:	ldr	r2, [r4, #32]
+    1600:	orr	r0, r7, r0
+    1604:	orr	r0, r0, ip
+    1608:	orrs	r2, r0, r2
+    160c:	bne	162c <_ctf_is_ipc_in_range+0x3a4>
+    1610:	add	r0, r6, #20
+    1614:	ldm	r0, {r0, r8, ip}
+    1618:	ldr	r2, [r6, #32]
+    161c:	orr	r0, r8, r0
+    1620:	orr	r0, r0, ip
+    1624:	orrs	r2, r0, r2
+    1628:	beq	13b8 <_ctf_is_ipc_in_range+0x130>
+    162c:	add	r8, r5, #16
+    1630:	add	sl, r4, #20
+    1634:	mov	r0, r6
+    1638:	mov	r2, #4
+    163c:	ldr	ip, [r8, #4]!
+    1640:	cmp	ip, r7
+    1644:	bcc	166c <_ctf_is_ipc_in_range+0x3e4>
+    1648:	ldr	r7, [r0, #20]
+    164c:	and	r1, r1, #1
+    1650:	cmp	ip, r7
+    1654:	bhi	166c <_ctf_is_ipc_in_range+0x3e4>
+    1658:	subs	r2, r2, #1
+    165c:	add	r0, r0, #4
+    1660:	beq	13b8 <_ctf_is_ipc_in_range+0x130>
+    1664:	ldr	r7, [sl, #4]!
+    1668:	b	163c <_ctf_is_ipc_in_range+0x3b4>
+    166c:	mov	r1, #0
+    1670:	b	1658 <_ctf_is_ipc_in_range+0x3d0>
+
+00001674 <_ctf_ipc_action>:
+    1674:	cmp	r0, #0
+    1678:	push	{r4, r5, r6, r7, r8, r9, sl, fp, lr}
+    167c:	sub	sp, sp, #20
+    1680:	mov	r5, r1
+    1684:	mov	r6, r2
+    1688:	str	r0, [sp, #12]
+    168c:	ldrb	r7, [sp, #56]	@ 0x38
+    1690:	bne	16a0 <_ctf_ipc_action+0x2c>
+    1694:	mvn	r0, #1
+    1698:	add	sp, sp, #20
+    169c:	pop	{r4, r5, r6, r7, r8, r9, sl, fp, pc}
+    16a0:	ldr	r2, [r0, #148]	@ 0x94
+    16a4:	cmp	r2, #0
+    16a8:	beq	1694 <_ctf_ipc_action+0x20>
+    16ac:	ands	sl, r3, #240	@ 0xf0
+    16b0:	movne	r2, #0
+    16b4:	moveq	r2, #1
+    16b8:	cmp	r1, #0
+    16bc:	orreq	r2, r2, #1
+    16c0:	cmp	r2, #0
+    16c4:	bne	1694 <_ctf_ipc_action+0x20>
+    16c8:	and	r1, r3, #64	@ 0x40
+    16cc:	and	r9, r3, #16
+    16d0:	and	fp, r3, #32
+    16d4:	ldr	r0, [r0, #152]	@ 0x98
+    16d8:	and	r3, r3, #128	@ 0x80
+    16dc:	str	r2, [sp, #8]
+    16e0:	mvn	sl, sl
+    16e4:	mov	r8, r2
+    16e8:	stm	sp, {r1, r3}
+    16ec:	bl	0 <_raw_spin_lock_bh>
+    16f0:	ldr	r2, [sp, #12]
+    16f4:	ldr	r1, [sp, #8]
+    16f8:	ldr	r3, [r2, #148]	@ 0x94
+    16fc:	ldr	r4, [r3, r1]
+    1700:	cmp	r4, #0
+    1704:	beq	17bc <_ctf_ipc_action+0x148>
+    1708:	mov	r0, r4
+    170c:	mov	r1, r5
+    1710:	mov	r2, r6
+    1714:	mov	r3, r7
+    1718:	bl	1288 <_ctf_is_ipc_in_range>
+    171c:	cmp	r0, #0
+    1720:	beq	17b0 <_ctf_ipc_action+0x13c>
+    1724:	cmp	r9, #0
+    1728:	ldr	r3, [r4, #68]	@ 0x44
+    172c:	ldrne	r2, [r5, #68]	@ 0x44
+    1730:	and	r3, sl, r3
+    1734:	andne	r2, r2, #16
+    1738:	orrne	r3, r3, r2
+    173c:	cmp	fp, #0
+    1740:	beq	1760 <_ctf_ipc_action+0xec>
+    1744:	ldr	r2, [r5, #68]	@ 0x44
+    1748:	and	r2, r2, #32
+    174c:	orr	r3, r3, r2
+    1750:	tst	r3, #32
+    1754:	ldrbne	r2, [r5, #94]	@ 0x5e
+    1758:	bicne	r2, r2, #3
+    175c:	strbne	r2, [r4, #94]	@ 0x5e
+    1760:	ldr	r2, [sp]
+    1764:	cmp	r2, #0
+    1768:	beq	1784 <_ctf_ipc_action+0x110>
+    176c:	ldr	r2, [r5, #68]	@ 0x44
+    1770:	and	r2, r2, #64	@ 0x40
+    1774:	orr	r3, r3, r2
+    1778:	tst	r3, #64	@ 0x40
+    177c:	ldrne	r2, [r5, #112]	@ 0x70
+    1780:	strne	r2, [r4, #112]	@ 0x70
+    1784:	ldr	r1, [sp, #4]
+    1788:	cmp	r1, #0
+    178c:	beq	17a8 <_ctf_ipc_action+0x134>
+    1790:	ldr	r2, [r5, #68]	@ 0x44
+    1794:	and	r2, r2, #128	@ 0x80
+    1798:	orr	r3, r3, r2
+    179c:	tst	r3, #128	@ 0x80
+    17a0:	ldrne	r2, [r5, #108]	@ 0x6c
+    17a4:	strne	r2, [r4, #108]	@ 0x6c
+    17a8:	add	r8, r8, #1
+    17ac:	str	r3, [r4, #68]	@ 0x44
+    17b0:	ldr	r4, [r4]
+    17b4:	cmp	r4, #0
+    17b8:	bne	1708 <_ctf_ipc_action+0x94>
+    17bc:	ldr	r2, [sp, #8]
+    17c0:	add	r2, r2, #4
+    17c4:	cmp	r2, #512	@ 0x200
+    17c8:	str	r2, [sp, #8]
+    17cc:	bne	16f0 <_ctf_ipc_action+0x7c>
+    17d0:	ldr	r3, [sp, #12]
+    17d4:	ldr	r0, [r3, #152]	@ 0x98
+    17d8:	bl	0 <_raw_spin_unlock_bh>
+    17dc:	cmp	r8, #0
+    17e0:	movne	r0, #0
+    17e4:	mvneq	r0, #29
+    17e8:	b	1698 <_ctf_ipc_action+0x24>
+
+000017ec <_ctf_ipc_delete_range>:
+    17ec:	push	{r4, r5, r6, r7, r8, r9, sl, fp, lr}
+    17f0:	subs	fp, r0, #0
+    17f4:	sub	sp, sp, #12
+    17f8:	mov	r8, r1
+    17fc:	mov	r9, r2
+    1800:	mov	sl, r3
+    1804:	bne	1814 <_ctf_ipc_delete_range+0x28>
+    1808:	mvn	r0, #1
+    180c:	add	sp, sp, #12
+    1810:	pop	{r4, r5, r6, r7, r8, r9, sl, fp, pc}
+    1814:	ldr	r3, [fp, #148]	@ 0x94
+    1818:	cmp	r3, #0
+    181c:	beq	1808 <_ctf_ipc_delete_range+0x1c>
+    1820:	cmp	r1, #0
+    1824:	beq	1808 <_ctf_ipc_delete_range+0x1c>
+    1828:	ldr	r7, [pc, #200]	@ 18f8 <_ctf_ipc_delete_range+0x10c>
+    182c:	mov	r1, #0
+    1830:	ldr	r0, [fp, #152]	@ 0x98
+    1834:	str	r1, [sp]
+    1838:	bl	0 <_raw_spin_lock_bh>
+    183c:	ldr	r2, [r7, #164]	@ 0xa4
+    1840:	str	r2, [sp, #4]
+    1844:	ldr	r3, [fp, #148]	@ 0x94
+    1848:	ldr	r1, [sp]
+    184c:	ldr	r4, [r3, r1]
+    1850:	cmp	r4, #0
+    1854:	beq	18c4 <_ctf_ipc_delete_range+0xd8>
+    1858:	mov	r6, #0
+    185c:	mov	r0, r4
+    1860:	mov	r1, r8
+    1864:	mov	r2, r9
+    1868:	mov	r3, sl
+    186c:	ldr	r5, [r4]
+    1870:	bl	1288 <_ctf_is_ipc_in_range>
+    1874:	cmp	r0, #0
+    1878:	moveq	r6, r4
+    187c:	beq	18b8 <_ctf_ipc_delete_range+0xcc>
+    1880:	cmp	r6, #0
+    1884:	ldrne	r3, [r4]
+    1888:	ldreq	r3, [fp, #148]	@ 0x94
+    188c:	ldreq	r2, [r4]
+    1890:	ldreq	r1, [sp]
+    1894:	strne	r3, [r6]
+    1898:	streq	r2, [r3, r1]
+    189c:	mov	r1, r4
+    18a0:	ldr	r3, [r7, #164]	@ 0xa4
+    18a4:	mov	r2, #124	@ 0x7c
+    18a8:	sub	r3, r3, #1
+    18ac:	str	r3, [r7, #164]	@ 0xa4
+    18b0:	ldr	r0, [fp, #128]	@ 0x80
+    18b4:	bl	0 <osl_mfree>
+    18b8:	cmp	r5, #0
+    18bc:	mov	r4, r5
+    18c0:	bne	185c <_ctf_ipc_delete_range+0x70>
+    18c4:	ldr	r2, [sp]
+    18c8:	add	r2, r2, #4
+    18cc:	cmp	r2, #512	@ 0x200
+    18d0:	str	r2, [sp]
+    18d4:	bne	1844 <_ctf_ipc_delete_range+0x58>
+    18d8:	ldr	r0, [fp, #152]	@ 0x98
+    18dc:	ldr	r4, [r7, #164]	@ 0xa4
+    18e0:	bl	0 <_raw_spin_unlock_bh>
+    18e4:	ldr	r3, [sp, #4]
+    18e8:	cmp	r3, r4
+    18ec:	movne	r0, #0
+    18f0:	mvneq	r0, #29
+    18f4:	b	180c <_ctf_ipc_delete_range+0x20>
+    18f8:	.word	0x00000000
+
+000018fc <_ctf_ipc_delete>:
+    18fc:	cmp	r0, #0
+    1900:	cmpne	r1, #0
+    1904:	push	{r4, r5, r6, r7, r8, r9, sl, fp, lr}
+    1908:	mov	r4, r1
+    190c:	sub	sp, sp, #12
+    1910:	mov	r5, r0
+    1914:	mov	r6, r2
+    1918:	bne	1928 <_ctf_ipc_delete+0x2c>
+    191c:	mvn	r0, #1
+    1920:	add	sp, sp, #12
+    1924:	pop	{r4, r5, r6, r7, r8, r9, sl, fp, pc}
+    1928:	ldr	r3, [r0, #148]	@ 0x94
+    192c:	cmp	r3, #0
+    1930:	beq	191c <_ctf_ipc_delete+0x20>
+    1934:	cmp	r2, #0
+    1938:	add	r3, r1, #4
+    193c:	str	r3, [sp, #4]
+    1940:	ldrb	r9, [r1, #40]	@ 0x28
+    1944:	ldrh	r8, [r1, #36]	@ 0x24
+    1948:	ldrh	sl, [r1, #38]	@ 0x26
+    194c:	beq	1a98 <_ctf_ipc_delete+0x19c>
+    1950:	ldr	r2, [r1, #8]
+    1954:	ldr	r3, [r1, #4]
+    1958:	ldr	r0, [r1, #12]
+    195c:	ldr	r1, [r1, #16]
+    1960:	add	r3, r2, r3
+    1964:	ldr	r2, [r4, #20]
+    1968:	add	r3, r3, r0
+    196c:	ldr	r0, [r4, #24]
+    1970:	add	r3, r3, r1
+    1974:	ldr	r1, [r4, #28]
+    1978:	add	r3, r3, r2
+    197c:	ldr	r2, [r4, #32]
+    1980:	add	r3, r3, r0
+    1984:	add	r3, r3, r1
+    1988:	add	r3, r3, r2
+    198c:	add	r3, r3, r9
+    1990:	add	r3, r3, r8
+    1994:	add	r3, r3, sl
+    1998:	uxth	r7, r3
+    199c:	ldr	r0, [r5, #152]	@ 0x98
+    19a0:	add	r7, r7, r3, lsr #16
+    19a4:	bl	0 <_raw_spin_lock_bh>
+    19a8:	add	r7, r7, r7, lsr #8
+    19ac:	ldr	r2, [r5, #148]	@ 0x94
+    19b0:	and	r3, r7, #127	@ 0x7f
+    19b4:	ldr	r7, [r2, r3, lsl #2]
+    19b8:	cmp	r7, #0
+    19bc:	beq	1a24 <_ctf_ipc_delete+0x128>
+    19c0:	mov	fp, #0
+    19c4:	cmp	r6, #0
+    19c8:	bne	1a7c <_ctf_ipc_delete+0x180>
+    19cc:	ldr	r0, [r7, #20]
+    19d0:	ldr	r2, [r7, #4]
+    19d4:	ldr	ip, [r4, #20]
+    19d8:	ldr	r1, [r4, #4]
+    19dc:	eor	r0, ip, r0
+    19e0:	eor	r2, r1, r2
+    19e4:	orr	r0, r0, r2
+    19e8:	ldrh	ip, [r7, #36]	@ 0x24
+    19ec:	ldrb	r2, [r7, #40]	@ 0x28
+    19f0:	ldrh	r1, [r7, #38]	@ 0x26
+    19f4:	eor	ip, r8, ip
+    19f8:	eor	r2, r9, r2
+    19fc:	orr	r2, ip, r2
+    1a00:	eor	r1, sl, r1
+    1a04:	orr	r2, r2, r1
+    1a08:	orrs	r2, r0, r2
+    1a0c:	beq	1a34 <_ctf_ipc_delete+0x138>
+    1a10:	ldr	r2, [r7]
+    1a14:	mov	fp, r7
+    1a18:	cmp	r2, #0
+    1a1c:	mov	r7, r2
+    1a20:	bne	19c4 <_ctf_ipc_delete+0xc8>
+    1a24:	ldr	r0, [r5, #152]	@ 0x98
+    1a28:	bl	0 <_raw_spin_unlock_bh>
+    1a2c:	mvn	r0, #29
+    1a30:	b	1920 <_ctf_ipc_delete+0x24>
+    1a34:	cmp	fp, #0
+    1a38:	ldrne	r3, [r7]
+    1a3c:	ldreq	r2, [r5, #148]	@ 0x94
+    1a40:	ldreq	r1, [r7]
+    1a44:	strne	r3, [fp]
+    1a48:	streq	r1, [r2, r3, lsl #2]
+    1a4c:	ldr	r3, [pc, #96]	@ 1ab4 <_ctf_ipc_delete+0x1b8>
+    1a50:	ldr	r2, [r3, #164]	@ 0xa4
+    1a54:	sub	r2, r2, #1
+    1a58:	str	r2, [r3, #164]	@ 0xa4
+    1a5c:	ldr	r0, [r5, #152]	@ 0x98
+    1a60:	bl	0 <_raw_spin_unlock_bh>
+    1a64:	ldr	r0, [r5, #128]	@ 0x80
+    1a68:	mov	r1, r7
+    1a6c:	mov	r2, #124	@ 0x7c
+    1a70:	bl	0 <osl_mfree>
+    1a74:	mov	r0, #0
+    1a78:	b	1920 <_ctf_ipc_delete+0x24>
+    1a7c:	add	r0, r7, #4
+    1a80:	ldr	r1, [sp, #4]
+    1a84:	mov	r2, #32
+    1a88:	str	r3, [sp]
+    1a8c:	bl	0 <memcmp>
+    1a90:	ldr	r3, [sp]
+    1a94:	b	19e8 <_ctf_ipc_delete+0xec>
+    1a98:	ldr	r2, [r1, #20]
+    1a9c:	ldr	r3, [r1, #4]
+    1aa0:	add	r3, r2, r3
+    1aa4:	add	r3, r3, r9
+    1aa8:	add	r3, r3, r8
+    1aac:	add	r3, r3, sl
+    1ab0:	b	1998 <_ctf_ipc_delete+0x9c>
+    1ab4:	.word	0x00000000
+
+00001ab8 <_ctf_dump>:
+    1ab8:	ldr	r3, [pc, #784]	@ 1dd0 <_ctf_dump+0x318>
+    1abc:	push	{r4, r5, r6, r7, r8, r9, sl, fp, lr}
+    1ac0:	mov	r5, r1
+    1ac4:	sub	sp, sp, #60	@ 0x3c
+    1ac8:	ldr	r1, [pc, #772]	@ 1dd4 <_ctf_dump+0x31c>
+    1acc:	ldr	r2, [r3, #164]	@ 0xa4
+    1ad0:	mov	r3, #0
+    1ad4:	str	r0, [sp, #28]
+    1ad8:	mov	r0, r5
+    1adc:	str	r3, [sp, #24]
+    1ae0:	bl	0 <bcm_bprintf>
+    1ae4:	ldr	ip, [pc, #748]	@ 1dd8 <_ctf_dump+0x320>
+    1ae8:	mov	r0, r5
+    1aec:	ldr	r2, [pc, #744]	@ 1ddc <_ctf_dump+0x324>
+    1af0:	ldr	r1, [pc, #744]	@ 1de0 <_ctf_dump+0x328>
+    1af4:	str	ip, [sp]
+    1af8:	ldr	ip, [pc, #740]	@ 1de4 <_ctf_dump+0x32c>
+    1afc:	ldr	r3, [pc, #740]	@ 1de8 <_ctf_dump+0x330>
+    1b00:	ldr	r9, [pc, #740]	@ 1dec <_ctf_dump+0x334>
+    1b04:	str	ip, [sp, #4]
+    1b08:	ldr	ip, [pc, #736]	@ 1df0 <_ctf_dump+0x338>
+    1b0c:	ldr	fp, [pc, #736]	@ 1df4 <_ctf_dump+0x33c>
+    1b10:	str	ip, [sp, #8]
+    1b14:	ldr	ip, [pc, #732]	@ 1df8 <_ctf_dump+0x340>
+    1b18:	str	ip, [sp, #12]
+    1b1c:	bl	0 <bcm_bprintf>
+    1b20:	ldr	r2, [sp, #28]
+    1b24:	ldr	r0, [r2, #152]	@ 0x98
+    1b28:	bl	0 <_raw_spin_lock_bh>
+    1b2c:	ldr	r2, [sp, #28]
+    1b30:	ldr	r3, [r2, #148]	@ 0x94
+    1b34:	ldr	r2, [sp, #24]
+    1b38:	ldr	r4, [r3, r2]
+    1b3c:	cmp	r4, #0
+    1b40:	bne	1bc4 <_ctf_dump+0x10c>
+    1b44:	b	1c3c <_ctf_dump+0x184>
+    1b48:	ldr	r2, [r4, #4]
+    1b4c:	ldr	r3, [r4, #20]
+    1b50:	rev	r2, r2
+    1b54:	rev	r3, r3
+    1b58:	bl	0 <bcm_bprintf>
+    1b5c:	ldrh	r1, [r4, #38]	@ 0x26
+    1b60:	ldrh	r3, [r4, #36]	@ 0x24
+    1b64:	ldrb	r2, [r4, #40]	@ 0x28
+    1b68:	ldr	r0, [r4, #68]	@ 0x44
+    1b6c:	lsr	lr, r1, #8
+    1b70:	lsr	ip, r3, #8
+    1b74:	cmp	r2, #6
+    1b78:	movne	r2, r9
+    1b7c:	orr	lr, lr, r1, lsl #8
+    1b80:	moveq	r2, fp
+    1b84:	orr	r3, ip, r3, lsl #8
+    1b88:	tst	r0, #1024	@ 0x400
+    1b8c:	uxth	lr, lr
+    1b90:	ldrne	ip, [r4, #64]	@ 0x40
+    1b94:	uxth	r3, r3
+    1b98:	ldreq	ip, [r4, #60]	@ 0x3c
+    1b9c:	mov	r0, r5
+    1ba0:	str	lr, [sp]
+    1ba4:	ldr	r1, [pc, #592]	@ 1dfc <_ctf_dump+0x344>
+    1ba8:	str	ip, [sp, #4]
+    1bac:	ldr	ip, [r4, #104]	@ 0x68
+    1bb0:	str	ip, [sp, #8]
+    1bb4:	bl	0 <bcm_bprintf>
+    1bb8:	ldr	r4, [r4]
+    1bbc:	cmp	r4, #0
+    1bc0:	beq	1c3c <_ctf_dump+0x184>
+    1bc4:	ldr	r2, [r4, #8]
+    1bc8:	mov	r0, r5
+    1bcc:	ldr	lr, [r4, #12]
+    1bd0:	ldr	ip, [r4, #16]
+    1bd4:	rev	r3, r2
+    1bd8:	ldr	r1, [pc, #544]	@ 1e00 <_ctf_dump+0x348>
+    1bdc:	orr	r2, lr, r2
+    1be0:	rev	lr, lr
+    1be4:	orrs	r2, r2, ip
+    1be8:	rev	ip, ip
+    1bec:	beq	1b48 <_ctf_dump+0x90>
+    1bf0:	ldr	r2, [r4, #4]
+    1bf4:	mov	r0, r5
+    1bf8:	add	r7, r4, #20
+    1bfc:	ldm	r7, {r7, r8, sl}
+    1c00:	rev	r2, r2
+    1c04:	ldr	r6, [r4, #32]
+    1c08:	rev	r7, r7
+    1c0c:	rev	r8, r8
+    1c10:	ldr	r1, [pc, #492]	@ 1e04 <_ctf_dump+0x34c>
+    1c14:	rev	sl, sl
+    1c18:	str	lr, [sp]
+    1c1c:	rev	r6, r6
+    1c20:	str	ip, [sp, #4]
+    1c24:	str	r7, [sp, #8]
+    1c28:	str	r8, [sp, #12]
+    1c2c:	str	sl, [sp, #16]
+    1c30:	str	r6, [sp, #20]
+    1c34:	bl	0 <bcm_bprintf>
+    1c38:	b	1b5c <_ctf_dump+0xa4>
+    1c3c:	ldr	r3, [sp, #24]
+    1c40:	add	r3, r3, #4
+    1c44:	cmp	r3, #512	@ 0x200
+    1c48:	str	r3, [sp, #24]
+    1c4c:	bne	1b2c <_ctf_dump+0x74>
+    1c50:	ldr	r2, [sp, #28]
+    1c54:	mov	r7, #0
+    1c58:	add	r6, sp, #36	@ 0x24
+    1c5c:	ldr	r0, [r2, #152]	@ 0x98
+    1c60:	bl	0 <_raw_spin_unlock_bh>
+    1c64:	ldr	r1, [pc, #412]	@ 1e08 <_ctf_dump+0x350>
+    1c68:	mov	r0, r5
+    1c6c:	bl	0 <bcm_bprintf>
+    1c70:	ldr	r1, [pc, #404]	@ 1e0c <_ctf_dump+0x354>
+    1c74:	mov	r0, r5
+    1c78:	bl	0 <bcm_bprintf>
+    1c7c:	ldr	r3, [sp, #28]
+    1c80:	ldr	r0, [r3, #140]	@ 0x8c
+    1c84:	bl	0 <_raw_spin_lock_bh>
+    1c88:	ldr	r8, [sp, #28]
+    1c8c:	ldr	r3, [r8, #136]	@ 0x88
+    1c90:	ldr	r4, [r3, r7]
+    1c94:	cmp	r4, #0
+    1c98:	beq	1cd0 <_ctf_dump+0x218>
+    1c9c:	add	r0, r4, #4
+    1ca0:	mov	r1, r6
+    1ca4:	bl	0 <bcm_ether_ntoa>
+    1ca8:	ldr	ip, [r4, #24]
+    1cac:	mov	r2, r0
+    1cb0:	ldr	r3, [r4, #12]
+    1cb4:	mov	r0, r5
+    1cb8:	ldr	r1, [pc, #336]	@ 1e10 <_ctf_dump+0x358>
+    1cbc:	str	ip, [sp]
+    1cc0:	bl	0 <bcm_bprintf>
+    1cc4:	ldr	r4, [r4]
+    1cc8:	cmp	r4, #0
+    1ccc:	bne	1c9c <_ctf_dump+0x1e4>
+    1cd0:	add	r7, r7, #4
+    1cd4:	cmp	r7, #128	@ 0x80
+    1cd8:	bne	1c8c <_ctf_dump+0x1d4>
+    1cdc:	mov	r0, r5
+    1ce0:	ldr	r1, [pc, #300]	@ 1e14 <_ctf_dump+0x35c>
+    1ce4:	bl	0 <bcm_bprintf>
+    1ce8:	ldr	r6, [sp, #28]
+    1cec:	mov	r7, #0
+    1cf0:	add	r8, sp, #36	@ 0x24
+    1cf4:	mov	sl, r5
+    1cf8:	and	r3, r7, #3
+    1cfc:	mov	r5, #0
+    1d00:	lsl	r2, r3, #3
+    1d04:	add	r3, r2, r3, lsl #2
+    1d08:	lsl	r4, r3, #2
+    1d0c:	ldr	r3, [r6, #144]	@ 0x90
+    1d10:	add	r0, r3, r4
+    1d14:	ldrb	r2, [r3, r4]
+    1d18:	ldrb	ip, [r0, #1]
+    1d1c:	add	r4, r4, #12
+    1d20:	ldrb	r3, [r0, #2]
+    1d24:	ldrb	r1, [r0, #3]
+    1d28:	orr	ip, ip, r2
+    1d2c:	ldrb	r2, [r0, #4]
+    1d30:	orr	ip, ip, r3
+    1d34:	ldrb	r3, [r0, #5]
+    1d38:	orr	r1, ip, r1
+    1d3c:	orr	r2, r1, r2
+    1d40:	orrs	r3, r2, r3
+    1d44:	bne	1dac <_ctf_dump+0x2f4>
+    1d48:	add	r5, r5, #1
+    1d4c:	cmp	r5, #4
+    1d50:	bne	1d0c <_ctf_dump+0x254>
+    1d54:	add	r7, r7, #1
+    1d58:	cmp	r7, #4
+    1d5c:	bne	1cf8 <_ctf_dump+0x240>
+    1d60:	ldr	r2, [sp, #28]
+    1d64:	mov	r5, sl
+    1d68:	ldr	r0, [r2, #140]	@ 0x8c
+    1d6c:	bl	0 <_raw_spin_unlock_bh>
+    1d70:	ldr	r3, [sp, #28]
+    1d74:	ldr	r4, [r3, #128]	@ 0x80
+    1d78:	cmp	r4, #0
+    1d7c:	beq	1da4 <_ctf_dump+0x2ec>
+    1d80:	ldr	r1, [pc, #144]	@ 1e18 <_ctf_dump+0x360>
+    1d84:	mov	r0, sl
+    1d88:	bl	0 <bcm_bprintf>
+    1d8c:	mov	r0, r4
+    1d90:	mov	r1, sl
+    1d94:	bl	0 <osl_ctfpool_stats>
+    1d98:	mov	r0, sl
+    1d9c:	ldr	r1, [pc, #120]	@ 1e1c <_ctf_dump+0x364>
+    1da0:	bl	0 <bcm_bprintf>
+    1da4:	add	sp, sp, #60	@ 0x3c
+    1da8:	pop	{r4, r5, r6, r7, r8, r9, sl, fp, pc}
+    1dac:	mov	r1, r8
+    1db0:	bl	0 <bcm_ether_ntoa>
+    1db4:	mov	r3, r5
+    1db8:	str	r0, [sp]
+    1dbc:	ldr	r1, [pc, #92]	@ 1e20 <_ctf_dump+0x368>
+    1dc0:	mov	r0, sl
+    1dc4:	mov	r2, r7
+    1dc8:	bl	0 <bcm_bprintf>
+    1dcc:	b	1d48 <_ctf_dump+0x290>
+    1dd0:	.word	0x00000000
+    1dd4:	.word	0x000000c0
+    1dd8:	.word	0x00000118
+    1ddc:	.word	0x00000108
+    1de0:	.word	0x000000e4
+    1de4:	.word	0x00000120
+    1de8:	.word	0x00000110
+    1dec:	.word	0x000000bc
+    1df0:	.word	0x00000128
+    1df4:	.word	0x000000b8
+    1df8:	.word	0x00000130
+    1dfc:	.word	0x00000178
+    1e00:	.word	0x00000138
+    1e04:	.word	0x0000014c
+    1e08:	.word	0x0000019c
+    1e0c:	.word	0x000001ac
+    1e10:	.word	0x000001c8
+    1e14:	.word	0x000001d4
+    1e18:	.word	0x000001f4
+    1e1c:	.word	0x00000208
+    1e20:	.word	0x000001e8
+
+00001e24 <_ctf_dev_register>:
+    1e24:	cmp	r0, #0
+    1e28:	cmpne	r1, #0
+    1e2c:	push	{r3, r4, r5, r6, r7, lr}
+    1e30:	mov	r4, r1
+    1e34:	mov	r5, r0
+    1e38:	mov	r7, r2
+    1e3c:	bne	1e48 <_ctf_dev_register+0x24>
+    1e40:	mvn	r0, #1
+    1e44:	pop	{r3, r4, r5, r6, r7, pc}
+    1e48:	ldr	r3, [r0, #156]	@ 0x9c
+    1e4c:	ldr	r0, [r3, #4]
+    1e50:	bl	0 <_raw_spin_lock_bh>
+    1e54:	ldr	r1, [r5, #156]	@ 0x9c
+    1e58:	cmp	r1, #0
+    1e5c:	beq	1e98 <_ctf_dev_register+0x74>
+    1e60:	ldr	r3, [r1]
+    1e64:	cmp	r3, #0
+    1e68:	bne	1e7c <_ctf_dev_register+0x58>
+    1e6c:	b	1e98 <_ctf_dev_register+0x74>
+    1e70:	ldr	r3, [r3]
+    1e74:	cmp	r3, #0
+    1e78:	beq	1e98 <_ctf_dev_register+0x74>
+    1e7c:	ldr	r2, [r3, #8]
+    1e80:	cmp	r4, r2
+    1e84:	bne	1e70 <_ctf_dev_register+0x4c>
+    1e88:	ldr	r0, [r1, #4]
+    1e8c:	bl	0 <_raw_spin_unlock_bh>
+    1e90:	mvn	r0, #0
+    1e94:	pop	{r3, r4, r5, r6, r7, pc}
+    1e98:	ldr	r0, [r5, #128]	@ 0x80
+    1e9c:	mov	r1, #272	@ 0x110
+    1ea0:	bl	0 <osl_malloc>
+    1ea4:	subs	r6, r0, #0
+    1ea8:	beq	1ee8 <_ctf_dev_register+0xc4>
+    1eac:	mov	r1, #272	@ 0x110
+    1eb0:	bl	0 <__memzero>
+    1eb4:	str	r5, [r6, #4]
+    1eb8:	str	r4, [r6, #8]
+    1ebc:	strb	r7, [r6, #13]
+    1ec0:	ldr	r3, [r5, #156]	@ 0x9c
+    1ec4:	ldr	r3, [r3]
+    1ec8:	str	r3, [r6]
+    1ecc:	ldr	r3, [r5, #156]	@ 0x9c
+    1ed0:	str	r6, [r3]
+    1ed4:	ldr	r3, [r5, #156]	@ 0x9c
+    1ed8:	ldr	r0, [r3, #4]
+    1edc:	bl	0 <_raw_spin_unlock_bh>
+    1ee0:	mov	r0, #0
+    1ee4:	pop	{r3, r4, r5, r6, r7, pc}
+    1ee8:	ldr	r3, [r5, #156]	@ 0x9c
+    1eec:	ldr	r0, [r3, #4]
+    1ef0:	bl	0 <_raw_spin_unlock_bh>
+    1ef4:	mvn	r0, #0
+    1ef8:	pop	{r3, r4, r5, r6, r7, pc}
+
+00001efc <_ctf_ipc_add>:
+    1efc:	cmp	r0, #0
+    1f00:	cmpne	r1, #0
+    1f04:	push	{r4, r5, r6, r7, r8, r9, sl, lr}
+    1f08:	mov	r4, r1
+    1f0c:	sub	sp, sp, #16
+    1f10:	mov	r5, r0
+    1f14:	mov	r6, r2
+    1f18:	bne	1f28 <_ctf_ipc_add+0x2c>
+    1f1c:	mvn	r0, #1
+    1f20:	add	sp, sp, #16
+    1f24:	pop	{r4, r5, r6, r7, r8, r9, sl, pc}
+    1f28:	ldr	r3, [r0, #148]	@ 0x94
+    1f2c:	cmp	r3, #0
+    1f30:	beq	1f1c <_ctf_ipc_add+0x20>
+    1f34:	ldrb	r7, [r1, #40]	@ 0x28
+    1f38:	ldrh	r8, [r1, #36]	@ 0x24
+    1f3c:	ldrh	r9, [r1, #38]	@ 0x26
+    1f40:	ldr	r0, [r0, #152]	@ 0x98
+    1f44:	bl	0 <_raw_spin_lock_bh>
+    1f48:	mov	r0, r5
+    1f4c:	mov	r1, r6
+    1f50:	add	r2, r4, #4
+    1f54:	add	r3, r4, #20
+    1f58:	stm	sp, {r7, r8, r9}
+    1f5c:	bl	140 <_ctf_ipc_detach_brcp+0x60>
+    1f60:	cmp	r0, #0
+    1f64:	bne	2040 <_ctf_ipc_add+0x144>
+    1f68:	ldr	r0, [r5, #128]	@ 0x80
+    1f6c:	mov	r1, #124	@ 0x7c
+    1f70:	bl	0 <osl_malloc>
+    1f74:	subs	sl, r0, #0
+    1f78:	beq	2040 <_ctf_ipc_add+0x144>
+    1f7c:	mov	r1, r4
+    1f80:	mov	r2, #124	@ 0x7c
+    1f84:	bl	0 <memcpy>
+    1f88:	ldrb	r3, [sl, #94]	@ 0x5e
+    1f8c:	cmp	r6, #0
+    1f90:	bic	r3, r3, #3
+    1f94:	strb	r3, [sl, #94]	@ 0x5e
+    1f98:	beq	2024 <_ctf_ipc_add+0x128>
+    1f9c:	ldr	r3, [r4, #4]
+    1fa0:	add	r0, r4, #8
+    1fa4:	ldm	r0, {r0, r1, r2}
+    1fa8:	add	r0, r0, r3
+    1fac:	ldr	r3, [r4, #20]
+    1fb0:	add	r0, r0, r1
+    1fb4:	ldr	r1, [r4, #24]
+    1fb8:	add	r0, r0, r2
+    1fbc:	ldr	r2, [r4, #28]
+    1fc0:	add	r0, r0, r3
+    1fc4:	ldr	r3, [r4, #32]
+    1fc8:	add	r1, r0, r1
+    1fcc:	add	r2, r1, r2
+    1fd0:	add	r3, r2, r3
+    1fd4:	add	r7, r3, r7
+    1fd8:	add	r8, r7, r8
+    1fdc:	add	r9, r8, r9
+    1fe0:	uxth	r2, r9
+    1fe4:	ldr	r1, [r5, #148]	@ 0x94
+    1fe8:	ldr	r3, [pc, #96]	@ 2050 <_ctf_ipc_add+0x154>
+    1fec:	add	r2, r2, r9, lsr #16
+    1ff0:	add	r2, r2, r2, lsr #8
+    1ff4:	and	r2, r2, #127	@ 0x7f
+    1ff8:	ldr	r1, [r1, r2, lsl #2]
+    1ffc:	str	r1, [sl]
+    2000:	ldr	r1, [r5, #148]	@ 0x94
+    2004:	str	sl, [r1, r2, lsl #2]
+    2008:	ldr	r2, [r3, #164]	@ 0xa4
+    200c:	add	r2, r2, #1
+    2010:	str	r2, [r3, #164]	@ 0xa4
+    2014:	ldr	r0, [r5, #152]	@ 0x98
+    2018:	bl	0 <_raw_spin_unlock_bh>
+    201c:	mov	r0, #0
+    2020:	b	1f20 <_ctf_ipc_add+0x24>
+    2024:	ldr	r2, [r4, #20]
+    2028:	ldr	r3, [r4, #4]
+    202c:	add	r3, r2, r3
+    2030:	add	r7, r3, r7
+    2034:	add	r8, r7, r8
+    2038:	add	r9, r8, r9
+    203c:	b	1fe0 <_ctf_ipc_add+0xe4>
+    2040:	ldr	r0, [r5, #152]	@ 0x98
+    2044:	bl	0 <_raw_spin_unlock_bh>
+    2048:	mvn	r0, #0
+    204c:	b	1f20 <_ctf_ipc_add+0x24>
+    2050:	.word	0x00000000
+
+00002054 <_ctf_brc_add>:
+    2054:	cmp	r0, #0
+    2058:	cmpne	r1, #0
+    205c:	push	{r3, r4, r5, r6, r7, lr}
+    2060:	mov	r5, r0
+    2064:	mov	r4, r1
+    2068:	mvneq	r0, #1
+    206c:	popeq	{r3, r4, r5, r6, r7, pc}
+    2070:	ldr	r3, [r5, #136]	@ 0x88
+    2074:	cmp	r3, #0
+    2078:	beq	2118 <_ctf_brc_add+0xc4>
+    207c:	ldr	r0, [r5, #140]	@ 0x8c
+    2080:	bl	0 <_raw_spin_lock_bh>
+    2084:	mov	r0, r5
+    2088:	add	r1, r4, #4
+    208c:	bl	0 <_ctf_ipc_count_get>
+    2090:	subs	r6, r0, #0
+    2094:	bne	2120 <_ctf_brc_add+0xcc>
+    2098:	ldr	r0, [r5, #128]	@ 0x80
+    209c:	mov	r1, #40	@ 0x28
+    20a0:	bl	0 <osl_malloc>
+    20a4:	subs	r7, r0, #0
+    20a8:	beq	2120 <_ctf_brc_add+0xcc>
+    20ac:	mov	lr, r4
+    20b0:	mov	ip, r7
+    20b4:	ldm	lr!, {r0, r1, r2, r3}
+    20b8:	stmia	ip!, {r0, r1, r2, r3}
+    20bc:	ldm	lr!, {r0, r1, r2, r3}
+    20c0:	stmia	ip!, {r0, r1, r2, r3}
+    20c4:	ldm	lr, {r0, r1}
+    20c8:	stm	ip, {r0, r1}
+    20cc:	ldrb	ip, [r4, #8]
+    20d0:	ldrb	r3, [r4, #9]
+    20d4:	ldrb	r2, [r4, #7]
+    20d8:	ldrb	r0, [r4, #6]
+    20dc:	ldrb	r1, [r4, #5]
+    20e0:	add	r3, ip, r3
+    20e4:	add	r3, r3, r2
+    20e8:	ldr	r2, [r5, #136]	@ 0x88
+    20ec:	add	r3, r3, r0
+    20f0:	add	r3, r3, r1
+    20f4:	and	r3, r3, #31
+    20f8:	ldr	r2, [r2, r3, lsl #2]
+    20fc:	str	r2, [r7]
+    2100:	ldr	r2, [r5, #136]	@ 0x88
+    2104:	str	r7, [r2, r3, lsl #2]
+    2108:	ldr	r0, [r5, #140]	@ 0x8c
+    210c:	bl	0 <_raw_spin_unlock_bh>
+    2110:	mov	r0, r6
+    2114:	pop	{r3, r4, r5, r6, r7, pc}
+    2118:	mvn	r0, #1
+    211c:	pop	{r3, r4, r5, r6, r7, pc}
+    2120:	ldr	r0, [r5, #140]	@ 0x8c
+    2124:	bl	0 <_raw_spin_unlock_bh>
+    2128:	mvn	r0, #0
+    212c:	pop	{r3, r4, r5, r6, r7, pc}
+
+00002130 <_ctf_attach>:
+    2130:	push	{r4, r5, r6, r7, r8, r9, sl, lr}
+    2134:	mov	sl, r3
+    2138:	ldr	r4, [pc, #924]	@ 24dc <_ctf_attach+0x3ac>
+    213c:	mov	r6, r0
+    2140:	mov	r7, r1
+    2144:	mov	r5, r2
+    2148:	ldr	r3, [r4, #136]	@ 0x88
+    214c:	cmp	r3, #0
+    2150:	bne	2184 <_ctf_attach+0x54>
+    2154:	ldr	r3, [r4, #148]	@ 0x94
+    2158:	cmp	r3, #0
+    215c:	bne	2184 <_ctf_attach+0x54>
+    2160:	ldr	r3, [r4, #156]	@ 0x9c
+    2164:	cmp	r3, #0
+    2168:	bne	2184 <_ctf_attach+0x54>
+    216c:	ldr	r3, [r4, #160]	@ 0xa0
+    2170:	cmp	r3, #0
+    2174:	bne	2184 <_ctf_attach+0x54>
+    2178:	ldr	r3, [r4, #144]	@ 0x90
+    217c:	cmp	r3, #0
+    2180:	beq	2320 <_ctf_attach+0x1f0>
+    2184:	mov	r0, r6
+    2188:	mov	r1, #188	@ 0xbc
+    218c:	bl	0 <osl_malloc>
+    2190:	subs	r8, r0, #0
+    2194:	beq	2318 <_ctf_attach+0x1e8>
+    2198:	mov	r1, #188	@ 0xbc
+    219c:	bl	0 <__memzero>
+    21a0:	ldr	r3, [pc, #824]	@ 24e0 <_ctf_attach+0x3b0>
+    21a4:	cmp	r5, #0
+    21a8:	mov	r1, r7
+    21ac:	mov	r2, #8
+    21b0:	str	r6, [r8, #128]	@ 0x80
+    21b4:	add	r0, r8, #172	@ 0xac
+    21b8:	moveq	r5, r3
+    21bc:	str	r5, [r8, #168]	@ 0xa8
+    21c0:	bl	0 <strncpy>
+    21c4:	mov	r0, #0
+    21c8:	ldr	r1, [pc, #788]	@ 24e4 <_ctf_attach+0x3b4>
+    21cc:	strb	r0, [r8, #179]	@ 0xb3
+    21d0:	ldr	r2, [r4, #136]	@ 0x88
+    21d4:	ldr	r3, [r4, #132]	@ 0x84
+    21d8:	str	r2, [r8, #136]	@ 0x88
+    21dc:	ldr	r2, [r4, #148]	@ 0x94
+    21e0:	ldr	ip, [r4, #144]	@ 0x90
+    21e4:	str	r2, [r8, #148]	@ 0x94
+    21e8:	ldr	r2, [r4, #160]	@ 0xa0
+    21ec:	str	r3, [r8, #132]	@ 0x84
+    21f0:	ldr	r3, [r4, #140]	@ 0x8c
+    21f4:	str	ip, [r8, #144]	@ 0x90
+    21f8:	str	r2, [r8, #160]	@ 0xa0
+    21fc:	str	r3, [r8, #140]	@ 0x8c
+    2200:	ldr	r3, [r4, #152]	@ 0x98
+    2204:	str	r3, [r8, #152]	@ 0x98
+    2208:	ldr	r3, [r4, #156]	@ 0x9c
+    220c:	str	r3, [r8, #156]	@ 0x9c
+    2210:	bl	0 <getintvar>
+    2214:	ldr	r2, [pc, #716]	@ 24e8 <_ctf_attach+0x3b8>
+    2218:	rsbs	r0, r0, #1
+    221c:	movcc	r0, #0
+    2220:	strb	r0, [r8]
+    2224:	mov	r0, r8
+    2228:	ldr	r3, [r4, #188]	@ 0xbc
+    222c:	str	r2, [r8, #4]
+    2230:	ldr	r2, [pc, #692]	@ 24ec <_ctf_attach+0x3bc>
+    2234:	str	sl, [r8, #88]	@ 0x58
+    2238:	str	r3, [r8, #180]	@ 0xb4
+    223c:	str	r2, [r8, #8]
+    2240:	ldr	r2, [pc, #680]	@ 24f0 <_ctf_attach+0x3c0>
+    2244:	str	r2, [r8, #12]
+    2248:	ldr	r2, [pc, #676]	@ 24f4 <_ctf_attach+0x3c4>
+    224c:	str	r2, [r8, #16]
+    2250:	ldr	r2, [pc, #672]	@ 24f8 <_ctf_attach+0x3c8>
+    2254:	str	r2, [r8, #20]
+    2258:	ldr	r2, [pc, #668]	@ 24fc <_ctf_attach+0x3cc>
+    225c:	str	r2, [r8, #24]
+    2260:	ldr	r2, [pc, #664]	@ 2500 <_ctf_attach+0x3d0>
+    2264:	str	r2, [r8, #28]
+    2268:	ldr	r2, [pc, #660]	@ 2504 <_ctf_attach+0x3d4>
+    226c:	str	r2, [r8, #32]
+    2270:	ldr	r2, [pc, #656]	@ 2508 <_ctf_attach+0x3d8>
+    2274:	str	r2, [r8, #36]	@ 0x24
+    2278:	ldr	r2, [pc, #652]	@ 250c <_ctf_attach+0x3dc>
+    227c:	str	r2, [r8, #40]	@ 0x28
+    2280:	ldr	r2, [pc, #648]	@ 2510 <_ctf_attach+0x3e0>
+    2284:	str	r2, [r8, #44]	@ 0x2c
+    2288:	ldr	r2, [pc, #644]	@ 2514 <_ctf_attach+0x3e4>
+    228c:	str	r2, [r8, #48]	@ 0x30
+    2290:	ldr	r2, [pc, #640]	@ 2518 <_ctf_attach+0x3e8>
+    2294:	str	r2, [r8, #52]	@ 0x34
+    2298:	ldr	r2, [pc, #636]	@ 251c <_ctf_attach+0x3ec>
+    229c:	str	r2, [r8, #56]	@ 0x38
+    22a0:	ldr	r2, [pc, #632]	@ 2520 <_ctf_attach+0x3f0>
+    22a4:	str	r2, [r8, #60]	@ 0x3c
+    22a8:	ldr	r2, [pc, #628]	@ 2524 <_ctf_attach+0x3f4>
+    22ac:	str	r2, [r8, #64]	@ 0x40
+    22b0:	ldr	r2, [pc, #624]	@ 2528 <_ctf_attach+0x3f8>
+    22b4:	str	r2, [r8, #68]	@ 0x44
+    22b8:	ldr	r2, [pc, #620]	@ 252c <_ctf_attach+0x3fc>
+    22bc:	str	r2, [r8, #72]	@ 0x48
+    22c0:	ldr	r2, [pc, #616]	@ 2530 <_ctf_attach+0x400>
+    22c4:	str	r2, [r8, #76]	@ 0x4c
+    22c8:	ldr	r2, [pc, #612]	@ 2534 <_ctf_attach+0x404>
+    22cc:	str	r2, [r8, #80]	@ 0x50
+    22d0:	ldr	r2, [pc, #608]	@ 2538 <_ctf_attach+0x408>
+    22d4:	str	r2, [r8, #84]	@ 0x54
+    22d8:	ldr	r2, [sp, #32]
+    22dc:	str	r2, [r8, #92]	@ 0x5c
+    22e0:	ldr	r2, [pc, #596]	@ 253c <_ctf_attach+0x40c>
+    22e4:	str	r2, [r8, #96]	@ 0x60
+    22e8:	ldr	r2, [pc, #592]	@ 2540 <_ctf_attach+0x410>
+    22ec:	str	r2, [r8, #100]	@ 0x64
+    22f0:	ldr	r2, [pc, #588]	@ 2544 <_ctf_attach+0x414>
+    22f4:	str	r2, [r8, #104]	@ 0x68
+    22f8:	ldr	r2, [pc, #584]	@ 2548 <_ctf_attach+0x418>
+    22fc:	str	r2, [r8, #108]	@ 0x6c
+    2300:	ldr	r2, [pc, #580]	@ 254c <_ctf_attach+0x41c>
+    2304:	str	r2, [r8, #112]	@ 0x70
+    2308:	ldr	r2, [pc, #576]	@ 2550 <_ctf_attach+0x420>
+    230c:	str	r2, [r8, #116]	@ 0x74
+    2310:	str	r8, [r4, #188]	@ 0xbc
+    2314:	pop	{r4, r5, r6, r7, r8, r9, sl, pc}
+    2318:	mov	r0, r8
+    231c:	pop	{r4, r5, r6, r7, r8, r9, sl, pc}
+    2320:	ldr	r0, [r4, #128]	@ 0x80
+    2324:	mov	r1, #128	@ 0x80
+    2328:	bl	0 <osl_malloc>
+    232c:	cmp	r0, #0
+    2330:	mov	r8, r0
+    2334:	str	r0, [r4, #136]	@ 0x88
+    2338:	beq	2474 <_ctf_attach+0x344>
+    233c:	mov	r1, #128	@ 0x80
+    2340:	bl	0 <__memzero>
+    2344:	ldr	r0, [r4, #128]	@ 0x80
+    2348:	mov	r1, #512	@ 0x200
+    234c:	bl	0 <osl_malloc>
+    2350:	cmp	r0, #0
+    2354:	mov	r8, r0
+    2358:	str	r0, [r4, #148]	@ 0x94
+    235c:	beq	24c4 <_ctf_attach+0x394>
+    2360:	mov	r1, #512	@ 0x200
+    2364:	bl	0 <__memzero>
+    2368:	ldr	r0, [r4, #128]	@ 0x80
+    236c:	mov	r1, #8
+    2370:	bl	0 <osl_malloc>
+    2374:	cmp	r0, #0
+    2378:	mov	r8, r0
+    237c:	str	r0, [r4, #156]	@ 0x9c
+    2380:	beq	2454 <_ctf_attach+0x324>
+    2384:	mov	r1, #8
+    2388:	bl	0 <__memzero>
+    238c:	ldr	r0, [r4, #128]	@ 0x80
+    2390:	mov	r1, #256	@ 0x100
+    2394:	bl	0 <osl_malloc>
+    2398:	cmp	r0, #0
+    239c:	mov	r8, r0
+    23a0:	str	r0, [r4, #160]	@ 0xa0
+    23a4:	beq	2444 <_ctf_attach+0x314>
+    23a8:	mov	r1, #256	@ 0x100
+    23ac:	bl	0 <__memzero>
+    23b0:	ldr	r0, [r4, #128]	@ 0x80
+    23b4:	mov	r1, #192	@ 0xc0
+    23b8:	bl	0 <osl_malloc>
+    23bc:	cmp	r0, #0
+    23c0:	str	r0, [r4, #144]	@ 0x90
+    23c4:	beq	247c <_ctf_attach+0x34c>
+    23c8:	mov	r1, #192	@ 0xc0
+    23cc:	mov	r8, #0
+    23d0:	bl	0 <__memzero>
+    23d4:	mov	r1, #8
+    23d8:	ldr	r0, [r4, #128]	@ 0x80
+    23dc:	bl	0 <osl_malloc>
+    23e0:	mov	r1, #8
+    23e4:	str	r0, [r4, #132]	@ 0x84
+    23e8:	str	r8, [r0]
+    23ec:	str	r8, [r0, #4]
+    23f0:	ldr	r0, [r4, #128]	@ 0x80
+    23f4:	bl	0 <osl_malloc>
+    23f8:	mov	r1, #8
+    23fc:	str	r0, [r4, #140]	@ 0x8c
+    2400:	str	r8, [r0]
+    2404:	str	r8, [r0, #4]
+    2408:	ldr	r0, [r4, #128]	@ 0x80
+    240c:	bl	0 <osl_malloc>
+    2410:	str	r0, [r4, #152]	@ 0x98
+    2414:	mov	r1, #8
+    2418:	str	r8, [r0]
+    241c:	str	r8, [r0, #4]
+    2420:	ldr	r9, [r4, #156]	@ 0x9c
+    2424:	ldr	r0, [r4, #128]	@ 0x80
+    2428:	bl	0 <osl_malloc>
+    242c:	str	r0, [r9, #4]
+    2430:	ldr	r3, [r4, #156]	@ 0x9c
+    2434:	ldr	r3, [r3, #4]
+    2438:	str	r8, [r3]
+    243c:	str	r8, [r3, #4]
+    2440:	b	2184 <_ctf_attach+0x54>
+    2444:	ldr	r0, [r4, #128]	@ 0x80
+    2448:	mov	r2, #8
+    244c:	ldr	r1, [r4, #156]	@ 0x9c
+    2450:	bl	0 <osl_mfree>
+    2454:	ldr	r0, [r4, #128]	@ 0x80
+    2458:	mov	r2, #128	@ 0x80
+    245c:	ldr	r1, [r4, #136]	@ 0x88
+    2460:	bl	0 <osl_mfree>
+    2464:	ldr	r0, [r4, #128]	@ 0x80
+    2468:	mov	r2, #512	@ 0x200
+    246c:	ldr	r1, [r4, #148]	@ 0x94
+    2470:	bl	0 <osl_mfree>
+    2474:	mov	r0, r8
+    2478:	pop	{r4, r5, r6, r7, r8, r9, sl, pc}
+    247c:	ldr	r0, [r4, #128]	@ 0x80
+    2480:	mov	r2, #256	@ 0x100
+    2484:	ldr	r1, [r4, #160]	@ 0xa0
+    2488:	bl	0 <osl_mfree>
+    248c:	ldr	r0, [r4, #128]	@ 0x80
+    2490:	mov	r2, #8
+    2494:	ldr	r1, [r4, #156]	@ 0x9c
+    2498:	bl	0 <osl_mfree>
+    249c:	ldr	r0, [r4, #128]	@ 0x80
+    24a0:	mov	r2, #128	@ 0x80
+    24a4:	ldr	r1, [r4, #136]	@ 0x88
+    24a8:	bl	0 <osl_mfree>
+    24ac:	ldr	r0, [r4, #128]	@ 0x80
+    24b0:	mov	r2, #512	@ 0x200
+    24b4:	ldr	r1, [r4, #148]	@ 0x94
+    24b8:	bl	0 <osl_mfree>
+    24bc:	mov	r0, #0
+    24c0:	pop	{r4, r5, r6, r7, r8, r9, sl, pc}
+    24c4:	ldr	r0, [r4, #128]	@ 0x80
+    24c8:	mov	r2, #128	@ 0x80
+    24cc:	ldr	r1, [r4, #136]	@ 0x88
+    24d0:	bl	0 <osl_mfree>
+    24d4:	mov	r0, r8
+    24d8:	pop	{r4, r5, r6, r7, r8, r9, sl, pc}
+    24dc:	.word	0x00000000
+    24e0:	.word	0x000000c0
+    24e4:	.word	0x0000020c
+	...
+
+00002554 <ctf_kattach>:
+    2554:	push	{r3, r4, r5, r6, r7, lr}
+    2558:	mov	r6, r0
+    255c:	ldr	r4, [pc, #332]	@ 26b0 <ctf_kattach+0x15c>
+    2560:	mov	r7, r1
+    2564:	ldrb	r5, [r4, #196]	@ 0xc4
+    2568:	cmp	r5, #0
+    256c:	bne	26a8 <ctf_kattach+0x154>
+    2570:	mov	r0, r4
+    2574:	mov	r1, #188	@ 0xbc
+    2578:	bl	0 <__memzero>
+    257c:	add	r3, r4, #192	@ 0xc0
+    2580:	mov	r1, r7
+    2584:	mov	r2, #8
+    2588:	add	r0, r4, #172	@ 0xac
+    258c:	str	r3, [r4, #168]	@ 0xa8
+    2590:	str	r5, [r4, #136]	@ 0x88
+    2594:	str	r5, [r4, #148]	@ 0x94
+    2598:	str	r5, [r4, #160]	@ 0xa0
+    259c:	str	r5, [r4, #144]	@ 0x90
+    25a0:	str	r5, [r4, #164]	@ 0xa4
+    25a4:	str	r6, [r4, #128]	@ 0x80
+    25a8:	bl	0 <strncpy>
+    25ac:	mov	r0, r5
+    25b0:	ldr	r1, [pc, #252]	@ 26b4 <ctf_kattach+0x160>
+    25b4:	strb	r5, [r4, #179]	@ 0xb3
+    25b8:	bl	0 <getintvar>
+    25bc:	ldr	r3, [pc, #244]	@ 26b8 <ctf_kattach+0x164>
+    25c0:	rsbs	r0, r0, #1
+    25c4:	movcc	r0, #0
+    25c8:	strb	r0, [r4]
+    25cc:	str	r3, [r4, #4]
+    25d0:	ldr	r3, [pc, #228]	@ 26bc <ctf_kattach+0x168>
+    25d4:	str	r3, [r4, #8]
+    25d8:	ldr	r3, [pc, #224]	@ 26c0 <ctf_kattach+0x16c>
+    25dc:	str	r3, [r4, #12]
+    25e0:	ldr	r3, [pc, #220]	@ 26c4 <ctf_kattach+0x170>
+    25e4:	str	r3, [r4, #16]
+    25e8:	ldr	r3, [pc, #216]	@ 26c8 <ctf_kattach+0x174>
+    25ec:	str	r3, [r4, #20]
+    25f0:	ldr	r3, [pc, #212]	@ 26cc <ctf_kattach+0x178>
+    25f4:	str	r3, [r4, #24]
+    25f8:	ldr	r3, [pc, #208]	@ 26d0 <ctf_kattach+0x17c>
+    25fc:	str	r3, [r4, #28]
+    2600:	ldr	r3, [pc, #204]	@ 26d4 <ctf_kattach+0x180>
+    2604:	str	r3, [r4, #32]
+    2608:	ldr	r3, [pc, #200]	@ 26d8 <ctf_kattach+0x184>
+    260c:	str	r3, [r4, #36]	@ 0x24
+    2610:	ldr	r3, [pc, #196]	@ 26dc <ctf_kattach+0x188>
+    2614:	str	r3, [r4, #40]	@ 0x28
+    2618:	ldr	r3, [pc, #192]	@ 26e0 <ctf_kattach+0x18c>
+    261c:	str	r3, [r4, #44]	@ 0x2c
+    2620:	ldr	r3, [pc, #188]	@ 26e4 <ctf_kattach+0x190>
+    2624:	str	r3, [r4, #48]	@ 0x30
+    2628:	ldr	r3, [pc, #184]	@ 26e8 <ctf_kattach+0x194>
+    262c:	str	r3, [r4, #52]	@ 0x34
+    2630:	ldr	r3, [pc, #180]	@ 26ec <ctf_kattach+0x198>
+    2634:	str	r3, [r4, #56]	@ 0x38
+    2638:	ldr	r3, [pc, #176]	@ 26f0 <ctf_kattach+0x19c>
+    263c:	str	r3, [r4, #60]	@ 0x3c
+    2640:	ldr	r3, [pc, #172]	@ 26f4 <ctf_kattach+0x1a0>
+    2644:	str	r3, [r4, #64]	@ 0x40
+    2648:	ldr	r3, [pc, #168]	@ 26f8 <ctf_kattach+0x1a4>
+    264c:	str	r3, [r4, #68]	@ 0x44
+    2650:	ldr	r3, [pc, #164]	@ 26fc <ctf_kattach+0x1a8>
+    2654:	str	r3, [r4, #72]	@ 0x48
+    2658:	ldr	r3, [pc, #160]	@ 2700 <ctf_kattach+0x1ac>
+    265c:	str	r3, [r4, #76]	@ 0x4c
+    2660:	ldr	r3, [pc, #156]	@ 2704 <ctf_kattach+0x1b0>
+    2664:	str	r3, [r4, #80]	@ 0x50
+    2668:	ldr	r3, [pc, #152]	@ 2708 <ctf_kattach+0x1b4>
+    266c:	str	r3, [r4, #84]	@ 0x54
+    2670:	ldr	r3, [pc, #148]	@ 270c <ctf_kattach+0x1b8>
+    2674:	str	r3, [r4, #96]	@ 0x60
+    2678:	ldr	r3, [pc, #144]	@ 2710 <ctf_kattach+0x1bc>
+    267c:	str	r3, [r4, #100]	@ 0x64
+    2680:	ldr	r3, [pc, #140]	@ 2714 <ctf_kattach+0x1c0>
+    2684:	str	r3, [r4, #104]	@ 0x68
+    2688:	ldr	r3, [pc, #136]	@ 2718 <ctf_kattach+0x1c4>
+    268c:	str	r3, [r4, #108]	@ 0x6c
+    2690:	ldr	r3, [pc, #132]	@ 271c <ctf_kattach+0x1c8>
+    2694:	str	r3, [r4, #112]	@ 0x70
+    2698:	ldr	r3, [pc, #128]	@ 2720 <ctf_kattach+0x1cc>
+    269c:	str	r3, [r4, #116]	@ 0x74
+    26a0:	mov	r3, #1
+    26a4:	strb	r3, [r4, #196]	@ 0xc4
+    26a8:	ldr	r0, [pc]	@ 26b0 <ctf_kattach+0x15c>
+    26ac:	pop	{r3, r4, r5, r6, r7, pc}
+    26b0:	.word	0x00000000
+    26b4:	.word	0x0000020c
+	...
+
+00002724 <ctf_kdetach>:
+    2724:	push	{r4, r5, r6, r7, r8, lr}
+    2728:	subs	r6, r0, #0
+    272c:	beq	2784 <ctf_kdetach+0x60>
+    2730:	ldr	r3, [r6, #156]	@ 0x9c
+    2734:	ldr	r0, [r3, #4]
+    2738:	bl	0 <_raw_spin_lock_bh>
+    273c:	ldr	r3, [r6, #156]	@ 0x9c
+    2740:	ldr	r4, [r3]
+    2744:	cmp	r4, #0
+    2748:	beq	2770 <ctf_kdetach+0x4c>
+    274c:	ldr	r3, [r4, #4]
+    2750:	mov	r1, r4
+    2754:	ldr	r4, [r4]
+    2758:	mov	r2, #272	@ 0x110
+    275c:	ldr	r0, [r3, #128]	@ 0x80
+    2760:	bl	0 <osl_mfree>
+    2764:	cmp	r4, #0
+    2768:	bne	274c <ctf_kdetach+0x28>
+    276c:	ldr	r3, [r6, #156]	@ 0x9c
+    2770:	mov	r2, #0
+    2774:	str	r2, [r3]
+    2778:	ldr	r3, [r6, #156]	@ 0x9c
+    277c:	ldr	r0, [r3, #4]
+    2780:	bl	0 <_raw_spin_unlock_bh>
+    2784:	ldr	r5, [pc, #456]	@ 2954 <ctf_kdetach+0x230>
+    2788:	ldr	r4, [r5, #188]	@ 0xbc
+    278c:	cmp	r4, #0
+    2790:	beq	27cc <ctf_kdetach+0xa8>
+    2794:	ldr	r3, [r4, #88]	@ 0x58
+    2798:	mov	r0, r4
+    279c:	ldr	r7, [r4, #180]	@ 0xb4
+    27a0:	cmp	r3, #0
+    27a4:	beq	27b0 <ctf_kdetach+0x8c>
+    27a8:	ldr	r1, [r4, #92]	@ 0x5c
+    27ac:	blx	r3
+    27b0:	ldr	r0, [r4, #128]	@ 0x80
+    27b4:	mov	r1, r4
+    27b8:	mov	r2, #188	@ 0xbc
+    27bc:	mov	r4, r7
+    27c0:	bl	0 <osl_mfree>
+    27c4:	cmp	r7, #0
+    27c8:	bne	2794 <ctf_kdetach+0x70>
+    27cc:	cmp	r6, #0
+    27d0:	beq	289c <ctf_kdetach+0x178>
+    27d4:	mov	r7, #0
+    27d8:	ldr	r0, [r6, #140]	@ 0x8c
+    27dc:	mov	r8, r7
+    27e0:	bl	0 <_raw_spin_lock_bh>
+    27e4:	ldr	r3, [r6, #136]	@ 0x88
+    27e8:	ldr	r1, [r3, r7]
+    27ec:	add	r3, r3, r7
+    27f0:	cmp	r1, #0
+    27f4:	beq	281c <ctf_kdetach+0xf8>
+    27f8:	ldr	r4, [r1]
+    27fc:	mov	r2, #40	@ 0x28
+    2800:	ldr	r0, [r6, #128]	@ 0x80
+    2804:	bl	0 <osl_mfree>
+    2808:	cmp	r4, #0
+    280c:	mov	r1, r4
+    2810:	bne	27f8 <ctf_kdetach+0xd4>
+    2814:	ldr	r3, [r6, #136]	@ 0x88
+    2818:	add	r3, r3, r7
+    281c:	add	r7, r7, #4
+    2820:	str	r8, [r3]
+    2824:	cmp	r7, #128	@ 0x80
+    2828:	bne	27e4 <ctf_kdetach+0xc0>
+    282c:	ldr	r0, [r6, #140]	@ 0x8c
+    2830:	mov	r7, r8
+    2834:	bl	0 <_raw_spin_unlock_bh>
+    2838:	ldr	r0, [r6, #152]	@ 0x98
+    283c:	bl	0 <_raw_spin_lock_bh>
+    2840:	ldr	r3, [r6, #148]	@ 0x94
+    2844:	ldr	r4, [r3, r7]
+    2848:	add	r3, r3, r7
+    284c:	cmp	r4, #0
+    2850:	beq	2884 <ctf_kdetach+0x160>
+    2854:	ldr	r3, [r5, #164]	@ 0xa4
+    2858:	mov	r1, r4
+    285c:	ldr	r4, [r4]
+    2860:	mov	r2, #124	@ 0x7c
+    2864:	sub	r3, r3, #1
+    2868:	str	r3, [r5, #164]	@ 0xa4
+    286c:	ldr	r0, [r6, #128]	@ 0x80
+    2870:	bl	0 <osl_mfree>
+    2874:	cmp	r4, #0
+    2878:	bne	2854 <ctf_kdetach+0x130>
+    287c:	ldr	r3, [r6, #148]	@ 0x94
+    2880:	add	r3, r3, r7
+    2884:	add	r7, r7, #4
+    2888:	str	r8, [r3]
+    288c:	cmp	r7, #512	@ 0x200
+    2890:	bne	2840 <ctf_kdetach+0x11c>
+    2894:	ldr	r0, [r6, #152]	@ 0x98
+    2898:	bl	0 <_raw_spin_unlock_bh>
+    289c:	mov	r4, #0
+    28a0:	ldr	r0, [r6, #128]	@ 0x80
+    28a4:	ldr	r1, [r6, #132]	@ 0x84
+    28a8:	mov	r2, #8
+    28ac:	str	r4, [r5, #188]	@ 0xbc
+    28b0:	bl	0 <osl_mfree>
+    28b4:	ldr	r0, [r6, #128]	@ 0x80
+    28b8:	mov	r2, #8
+    28bc:	ldr	r1, [r6, #140]	@ 0x8c
+    28c0:	bl	0 <osl_mfree>
+    28c4:	ldr	r0, [r6, #128]	@ 0x80
+    28c8:	mov	r2, #8
+    28cc:	ldr	r1, [r6, #152]	@ 0x98
+    28d0:	bl	0 <osl_mfree>
+    28d4:	ldr	r3, [r6, #156]	@ 0x9c
+    28d8:	mov	r2, #8
+    28dc:	ldr	r0, [r6, #128]	@ 0x80
+    28e0:	ldr	r1, [r3, #4]
+    28e4:	bl	0 <osl_mfree>
+    28e8:	ldr	r0, [r6, #128]	@ 0x80
+    28ec:	mov	r2, #128	@ 0x80
+    28f0:	ldr	r1, [r6, #136]	@ 0x88
+    28f4:	bl	0 <osl_mfree>
+    28f8:	ldr	r0, [r6, #128]	@ 0x80
+    28fc:	mov	r2, #512	@ 0x200
+    2900:	ldr	r1, [r6, #148]	@ 0x94
+    2904:	bl	0 <osl_mfree>
+    2908:	ldr	r0, [r6, #128]	@ 0x80
+    290c:	mov	r2, #8
+    2910:	ldr	r1, [r6, #156]	@ 0x9c
+    2914:	bl	0 <osl_mfree>
+    2918:	ldr	r0, [r6, #128]	@ 0x80
+    291c:	mov	r2, #256	@ 0x100
+    2920:	ldr	r1, [r6, #160]	@ 0xa0
+    2924:	bl	0 <osl_mfree>
+    2928:	ldr	r0, [r6, #128]	@ 0x80
+    292c:	mov	r2, #192	@ 0xc0
+    2930:	ldr	r1, [r6, #144]	@ 0x90
+    2934:	bl	0 <osl_mfree>
+    2938:	str	r4, [r6, #136]	@ 0x88
+    293c:	str	r4, [r6, #144]	@ 0x90
+    2940:	str	r4, [r6, #148]	@ 0x94
+    2944:	str	r4, [r6, #156]	@ 0x9c
+    2948:	str	r4, [r6, #160]	@ 0xa0
+    294c:	str	r4, [r6, #164]	@ 0xa4
+    2950:	pop	{r4, r5, r6, r7, r8, pc}
+    2954:	.word	0x00000000
+
+00002958 <ctf_netlink_sock_cb>:
+    2958:	push	{r4, r5, r6, lr}
+    295c:	movw	r3, #1035	@ 0x40b
+    2960:	ldr	r2, [r0, #168]	@ 0xa8
+    2964:	cmp	r2, r3
+    2968:	popls	{r4, r5, r6, pc}
+    296c:	mov	r1, #208	@ 0xd0
+    2970:	bl	0 <skb_clone>
+    2974:	subs	r5, r0, #0
+    2978:	popeq	{r4, r5, r6, pc}
+    297c:	ldr	r6, [pc, #88]	@ 29dc <ctf_netlink_sock_cb+0x84>
+    2980:	ldr	r4, [r5, #236]	@ 0xec
+    2984:	ldr	r0, [r6]
+    2988:	cmp	r0, #0
+    298c:	beq	299c <ctf_netlink_sock_cb+0x44>
+    2990:	ldrb	r3, [r0]
+    2994:	cmp	r3, #0
+    2998:	bne	29c8 <ctf_netlink_sock_cb+0x70>
+    299c:	ldr	ip, [r4, #12]
+    29a0:	add	r2, r5, #48	@ 0x30
+    29a4:	mov	r3, #0
+    29a8:	mov	r1, r5
+    29ac:	str	r3, [r2, #16]
+    29b0:	mov	r3, #64	@ 0x40
+    29b4:	str	ip, [r2, #12]
+    29b8:	ldr	r0, [r0, #120]	@ 0x78
+    29bc:	ldr	r2, [r4, #12]
+    29c0:	pop	{r4, r5, r6, lr}
+    29c4:	b	0 <netlink_unicast>
+    29c8:	ldr	r3, [r0, #108]	@ 0x6c
+    29cc:	add	r1, r4, #16
+    29d0:	blx	r3
+    29d4:	ldr	r0, [r6]
+    29d8:	b	299c <ctf_netlink_sock_cb+0x44>
+    29dc:	.word	0x00000000
+
+Disassembly of section .text.fastpath:
+
+00000000 <_ctf_brc_lkup_ll>:
+   0:	push	{r4, r5, r6}
+   4:	ldr	r3, [r0, #136]	@ 0x88
+   8:	ldrb	r2, [r1, #5]
+   c:	ldrb	r0, [r1, #4]
+  10:	ldrb	r4, [r1, #3]
+  14:	ldrb	ip, [r1, #2]
+  18:	add	r2, r0, r2
+  1c:	ldrb	r0, [r1, #1]
+  20:	add	r2, r2, r4
+  24:	add	r2, r2, ip
+  28:	add	r2, r2, r0
+  2c:	and	r2, r2, #31
+  30:	ldr	r0, [r3, r2, lsl #2]
+  34:	cmp	r0, #0
+  38:	beq	94 <_ctf_brc_lkup_ll+0x94>
+  3c:	add	r3, r0, #4
+  40:	ldrh	r4, [r1, #2]
+  44:	ldrh	r6, [r3, #2]
+  48:	ldrh	ip, [r1, #4]
+  4c:	ldrh	r2, [r3, #4]
+  50:	ldrh	r5, [r1]
+  54:	eor	r1, r4, r6
+  58:	ldrh	r3, [r0, #4]
+  5c:	b	80 <_ctf_brc_lkup_ll+0x80>
+  60:	ldr	r0, [r0]
+  64:	cmp	r0, #0
+  68:	add	r3, r0, #4
+  6c:	beq	94 <_ctf_brc_lkup_ll+0x94>
+  70:	ldrh	r1, [r3, #2]
+  74:	ldrh	r2, [r3, #4]
+  78:	ldrh	r3, [r0, #4]
+  7c:	eor	r1, r4, r1
+  80:	eor	r2, ip, r2
+  84:	eor	r3, r5, r3
+  88:	orr	r2, r1, r2
+  8c:	orrs	r3, r2, r3
+  90:	bne	60 <_ctf_brc_lkup_ll+0x60>
+  94:	pop	{r4, r5, r6}
+  98:	bx	lr
+
+0000009c <_ctf_ipc_lkup_l4proto_v6>:
+  9c:	ldrb	r3, [r0]
+  a0:	lsr	r3, r3, #4
+  a4:	cmp	r3, #6
+  a8:	movne	r0, #0
+  ac:	bxne	lr
+  b0:	ldrb	r3, [r0, #6]
+  b4:	cmp	r3, #6
+  b8:	cmpne	r3, #17
+  bc:	beq	138 <_ctf_ipc_lkup_l4proto_v6+0x9c>
+  c0:	mov	r2, #40	@ 0x28
+  c4:	b	e4 <_ctf_ipc_lkup_l4proto_v6+0x48>
+  c8:	ldrb	r3, [r0]
+  cc:	ldrb	r2, [r0, #1]
+  d0:	cmp	r3, #6
+  d4:	cmpne	r3, #17
+  d8:	add	r2, r2, #1
+  dc:	lsl	r2, r2, #3
+  e0:	beq	118 <_ctf_ipc_lkup_l4proto_v6+0x7c>
+  e4:	cmp	r3, #60	@ 0x3c
+  e8:	cmpne	r3, #51	@ 0x33
+  ec:	bne	124 <_ctf_ipc_lkup_l4proto_v6+0x88>
+  f0:	cmp	r3, #51	@ 0x33
+  f4:	add	r0, r0, r2
+  f8:	bne	c8 <_ctf_ipc_lkup_l4proto_v6+0x2c>
+  fc:	ldrb	r3, [r0]
+ 100:	ldrb	r2, [r0, #1]
+ 104:	cmp	r3, #6
+ 108:	cmpne	r3, #17
+ 10c:	add	r2, r2, #2
+ 110:	lsl	r2, r2, #2
+ 114:	bne	e4 <_ctf_ipc_lkup_l4proto_v6+0x48>
+ 118:	strb	r3, [r1]
+ 11c:	add	r0, r0, r2
+ 120:	bx	lr
+ 124:	cmp	r3, #43	@ 0x2b
+ 128:	add	r0, r0, r2
+ 12c:	beq	c8 <_ctf_ipc_lkup_l4proto_v6+0x2c>
+ 130:	mov	r0, #0
+ 134:	bx	lr
+ 138:	mov	r2, #40	@ 0x28
+ 13c:	b	118 <_ctf_ipc_lkup_l4proto_v6+0x7c>
+
+00000140 <_ctf_ipc_lkup_ll>:
+ 140:	push	{r4, r5, r6, r7, r8, r9, sl, lr}
+ 144:	subs	r9, r1, #0
+ 148:	mov	r4, r2
+ 14c:	mov	sl, r3
+ 150:	ldrb	r6, [sp, #32]
+ 154:	ldrh	r7, [sp, #36]	@ 0x24
+ 158:	ldrh	r8, [sp, #40]	@ 0x28
+ 15c:	beq	240 <_ctf_ipc_lkup_ll+0x100>
+ 160:	ldr	r2, [r2, #4]
+ 164:	ldr	r3, [r4, #8]
+ 168:	ldr	ip, [r4]
+ 16c:	ldr	r1, [r4, #12]
+ 170:	add	r3, r2, r3
+ 174:	ldr	r2, [sl]
+ 178:	add	r3, r3, ip
+ 17c:	ldr	ip, [sl, #4]
+ 180:	add	r3, r3, r1
+ 184:	ldr	r1, [sl, #8]
+ 188:	add	r3, r3, r2
+ 18c:	ldr	r2, [sl, #12]
+ 190:	add	r3, r3, ip
+ 194:	add	r3, r3, r1
+ 198:	add	r3, r3, r2
+ 19c:	add	r3, r3, r6
+ 1a0:	add	r3, r3, r7
+ 1a4:	add	r3, r3, r8
+ 1a8:	uxth	r1, r3
+ 1ac:	ldr	r2, [r0, #148]	@ 0x94
+ 1b0:	add	r3, r1, r3, lsr #16
+ 1b4:	add	r3, r3, r3, lsr #8
+ 1b8:	and	r3, r3, #127	@ 0x7f
+ 1bc:	ldr	r5, [r2, r3, lsl #2]
+ 1c0:	cmp	r5, #0
+ 1c4:	bne	21c <_ctf_ipc_lkup_ll+0xdc>
+ 1c8:	b	238 <_ctf_ipc_lkup_ll+0xf8>
+ 1cc:	ldr	r1, [r5, #20]
+ 1d0:	ldr	r3, [r5, #4]
+ 1d4:	ldr	r0, [sl]
+ 1d8:	ldr	r2, [r4]
+ 1dc:	eor	r0, r0, r1
+ 1e0:	eor	r3, r2, r3
+ 1e4:	orr	r0, r0, r3
+ 1e8:	ldrh	r1, [r5, #36]	@ 0x24
+ 1ec:	ldrb	r3, [r5, #40]	@ 0x28
+ 1f0:	ldrh	r2, [r5, #38]	@ 0x26
+ 1f4:	eor	r1, r7, r1
+ 1f8:	eor	r3, r6, r3
+ 1fc:	orr	r3, r1, r3
+ 200:	eor	r2, r8, r2
+ 204:	orr	r3, r3, r2
+ 208:	orrs	r3, r0, r3
+ 20c:	beq	238 <_ctf_ipc_lkup_ll+0xf8>
+ 210:	ldr	r5, [r5]
+ 214:	cmp	r5, #0
+ 218:	beq	238 <_ctf_ipc_lkup_ll+0xf8>
+ 21c:	cmp	r9, #0
+ 220:	beq	1cc <_ctf_ipc_lkup_ll+0x8c>
+ 224:	add	r0, r5, #4
+ 228:	mov	r1, r4
+ 22c:	mov	r2, #32
+ 230:	bl	0 <memcmp>
+ 234:	b	1e8 <_ctf_ipc_lkup_ll+0xa8>
+ 238:	mov	r0, r5
+ 23c:	pop	{r4, r5, r6, r7, r8, r9, sl, pc}
+ 240:	ldr	r2, [r3]
+ 244:	ldr	r3, [r4]
+ 248:	add	r3, r2, r3
+ 24c:	add	r3, r3, r6
+ 250:	add	r3, r3, r7
+ 254:	add	r3, r3, r8
+ 258:	b	1a8 <_ctf_ipc_lkup_ll+0x68>
+
+0000025c <_ctf_forward>:
+ 25c:	push	{r4, r5, r6, r7, r8, r9, sl, fp, lr}
+ 260:	mov	r4, r1
+ 264:	ldr	r3, [r1, #156]	@ 0x9c
+ 268:	sub	sp, sp, #84	@ 0x54
+ 26c:	mov	r6, r0
+ 270:	mov	r8, r2
+ 274:	mov	r5, r1
+ 278:	tst	r3, #4
+ 27c:	beq	28c <_ctf_forward+0x30>
+ 280:	mvn	r0, #0
+ 284:	add	sp, sp, #84	@ 0x54
+ 288:	pop	{r4, r5, r6, r7, r8, r9, sl, fp, pc}
+ 28c:	ldr	r7, [r1, #236]	@ 0xec
+ 290:	ldrb	r3, [r7]
+ 294:	mov	sl, r7
+ 298:	ands	r3, r3, #1
+ 29c:	bne	280 <_ctf_forward+0x24>
+ 2a0:	ldrh	r0, [r7, #12]
+ 2a4:	cmp	r0, #129	@ 0x81
+ 2a8:	str	r0, [sp, #40]	@ 0x28
+ 2ac:	beq	608 <_ctf_forward+0x3ac>
+ 2b0:	bhi	5c8 <_ctf_forward+0x36c>
+ 2b4:	cmp	r0, #8
+ 2b8:	bne	280 <_ctf_forward+0x24>
+ 2bc:	add	r9, r7, #14
+ 2c0:	str	r3, [sp, #32]
+ 2c4:	ldrb	r3, [r9, #1]
+ 2c8:	movw	r1, #65535	@ 0xffff
+ 2cc:	str	r1, [sp, #56]	@ 0x38
+ 2d0:	lsr	r3, r3, #5
+ 2d4:	str	r3, [sp, #48]	@ 0x30
+ 2d8:	ldr	r0, [r6, #140]	@ 0x8c
+ 2dc:	bl	0 <_raw_spin_lock_bh>
+ 2e0:	mov	r0, r6
+ 2e4:	mov	r1, sl
+ 2e8:	bl	0 <_ctf_brc_lkup_ll>
+ 2ec:	subs	fp, r0, #0
+ 2f0:	beq	6e0 <_ctf_forward+0x484>
+ 2f4:	ldrh	r3, [r4, #12]
+ 2f8:	mov	r0, r6
+ 2fc:	ldr	r9, [pc, #2836]	@ e18 <_ctf_forward+0xbbc>
+ 300:	add	r1, sl, #6
+ 304:	ldr	ip, [fp, #24]
+ 308:	ubfx	r3, r3, #3, #9
+ 30c:	ldr	r2, [fp, #16]
+ 310:	ldr	lr, [r9]
+ 314:	add	r3, ip, r3
+ 318:	ldr	ip, [fp, #12]
+ 31c:	str	r3, [fp, #24]
+ 320:	str	lr, [fp, #32]
+ 324:	str	ip, [sp, #52]	@ 0x34
+ 328:	str	r2, [sp, #28]
+ 32c:	bl	0 <_ctf_brc_lkup_ll>
+ 330:	cmp	r0, #0
+ 334:	ldrh	ip, [fp, #10]
+ 338:	ldr	r2, [sp, #28]
+ 33c:	beq	aa0 <_ctf_forward+0x844>
+ 340:	str	r2, [sp, #36]	@ 0x24
+ 344:	uxth	ip, ip
+ 348:	ldr	lr, [sp, #36]	@ 0x24
+ 34c:	mov	r1, sl
+ 350:	ldr	r2, [r9]
+ 354:	str	ip, [sp, #32]
+ 358:	ands	r3, lr, #128	@ 0x80
+ 35c:	ldr	r9, [sp, #40]	@ 0x28
+ 360:	str	r2, [r0, #20]
+ 364:	mov	r2, #6
+ 368:	ldrne	r0, [fp, #28]
+ 36c:	streq	r3, [sp, #44]	@ 0x2c
+ 370:	ldrb	r3, [sl, #5]
+ 374:	strne	r0, [sp, #44]	@ 0x2c
+ 378:	ldrb	r0, [sl, #4]
+ 37c:	ldr	lr, [r8, #104]	@ 0x68
+ 380:	ldr	ip, [r6, #144]	@ 0x90
+ 384:	eor	r3, r3, r0
+ 388:	and	r0, r3, #3
+ 38c:	and	r3, lr, #3
+ 390:	add	r3, r0, r3, lsl #2
+ 394:	add	r3, r3, r3, lsl #1
+ 398:	add	r0, ip, r3, lsl #2
+ 39c:	bl	0 <memcpy>
+ 3a0:	ldrb	r3, [sl, #5]
+ 3a4:	ldrb	r2, [sl, #4]
+ 3a8:	ldr	r1, [r8, #104]	@ 0x68
+ 3ac:	ldr	r0, [r6, #144]	@ 0x90
+ 3b0:	eor	r3, r3, r2
+ 3b4:	and	r3, r3, #3
+ 3b8:	and	r1, r1, #3
+ 3bc:	add	r3, r3, r1, lsl #2
+ 3c0:	add	r3, r3, r3, lsl #1
+ 3c4:	add	r3, r0, r3, lsl #2
+ 3c8:	str	fp, [r3, #8]
+ 3cc:	ldr	r0, [r6, #140]	@ 0x8c
+ 3d0:	bl	0 <_raw_spin_unlock_bh>
+ 3d4:	ldr	lr, [sp, #36]	@ 0x24
+ 3d8:	tst	lr, #1
+ 3dc:	beq	558 <_ctf_forward+0x2fc>
+ 3e0:	ldr	r0, [sp, #56]	@ 0x38
+ 3e4:	sxth	r3, r0
+ 3e8:	cmn	r3, #1
+ 3ec:	beq	9d8 <_ctf_forward+0x77c>
+ 3f0:	ldr	r1, [sp, #32]
+ 3f4:	mov	ip, #129	@ 0x81
+ 3f8:	ldr	r2, [sp, #48]	@ 0x30
+ 3fc:	strh	ip, [sl, #12]
+ 400:	strh	r9, [sl, #16]
+ 404:	orr	r3, r1, r2, lsl #13
+ 408:	mov	r1, #18
+ 40c:	lsr	r2, r3, #8
+ 410:	orr	r3, r2, r3, lsl #8
+ 414:	strh	r3, [sl, #14]
+ 418:	ldr	ip, [sp, #44]	@ 0x2c
+ 41c:	ldr	lr, [sp, #48]	@ 0x30
+ 420:	cmp	ip, #0
+ 424:	str	lr, [r4, #184]	@ 0xb8
+ 428:	beq	444 <_ctf_forward+0x1e8>
+ 42c:	ldr	r0, [r4, #12]
+ 430:	ldrd	r2, [ip]
+ 434:	ubfx	r0, r0, #12, #20
+ 438:	adds	r2, r2, r0
+ 43c:	adc	r3, r3, #0
+ 440:	strd	r2, [ip]
+ 444:	ldr	r3, [r4, #236]	@ 0xec
+ 448:	add	r7, r4, #244	@ 0xf4
+ 44c:	ldr	r0, [sp, #52]	@ 0x34
+ 450:	ldr	r2, [sp, #40]	@ 0x28
+ 454:	add	r1, r3, r1
+ 458:	ldr	r6, [r6, #128]	@ 0x80
+ 45c:	str	r0, [r4, #44]	@ 0x2c
+ 460:	str	r3, [r4, #220]	@ 0xdc
+ 464:	strh	r2, [r4, #190]	@ 0xbe
+ 468:	str	r1, [r4, #216]	@ 0xd8
+ 46c:	ldrex	r3, [r7]
+ 470:	add	r3, r3, #1
+ 474:	strex	r2, r3, [r7]
+ 478:	teq	r2, #0
+ 47c:	bne	46c <_ctf_forward+0x210>
+ 480:	mov	r0, r4
+ 484:	bl	0 <dev_queue_xmit>
+ 488:	ldr	r3, [r4, #244]	@ 0xf4
+ 48c:	cmp	r3, #1
+ 490:	beq	6d8 <_ctf_forward+0x47c>
+ 494:	dmb	sy
+ 498:	ldrex	r3, [r7]
+ 49c:	sub	r3, r3, #1
+ 4a0:	strex	r2, r3, [r7]
+ 4a4:	teq	r2, #0
+ 4a8:	bne	498 <_ctf_forward+0x23c>
+ 4ac:	dmb	sy
+ 4b0:	cmp	r3, #0
+ 4b4:	movne	r0, #0
+ 4b8:	bne	284 <_ctf_forward+0x28>
+ 4bc:	mov	r0, r6
+ 4c0:	mov	r1, r4
+ 4c4:	bl	0 <osl_pkt_frmnative>
+ 4c8:	cmp	r4, #0
+ 4cc:	moveq	r0, r4
+ 4d0:	beq	284 <_ctf_forward+0x28>
+ 4d4:	mov	r7, #0
+ 4d8:	ldr	r3, [r5, #156]	@ 0x9c
+ 4dc:	add	ip, r5, #8
+ 4e0:	mov	r1, r5
+ 4e4:	mov	r0, r6
+ 4e8:	mov	r2, #1
+ 4ec:	ands	r4, r3, #8
+ 4f0:	beq	524 <_ctf_forward+0x2c8>
+ 4f4:	bic	r3, r3, #8
+ 4f8:	ldr	r4, [r5, #8]
+ 4fc:	str	r3, [r5, #156]	@ 0x9c
+ 500:	str	r7, [r5, #8]
+ 504:	ldrb	r3, [ip, #4]
+ 508:	bfi	r3, r7, #0, #3
+ 50c:	strb	r3, [ip, #4]
+ 510:	bl	0 <osl_pktfree>
+ 514:	subs	r5, r4, #0
+ 518:	bne	4d8 <_ctf_forward+0x27c>
+ 51c:	mov	r0, r5
+ 520:	b	284 <_ctf_forward+0x28>
+ 524:	add	ip, r5, #8
+ 528:	bic	r3, r3, #8
+ 52c:	str	r4, [r5, #8]
+ 530:	mov	r0, r6
+ 534:	str	r3, [r5, #156]	@ 0x9c
+ 538:	mov	r1, r5
+ 53c:	ldrb	r3, [ip, #4]
+ 540:	mov	r2, #1
+ 544:	bfi	r3, r4, #0, #3
+ 548:	strb	r3, [ip, #4]
+ 54c:	bl	0 <osl_pktfree>
+ 550:	mov	r0, r4
+ 554:	b	284 <_ctf_forward+0x28>
+ 558:	ldr	r3, [sp, #36]	@ 0x24
+ 55c:	tst	r3, #2
+ 560:	beq	6c0 <_ctf_forward+0x464>
+ 564:	ldr	sl, [sp, #56]	@ 0x38
+ 568:	sxth	r3, sl
+ 56c:	cmn	r3, #1
+ 570:	beq	5b4 <_ctf_forward+0x358>
+ 574:	mov	r1, #4
+ 578:	mov	r0, r4
+ 57c:	bl	0 <skb_pull>
+ 580:	ldrh	ip, [r0, #6]
+ 584:	mov	r7, r0
+ 588:	ldrh	lr, [r0, #4]
+ 58c:	strh	ip, [r0, #10]
+ 590:	strh	lr, [r0, #8]
+ 594:	ldrh	r0, [r0, #2]
+ 598:	ldrh	r1, [r7]
+ 59c:	ldrh	r2, [r7, #-2]
+ 5a0:	ldrh	r3, [r7, #-4]
+ 5a4:	strh	r0, [r7, #6]
+ 5a8:	strh	r1, [r7, #4]
+ 5ac:	strh	r2, [r7, #2]
+ 5b0:	strh	r3, [r7]
+ 5b4:	ubfx	r3, r9, #8, #16
+ 5b8:	strb	r9, [r7, #12]
+ 5bc:	strb	r3, [r7, #13]
+ 5c0:	mov	r1, #14
+ 5c4:	b	418 <_ctf_forward+0x1bc>
+ 5c8:	ldr	r1, [sp, #40]	@ 0x28
+ 5cc:	movw	r2, #25736	@ 0x6488
+ 5d0:	cmp	r1, r2
+ 5d4:	beq	670 <_ctf_forward+0x414>
+ 5d8:	movw	r2, #56710	@ 0xdd86
+ 5dc:	cmp	r1, r2
+ 5e0:	bne	280 <_ctf_forward+0x24>
+ 5e4:	ldrb	r2, [r7, #14]
+ 5e8:	add	ip, r7, #14
+ 5ec:	movw	lr, #65535	@ 0xffff
+ 5f0:	str	ip, [sp, #32]
+ 5f4:	str	lr, [sp, #56]	@ 0x38
+ 5f8:	mov	r9, r3
+ 5fc:	ubfx	r2, r2, #1, #3
+ 600:	str	r2, [sp, #48]	@ 0x30
+ 604:	b	2d8 <_ctf_forward+0x7c>
+ 608:	ldrh	r2, [r7, #16]
+ 60c:	cmp	r2, #8
+ 610:	str	r2, [sp, #40]	@ 0x28
+ 614:	beq	a58 <_ctf_forward+0x7fc>
+ 618:	ldr	ip, [sp, #40]	@ 0x28
+ 61c:	movw	r2, #56710	@ 0xdd86
+ 620:	cmp	ip, r2
+ 624:	bne	a70 <_ctf_forward+0x814>
+ 628:	ldrb	r2, [r7, #18]
+ 62c:	mov	r9, r3
+ 630:	add	lr, r7, #18
+ 634:	str	lr, [sp, #32]
+ 638:	ubfx	r2, r2, #1, #3
+ 63c:	str	r2, [sp, #48]	@ 0x30
+ 640:	ldr	r1, [sp, #48]	@ 0x30
+ 644:	cmp	r1, #0
+ 648:	ldrheq	r3, [r7, #14]
+ 64c:	ldrhne	r3, [r7, #14]
+ 650:	ubfxeq	r2, r3, #5, #3
+ 654:	streq	r2, [sp, #48]	@ 0x30
+ 658:	lsr	r2, r3, #8
+ 65c:	orr	r3, r2, r3, lsl #8
+ 660:	lsl	r3, r3, #20
+ 664:	lsr	r3, r3, #20
+ 668:	str	r3, [sp, #56]	@ 0x38
+ 66c:	b	2d8 <_ctf_forward+0x7c>
+ 670:	movw	r3, #65535	@ 0xffff
+ 674:	str	r3, [sp, #56]	@ 0x38
+ 678:	ldrh	r3, [r7, #20]
+ 67c:	cmp	r3, #22272	@ 0x5700
+ 680:	cmpne	r3, #8448	@ 0x2100
+ 684:	moveq	r3, #0
+ 688:	movne	r3, #1
+ 68c:	bne	280 <_ctf_forward+0x24>
+ 690:	ldrb	r2, [r7, #22]
+ 694:	lsr	r1, r2, #4
+ 698:	cmp	r1, #4
+ 69c:	beq	a38 <_ctf_forward+0x7dc>
+ 6a0:	add	lr, r7, #22
+ 6a4:	ubfx	r2, r2, #1, #3
+ 6a8:	movw	r0, #56710	@ 0xdd86
+ 6ac:	str	lr, [sp, #32]
+ 6b0:	str	r2, [sp, #48]	@ 0x30
+ 6b4:	mov	r9, r3
+ 6b8:	str	r0, [sp, #40]	@ 0x28
+ 6bc:	b	2d8 <_ctf_forward+0x7c>
+ 6c0:	ldr	sl, [sp, #56]	@ 0x38
+ 6c4:	sxth	r1, sl
+ 6c8:	cmn	r1, #1
+ 6cc:	movne	r1, #18
+ 6d0:	moveq	r1, #14
+ 6d4:	b	418 <_ctf_forward+0x1bc>
+ 6d8:	dmb	sy
+ 6dc:	b	4bc <_ctf_forward+0x260>
+ 6e0:	ldr	r0, [r6, #140]	@ 0x8c
+ 6e4:	bl	0 <_raw_spin_unlock_bh>
+ 6e8:	ldr	r0, [r6, #152]	@ 0x98
+ 6ec:	bl	0 <_raw_spin_lock_bh>
+ 6f0:	ldr	r1, [sp, #32]
+ 6f4:	cmp	r1, #0
+ 6f8:	beq	b14 <_ctf_forward+0x8b8>
+ 6fc:	mov	r0, r1
+ 700:	add	r1, sp, #79	@ 0x4f
+ 704:	bl	9c <_ctf_ipc_lkup_l4proto_v6>
+ 708:	subs	lr, r0, #0
+ 70c:	beq	72c <_ctf_forward+0x4d0>
+ 710:	ldrb	r3, [sp, #79]	@ 0x4f
+ 714:	cmp	r3, #6
+ 718:	bne	748 <_ctf_forward+0x4ec>
+ 71c:	ldrb	r2, [lr, #13]
+ 720:	lsl	r2, r2, #8
+ 724:	tst	r2, #1792	@ 0x700
+ 728:	beq	748 <_ctf_forward+0x4ec>
+ 72c:	ldr	r0, [r6, #152]	@ 0x98
+ 730:	bl	0 <_raw_spin_unlock_bh>
+ 734:	ldr	r3, [r4, #156]	@ 0x9c
+ 738:	mvn	r0, #0
+ 73c:	bic	r3, r3, #32
+ 740:	str	r3, [r4, #156]	@ 0x9c
+ 744:	b	284 <_ctf_forward+0x28>
+ 748:	str	r3, [sp]
+ 74c:	mov	r0, r6
+ 750:	ldrb	r8, [lr]
+ 754:	mov	r1, #1
+ 758:	ldrb	ip, [lr, #1]
+ 75c:	ldr	r3, [sp, #32]
+ 760:	orr	ip, r8, ip, lsl #8
+ 764:	add	r2, r3, #8
+ 768:	add	r3, r3, #24
+ 76c:	str	ip, [sp, #4]
+ 770:	ldrb	r8, [lr, #2]
+ 774:	ldrb	ip, [lr, #3]
+ 778:	orr	ip, r8, ip, lsl #8
+ 77c:	str	ip, [sp, #8]
+ 780:	bl	140 <_ctf_ipc_lkup_ll>
+ 784:	subs	r8, r0, #0
+ 788:	beq	72c <_ctf_forward+0x4d0>
+ 78c:	ldr	r3, [r8, #68]	@ 0x44
+ 790:	tst	r3, #16
+ 794:	bne	72c <_ctf_forward+0x4d0>
+ 798:	tst	r3, #768	@ 0x300
+ 79c:	bne	b00 <_ctf_forward+0x8a4>
+ 7a0:	tst	r3, #32
+ 7a4:	beq	7f0 <_ctf_forward+0x594>
+ 7a8:	ldr	sl, [sp, #32]
+ 7ac:	ldrb	r3, [r8, #94]	@ 0x5e
+ 7b0:	ldrb	r1, [sl]
+ 7b4:	lsr	r2, r3, #4
+ 7b8:	and	r0, r1, #15
+ 7bc:	cmp	r0, r2
+ 7c0:	bicne	r1, r1, #15
+ 7c4:	orrne	r2, r1, r2
+ 7c8:	strbne	r2, [sl]
+ 7cc:	ldr	ip, [sp, #32]
+ 7d0:	ldrbne	r3, [r8, #94]	@ 0x5e
+ 7d4:	ldrb	r2, [ip, #1]
+ 7d8:	lsl	r3, r3, #4
+ 7dc:	and	r1, r2, #4032	@ 0xfc0
+ 7e0:	cmp	r1, r3
+ 7e4:	andne	r2, r2, #63	@ 0x3f
+ 7e8:	orrne	r3, r2, r3
+ 7ec:	strbne	r3, [ip, #1]
+ 7f0:	cmp	r8, #0
+ 7f4:	beq	72c <_ctf_forward+0x4d0>
+ 7f8:	ldr	lr, [r8, #68]	@ 0x44
+ 7fc:	mov	r2, #0
+ 800:	ldr	r3, [r4, #156]	@ 0x9c
+ 804:	ldr	r0, [r8, #60]	@ 0x3c
+ 808:	tst	lr, #1024	@ 0x400
+ 80c:	str	lr, [sp, #36]	@ 0x24
+ 810:	bic	r3, r3, #32
+ 814:	str	r2, [r4, #160]	@ 0xa0
+ 818:	str	r0, [sp, #52]	@ 0x34
+ 81c:	str	r3, [r4, #156]	@ 0x9c
+ 820:	beq	83c <_ctf_forward+0x5e0>
+ 824:	ldr	r1, [r8, #64]	@ 0x40
+ 828:	orr	r3, r3, #32
+ 82c:	ldr	r2, [r8, #60]	@ 0x3c
+ 830:	str	r3, [r4, #156]	@ 0x9c
+ 834:	str	r1, [sp, #52]	@ 0x34
+ 838:	str	r2, [r4, #160]	@ 0xa0
+ 83c:	ldr	r3, [r8, #72]	@ 0x48
+ 840:	ldr	r2, [pc, #1488]	@ e18 <_ctf_forward+0xbbc>
+ 844:	ldr	r1, [r8, #104]	@ 0x68
+ 848:	cmp	r3, #0
+ 84c:	ldrh	fp, [r8, #44]	@ 0x2c
+ 850:	ldr	r0, [r2]
+ 854:	ldrne	r2, [r2]
+ 858:	add	r1, r1, #1
+ 85c:	str	r1, [r8, #104]	@ 0x68
+ 860:	str	r0, [r8, #76]	@ 0x4c
+ 864:	strne	r2, [r3, #20]
+ 868:	ldr	r2, [sp, #36]	@ 0x24
+ 86c:	ldr	sl, [sp, #36]	@ 0x24
+ 870:	ldr	lr, [sp, #36]	@ 0x24
+ 874:	tst	r2, #64	@ 0x40
+ 878:	ldrne	r3, [r8, #112]	@ 0x70
+ 87c:	strne	r3, [r4, #204]	@ 0xcc
+ 880:	ands	r3, sl, #128	@ 0x80
+ 884:	ldrne	ip, [r8, #108]	@ 0x6c
+ 888:	streq	r3, [sp, #44]	@ 0x2c
+ 88c:	strne	ip, [sp, #44]	@ 0x2c
+ 890:	tst	lr, #256	@ 0x100
+ 894:	beq	988 <_ctf_forward+0x72c>
+ 898:	ldr	r0, [sp, #32]
+ 89c:	cmp	r0, #0
+ 8a0:	beq	ab0 <_ctf_forward+0x854>
+ 8a4:	ldrb	r2, [r0, #5]
+ 8a8:	mov	r9, r0
+ 8ac:	ldrb	r3, [r0, #4]
+ 8b0:	orr	r3, r3, r2, lsl #8
+ 8b4:	lsr	r2, r3, #8
+ 8b8:	orr	r3, r2, r3, lsl #8
+ 8bc:	add	sl, r3, #42	@ 0x2a
+ 8c0:	uxth	sl, sl
+ 8c4:	mov	r1, #8
+ 8c8:	mov	r0, r4
+ 8cc:	bl	0 <skb_push>
+ 8d0:	ldr	r1, [sp, #32]
+ 8d4:	lsr	r3, sl, #8
+ 8d8:	mov	r2, #17
+ 8dc:	strh	r2, [r9, #-8]
+ 8e0:	orr	r3, r3, sl, lsl #8
+ 8e4:	ldrh	sl, [r8, #96]	@ 0x60
+ 8e8:	cmp	r1, #0
+ 8ec:	movne	ip, #22272	@ 0x5700
+ 8f0:	moveq	lr, #8448	@ 0x2100
+ 8f4:	strh	r3, [r9, #-4]
+ 8f8:	mov	r7, r0
+ 8fc:	strh	sl, [r9, #-6]
+ 900:	mov	r1, r4
+ 904:	strhne	ip, [r9, #-2]
+ 908:	strheq	lr, [r9, #-2]
+ 90c:	movw	r9, #25736	@ 0x6488
+ 910:	ldr	r0, [r8, #100]	@ 0x64
+ 914:	bl	0 <ppp_txstats_upd>
+ 918:	ldrh	r1, [r8, #46]	@ 0x2e
+ 91c:	add	r2, r8, #46	@ 0x2e
+ 920:	strh	r1, [r7]
+ 924:	ldrh	r3, [r2, #2]
+ 928:	strh	r3, [r7, #2]
+ 92c:	add	r3, r7, #6
+ 930:	ldrh	r2, [r2, #4]
+ 934:	strh	r2, [r7, #4]
+ 938:	add	r2, r8, #52	@ 0x34
+ 93c:	ldrh	sl, [r8, #52]	@ 0x34
+ 940:	strh	sl, [r7, #6]
+ 944:	mov	sl, r7
+ 948:	ldrh	ip, [r2, #2]
+ 94c:	strh	ip, [r3, #2]
+ 950:	ldrh	r2, [r2, #4]
+ 954:	strh	r2, [r3, #4]
+ 958:	ldr	r3, [pc, #1212]	@ e1c <_ctf_forward+0xbc0>
+ 95c:	ldr	r3, [r3, #184]	@ 0xb8
+ 960:	cmp	r3, #0
+ 964:	beq	974 <_ctf_forward+0x718>
+ 968:	ldr	r2, [r8, #112]	@ 0x70
+ 96c:	cmp	r2, #0
+ 970:	bne	ad0 <_ctf_forward+0x874>
+ 974:	uxth	fp, fp
+ 978:	ldr	r0, [r6, #152]	@ 0x98
+ 97c:	str	fp, [sp, #32]
+ 980:	bl	0 <_raw_spin_unlock_bh>
+ 984:	b	3d4 <_ctf_forward+0x178>
+ 988:	ldr	r0, [sp, #36]	@ 0x24
+ 98c:	tst	r0, #512	@ 0x200
+ 990:	ldreq	r9, [sp, #40]	@ 0x28
+ 994:	beq	918 <_ctf_forward+0x6bc>
+ 998:	ldrh	r3, [r7, #16]
+ 99c:	movw	r2, #65535	@ 0xffff
+ 9a0:	cmp	r3, r2
+ 9a4:	beq	72c <_ctf_forward+0x4d0>
+ 9a8:	ldrh	r2, [r8, #96]	@ 0x60
+ 9ac:	cmp	r2, r3
+ 9b0:	bne	72c <_ctf_forward+0x4d0>
+ 9b4:	mov	r1, #8
+ 9b8:	mov	r0, r4
+ 9bc:	bl	0 <skb_pull>
+ 9c0:	mov	r1, r4
+ 9c4:	mov	r7, r0
+ 9c8:	ldr	r0, [r8, #100]	@ 0x64
+ 9cc:	ldr	r9, [sp, #40]	@ 0x28
+ 9d0:	bl	0 <ppp_rxstats_upd>
+ 9d4:	b	918 <_ctf_forward+0x6bc>
+ 9d8:	mov	r1, #4
+ 9dc:	mov	r0, r4
+ 9e0:	bl	0 <skb_push>
+ 9e4:	ldr	lr, [sp, #32]
+ 9e8:	ldrh	r1, [r0, #4]
+ 9ec:	ldrh	r2, [r0, #6]
+ 9f0:	ldrh	sl, [r0, #8]
+ 9f4:	lsr	r3, lr, #8
+ 9f8:	ldrh	ip, [r0, #10]
+ 9fc:	strh	r1, [r0]
+ a00:	orr	r3, r3, lr, lsl #8
+ a04:	ldrh	r1, [r0, #14]
+ a08:	ldrh	lr, [r0, #12]
+ a0c:	strh	r2, [r0, #2]
+ a10:	mov	r2, #129	@ 0x81
+ a14:	strh	r1, [r0, #10]
+ a18:	mov	r1, #18
+ a1c:	strh	r9, [r0, #16]
+ a20:	strh	sl, [r0, #4]
+ a24:	strh	ip, [r0, #6]
+ a28:	strh	lr, [r0, #8]
+ a2c:	strh	r2, [r0, #12]
+ a30:	strh	r3, [r0, #14]
+ a34:	b	418 <_ctf_forward+0x1bc>
+ a38:	add	r9, r7, #22
+ a3c:	str	r3, [sp, #32]
+ a40:	ldrb	r3, [r9, #1]
+ a44:	mov	ip, #8
+ a48:	str	ip, [sp, #40]	@ 0x28
+ a4c:	lsr	r3, r3, #5
+ a50:	str	r3, [sp, #48]	@ 0x30
+ a54:	b	2d8 <_ctf_forward+0x7c>
+ a58:	add	r9, r7, #18
+ a5c:	str	r3, [sp, #32]
+ a60:	ldrb	r3, [r9, #1]
+ a64:	lsr	r3, r3, #5
+ a68:	str	r3, [sp, #48]	@ 0x30
+ a6c:	b	640 <_ctf_forward+0x3e4>
+ a70:	ldr	r0, [sp, #40]	@ 0x28
+ a74:	movw	r3, #25736	@ 0x6488
+ a78:	cmp	r0, r3
+ a7c:	bne	280 <_ctf_forward+0x24>
+ a80:	ldrh	r3, [r7, #14]
+ a84:	add	r7, r7, #4
+ a88:	lsr	r2, r3, #8
+ a8c:	orr	r3, r2, r3, lsl #8
+ a90:	lsl	r3, r3, #20
+ a94:	lsr	r3, r3, #20
+ a98:	str	r3, [sp, #56]	@ 0x38
+ a9c:	b	678 <_ctf_forward+0x41c>
+ aa0:	ldr	r0, [r6, #140]	@ 0x8c
+ aa4:	bl	0 <_raw_spin_unlock_bh>
+ aa8:	mvn	r0, #0
+ aac:	b	284 <_ctf_forward+0x28>
+ ab0:	ldrb	r2, [r9, #3]
+ ab4:	ldrb	r3, [r9, #2]
+ ab8:	orr	r3, r3, r2, lsl #8
+ abc:	lsr	r2, r3, #8
+ ac0:	orr	r3, r2, r3, lsl #8
+ ac4:	add	sl, r3, #2
+ ac8:	uxth	sl, sl
+ acc:	b	8c4 <_ctf_forward+0x668>
+ ad0:	mov	r0, r4
+ ad4:	mov	r1, r8
+ ad8:	blx	r3
+ adc:	cmn	r0, #2
+ ae0:	bne	974 <_ctf_forward+0x718>
+ ae4:	ldr	r0, [r6, #152]	@ 0x98
+ ae8:	bl	0 <_raw_spin_unlock_bh>
+ aec:	ldr	r3, [r4, #156]	@ 0x9c
+ af0:	mvn	r0, #25
+ af4:	bic	r3, r3, #32
+ af8:	str	r3, [r4, #156]	@ 0x9c
+ afc:	b	284 <_ctf_forward+0x28>
+ b00:	ldrh	r1, [r8, #96]	@ 0x60
+ b04:	movw	r2, #65535	@ 0xffff
+ b08:	cmp	r1, r2
+ b0c:	bne	7a0 <_ctf_forward+0x544>
+ b10:	b	72c <_ctf_forward+0x4d0>
+ b14:	ldrb	r2, [r9]
+ b18:	lsr	r3, r2, #4
+ b1c:	cmp	r3, #4
+ b20:	bne	72c <_ctf_forward+0x4d0>
+ b24:	ldrb	r1, [r9, #6]
+ b28:	movw	r3, #65343	@ 0xff3f
+ b2c:	ldrb	r0, [r9, #7]
+ b30:	orr	r1, r1, r0, lsl #8
+ b34:	and	r3, r1, r3
+ b38:	cmp	r3, #0
+ b3c:	bne	72c <_ctf_forward+0x4d0>
+ b40:	ldr	r3, [r9, #16]
+ b44:	add	lr, r9, #16
+ b48:	str	lr, [sp, #44]	@ 0x2c
+ b4c:	and	r3, r3, #240	@ 0xf0
+ b50:	cmp	r3, #224	@ 0xe0
+ b54:	beq	72c <_ctf_forward+0x4d0>
+ b58:	ldrb	r3, [r9, #9]
+ b5c:	and	r2, r2, #15
+ b60:	add	fp, r9, r2, lsl #2
+ b64:	cmp	r3, #6
+ b68:	beq	df8 <_ctf_forward+0xb9c>
+ b6c:	cmp	r3, #17
+ b70:	bne	72c <_ctf_forward+0x4d0>
+ b74:	add	r1, fp, #6
+ b78:	ldrh	sl, [fp, #6]
+ b7c:	str	r1, [sp, #36]	@ 0x24
+ b80:	add	r2, r9, #12
+ b84:	str	r3, [sp]
+ b88:	str	r2, [sp, #52]	@ 0x34
+ b8c:	mov	r0, r6
+ b90:	ldrb	lr, [fp]
+ b94:	mov	r1, #0
+ b98:	ldrb	ip, [fp, #1]
+ b9c:	ldr	r3, [sp, #44]	@ 0x2c
+ ba0:	orr	ip, lr, ip, lsl #8
+ ba4:	str	ip, [sp, #4]
+ ba8:	ldrb	lr, [fp, #2]
+ bac:	ldrb	ip, [fp, #3]
+ bb0:	orr	ip, lr, ip, lsl #8
+ bb4:	str	ip, [sp, #8]
+ bb8:	bl	140 <_ctf_ipc_lkup_ll>
+ bbc:	subs	r8, r0, #0
+ bc0:	beq	72c <_ctf_forward+0x4d0>
+ bc4:	ldr	r3, [r8, #68]	@ 0x44
+ bc8:	tst	r3, #16
+ bcc:	bne	72c <_ctf_forward+0x4d0>
+ bd0:	tst	r3, #768	@ 0x300
+ bd4:	bne	de4 <_ctf_forward+0xb88>
+ bd8:	tst	r3, #32
+ bdc:	beq	bfc <_ctf_forward+0x9a0>
+ be0:	ldrb	r1, [r9, #1]
+ be4:	ldrb	r0, [r8, #94]	@ 0x5e
+ be8:	and	r2, r1, #252	@ 0xfc
+ bec:	cmp	r0, r2
+ bf0:	andne	r2, r1, #3
+ bf4:	orrne	r2, r2, r0
+ bf8:	strbne	r2, [r9, #1]
+ bfc:	tst	r3, #4
+ c00:	beq	d14 <_ctf_forward+0xab8>
+ c04:	cmp	sl, #0
+ c08:	beq	cac <_ctf_forward+0xa50>
+ c0c:	ldr	sl, [sp, #36]	@ 0x24
+ c10:	mov	r1, #8
+ c14:	ldrb	r2, [fp]
+ c18:	add	ip, sp, #68	@ 0x44
+ c1c:	ldrb	r3, [fp, #1]
+ c20:	mov	r0, ip
+ c24:	ldrh	lr, [sl]
+ c28:	ldr	sl, [sp, #52]	@ 0x34
+ c2c:	orr	r3, r2, r3, lsl r1
+ c30:	ldr	r2, [r8, #80]	@ 0x50
+ c34:	ldr	sl, [sl]
+ c38:	mvn	r3, r3
+ c3c:	str	r2, [sp, #44]	@ 0x2c
+ c40:	mvn	r2, lr
+ c44:	str	sl, [sp, #20]
+ c48:	uxth	r3, r3
+ c4c:	ldrh	sl, [r8, #84]	@ 0x54
+ c50:	uxth	r2, r2
+ c54:	ldr	lr, [sp, #20]
+ c58:	str	r3, [sp, #68]	@ 0x44
+ c5c:	str	sl, [sp, #60]	@ 0x3c
+ c60:	mvn	sl, lr
+ c64:	ldr	lr, [sp, #60]	@ 0x3c
+ c68:	str	ip, [sp, #28]
+ c6c:	str	lr, [sp, #72]	@ 0x48
+ c70:	bl	0 <csum_partial>
+ c74:	ldr	ip, [sp, #28]
+ c78:	mov	r1, #8
+ c7c:	ldr	r3, [sp, #44]	@ 0x2c
+ c80:	add	r2, r0, r0, ror #16
+ c84:	mov	r0, ip
+ c88:	lsr	r2, r2, #16
+ c8c:	str	sl, [sp, #68]	@ 0x44
+ c90:	str	r3, [sp, #72]	@ 0x48
+ c94:	bl	0 <csum_partial>
+ c98:	ldr	sl, [sp, #36]	@ 0x24
+ c9c:	add	r3, r0, r0, ror #16
+ ca0:	mvn	r3, r3
+ ca4:	lsr	r3, r3, #16
+ ca8:	strh	r3, [sl]
+ cac:	ldrb	r3, [r8, #84]	@ 0x54
+ cb0:	strb	r3, [fp]
+ cb4:	ldrb	r3, [r8, #85]	@ 0x55
+ cb8:	strb	r3, [fp, #1]
+ cbc:	ldr	ip, [sp, #52]	@ 0x34
+ cc0:	ldr	r3, [r8, #80]	@ 0x50
+ cc4:	str	r3, [ip]
+ cc8:	ldrb	r1, [r9, #8]
+ ccc:	mov	r3, #0
+ cd0:	ldrb	ip, [r9]
+ cd4:	mov	r2, r3
+ cd8:	strb	r3, [r9, #10]
+ cdc:	mov	r0, r9
+ ce0:	sub	lr, r1, #1
+ ce4:	strb	r3, [r9, #11]
+ ce8:	and	r1, ip, #15
+ cec:	strb	lr, [r9, #8]
+ cf0:	lsl	r1, r1, #2
+ cf4:	bl	0 <csum_partial>
+ cf8:	add	r3, r0, r0, ror #16
+ cfc:	mvn	r3, r3
+ d00:	lsr	r3, r3, #16
+ d04:	lsr	r2, r3, #8
+ d08:	strb	r3, [r9, #10]
+ d0c:	strb	r2, [r9, #11]
+ d10:	b	7f0 <_ctf_forward+0x594>
+ d14:	tst	r3, #8
+ d18:	beq	cc8 <_ctf_forward+0xa6c>
+ d1c:	cmp	sl, #0
+ d20:	beq	dc4 <_ctf_forward+0xb68>
+ d24:	ldrb	r2, [fp, #2]
+ d28:	mov	r1, #8
+ d2c:	ldrb	r3, [fp, #3]
+ d30:	add	ip, sp, #68	@ 0x44
+ d34:	ldr	sl, [sp, #44]	@ 0x2c
+ d38:	ldr	r0, [sp, #36]	@ 0x24
+ d3c:	ldr	sl, [sl]
+ d40:	orr	r3, r2, r3, lsl r1
+ d44:	ldrh	lr, [r0]
+ d48:	mov	r0, ip
+ d4c:	ldr	r2, [r8, #80]	@ 0x50
+ d50:	mvn	r3, r3
+ d54:	str	sl, [sp, #16]
+ d58:	uxth	r3, r3
+ d5c:	ldrh	sl, [r8, #84]	@ 0x54
+ d60:	str	r2, [sp, #52]	@ 0x34
+ d64:	mvn	r2, lr
+ d68:	ldr	lr, [sp, #16]
+ d6c:	uxth	r2, r2
+ d70:	str	sl, [sp, #60]	@ 0x3c
+ d74:	str	r3, [sp, #68]	@ 0x44
+ d78:	mvn	sl, lr
+ d7c:	ldr	lr, [sp, #60]	@ 0x3c
+ d80:	str	ip, [sp, #28]
+ d84:	str	lr, [sp, #72]	@ 0x48
+ d88:	bl	0 <csum_partial>
+ d8c:	ldr	ip, [sp, #28]
+ d90:	mov	r1, #8
+ d94:	ldr	r3, [sp, #52]	@ 0x34
+ d98:	add	r2, r0, r0, ror #16
+ d9c:	mov	r0, ip
+ da0:	lsr	r2, r2, #16
+ da4:	str	sl, [sp, #68]	@ 0x44
+ da8:	str	r3, [sp, #72]	@ 0x48
+ dac:	bl	0 <csum_partial>
+ db0:	ldr	sl, [sp, #36]	@ 0x24
+ db4:	add	r3, r0, r0, ror #16
+ db8:	mvn	r3, r3
+ dbc:	lsr	r3, r3, #16
+ dc0:	strh	r3, [sl]
+ dc4:	ldrb	r3, [r8, #84]	@ 0x54
+ dc8:	strb	r3, [fp, #2]
+ dcc:	ldrb	r3, [r8, #85]	@ 0x55
+ dd0:	strb	r3, [fp, #3]
+ dd4:	ldr	ip, [sp, #44]	@ 0x2c
+ dd8:	ldr	r3, [r8, #80]	@ 0x50
+ ddc:	str	r3, [ip]
+ de0:	b	cc8 <_ctf_forward+0xa6c>
+ de4:	ldrh	r1, [r8, #96]	@ 0x60
+ de8:	movw	r2, #65535	@ 0xffff
+ dec:	cmp	r1, r2
+ df0:	bne	bd8 <_ctf_forward+0x97c>
+ df4:	b	72c <_ctf_forward+0x4d0>
+ df8:	ldrb	r2, [fp, #13]
+ dfc:	lsl	r2, r2, #8
+ e00:	tst	r2, #1792	@ 0x700
+ e04:	addeq	r0, fp, #16
+ e08:	moveq	sl, #1
+ e0c:	streq	r0, [sp, #36]	@ 0x24
+ e10:	bne	72c <_ctf_forward+0x4d0>
+ e14:	b	b80 <_ctf_forward+0x924>
+	...
+
+Disassembly of section .init.text:
+
+00000000 <init_module>:
+   0:	push	{r4, r5, r6, lr}
+   4:	mov	r0, #0
+   8:	sub	sp, sp, #8
+   c:	ldr	r1, [pc, #132]	@ 98 <init_module+0x98>
+  10:	ldr	r6, [pc, #132]	@ 9c <init_module+0x9c>
+  14:	bl	2554 <ctf_kattach>
+  18:	cmp	r0, #0
+  1c:	mov	r4, r0
+  20:	str	r0, [r6]
+  24:	bne	3c <init_module+0x3c>
+  28:	ldr	r0, [pc, #112]	@ a0 <init_module+0xa0>
+  2c:	ldr	r1, [pc, #112]	@ a4 <init_module+0xa4>
+  30:	bl	0 <printk>
+  34:	mvn	r0, #0
+  38:	b	90 <init_module+0x90>
+  3c:	ldr	lr, [pc, #100]	@ a8 <init_module+0xa8>
+  40:	mov	r5, #0
+  44:	ldr	ip, [pc, #96]	@ ac <init_module+0xac>
+  48:	mov	r1, #20
+  4c:	ldr	r3, [pc, #92]	@ b0 <init_module+0xb0>
+  50:	mov	r2, r5
+  54:	ldr	r0, [pc, #88]	@ b4 <init_module+0xb4>
+  58:	str	lr, [ip]
+  5c:	ldr	ip, [pc, #84]	@ b8 <init_module+0xb8>
+  60:	stm	sp, {r5, ip}
+  64:	bl	0 <netlink_kernel_create>
+  68:	ldr	r3, [r6]
+  6c:	str	r0, [r4, #120]	@ 0x78
+  70:	ldr	r3, [r3, #120]	@ 0x78
+  74:	cmp	r3, r5
+  78:	movne	r0, r5
+  7c:	bne	90 <init_module+0x90>
+  80:	ldr	r0, [pc, #52]	@ bc <init_module+0xbc>
+  84:	ldr	r1, [pc, #24]	@ a4 <init_module+0xa4>
+  88:	bl	0 <printk>
+  8c:	mvn	r0, #0
+  90:	add	sp, sp, #8
+  94:	pop	{r4, r5, r6, pc}
+  98:	.word	0x00000218
+  9c:	.word	0x00000000
+  a0:	.word	0x00000220
+	...
+  bc:	.word	0x00000238
+
+Disassembly of section .exit.text:
+
+00000000 <cleanup_module>:
+   0:	push	{r4, lr}
+   4:	ldr	r4, [pc, #36]	@ 30 <cleanup_module+0x30>
+   8:	ldr	r3, [r4]
+   c:	ldr	r0, [r3, #120]	@ 0x78
+  10:	bl	0 <netlink_kernel_release>
+  14:	ldr	r0, [r4]
+  18:	bl	2724 <ctf_kdetach>
+  1c:	ldr	r2, [pc, #16]	@ 34 <cleanup_module+0x34>
+  20:	mov	r3, #0
+  24:	str	r3, [r4]
+  28:	str	r3, [r2]
+  2c:	pop	{r4, pc}
+	...

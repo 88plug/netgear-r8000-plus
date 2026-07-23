@@ -1,0 +1,237 @@
+OSL_UNLOCK
+OSL_LOCK
+Snooper parameter should be non NULL
+EMF handle should be non NULL
+Invalid instance id string
+EMF Instance doesn't exist
+Snooper input function should be non NULL
+Unregistering using invalid handle
+Unknown return value from IGMP Snooper
+Failed to alloc mem size %d for mhif entry
+Failed to alloc mem size %d for group entry
+Failed to allocated memory %d for interface entry
+Invalid EMFC handle passed
+Invalid buffer input
+Insufficient buffer size %d
+Invalid interface identifier
+Failed to alloc mem size %d for interface entry
+UFFP entry not found
+Invalid interface specified to rtport delete
+Duplicate configuration request
+Duplicate hooks registration
+Unknown operation
+Unable to add entry
+MFDB entry not found
+MFDB list get failed
+Unknown interface, rtport add failed
+Unknown interface, rtport del failed
+rtport list get failed
+UFFP list get failed
+EMF stats get failed
+Unknown command
+Unknown interface, UFFP del failed
+emfc_init: wrapper parameter NULL
+Failed to allocated memory size %d for MFL
+Memory alloc for lock object failed
+FDB Lock
+Router Port List Lock
+EMFC List Lock
+EMFC List lock create failed
+Unable to get the MFDB list
+Group           Interface      Pkts
+%08x        
+Input buffer overflow
+Unable to get the EMF stats
+McastDataPkts   McastDataFwd    McastFlooded    McastDataSentUp McastDataDropped
+%-15d %-15d %-15d %-15d %d
+IgmpPkts        IgmpPktsFwd     IgmpPktsSentUp  MFDBCacheHits   MFDBCacheMisses
+Interface %s doesn't exist
+Hooks already unregistered
+Unable to register netfilter hooks
+%s(%d): unexpected CPU value! %d
+emf/emf_stats_%s
+emf/emfdb_%s
+EMF instance not found
+Invalid EMF instance handle passed
+Invalid buffer input
+drivers/net/emf/../../../../../../../src/router/emf/emf/emf_linux.c
+Unknown instance identifier %s
+Invalid instance identifier %s
+Invalid interface specified during MFDB entry add/delete
+Interface not part of bridge %s
+Invalid interface specified
+Unable to allocate iflist entry
+Interface add failed
+Interface delete failed
+EMF if list get failed
+EMF already configured for %s
+Max instance limit %d exceeded
+Out of memory allocating emf_info
+EMFC init failed
+EMF add on %s failed
+EMF delete on %s failed
+Invalid iface specified for deletion
+Configuration request size not > %d
+Memory alloc for lock object failed
+EMF Instance List
+EMF instance list lock create failed
+Netlink kernel socket create failed
+license=Proprietary
+depends=
+vermagic=2.6.36.4brcmarm+ SMP preempt mod_unload ARMv7 
+emfc_igmp_snooper_unregister
+emfc_igmp_snooper_register
+emfc_rtport_del
+emfc_rtport_add
+emfc_mfdb_membership_del
+emfc_mfdb_membership_add
+emfc_cfg_request_process
+emfc_input
+emfc_exit
+emfc_init
+OSL_UNLOCK
+OSL_LOCK
+GCC: (Buildroot 2012.02) 4.5.3
+GCC: (Buildroot 2012.02) 4.5.3
+GCC: (Buildroot 2012.02) 4.5.3
+.symtab
+.strtab
+.shstrtab
+.rel.text
+.rel.init.text
+.rel.exit.text
+.rodata
+.rodata.str1.1
+.ARM.extab.init.text
+.rel.ARM.exidx.init.text
+.ARM.extab.exit.text
+.rel.ARM.exidx.exit.text
+.modinfo
+__ksymtab_strings
+.rel__ksymtab
+.ARM.extab
+.rel.data
+.rel.gnu.linkonce.this_module
+.rel.ARM.exidx
+.note.gnu.build-id
+.comment
+.note.GNU-stack
+.ARM.attributes
+emfc_mfdb_group_find
+emfc_iflist_clear
+emfc_unreg_frame_handle
+emfc_list_head
+emfc_list_lock
+emf_mfdb_list
+emf_stats_get
+emf_if_name_validate
+emf_instance_del
+emf_ip_post_hook
+emf_br_pre_hook
+emf_iflist_del.clone.4
+emf_netlink_sock_cb
+emf_module_init
+emf_module_exit
+__func__.32256
+__func__.32247
+__mod_license34
+__kstrtab_emfc_igmp_snooper_unregister
+__kstrtab_emfc_igmp_snooper_register
+__kstrtab_emfc_rtport_del
+__kstrtab_emfc_rtport_add
+__kstrtab_emfc_mfdb_membership_del
+__kstrtab_emfc_mfdb_membership_add
+__kstrtab_emfc_cfg_request_process
+__kstrtab_emfc_input
+__kstrtab_emfc_exit
+__kstrtab_emfc_init
+__kstrtab_OSL_UNLOCK
+__kstrtab_OSL_LOCK
+emf_nf_ops
+__ksymtab_emfc_igmp_snooper_unregister
+__ksymtab_emfc_igmp_snooper_register
+__ksymtab_emfc_rtport_del
+__ksymtab_emfc_rtport_add
+__ksymtab_emfc_mfdb_membership_del
+__ksymtab_emfc_mfdb_membership_add
+__ksymtab_emfc_cfg_request_process
+__ksymtab_emfc_input
+__ksymtab_emfc_exit
+__ksymtab_emfc_init
+__ksymtab_OSL_UNLOCK
+__ksymtab_OSL_LOCK
+spinCount
+root_emf_dir
+__module_depends
+__mod_vermagic5
+emfc_module_exit
+dev_queue_xmit
+__this_module
+osl_malloc
+emfc_iflist_add
+emfc_gethostmaclist
+__aeabi_unwind_cpp_pr0
+emf_hooks_unregister
+emfc_iflist_del
+cleanup_module
+memcpy
+emf_ucast_to_mcast
+osl_detach
+emfc_rtport_del
+nf_unregister_hook
+bcm_bprintf
+emfc_init
+emfc_igmp_snooper_register
+init_module
+bcm_binit
+create_proc_entry
+local_bh_enable
+bcm_robo_snoop_ip_match
+kfree_skb
+_raw_spin_unlock_bh
+emf_cfg_request_process
+local_bh_disable
+OSL_LOCK
+init_net
+netlink_unicast
+OSL_UNLOCK
+skb_push
+emfc_input
+strncmp
+osl_attach
+strncpy
+netlink_kernel_release
+printk
+proc_mkdir
+netlink_kernel_create
+__memzero
+emfc_rtport_add
+emf_hooks_register
+netif_rx
+emfc_mfdb_membership_find
+is_reg_snooping_enable
+strcmp
+sprintf
+emfc_cfg_request_process
+nf_register_hook
+emf_iflist_list
+emfc_exit
+emfc_module_init
+emfc_mfdb_mhif_add
+remove_proc_entry
+emfc_stats_get
+emfc_igmp_snooper_unregister
+skb_copy
+dev_get_by_name
+skb_clone
+emf_forward
+emfc_mfdb_membership_del
+_raw_spin_lock_bh
+osl_pktfree
+osl_mfree
+emfc_mfdb_clear
+emfc_mfdb_membership_add
+emfc_mfdb_list
+osl_pktdup
+__aeabi_unwind_cpp_pr1
+emf_sendup

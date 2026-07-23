@@ -1,0 +1,40 @@
+# 5ghz-channel-defaults/wireless.snippet
+#
+# R8000's three radios are hardware-split, not symmetric -- radio0 and
+# radio2 are BOTH labelled "5 GHz" in the DTS/nvram, but each is physically
+# limited to a different half of the 5 GHz band. This is not a config
+# choice, it's how the two BCM43602 5GHz chips are wired/tuned on this
+# board. See NOTES.md for the full derivation and evidence; this file is
+# just the resulting defaults, matching what OpenWrt's own board detection
+# already generates for netgear,r8000 -- confirmed live on-device (25.12.5,
+# see NOTES.md "Live confirmation").
+#
+# radio0 = 5 GHz UPPER only (UNII-3, hardware freq-limit 5735-5835 MHz):
+#   usable channels: 149, 153, 157, 161, 165 (all non-DFS, always available)
+config wifi-device 'radio0'
+	option type		'mac80211'
+	option band		'5g'
+	option channel		'149'
+	option htmode		'VHT80'
+	option country		'US'
+
+# radio1 = 2.4 GHz (unrestricted band-wise; keep off ch12-14 for US ccode)
+config wifi-device 'radio1'
+	option type		'mac80211'
+	option band		'2g'
+	option channel		'1'
+	option htmode		'HT20'
+	option country		'US'
+
+# radio2 = 5 GHz LOWER only (UNII-1/2/2e, hardware freq-limit 5170-5730 MHz):
+#   non-DFS, always available: 36, 40, 44, 48
+#   DFS (52-144): present in silicon per the freq-limit, but requires a
+#   working CLM/regulatory blob for CAC to activate -- not yet present in
+#   this build (see ../../extracted/FINDINGS.md). Defaulting to a non-DFS
+#   channel avoids a radio that silently refuses to come up AP-side.
+config wifi-device 'radio2'
+	option type		'mac80211'
+	option band		'5g'
+	option channel		'36'
+	option htmode		'VHT80'
+	option country		'US'

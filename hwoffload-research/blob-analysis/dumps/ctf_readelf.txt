@@ -1,0 +1,919 @@
+ELF Header:
+  Magic:   7f 45 4c 46 01 01 01 00 00 00 00 00 00 00 00 00 
+  Class:                             ELF32
+  Data:                              2's complement, little endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              REL (Relocatable file)
+  Machine:                           ARM
+  Version:                           0x1
+  Entry point address:               0x0
+  Start of program headers:          0 (bytes into file)
+  Start of section headers:          16716 (bytes into file)
+  Flags:                             0x5000000, Version5 EABI
+  Size of this header:               52 (bytes)
+  Size of program headers:           0 (bytes)
+  Number of program headers:         0
+  Size of section headers:           40 (bytes)
+  Number of section headers:         40
+  Section header string table index: 37
+
+Section Headers:
+  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+  [ 0]                   NULL            00000000 000000 000000 00      0   0  0
+  [ 1] .text             PROGBITS        00000000 000034 0029e0 00  AX  0   0  4
+  [ 2] .rel.text         REL             00000000 0057e8 0008a0 08     38   1  4
+  [ 3] .text.fastpath    PROGBITS        00000000 002a14 000e20 00  AX  0   0  4
+  [ 4] .rel.text.fa[...] REL             00000000 006088 0000d8 08     38   3  4
+  [ 5] .init.text        PROGBITS        00000000 003834 0000c0 00  AX  0   0  4
+  [ 6] .rel.init.text    REL             00000000 006160 000070 08     38   5  4
+  [ 7] .exit.text        PROGBITS        00000000 0038f4 000038 00  AX  0   0  4
+  [ 8] .rel.exit.text    REL             00000000 0061d0 000020 08     38   7  4
+  [ 9] .rodata           PROGBITS        00000000 00392c 00000c 00   A  0   0  4
+  [10] .ARM.extab.t[...] PROGBITS        00000000 003938 000000 00   A  0   0  1
+  [11] .ARM.exidx.t[...] ARM_EXIDX       00000000 003938 000020 00  AL  3   0  4
+  [12] .rel.ARM.exi[...] REL             00000000 0061f0 000028 08     38  11  4
+  [13] .rodata.str1.4    PROGBITS        00000000 003958 000264 01 AMS  0   0  4
+  [14] .ARM.extab.i[...] PROGBITS        00000000 003bbc 000000 00   A  0   0  1
+  [15] .ARM.exidx.i[...] ARM_EXIDX       00000000 003bbc 000008 00  AL  5   0  4
+  [16] .rel.ARM.exi[...] REL             00000000 006218 000010 08     38  15  4
+  [17] .ARM.extab.e[...] PROGBITS        00000000 003bc4 000000 00   A  0   0  1
+  [18] .ARM.exidx.e[...] ARM_EXIDX       00000000 003bc4 000008 00  AL  7   0  4
+  [19] .rel.ARM.exi[...] REL             00000000 006228 000010 08     38  18  4
+  [20] .modinfo          PROGBITS        00000000 003bcc 000058 00   A  0   0  4
+  [21] __ksymtab_strings PROGBITS        00000000 003c24 000024 00   A  0   0  1
+  [22] __ksymtab         PROGBITS        00000000 003c48 000018 00   A  0   0  4
+  [23] .rel__ksymtab     REL             00000000 006238 000030 08     38  22  4
+  [24] __kcrctab         PROGBITS        00000000 003c60 00000c 00   A  0   0  4
+  [25] .rel__kcrctab     REL             00000000 006268 000018 08     38  24  4
+  [26] .ARM.extab        PROGBITS        00000000 003c6c 000000 00   A  0   0  1
+  [27] .data             PROGBITS        00000000 003c6c 000000 00  WA  0   0  1
+  [28] .gnu.linkonc[...] PROGBITS        00000000 003c6c 000150 00  WA  0   0  4
+  [29] .rel.gnu.lin[...] REL             00000000 006280 000010 08     38  28  4
+  [30] .ARM.exidx        ARM_EXIDX       00000000 003dbc 000108 00  AL  1   0  4
+  [31] .rel.ARM.exidx    REL             00000000 006290 000118 08     38  30  4
+  [32] .note.gnu.bu[...] NOTE            00000000 003ec4 000024 00   A  0   0  4
+  [33] .bss              NOBITS          00000000 003ee8 0000c8 00  WA  0   0  4
+  [34] .comment          PROGBITS        00000000 003ee8 000080 01  MS  0   0  1
+  [35] .note.GNU-stack   PROGBITS        00000000 003f68 000000 00      0   0  1
+  [36] .ARM.attributes   ARM_ATTRIBUTES  00000000 003f68 00002f 00      0   0  1
+  [37] .shstrtab         STRTAB          00000000 003f97 0001b5 00      0   0  1
+  [38] .symtab           SYMTAB          00000000 00478c 000ab0 10     39 131  4
+  [39] .strtab           STRTAB          00000000 00523c 0005aa 00      0   0  1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
+  L (link order), O (extra OS processing required), G (group), T (TLS),
+  C (compressed), x (unknown), o (OS specific), E (exclude),
+  D (mbind), y (purecode), p (processor specific)
+
+There are no section groups in this file.
+
+There are no program headers in this file.
+
+There is no dynamic section in this file.
+
+Relocation section '.rel.text' at offset 0x57e8 contains 276 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name
+00000024  00000802 R_ARM_ABS32       00000000   .bss
+00000054  00000802 R_ARM_ABS32       00000000   .bss
+000000c8  0000a81d R_ARM_JUMP24      00000000   osl_mfree
+000000dc  00000802 R_ARM_ABS32       00000000   .bss
+000000f4  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00000144  0000921d R_ARM_JUMP24      00000000   _raw_spin_unlock_bh
+00000184  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00000234  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00000244  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+000002a0  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00000350  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00000360  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+0000039c  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00000400  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00000410  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00000420  0000921d R_ARM_JUMP24      00000000   _raw_spin_unlock_bh
+00000478  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+0000047c  00001e2b R_ARM_MOVW_ABS_NC 00000000   .LANCHOR0
+00000480  00001e2c R_ARM_MOVT_ABS    00000000   .LANCHOR0
+0000070c  00001e2b R_ARM_MOVW_ABS_NC 00000000   .LANCHOR0
+00000710  00001e2c R_ARM_MOVT_ABS    00000000   .LANCHOR0
+00000730  0000a81c R_ARM_CALL        00000000   osl_mfree
+00000754  00001e2b R_ARM_MOVW_ABS_NC 00000000   .LANCHOR0
+00000758  00001e2c R_ARM_MOVT_ABS    00000000   .LANCHOR0
+00000764  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00000780  0000921d R_ARM_JUMP24      00000000   _raw_spin_unlock_bh
+00000794  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+000007a0  00000a1c R_ARM_CALL        00000000   _ctf_brc_lkup_ll
+000007b8  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+000007f8  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00000804  00000a1c R_ARM_CALL        00000000   _ctf_brc_lkup_ll
+0000083c  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00000854  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00000874  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+000008b8  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+000008f0  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00000934  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00000948  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+000009cc  0000a01c R_ARM_CALL        00000000   __memzero
+000009fc  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00000a04  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00000a80  0000a81c R_ARM_CALL        00000000   osl_mfree
+00000a9c  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00000aa4  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00000b24  0000a81c R_ARM_CALL        00000000   osl_mfree
+00000b3c  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00000b8c  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00000ba0  0000a81d R_ARM_JUMP24      00000000   osl_mfree
+00000bac  0000921d R_ARM_JUMP24      00000000   _raw_spin_unlock_bh
+00000bc0  00000802 R_ARM_ABS32       00000000   .bss
+00000c28  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00000c98  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00000ca8  0000a81c R_ARM_CALL        00000000   osl_mfree
+00000cfc  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00000d40  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00000dac  0000a81c R_ARM_CALL        00000000   osl_mfree
+00000dc8  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00000de0  00008d1d R_ARM_JUMP24      00000000   bcm_bprintf
+00000dec  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00000e08  0000a81c R_ARM_CALL        00000000   osl_mfree
+00000e30  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00000e44  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00000e7c  0000a81c R_ARM_CALL        00000000   osl_mfree
+00000ea0  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00000eb4  00008d1d R_ARM_JUMP24      00000000   bcm_bprintf
+00000eb8  00000802 R_ARM_ABS32       00000000   .bss
+00000ebc  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+00000ec0  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+00000eec  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00000f0c  00002b1c R_ARM_CALL        00000140   _ctf_ipc_lkup_ll
+00000f28  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00000f70  00000102 R_ARM_ABS32       00000000   .text
+00000f74  00000102 R_ARM_ABS32       00000000   .text
+00000f78  00000102 R_ARM_ABS32       00000000   .text
+00000f7c  00000102 R_ARM_ABS32       00000000   .text
+00000f80  00000102 R_ARM_ABS32       00000000   .text
+00000f84  00000102 R_ARM_ABS32       00000000   .text
+00000f88  00000102 R_ARM_ABS32       00000000   .text
+00001020  0000a41c R_ARM_CALL        00000000   sprintf
+00001040  0000a41c R_ARM_CALL        00000000   sprintf
+00001098  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+000010b8  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00001108  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00001130  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00001180  0000a41c R_ARM_CALL        00000000   sprintf
+0000119c  0000a41c R_ARM_CALL        00000000   sprintf
+000011f8  0000a41c R_ARM_CALL        00000000   sprintf
+0000120c  0000921d R_ARM_JUMP24      00000000   _raw_spin_unlock_bh
+00001210  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+00001214  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+00001218  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+0000121c  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+00001220  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+000014dc  00009d1c R_ARM_CALL        00000000   memcmp
+00001504  00009d1c R_ARM_CALL        00000000   memcmp
+000016ec  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+000017d8  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00001838  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+000018b4  0000a81c R_ARM_CALL        00000000   osl_mfree
+000018e0  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+000018f8  00000802 R_ARM_ABS32       00000000   .bss
+000019a4  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00001a28  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00001a60  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00001a70  0000a81c R_ARM_CALL        00000000   osl_mfree
+00001a8c  00009d1c R_ARM_CALL        00000000   memcmp
+00001ab4  00000802 R_ARM_ABS32       00000000   .bss
+00001ae0  00008d1c R_ARM_CALL        00000000   bcm_bprintf
+00001b1c  00008d1c R_ARM_CALL        00000000   bcm_bprintf
+00001b28  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00001b58  00008d1c R_ARM_CALL        00000000   bcm_bprintf
+00001bb4  00008d1c R_ARM_CALL        00000000   bcm_bprintf
+00001c34  00008d1c R_ARM_CALL        00000000   bcm_bprintf
+00001c60  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00001c6c  00008d1c R_ARM_CALL        00000000   bcm_bprintf
+00001c78  00008d1c R_ARM_CALL        00000000   bcm_bprintf
+00001c84  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00001ca4  0000851c R_ARM_CALL        00000000   bcm_ether_ntoa
+00001cc0  00008d1c R_ARM_CALL        00000000   bcm_bprintf
+00001ce4  00008d1c R_ARM_CALL        00000000   bcm_bprintf
+00001d6c  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00001d88  00008d1c R_ARM_CALL        00000000   bcm_bprintf
+00001d94  0000931c R_ARM_CALL        00000000   osl_ctfpool_stats
+00001da0  00008d1c R_ARM_CALL        00000000   bcm_bprintf
+00001db0  0000851c R_ARM_CALL        00000000   bcm_ether_ntoa
+00001dc8  00008d1c R_ARM_CALL        00000000   bcm_bprintf
+00001dd0  00000802 R_ARM_ABS32       00000000   .bss
+00001dd4  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+00001dd8  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+00001ddc  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+00001de0  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+00001de4  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+00001de8  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+00001dec  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+00001df0  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+00001df4  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+00001df8  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+00001dfc  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+00001e00  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+00001e04  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+00001e08  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+00001e0c  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+00001e10  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+00001e14  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+00001e18  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+00001e1c  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+00001e20  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+00001e50  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00001e8c  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00001ea0  0000881c R_ARM_CALL        00000000   osl_malloc
+00001eb0  0000a01c R_ARM_CALL        00000000   __memzero
+00001edc  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00001ef0  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00001f44  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00001f5c  00002b1c R_ARM_CALL        00000140   _ctf_ipc_lkup_ll
+00001f70  0000881c R_ARM_CALL        00000000   osl_malloc
+00001f84  00008c1c R_ARM_CALL        00000000   memcpy
+00002018  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00002044  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00002050  00000802 R_ARM_ABS32       00000000   .bss
+00002080  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+0000208c  00000a1c R_ARM_CALL        00000000   _ctf_brc_lkup_ll
+000020a0  0000881c R_ARM_CALL        00000000   osl_malloc
+0000210c  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00002124  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+0000218c  0000881c R_ARM_CALL        00000000   osl_malloc
+0000219c  0000a01c R_ARM_CALL        00000000   __memzero
+000021c0  00009b1c R_ARM_CALL        00000000   strncpy
+00002210  0000a91c R_ARM_CALL        00000000   getintvar
+00002328  0000881c R_ARM_CALL        00000000   osl_malloc
+00002340  0000a01c R_ARM_CALL        00000000   __memzero
+0000234c  0000881c R_ARM_CALL        00000000   osl_malloc
+00002364  0000a01c R_ARM_CALL        00000000   __memzero
+00002370  0000881c R_ARM_CALL        00000000   osl_malloc
+00002388  0000a01c R_ARM_CALL        00000000   __memzero
+00002394  0000881c R_ARM_CALL        00000000   osl_malloc
+000023ac  0000a01c R_ARM_CALL        00000000   __memzero
+000023b8  0000881c R_ARM_CALL        00000000   osl_malloc
+000023d0  0000a01c R_ARM_CALL        00000000   __memzero
+000023dc  0000881c R_ARM_CALL        00000000   osl_malloc
+000023f4  0000881c R_ARM_CALL        00000000   osl_malloc
+0000240c  0000881c R_ARM_CALL        00000000   osl_malloc
+00002428  0000881c R_ARM_CALL        00000000   osl_malloc
+00002450  0000a81c R_ARM_CALL        00000000   osl_mfree
+00002460  0000a81c R_ARM_CALL        00000000   osl_mfree
+00002470  0000a81c R_ARM_CALL        00000000   osl_mfree
+00002488  0000a81c R_ARM_CALL        00000000   osl_mfree
+00002498  0000a81c R_ARM_CALL        00000000   osl_mfree
+000024a8  0000a81c R_ARM_CALL        00000000   osl_mfree
+000024b8  0000a81c R_ARM_CALL        00000000   osl_mfree
+000024d0  0000a81c R_ARM_CALL        00000000   osl_mfree
+000024dc  00000802 R_ARM_ABS32       00000000   .bss
+000024e0  00000802 R_ARM_ABS32       00000000   .bss
+000024e4  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+000024e8  00001502 R_ARM_ABS32       00000058   _ctf_detach
+000024ec  00004402 R_ARM_ABS32       0000025c   _ctf_forward
+000024f0  00002302 R_ARM_ABS32       000008c4   _ctf_isenabled
+000024f4  00002202 R_ARM_ABS32       00000860   _ctf_isbridge
+000024f8  00004302 R_ARM_ABS32       00002054   _ctf_brc_add
+000024fc  00002802 R_ARM_ABS32       00000bc4   _ctf_brc_delete
+00002500  00002102 R_ARM_ABS32       000007c4   _ctf_brc_update
+00002504  00002002 R_ARM_ABS32       00000784   _ctf_brc_lkup
+00002508  00001f02 R_ARM_ABS32       0000077c   _ctf_brc_release
+0000250c  00004002 R_ARM_ABS32       00001efc   _ctf_ipc_add
+00002510  00003902 R_ARM_ABS32       000018fc   _ctf_ipc_delete
+00002514  00000d02 R_ARM_ABS32       00000000   _ctf_ipc_count_get
+00002518  00001d02 R_ARM_ABS32       00000424   _ctf_ipc_delete_multi
+0000251c  00003602 R_ARM_ABS32       000017ec   _ctf_ipc_delete_range
+00002520  00003502 R_ARM_ABS32       00001674   _ctf_ipc_action
+00002524  00003302 R_ARM_ABS32       00001224   _ctf_ipc_lkup_fn
+00002528  00001002 R_ARM_ABS32       0000009c   _ctf_ipc_lkup_l4p[...]
+0000252c  00001c02 R_ARM_ABS32       0000041c   _ctf_ipc_release
+00002530  00001b02 R_ARM_ABS32       0000036c   _ctf_enable
+00002534  00003f02 R_ARM_ABS32       00001e24   _ctf_dev_register
+00002538  00002502 R_ARM_ABS32       000009d4   _ctf_dev_unregister
+0000253c  00001a02 R_ARM_ABS32       00000250   _ctf_dev_vlan_add
+00002540  00001902 R_ARM_ABS32       00000148   _ctf_dev_vlan_delete
+00002544  00003c02 R_ARM_ABS32       00001ab8   _ctf_dump
+00002548  00002e02 R_ARM_ABS32       00000f30   _ctf_cfg_req_process
+0000254c  00001202 R_ARM_ABS32       00000028   _ctf_fwdcb_register
+00002550  00002902 R_ARM_ABS32       00000d08   _ctf_clear
+00002578  0000a01c R_ARM_CALL        00000000   __memzero
+000025a8  00009b1c R_ARM_CALL        00000000   strncpy
+000025b8  0000a91c R_ARM_CALL        00000000   getintvar
+000026b0  00000802 R_ARM_ABS32       00000000   .bss
+000026b4  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+000026b8  00001502 R_ARM_ABS32       00000058   _ctf_detach
+000026bc  00004402 R_ARM_ABS32       0000025c   _ctf_forward
+000026c0  00002302 R_ARM_ABS32       000008c4   _ctf_isenabled
+000026c4  00002202 R_ARM_ABS32       00000860   _ctf_isbridge
+000026c8  00004302 R_ARM_ABS32       00002054   _ctf_brc_add
+000026cc  00002802 R_ARM_ABS32       00000bc4   _ctf_brc_delete
+000026d0  00002102 R_ARM_ABS32       000007c4   _ctf_brc_update
+000026d4  00002002 R_ARM_ABS32       00000784   _ctf_brc_lkup
+000026d8  00001f02 R_ARM_ABS32       0000077c   _ctf_brc_release
+000026dc  00004002 R_ARM_ABS32       00001efc   _ctf_ipc_add
+000026e0  00003902 R_ARM_ABS32       000018fc   _ctf_ipc_delete
+000026e4  00000d02 R_ARM_ABS32       00000000   _ctf_ipc_count_get
+000026e8  00001d02 R_ARM_ABS32       00000424   _ctf_ipc_delete_multi
+000026ec  00003602 R_ARM_ABS32       000017ec   _ctf_ipc_delete_range
+000026f0  00003502 R_ARM_ABS32       00001674   _ctf_ipc_action
+000026f4  00003302 R_ARM_ABS32       00001224   _ctf_ipc_lkup_fn
+000026f8  00001002 R_ARM_ABS32       0000009c   _ctf_ipc_lkup_l4p[...]
+000026fc  00001c02 R_ARM_ABS32       0000041c   _ctf_ipc_release
+00002700  00001b02 R_ARM_ABS32       0000036c   _ctf_enable
+00002704  00003f02 R_ARM_ABS32       00001e24   _ctf_dev_register
+00002708  00002502 R_ARM_ABS32       000009d4   _ctf_dev_unregister
+0000270c  00001a02 R_ARM_ABS32       00000250   _ctf_dev_vlan_add
+00002710  00001902 R_ARM_ABS32       00000148   _ctf_dev_vlan_delete
+00002714  00003c02 R_ARM_ABS32       00001ab8   _ctf_dump
+00002718  00002e02 R_ARM_ABS32       00000f30   _ctf_cfg_req_process
+0000271c  00001202 R_ARM_ABS32       00000028   _ctf_fwdcb_register
+00002720  00002902 R_ARM_ABS32       00000d08   _ctf_clear
+00002738  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00002760  0000a81c R_ARM_CALL        00000000   osl_mfree
+00002780  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+000027c0  0000a81c R_ARM_CALL        00000000   osl_mfree
+000027e0  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00002804  0000a81c R_ARM_CALL        00000000   osl_mfree
+00002834  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+0000283c  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00002870  0000a81c R_ARM_CALL        00000000   osl_mfree
+00002898  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+000028b0  0000a81c R_ARM_CALL        00000000   osl_mfree
+000028c0  0000a81c R_ARM_CALL        00000000   osl_mfree
+000028d0  0000a81c R_ARM_CALL        00000000   osl_mfree
+000028e4  0000a81c R_ARM_CALL        00000000   osl_mfree
+000028f4  0000a81c R_ARM_CALL        00000000   osl_mfree
+00002904  0000a81c R_ARM_CALL        00000000   osl_mfree
+00002914  0000a81c R_ARM_CALL        00000000   osl_mfree
+00002924  0000a81c R_ARM_CALL        00000000   osl_mfree
+00002934  0000a81c R_ARM_CALL        00000000   osl_mfree
+00002954  00000802 R_ARM_ABS32       00000000   .bss
+00002970  0000a51c R_ARM_CALL        00000000   skb_clone
+000029c4  0000981d R_ARM_JUMP24      00000000   netlink_unicast
+000029dc  0000aa02 R_ARM_ABS32       00000000   kcih
+
+Relocation section '.rel.text.fastpath' at offset 0x6088 contains 27 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name
+00000230  00009d1c R_ARM_CALL        00000000   memcmp
+000002dc  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+0000039c  00008c1c R_ARM_CALL        00000000   memcpy
+000003d0  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00000484  0000841c R_ARM_CALL        00000000   dev_queue_xmit
+000004c4  00008f1c R_ARM_CALL        00000000   osl_pkt_frmnative
+00000510  0000a71c R_ARM_CALL        00000000   osl_pktfree
+0000054c  0000a71c R_ARM_CALL        00000000   osl_pktfree
+0000057c  0000961c R_ARM_CALL        00000000   skb_pull
+000006e4  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+000006ec  0000a61c R_ARM_CALL        00000000   _raw_spin_lock_bh
+00000730  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+000008cc  00009a1c R_ARM_CALL        00000000   skb_push
+00000914  00008b1c R_ARM_CALL        00000000   ppp_txstats_upd
+00000980  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+000009bc  0000961c R_ARM_CALL        00000000   skb_pull
+000009d0  0000911c R_ARM_CALL        00000000   ppp_rxstats_upd
+000009e0  00009a1c R_ARM_CALL        00000000   skb_push
+00000aa4  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00000ae8  0000921c R_ARM_CALL        00000000   _raw_spin_unlock_bh
+00000c70  0000861c R_ARM_CALL        00000000   csum_partial
+00000c94  0000861c R_ARM_CALL        00000000   csum_partial
+00000cf4  0000861c R_ARM_CALL        00000000   csum_partial
+00000d88  0000861c R_ARM_CALL        00000000   csum_partial
+00000dac  0000861c R_ARM_CALL        00000000   csum_partial
+00000e18  0000a302 R_ARM_ABS32       00000000   jiffies
+00000e1c  00000802 R_ARM_ABS32       00000000   .bss
+
+Relocation section '.rel.init.text' at offset 0x6160 contains 14 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name
+00000014  0000a11c R_ARM_CALL        00002554   ctf_kattach
+00000030  00009e1c R_ARM_CALL        00000000   printk
+00000064  00009f1c R_ARM_CALL        00000000   netlink_kernel_create
+00000088  00009e1c R_ARM_CALL        00000000   printk
+00000098  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+0000009c  0000aa02 R_ARM_ABS32       00000000   kcih
+000000a0  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+000000a4  00000502 R_ARM_ABS32       00000000   .rodata
+000000a8  00008302 R_ARM_ABS32       00002130   _ctf_attach
+000000ac  00009902 R_ARM_ABS32       00000000   ctf_attach_fn
+000000b0  00005202 R_ARM_ABS32       00002958   ctf_netlink_sock_cb
+000000b4  00009402 R_ARM_ABS32       00000000   init_net
+000000b8  00008702 R_ARM_ABS32       00000000   __this_module
+000000bc  00000602 R_ARM_ABS32       00000000   .rodata.str1.4
+
+Relocation section '.rel.exit.text' at offset 0x61d0 contains 4 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name
+00000010  00009c1c R_ARM_CALL        00000000   netlink_kernel_release
+00000018  00008e1c R_ARM_CALL        00002724   ctf_kdetach
+00000030  0000aa02 R_ARM_ABS32       00000000   kcih
+00000034  00009902 R_ARM_ABS32       00000000   ctf_attach_fn
+
+Relocation section '.rel.ARM.exidx.text.fastpath' at offset 0x61f0 contains 5 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name
+00000000  0000022a R_ARM_PREL31      00000000   .text.fastpath
+00000000  00008900 R_ARM_NONE        00000000   __aeabi_unwind_cpp_pr0
+00000008  0000022a R_ARM_PREL31      00000000   .text.fastpath
+00000010  0000022a R_ARM_PREL31      00000000   .text.fastpath
+00000018  0000022a R_ARM_PREL31      00000000   .text.fastpath
+
+Relocation section '.rel.ARM.exidx.init.text' at offset 0x6218 contains 2 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name
+00000000  0000032a R_ARM_PREL31      00000000   .init.text
+00000000  00008900 R_ARM_NONE        00000000   __aeabi_unwind_cpp_pr0
+
+Relocation section '.rel.ARM.exidx.exit.text' at offset 0x6228 contains 2 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name
+00000000  0000042a R_ARM_PREL31      00000000   .exit.text
+00000000  00008900 R_ARM_NONE        00000000   __aeabi_unwind_cpp_pr0
+
+Relocation section '.rel__ksymtab' at offset 0x6238 contains 6 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name
+00000000  00008e02 R_ARM_ABS32       00002724   ctf_kdetach
+00000004  00000702 R_ARM_ABS32       00000000   __ksymtab_strings
+00000008  0000a102 R_ARM_ABS32       00002554   ctf_kattach
+0000000c  00000702 R_ARM_ABS32       00000000   __ksymtab_strings
+00000010  00008302 R_ARM_ABS32       00002130   _ctf_attach
+00000014  00000702 R_ARM_ABS32       00000000   __ksymtab_strings
+
+Relocation section '.rel__kcrctab' at offset 0x6268 contains 3 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name
+00000000  00009702 R_ARM_ABS32       c429e3b0   __crc_ctf_kdetach
+00000004  0000a202 R_ARM_ABS32       9712bb13   __crc_ctf_kattach
+00000008  00009502 R_ARM_ABS32       f2d9bfb6   __crc__ctf_attach
+
+Relocation section '.rel.gnu.linkonce.this_module' at offset 0x6280 contains 2 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name
+000000bc  00009002 R_ARM_ABS32       00000000   init_module
+00000140  00008a02 R_ARM_ABS32       00000000   cleanup_module
+
+Relocation section '.rel.ARM.exidx' at offset 0x6290 contains 35 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name
+00000000  0000012a R_ARM_PREL31      00000000   .text
+00000000  00008900 R_ARM_NONE        00000000   __aeabi_unwind_cpp_pr0
+00000008  0000012a R_ARM_PREL31      00000000   .text
+00000010  0000012a R_ARM_PREL31      00000000   .text
+00000018  0000012a R_ARM_PREL31      00000000   .text
+00000020  0000012a R_ARM_PREL31      00000000   .text
+00000028  0000012a R_ARM_PREL31      00000000   .text
+00000030  0000012a R_ARM_PREL31      00000000   .text
+00000038  0000012a R_ARM_PREL31      00000000   .text
+00000040  0000012a R_ARM_PREL31      00000000   .text
+00000048  0000012a R_ARM_PREL31      00000000   .text
+00000050  0000012a R_ARM_PREL31      00000000   .text
+00000058  0000012a R_ARM_PREL31      00000000   .text
+00000060  0000012a R_ARM_PREL31      00000000   .text
+00000068  0000012a R_ARM_PREL31      00000000   .text
+00000070  0000012a R_ARM_PREL31      00000000   .text
+00000078  0000012a R_ARM_PREL31      00000000   .text
+00000080  0000012a R_ARM_PREL31      00000000   .text
+00000088  0000012a R_ARM_PREL31      00000000   .text
+00000090  0000012a R_ARM_PREL31      00000000   .text
+00000098  0000012a R_ARM_PREL31      00000000   .text
+000000a0  0000012a R_ARM_PREL31      00000000   .text
+000000a8  0000012a R_ARM_PREL31      00000000   .text
+000000b0  0000012a R_ARM_PREL31      00000000   .text
+000000b8  0000012a R_ARM_PREL31      00000000   .text
+000000c0  0000012a R_ARM_PREL31      00000000   .text
+000000c8  0000012a R_ARM_PREL31      00000000   .text
+000000d0  0000012a R_ARM_PREL31      00000000   .text
+000000d8  0000012a R_ARM_PREL31      00000000   .text
+000000e0  0000012a R_ARM_PREL31      00000000   .text
+000000e8  0000012a R_ARM_PREL31      00000000   .text
+000000f0  0000012a R_ARM_PREL31      00000000   .text
+000000f8  0000012a R_ARM_PREL31      00000000   .text
+00000100  0000012a R_ARM_PREL31      00000000   .text
+00000100  00008900 R_ARM_NONE        00000000   __aeabi_unwind_cpp_pr0
+
+Unwind section '.ARM.exidx.text.fastpath' at offset 0x3938 contains 4 entries:
+
+0x0: 0x80a2b0b0
+  Compact model index: 0
+  0xa2      pop {r4, r5, r6}
+  0xb0      finish
+  0xb0      finish
+
+0x9c <_ctf_ipc_lkup_l4proto_v6>: 0x80b0b0b0
+  Compact model index: 0
+  0xb0      finish
+  0xb0      finish
+  0xb0      finish
+
+0x140 <_ctf_ipc_lkup_ll>: 0x80aeb0b0
+  Compact model index: 0
+  0xae      pop {r4, r5, r6, r7, r8, r9, r10, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x25c <_ctf_forward>: 0x8014afb0
+  Compact model index: 0
+  0x14      vsp = vsp + 84
+  0xaf      pop {r4, r5, r6, r7, r8, r9, r10, r11, r14}
+  0xb0      finish
+
+
+Unwind section '.ARM.exidx.init.text' at offset 0x3bbc contains 1 entry:
+
+0x0: 0x8001aab0
+  Compact model index: 0
+  0x01      vsp = vsp + 8
+  0xaa      pop {r4, r5, r6, r14}
+  0xb0      finish
+
+
+Unwind section '.ARM.exidx.exit.text' at offset 0x3bc4 contains 1 entry:
+
+0x0: 0x80a8b0b0
+  Compact model index: 0
+  0xa8      pop {r4, r14}
+  0xb0      finish
+  0xb0      finish
+
+
+Unwind section '.ARM.exidx' at offset 0x3dbc contains 33 entries:
+
+0x0: 0x80b0b0b0
+  Compact model index: 0
+  0xb0      finish
+  0xb0      finish
+  0xb0      finish
+
+0x28 <_ctf_fwdcb_register>: 0x80b0b0b0
+  Compact model index: 0
+  0xb0      finish
+  0xb0      finish
+  0xb0      finish
+
+0x58 <_ctf_detach>: 0x80a8b0b0
+  Compact model index: 0
+  0xa8      pop {r4, r14}
+  0xb0      finish
+  0xb0      finish
+
+0xe0 <_ctf_ipc_detach_brcp>: 0x8001a8b0
+  Compact model index: 0
+  0x01      vsp = vsp + 8
+  0xa8      pop {r4, r14}
+  0xb0      finish
+
+0x148 <_ctf_dev_vlan_delete>: 0x8002a9b0
+  Compact model index: 0
+  0x02      vsp = vsp + 12
+  0xa9      pop {r4, r5, r14}
+  0xb0      finish
+
+0x250 <_ctf_dev_vlan_add>: 0x8004a9b0
+  Compact model index: 0
+  0x04      vsp = vsp + 20
+  0xa9      pop {r4, r5, r14}
+  0xb0      finish
+
+0x36c <_ctf_enable>: 0x80b108ab
+  Compact model index: 0
+  0xb1 0x08 pop {r3}
+  0xab      pop {r4, r5, r6, r7, r14}
+
+0x41c <_ctf_ipc_release>: 0x80b0b0b0
+  Compact model index: 0
+  0xb0      finish
+  0xb0      finish
+  0xb0      finish
+
+0x424 <_ctf_ipc_delete_multi>: 0x800aafb0
+  Compact model index: 0
+  0x0a      vsp = vsp + 44
+  0xaf      pop {r4, r5, r6, r7, r8, r9, r10, r11, r14}
+  0xb0      finish
+
+0x77c <_ctf_brc_release>: 0x80b0b0b0
+  Compact model index: 0
+  0xb0      finish
+  0xb0      finish
+  0xb0      finish
+
+0x784 <_ctf_brc_lkup>: 0x80b108a9
+  Compact model index: 0
+  0xb1 0x08 pop {r3}
+  0xa9      pop {r4, r5, r14}
+
+0x7c4 <_ctf_brc_update>: 0x80aab0b0
+  Compact model index: 0
+  0xaa      pop {r4, r5, r6, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x860 <_ctf_isbridge>: 0x80b108a9
+  Compact model index: 0
+  0xb1 0x08 pop {r3}
+  0xa9      pop {r4, r5, r14}
+
+0x8c4 <_ctf_isenabled>: 0x80b108a9
+  Compact model index: 0
+  0xb1 0x08 pop {r3}
+  0xa9      pop {r4, r5, r14}
+
+0x950 <_ctf_brc_hot_invalidate>: 0x80aeb0b0
+  Compact model index: 0
+  0xae      pop {r4, r5, r6, r7, r8, r9, r10, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x9d4 <_ctf_dev_unregister>: 0x80aeb0b0
+  Compact model index: 0
+  0xae      pop {r4, r5, r6, r7, r8, r9, r10, r14}
+  0xb0      finish
+  0xb0      finish
+
+0xbc4 <_ctf_brc_delete>: 0x8002abb0
+  Compact model index: 0
+  0x02      vsp = vsp + 12
+  0xab      pop {r4, r5, r6, r7, r14}
+  0xb0      finish
+
+0xd08 <_ctf_clear>: 0x8000afb0
+  Compact model index: 0
+  0x00      vsp = vsp + 4
+  0xaf      pop {r4, r5, r6, r7, r8, r9, r10, r11, r14}
+  0xb0      finish
+
+0xec4 <_ctf_ipc_lkup>: 0x8003aeb0
+  Compact model index: 0
+  0x03      vsp = vsp + 16
+  0xae      pop {r4, r5, r6, r7, r8, r9, r10, r14}
+  0xb0      finish
+
+0xf30 <_ctf_cfg_req_process>: 0x8003acb0
+  Compact model index: 0
+  0x03      vsp = vsp + 16
+  0xac      pop {r4, r5, r6, r7, r8, r14}
+  0xb0      finish
+
+0x1224 <_ctf_ipc_lkup_fn>: 0x80048400
+  Compact model index: 0
+  0x04      vsp = vsp + 20
+  0x84 0x00 pop {r14}
+
+0x1288 <_ctf_is_ipc_in_range>: 0x8002845f
+  Compact model index: 0
+  0x02      vsp = vsp + 12
+  0x84 0x5f pop {r4, r5, r6, r7, r8, r10, r14}
+
+0x1674 <_ctf_ipc_action>: 0x8004afb0
+  Compact model index: 0
+  0x04      vsp = vsp + 20
+  0xaf      pop {r4, r5, r6, r7, r8, r9, r10, r11, r14}
+  0xb0      finish
+
+0x17ec <_ctf_ipc_delete_range>: 0x8002afb0
+  Compact model index: 0
+  0x02      vsp = vsp + 12
+  0xaf      pop {r4, r5, r6, r7, r8, r9, r10, r11, r14}
+  0xb0      finish
+
+0x18fc <_ctf_ipc_delete>: 0x8002afb0
+  Compact model index: 0
+  0x02      vsp = vsp + 12
+  0xaf      pop {r4, r5, r6, r7, r8, r9, r10, r11, r14}
+  0xb0      finish
+
+0x1ab8 <_ctf_dump>: 0x800eafb0
+  Compact model index: 0
+  0x0e      vsp = vsp + 60
+  0xaf      pop {r4, r5, r6, r7, r8, r9, r10, r11, r14}
+  0xb0      finish
+
+0x1e24 <_ctf_dev_register>: 0x80b108ab
+  Compact model index: 0
+  0xb1 0x08 pop {r3}
+  0xab      pop {r4, r5, r6, r7, r14}
+
+0x1efc <_ctf_ipc_add>: 0x8003aeb0
+  Compact model index: 0
+  0x03      vsp = vsp + 16
+  0xae      pop {r4, r5, r6, r7, r8, r9, r10, r14}
+  0xb0      finish
+
+0x2054 <_ctf_brc_add>: 0x80b108ab
+  Compact model index: 0
+  0xb1 0x08 pop {r3}
+  0xab      pop {r4, r5, r6, r7, r14}
+
+0x2130 <_ctf_attach>: 0x80aeb0b0
+  Compact model index: 0
+  0xae      pop {r4, r5, r6, r7, r8, r9, r10, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x2554 <ctf_kattach>: 0x80b108ab
+  Compact model index: 0
+  0xb1 0x08 pop {r3}
+  0xab      pop {r4, r5, r6, r7, r14}
+
+0x2724 <ctf_kdetach>: 0x80acb0b0
+  Compact model index: 0
+  0xac      pop {r4, r5, r6, r7, r8, r14}
+  0xb0      finish
+  0xb0      finish
+
+0x2958 <ctf_netlink_sock_cb>: 0x80aab0b0
+  Compact model index: 0
+  0xaa      pop {r4, r5, r6, r14}
+  0xb0      finish
+  0xb0      finish
+
+
+Symbol table '.symtab' contains 171 entries:
+   Num:    Value  Size Type    Bind   Vis      Ndx Name
+     0: 00000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 00000000     0 SECTION LOCAL  DEFAULT    1 .text
+     2: 00000000     0 SECTION LOCAL  DEFAULT    3 .text.fastpath
+     3: 00000000     0 SECTION LOCAL  DEFAULT    5 .init.text
+     4: 00000000     0 SECTION LOCAL  DEFAULT    7 .exit.text
+     5: 00000000     0 SECTION LOCAL  DEFAULT    9 .rodata
+     6: 00000000     0 SECTION LOCAL  DEFAULT   13 .rodata.str1.4
+     7: 00000000     0 SECTION LOCAL  DEFAULT   21 __ksymtab_strings
+     8: 00000000     0 SECTION LOCAL  DEFAULT   33 .bss
+     9: 00000000     0 NOTYPE  LOCAL  DEFAULT    3 $a
+    10: 00000000   156 FUNC    LOCAL  DEFAULT    3 _ctf_brc_lkup_ll
+    11: 00000000     0 NOTYPE  LOCAL  DEFAULT   11 $d
+    12: 00000000     0 NOTYPE  LOCAL  DEFAULT    1 $a
+    13: 00000000    40 FUNC    LOCAL  DEFAULT    1 _ctf_ipc_count_get
+    14: 00000024     0 NOTYPE  LOCAL  DEFAULT    1 $d
+    15: 00000000     0 NOTYPE  LOCAL  DEFAULT   30 $d
+    16: 0000009c   164 FUNC    LOCAL  DEFAULT    3 _ctf_ipc_lkup_l4[...]
+    17: 00000028     0 NOTYPE  LOCAL  DEFAULT    1 $a
+    18: 00000028    48 FUNC    LOCAL  DEFAULT    1 _ctf_fwdcb_register
+    19: 00000054     0 NOTYPE  LOCAL  DEFAULT    1 $d
+    20: 00000058     0 NOTYPE  LOCAL  DEFAULT    1 $a
+    21: 00000058   136 FUNC    LOCAL  DEFAULT    1 _ctf_detach
+    22: 000000dc     0 NOTYPE  LOCAL  DEFAULT    1 $d
+    23: 000000e0     0 NOTYPE  LOCAL  DEFAULT    1 $a
+    24: 000000e0   104 FUNC    LOCAL  DEFAULT    1 _ctf_ipc_detach_brcp
+    25: 00000148   264 FUNC    LOCAL  DEFAULT    1 _ctf_dev_vlan_delete
+    26: 00000250   284 FUNC    LOCAL  DEFAULT    1 _ctf_dev_vlan_add
+    27: 0000036c   176 FUNC    LOCAL  DEFAULT    1 _ctf_enable
+    28: 0000041c     8 FUNC    LOCAL  DEFAULT    1 _ctf_ipc_release
+    29: 00000424   856 FUNC    LOCAL  DEFAULT    1 _ctf_ipc_delete_multi
+    30: 00000000     0 NOTYPE  LOCAL  DEFAULT   33 .LANCHOR0
+    31: 0000077c     8 FUNC    LOCAL  DEFAULT    1 _ctf_brc_release
+    32: 00000784    64 FUNC    LOCAL  DEFAULT    1 _ctf_brc_lkup
+    33: 000007c4   156 FUNC    LOCAL  DEFAULT    1 _ctf_brc_update
+    34: 00000860   100 FUNC    LOCAL  DEFAULT    1 _ctf_isbridge
+    35: 000008c4   140 FUNC    LOCAL  DEFAULT    1 _ctf_isenabled
+    36: 00000950   132 FUNC    LOCAL  DEFAULT    1 _ctf_brc_hot_inv[...]
+    37: 000009d4   496 FUNC    LOCAL  DEFAULT    1 _ctf_dev_unregister
+    38: 00000bc0     0 NOTYPE  LOCAL  DEFAULT    1 $d
+    39: 00000bc4     0 NOTYPE  LOCAL  DEFAULT    1 $a
+    40: 00000bc4   324 FUNC    LOCAL  DEFAULT    1 _ctf_brc_delete
+    41: 00000d08   444 FUNC    LOCAL  DEFAULT    1 _ctf_clear
+    42: 00000eb8     0 NOTYPE  LOCAL  DEFAULT    1 $d
+    43: 00000140   284 FUNC    LOCAL  DEFAULT    3 _ctf_ipc_lkup_ll
+    44: 00000ec4     0 NOTYPE  LOCAL  DEFAULT    1 $a
+    45: 00000ec4   108 FUNC    LOCAL  DEFAULT    1 _ctf_ipc_lkup
+    46: 00000f30   756 FUNC    LOCAL  DEFAULT    1 _ctf_cfg_req_process
+    47: 00000f70     0 NOTYPE  LOCAL  DEFAULT    1 $d
+    48: 00000f8c     0 NOTYPE  LOCAL  DEFAULT    1 $a
+    49: 00001210     0 NOTYPE  LOCAL  DEFAULT    1 $d
+    50: 00001224     0 NOTYPE  LOCAL  DEFAULT    1 $a
+    51: 00001224   100 FUNC    LOCAL  DEFAULT    1 _ctf_ipc_lkup_fn
+    52: 00001288  1004 FUNC    LOCAL  DEFAULT    1 _ctf_is_ipc_in_range
+    53: 00001674   376 FUNC    LOCAL  DEFAULT    1 _ctf_ipc_action
+    54: 000017ec   272 FUNC    LOCAL  DEFAULT    1 _ctf_ipc_delete_range
+    55: 000018f8     0 NOTYPE  LOCAL  DEFAULT    1 $d
+    56: 000018fc     0 NOTYPE  LOCAL  DEFAULT    1 $a
+    57: 000018fc   444 FUNC    LOCAL  DEFAULT    1 _ctf_ipc_delete
+    58: 00001ab4     0 NOTYPE  LOCAL  DEFAULT    1 $d
+    59: 00001ab8     0 NOTYPE  LOCAL  DEFAULT    1 $a
+    60: 00001ab8   876 FUNC    LOCAL  DEFAULT    1 _ctf_dump
+    61: 00001dd0     0 NOTYPE  LOCAL  DEFAULT    1 $d
+    62: 00001e24     0 NOTYPE  LOCAL  DEFAULT    1 $a
+    63: 00001e24   216 FUNC    LOCAL  DEFAULT    1 _ctf_dev_register
+    64: 00001efc   344 FUNC    LOCAL  DEFAULT    1 _ctf_ipc_add
+    65: 00002050     0 NOTYPE  LOCAL  DEFAULT    1 $d
+    66: 00002054     0 NOTYPE  LOCAL  DEFAULT    1 $a
+    67: 00002054   220 FUNC    LOCAL  DEFAULT    1 _ctf_brc_add
+    68: 0000025c  3012 FUNC    LOCAL  DEFAULT    3 _ctf_forward
+    69: 00000e18     0 NOTYPE  LOCAL  DEFAULT    3 $d
+    70: 000024dc     0 NOTYPE  LOCAL  DEFAULT    1 $d
+    71: 00002554     0 NOTYPE  LOCAL  DEFAULT    1 $a
+    72: 000026b0     0 NOTYPE  LOCAL  DEFAULT    1 $d
+    73: 00002724     0 NOTYPE  LOCAL  DEFAULT    1 $a
+    74: 00002954     0 NOTYPE  LOCAL  DEFAULT    1 $d
+    75: 00000000     0 NOTYPE  LOCAL  DEFAULT   13 $d
+    76: 00000000     0 NOTYPE  LOCAL  DEFAULT   33 $d
+    77: 00000000   188 OBJECT  LOCAL  DEFAULT   33 kci
+    78: 000000bc     4 OBJECT  LOCAL  DEFAULT   33 ci_head
+    79: 000000c0     4 OBJECT  LOCAL  DEFAULT   33 ctf_msg_level
+    80: 000000c4     1 OBJECT  LOCAL  DEFAULT   33 attached.27295
+    81: 00002958     0 NOTYPE  LOCAL  DEFAULT    1 $a
+    82: 00002958   136 FUNC    LOCAL  DEFAULT    1 ctf_netlink_sock_cb
+    83: 000029dc     0 NOTYPE  LOCAL  DEFAULT    1 $d
+    84: 00000100     0 NOTYPE  LOCAL  DEFAULT   30 $d
+    85: 00000000     0 NOTYPE  LOCAL  DEFAULT    5 $a
+    86: 00000000   192 FUNC    LOCAL  DEFAULT    5 ctf_init
+    87: 00000098     0 NOTYPE  LOCAL  DEFAULT    5 $d
+    88: 00000000     0 NOTYPE  LOCAL  DEFAULT   15 $d
+    89: 00000000     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    90: 00000000    56 FUNC    LOCAL  DEFAULT    7 ctf_exit
+    91: 00000030     0 NOTYPE  LOCAL  DEFAULT    7 $d
+    92: 00000000     0 NOTYPE  LOCAL  DEFAULT   18 $d
+    93: 00000000     0 NOTYPE  LOCAL  DEFAULT    9 $d
+    94: 00000000     9 OBJECT  LOCAL  DEFAULT    9 __func__.31262
+    95: 00000000     0 NOTYPE  LOCAL  DEFAULT   20 $d
+    96: 00000000    20 OBJECT  LOCAL  DEFAULT   20 __mod_license19
+    97: 00000218     0 NOTYPE  LOCAL  DEFAULT   13 $d
+    98: 00000000    12 OBJECT  LOCAL  DEFAULT   21 __kstrtab_ctf_kdetach
+    99: 0000000c    12 OBJECT  LOCAL  DEFAULT   21 __kstrtab_ctf_kattach
+   100: 00000018    12 OBJECT  LOCAL  DEFAULT   21 __kstrtab__ctf_attach
+   101: 00000000     0 NOTYPE  LOCAL  DEFAULT   22 $d
+   102: 00000000     8 OBJECT  LOCAL  DEFAULT   22 __ksymtab_ctf_kdetach
+   103: 00000008     8 OBJECT  LOCAL  DEFAULT   22 __ksymtab_ctf_kattach
+   104: 00000010     8 OBJECT  LOCAL  DEFAULT   22 __ksymtab__ctf_attach
+   105: 00000000     0 NOTYPE  LOCAL  DEFAULT   24 $d
+   106: 00000000     4 OBJECT  LOCAL  DEFAULT   24 __kcrctab_ctf_kdetach
+   107: 00000004     4 OBJECT  LOCAL  DEFAULT   24 __kcrctab_ctf_kattach
+   108: 00000008     4 OBJECT  LOCAL  DEFAULT   24 __kcrctab__ctf_attach
+   109: 00000000     0 NOTYPE  LOCAL  DEFAULT   21 $d
+   110: 00000014     0 NOTYPE  LOCAL  DEFAULT   20 $d
+   111: 00000014     9 OBJECT  LOCAL  DEFAULT   20 __module_depends
+   112: 00000020    56 OBJECT  LOCAL  DEFAULT   20 __mod_vermagic5
+   113: 00000000     0 NOTYPE  LOCAL  DEFAULT   28 $d
+   114: 00000000     0 SECTION LOCAL  DEFAULT   10 .ARM.extab.text.[...]
+   115: 00000000     0 SECTION LOCAL  DEFAULT   11 .ARM.exidx.text.[...]
+   116: 00000000     0 SECTION LOCAL  DEFAULT   14 .ARM.extab.init.text
+   117: 00000000     0 SECTION LOCAL  DEFAULT   15 .ARM.exidx.init.text
+   118: 00000000     0 SECTION LOCAL  DEFAULT   17 .ARM.extab.exit.text
+   119: 00000000     0 SECTION LOCAL  DEFAULT   18 .ARM.exidx.exit.text
+   120: 00000000     0 SECTION LOCAL  DEFAULT   20 .modinfo
+   121: 00000000     0 SECTION LOCAL  DEFAULT   22 __ksymtab
+   122: 00000000     0 SECTION LOCAL  DEFAULT   24 __kcrctab
+   123: 00000000     0 SECTION LOCAL  DEFAULT   26 .ARM.extab
+   124: 00000000     0 SECTION LOCAL  DEFAULT   27 .data
+   125: 00000000     0 SECTION LOCAL  DEFAULT   28 .gnu.linkonce.th[...]
+   126: 00000000     0 SECTION LOCAL  DEFAULT   30 .ARM.exidx
+   127: 00000000     0 SECTION LOCAL  DEFAULT   32 .note.gnu.build-id
+   128: 00000000     0 SECTION LOCAL  DEFAULT   34 .comment
+   129: 00000000     0 SECTION LOCAL  DEFAULT   35 .note.GNU-stack
+   130: 00000000     0 SECTION LOCAL  DEFAULT   36 .ARM.attributes
+   131: 00002130  1060 FUNC    GLOBAL DEFAULT    1 _ctf_attach
+   132: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND dev_queue_xmit
+   133: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND bcm_ether_ntoa
+   134: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND csum_partial
+   135: 00000000   336 OBJECT  GLOBAL DEFAULT   28 __this_module
+   136: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND osl_malloc
+   137: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND __aeabi_unwind_c[...]
+   138: 00000000    56 FUNC    GLOBAL DEFAULT    7 cleanup_module
+   139: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND ppp_txstats_upd
+   140: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND memcpy
+   141: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND bcm_bprintf
+   142: 00002724   564 FUNC    GLOBAL DEFAULT    1 ctf_kdetach
+   143: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND osl_pkt_frmnative
+   144: 00000000   192 FUNC    GLOBAL DEFAULT    5 init_module
+   145: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND ppp_rxstats_upd
+   146: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND _raw_spin_unlock_bh
+   147: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND osl_ctfpool_stats
+   148: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND init_net
+   149: f2d9bfb6     0 NOTYPE  GLOBAL DEFAULT  ABS __crc__ctf_attach
+   150: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND skb_pull
+   151: c429e3b0     0 NOTYPE  GLOBAL DEFAULT  ABS __crc_ctf_kdetach
+   152: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND netlink_unicast
+   153: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND ctf_attach_fn
+   154: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND skb_push
+   155: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND strncpy
+   156: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND netlink_kernel_r[...]
+   157: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND memcmp
+   158: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND printk
+   159: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND netlink_kernel_create
+   160: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND __memzero
+   161: 00002554   464 FUNC    GLOBAL DEFAULT    1 ctf_kattach
+   162: 9712bb13     0 NOTYPE  GLOBAL DEFAULT  ABS __crc_ctf_kattach
+   163: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND jiffies
+   164: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND sprintf
+   165: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND skb_clone
+   166: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND _raw_spin_lock_bh
+   167: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND osl_pktfree
+   168: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND osl_mfree
+   169: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND getintvar
+   170: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND kcih
+
+No version information found in this file.
+
+There is no GOT section in this file.
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)
+    Build ID: 0bed428619d932934b6ffad8b786cbc4aca006cd
+Attribute Section: aeabi
+File Attributes
+  Tag_CPU_name: "7-A"
+  Tag_CPU_arch: v7
+  Tag_CPU_arch_profile: Application
+  Tag_ARM_ISA_use: Yes
+  Tag_THUMB_ISA_use: Thumb-2
+  Tag_ABI_PCS_wchar_t: 4
+  Tag_ABI_FP_denormal: Needed
+  Tag_ABI_FP_exceptions: Needed
+  Tag_ABI_FP_number_model: IEEE 754
+  Tag_ABI_align_needed: 8-byte
+  Tag_ABI_align_preserved: 8-byte, except leaf SP
+  Tag_ABI_enum_size: int
+  Tag_ABI_optimization_goals: Aggressive Speed
+  Tag_DIV_use: Not allowed

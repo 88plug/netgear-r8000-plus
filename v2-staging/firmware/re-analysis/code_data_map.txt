@@ -1,0 +1,282 @@
+# Coarse code/data structural map
+# file: /home/andrew/netgearr8000/v2-staging/firmware/brcmfmac43602-pcie.ap.bin
+# size: 595472 bytes
+# method: sliding 512-byte window, Thumb-2 (capstone CS_ARCH_ARM|CS_MODE_THUMB)
+# score = avg(linear_decode_ratio, resync_coverage_ratio) across merged window(s)
+# NOTE: this is a coarse structural heuristic with real error margin.
+#       UNCERTAIN ranges genuinely mean 'we don't know' -- do not treat
+#       CODE/DATA calls near threshold boundaries as ground truth.
+#
+start_offset    end_offset      size  class       avg_score  notes
+0x0000000  0x0000800      2048  UNCERTAIN       0.293  
+0x0000800  0x0001000      2048  DATA            0.990  padding(0x00=100%)
+0x0001000  0x0001600      1536  CODE            1.000  
+0x0001600  0x0001800       512  DATA            0.961  padding(0x00=92%)
+0x0001800  0x0001a00       512  UNCERTAIN       0.172  
+0x0001a00  0x0001c00       512  CODE            1.000  
+0x0001c00  0x0002000      1024  UNCERTAIN       0.072  
+0x0002000  0x0002200       512  CODE            1.000  
+0x0002200  0x0002400       512  UNCERTAIN       0.648  
+0x0002400  0x0002a00      1536  CODE            1.000  
+0x0002a00  0x0002c00       512  UNCERTAIN       0.477  
+0x0002c00  0x0002e00       512  CODE            1.000  
+0x0002e00  0x0003000       512  UNCERTAIN       0.145  
+0x0003000  0x0003200       512  CODE            1.000  
+0x0003200  0x0003400       512  UNCERTAIN       0.336  
+0x0003400  0x0006000     11264  CODE            0.999  
+0x0006000  0x0006200       512  UNCERTAIN       0.004  
+0x0006200  0x0008e00     11264  CODE            0.996  
+0x0008e00  0x0009000       512  UNCERTAIN       0.004  
+0x0009000  0x000a200      4608  CODE            0.999  
+0x000a200  0x000a400       512  UNCERTAIN       0.258  
+0x000a400  0x000aa00      1536  CODE            0.999  
+0x000aa00  0x000ac00       512  UNCERTAIN       0.008  
+0x000ac00  0x000ae00       512  CODE            0.996  
+0x000ae00  0x000b000       512  UNCERTAIN       0.004  
+0x000b000  0x000b400      1024  CODE            0.984  
+0x000b400  0x000b600       512  UNCERTAIN       0.566  
+0x000b600  0x000c200      3072  CODE            0.990  
+0x000c200  0x000c400       512  UNCERTAIN       0.781  
+0x000c400  0x000c600       512  CODE            1.000  
+0x000c600  0x000ca00      1024  UNCERTAIN       0.236  
+0x000ca00  0x000e000      5632  CODE            0.999  
+0x000e000  0x000e200       512  UNCERTAIN       0.109  
+0x000e200  0x000ea00      2048  CODE            0.999  
+0x000ea00  0x000ec00       512  UNCERTAIN       0.473  
+0x000ec00  0x000ee00       512  CODE            0.996  
+0x000ee00  0x000f000       512  UNCERTAIN       0.789  
+0x000f000  0x000f400      1024  CODE            0.992  
+0x000f400  0x000f800      1024  UNCERTAIN       0.584  
+0x000f800  0x0010200      2560  CODE            0.997  
+0x0010200  0x0010400       512  UNCERTAIN       0.379  
+0x0010400  0x0010a00      1536  CODE            0.997  
+0x0010a00  0x0010c00       512  UNCERTAIN       0.004  
+0x0010c00  0x0010e00       512  CODE            1.000  
+0x0010e00  0x0011000       512  UNCERTAIN       0.465  
+0x0011000  0x0016400     21504  CODE            0.999  
+0x0016400  0x0016600       512  UNCERTAIN       0.387  
+0x0016600  0x0019400     11776  CODE            0.999  
+0x0019400  0x0019600       512  UNCERTAIN       0.195  
+0x0019600  0x001a800      4608  CODE            0.998  
+0x001a800  0x001aa00       512  UNCERTAIN       0.613  
+0x001aa00  0x001e200     14336  CODE            0.999  
+0x001e200  0x001e400       512  UNCERTAIN       0.004  
+0x001e400  0x001f400      4096  CODE            0.999  
+0x001f400  0x001f600       512  UNCERTAIN       0.008  
+0x001f600  0x0020200      3072  CODE            0.998  
+0x0020200  0x0020400       512  UNCERTAIN       0.004  
+0x0020400  0x0020a00      1536  CODE            0.999  
+0x0020a00  0x0020e00      1024  UNCERTAIN       0.416  
+0x0020e00  0x0021e00      4096  CODE            0.999  
+0x0021e00  0x0022000       512  UNCERTAIN       0.520  
+0x0022000  0x0022600      1536  CODE            0.999  
+0x0022600  0x0022800       512  UNCERTAIN       0.008  
+0x0022800  0x0029000     26624  CODE            0.999  
+0x0029000  0x0029200       512  UNCERTAIN       0.309  
+0x0029200  0x002be00     11264  CODE            0.999  
+0x002be00  0x002c000       512  UNCERTAIN       0.742  
+0x002c000  0x002c400      1024  CODE            0.998  
+0x002c400  0x002c600       512  UNCERTAIN       0.004  
+0x002c600  0x002e800      8704  CODE            0.999  
+0x002e800  0x002ea00       512  UNCERTAIN       0.754  
+0x002ea00  0x002f200      2048  CODE            0.998  
+0x002f200  0x002f400       512  UNCERTAIN       0.008  
+0x002f400  0x0033000     15360  CODE            1.000  
+0x0033000  0x0033200       512  UNCERTAIN       0.363  
+0x0033200  0x0034600      5120  CODE            1.000  
+0x0034600  0x0034800       512  UNCERTAIN       0.039  
+0x0034800  0x0036a00      8704  CODE            0.999  
+0x0036a00  0x0036c00       512  UNCERTAIN       0.008  
+0x0036c00  0x0038800      7168  CODE            0.998  
+0x0038800  0x0038a00       512  UNCERTAIN       0.004  
+0x0038a00  0x003b200     10240  CODE            0.999  
+0x003b200  0x003b400       512  UNCERTAIN       0.004  
+0x003b400  0x0043000     31744  CODE            0.999  
+0x0043000  0x0043200       512  UNCERTAIN       0.363  
+0x0043200  0x0046000     11776  CODE            0.999  
+0x0046000  0x0046400      1024  UNCERTAIN       0.470  
+0x0046400  0x0046c00      2048  CODE            0.998  
+0x0046c00  0x0047000      1024  UNCERTAIN       0.326  
+0x0047000  0x0049400      9216  CODE            0.999  
+0x0049400  0x0049600       512  UNCERTAIN       0.004  
+0x0049600  0x004aa00      5120  CODE            1.000  
+0x004aa00  0x004ac00       512  UNCERTAIN       0.234  
+0x004ac00  0x004b600      2560  CODE            0.998  
+0x004b600  0x004b800       512  UNCERTAIN       0.074  
+0x004b800  0x004c000      2048  CODE            0.999  
+0x004c000  0x004c200       512  UNCERTAIN       0.070  
+0x004c200  0x004cc00      2560  CODE            1.000  
+0x004cc00  0x004ce00       512  UNCERTAIN       0.098  
+0x004ce00  0x004dc00      3584  CODE            1.000  
+0x004dc00  0x004de00       512  UNCERTAIN       0.219  
+0x004de00  0x004e600      2048  CODE            0.999  
+0x004e600  0x004e800       512  UNCERTAIN       0.004  
+0x004e800  0x004ea00       512  CODE            1.000  
+0x004ea00  0x004ec00       512  UNCERTAIN       0.512  
+0x004ec00  0x0050000      5120  CODE            1.000  
+0x0050000  0x0050200       512  UNCERTAIN       0.406  
+0x0050200  0x0050a00      2048  CODE            1.000  
+0x0050a00  0x0051200      2048  UNCERTAIN       0.231  
+0x0051200  0x0051400       512  CODE            1.000  
+0x0051400  0x0051600       512  UNCERTAIN       0.367  
+0x0051600  0x0052a00      5120  CODE            1.000  
+0x0052a00  0x0053a00      4096  UNCERTAIN       0.242  
+0x0053a00  0x0053c00       512  CODE            1.000  
+0x0053c00  0x0053e00       512  UNCERTAIN       0.129  
+0x0053e00  0x0054000       512  CODE            1.000  
+0x0054000  0x0054200       512  UNCERTAIN       0.836  
+0x0054200  0x0054400       512  CODE            1.000  
+0x0054400  0x0054600       512  UNCERTAIN       0.352  
+0x0054600  0x0054a00      1024  CODE            0.962  
+0x0054a00  0x0054c00       512  UNCERTAIN       0.020  
+0x0054c00  0x0055600      2560  CODE            1.000  
+0x0055600  0x0056000      2560  UNCERTAIN       0.249  
+0x0056000  0x0056800      2048  CODE            0.996  
+0x0056800  0x0056e00      1536  DATA            0.969  padding(0x00=100%);padding(0x00=91%);padding(0x00=92%)
+0x0056e00  0x0057200      1024  UNCERTAIN       0.607  
+0x0057200  0x0057800      1536  DATA            0.944  padding(0x00=100%);padding(0x00=80%);padding(0x00=88%)
+0x0057800  0x0058000      2048  CODE            1.000  
+0x0058000  0x0058800      2048  UNCERTAIN       0.401  
+0x0058800  0x005a600      7680  DATA            0.891  padding(0x00=78%)
+0x005a600  0x005cc00      9728  UNCERTAIN       0.142  
+0x005cc00  0x005d800      3072  DATA            0.972  padding(0x00=100%);padding(0x00=76%);padding(0x00=98%)
+0x005d800  0x005da00       512  UNCERTAIN       0.629  
+0x005da00  0x005dc00       512  CODE            1.000  
+0x005dc00  0x005de00       512  UNCERTAIN       0.332  
+0x005de00  0x005f400      5632  CODE            1.000  
+0x005f400  0x005f600       512  UNCERTAIN       0.316  
+0x005f600  0x0060600      4096  CODE            0.999  
+0x0060600  0x0060800       512  UNCERTAIN       0.801  
+0x0060800  0x0066000     22528  CODE            1.000  
+0x0066000  0x0066200       512  UNCERTAIN       0.004  
+0x0066200  0x0066c00      2560  CODE            0.999  
+0x0066c00  0x0066e00       512  UNCERTAIN       0.598  
+0x0066e00  0x0068e00      8192  CODE            0.995  
+0x0068e00  0x0069200      1024  UNCERTAIN       0.548  
+0x0069200  0x0069600      1024  CODE            0.998  
+0x0069600  0x0069800       512  UNCERTAIN       0.156  
+0x0069800  0x0069a00       512  CODE            1.000  
+0x0069a00  0x0069c00       512  UNCERTAIN       0.137  
+0x0069c00  0x006a200      1536  CODE            0.997  
+0x006a200  0x006a400       512  UNCERTAIN       0.004  
+0x006a400  0x006aa00      1536  CODE            0.999  
+0x006aa00  0x006ac00       512  UNCERTAIN       0.496  
+0x006ac00  0x006b400      2048  CODE            0.999  
+0x006b400  0x006ba00      1536  UNCERTAIN       0.486  
+0x006ba00  0x006bc00       512  CODE            1.000  
+0x006bc00  0x006be00       512  UNCERTAIN       0.047  
+0x006be00  0x006c000       512  CODE            1.000  
+0x006c000  0x006c200       512  UNCERTAIN       0.309  
+0x006c200  0x006d400      4608  CODE            0.996  
+0x006d400  0x006d800      1024  UNCERTAIN       0.088  
+0x006d800  0x0070000     10240  CODE            0.999  
+0x0070000  0x0070800      2048  UNCERTAIN       0.515  
+0x0070800  0x0070c00      1024  CODE            0.990  
+0x0070c00  0x0071200      1536  UNCERTAIN       0.091  
+0x0071200  0x0071400       512  CODE            1.000  
+0x0071400  0x0071600       512  UNCERTAIN       0.734  
+0x0071600  0x0071800       512  CODE            1.000  
+0x0071800  0x0071a00       512  UNCERTAIN       0.215  
+0x0071a00  0x0072400      2560  CODE            0.999  
+0x0072400  0x0072600       512  UNCERTAIN       0.316  
+0x0072600  0x0072e00      2048  CODE            0.983  
+0x0072e00  0x0073e00      4096  DATA            0.980  padding(0x00=100%);padding(0x00=82%)
+0x0073e00  0x0074000       512  CODE            1.000  
+0x0074000  0x0075000      4096  DATA            0.987  padding(0x00=100%);padding(0x00=93%)
+0x0075000  0x0076800      6144  CODE            1.000  
+0x0076800  0x0078e00      9728  UNCERTAIN       0.183  
+0x0078e00  0x0079000       512  CODE            1.000  
+0x0079000  0x0079400      1024  UNCERTAIN       0.328  
+0x0079400  0x007ba00      9728  CODE            1.000  
+0x007ba00  0x007cc00      4608  UNCERTAIN       0.187  
+0x007cc00  0x007dc00      4096  CODE            1.000  
+0x007dc00  0x007ec00      4096  UNCERTAIN       0.242  
+0x007ec00  0x007ee00       512  CODE            0.953  
+0x007ee00  0x007f800      2560  UNCERTAIN       0.263  
+0x007f800  0x007fc00      1024  CODE            0.984  
+0x007fc00  0x0080000      1024  UNCERTAIN       0.291  
+0x0080000  0x0081200      4608  CODE            1.000  
+0x0081200  0x0081400       512  UNCERTAIN       0.297  
+0x0081400  0x0083a00      9728  CODE            1.000  
+0x0083a00  0x0083c00       512  UNCERTAIN       0.051  
+0x0083c00  0x0083e00       512  CODE            1.000  
+0x0083e00  0x0084800      2560  UNCERTAIN       0.327  
+0x0084800  0x0084e00      1536  CODE            1.000  
+0x0084e00  0x0085000       512  UNCERTAIN       0.070  
+0x0085000  0x0085a00      2560  CODE            0.999  
+0x0085a00  0x0086200      2048  UNCERTAIN       0.131  
+0x0086200  0x0086400       512  CODE            1.000  
+0x0086400  0x0086600       512  UNCERTAIN       0.238  
+0x0086600  0x0086800       512  CODE            1.000  
+0x0086800  0x0088c00      9216  UNCERTAIN       0.216  
+0x0088c00  0x0088e00       512  CODE            1.000  
+0x0088e00  0x008b400      9728  UNCERTAIN       0.279  
+0x008b400  0x008b600       512  CODE            1.000  
+0x008b600  0x008d200      7168  UNCERTAIN       0.281  
+0x008d200  0x008d400       512  CODE            1.000  
+0x008d400  0x0091600     16896  UNCERTAIN       0.209  
+0x0091600  0x0091610        16  CODE            1.000  
+#
+# ============================================================
+# MANUAL CROSS-CHECK ADDENDUM (spot-disassembly + hex review)
+# ============================================================
+#
+# 1. FILE HEADER (0x000000-0x00004x+): manually disassembled and CONFIRMED
+#    genuine code -- a repeating table of `b.w` (32-bit Thumb-2 branch)
+#    stubs targeting addresses ~0x180000-0x182300 (outside this file's own
+#    address range, consistent with a reset/exception vector table whose
+#    targets live in a different mapped region, e.g. ROM or another
+#    firmware segment). This confirms file offset 0 is instruction-aligned,
+#    i.e. Thumb-2 decode alignment assumption used for this whole map is
+#    correct at the start of the file.
+#
+# 2. "CLM DATA" TAG @ 0x0802b0: manually confirmed this is a REAL embedded
+#    data blob, not just a string reference. Hex context shows a structured
+#    header: tag "CLM DATA", build date "2015-09-18 03:19:38", version
+#    strings "9.0.1" / "1.29.20" / "1.29.6", string "Broadcom-0.0", string
+#    "ClmImport: 1...", then country-code tokens ("US", "XA", "XT", "XV",
+#    ...) and small lookup-table-like binary structures (channel/regulatory
+#    entries). This CONTRADICTS the a priori assumption that this AP-mode
+#    image carries no CLM payload -- see summary / final report.
+#
+# 3. KNOWN FALSE-POSITIVE SPAN ~0x07fc00 - 0x0091610 (through EOF):
+#    the automated window classifier frequently mislabels parts of this
+#    span CODE (several windows scored 1.000) or UNCERTAIN. Manual
+#    disassembly of a "CODE 1.000" window at 0x080000 produced long runs of
+#    semantically-implausible short instructions (repeating "movs r1,r0",
+#    "lsls r7,r7,#7", "cmp r3,#0xe" patterns with no real control flow,
+#    no bl/push/pop, no varied mnemonic mix) -- classic signature of small
+#    binary table/struct data that happens to fall in Thumb's dense 16-bit
+#    encoding space, NOT real code. A manual hex sample at 0x08d400 and
+#    0x090000 shows regular ~8-16 byte binary records with recurring
+#    pointer/offset-like little-endian fields (e.g. 0x0001bc60 repeats
+#    often) -- consistent with a structured lookup/dispatch table, not code.
+#    CONCLUSION: treat the ENTIRE span 0x07fc00-0x0091610 (file end) as
+#    DATA (CLM blob + adjoining tables/strings), overriding the automated
+#    per-window CODE/UNCERTAIN labels in that range. This is the single
+#    largest known blind spot of the coarse heuristic used here.
+#
+# 4. FILE TAIL (0x00915d0-0x0091610, the very last window, auto-labeled
+#    "CODE 1.000"): manually confirmed this is ASCII text -- a build/FWID
+#    trailer string "...2015-09-18 03:31:06 PDT Ucode Ver: 986.122 FWID:
+#    01-6cb8e269". ASCII bytes 0x20-0x7e frequently form valid narrow Thumb
+#    adds/subs/movs encodings, producing a spurious high decode-ratio.
+#    This is a textbook false positive and is folded into item 3 above.
+#
+# 5. LARGEST CODE REGION (0x03b400-0x043000, 31744B) was independently
+#    spot-checked at its start, middle, and near-end via manual
+#    disassembly: confirmed genuine code -- push.w/pop.w prologues and
+#    epilogues (incl. "pop {r3,r4,r5,r6,r7,pc}" function returns), bl calls
+#    to multiple distinct targets, a `tbh` (table-branch-halfword, the
+#    classic compiled switch-statement instruction), and a healthy mix of
+#    25-40 distinct mnemonics per 400-byte sample -- all hallmarks of real
+#    compiled code, not a heuristic artifact.
+#
+# ---- CORRECTED SUMMARY (raw automated map overridden per addendum item 3) ----
+# Raw automated:      CODE=427536 (71.80%)  DATA=24576  (4.13%)  UNCERTAIN=143360 (24.08%)
+# After manual override of 0x07fc00-0x0091610 (72208B, 12.13% of file) to DATA:
+#   CODE=406016 (68.18%)  DATA=96784 (16.25%)  UNCERTAIN=92672 (15.56%)
+#   CODE:DATA ratio (corrected, excluding UNCERTAIN) = 4.195 : 1
+# Largest contiguous CODE region is UNAFFECTED by this correction (it lies at
+# 0x03b400-0x043000, well before the corrected span) and remains manually
+# verified as genuine code.

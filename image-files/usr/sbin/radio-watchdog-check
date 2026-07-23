@@ -1,0 +1,109 @@
+#!/bin/sh
+# radio-watchdog-check -- detect a wedged BCM43602 radio on the R8000 and
+# recover it, with an escalating/rate-limited response so a real firmware
+# crash gets fixed without turning into a reboot loop.
+#
+# Run every 5 min from cron (wired up by /etc/init.d/radio-watchdog).
+# Rationale, signatures, and issue references: see ../NOTES.md.
+
+STATE_DIR=/tmp/radio-watchdog
+LASTLINE_FILE="$STATE_DIR/lastline"
+EVENTS_FILE="$STATE_DIR/events"
+REBOOT_MARK=/etc/radio-watchdog.last-reboot
+
+# Escalation window: how far back "recent events" are counted from.
+WINDOW_SECS=3600
+# Minimum gap between watchdog-triggered reboots (last resort only).
+REBOOT_COOLDOWN_SECS=21600
+
+# Known brcmfmac firmware-wedge signatures for BCM43602 on this target.
+# All four have been observed on R8000 hardware in OpenWrt issue reports:
+#   - "PSM's watchdog has fired" / "PSM microcode watchdog fired"
+#     -> firmware-level power-save-microcode watchdog crash
+#     https://github.com/openwrt/openwrt/issues/14685
+#   - "brcmf_msgbuf_query_dcmd: Timeout on response for query command"
+#     -> host<->firmware message-ring wedged
+#     https://github.com/openwrt/openwrt/issues/14685
+#   - "Failed to reserve space in commonring"
+#     -> same message-ring wedge, TX side
+#     https://github.com/openwrt/openwrt/issues/14685
+#   - "brcmf_msgbuf_delete_flowring: timed out waiting for txstatus"
+#     -> flowring teardown wedge, reported on R8000 stock 24.10.3
+#     https://github.com/openwrt/openwrt/issues/20514
+PATTERN="PSM.s watchdog has fired|PSM microcode watchdog fired|brcmf_msgbuf_query_dcmd: Timeout|Failed to reserve space in commonring|brcmf_msgbuf_delete_flowring: timed out waiting for txstatus"
+
+mkdir -p "$STATE_DIR"
+
+log() { logger -t radio-watchdog "$1"; }
+
+# --- collect only log lines new since the previous run --------------------
+current="$(logread 2>/dev/null)"
+[ -z "$current" ] && exit 0
+
+if [ -s "$LASTLINE_FILE" ]; then
+	last="$(cat "$LASTLINE_FILE")"
+	# find where we left off; if the marker isn't present the ring buffer
+	# wrapped since last run, fall back to the tail so we don't miss a
+	# same-cycle crash, but don't replay the whole historical buffer either
+	new="$(printf '%s\n' "$current" | awk -v m="$last" 'found{print} $0==m{found=1} END{if(!found) exit 1}')"
+	if [ $? -ne 0 ]; then
+		new="$(printf '%s\n' "$current" | tail -n 200)"
+	fi
+else
+	# first run since boot/install: only look at the tail, not full boot log
+	new="$(printf '%s\n' "$current" | tail -n 200)"
+fi
+
+printf '%s\n' "$current" | tail -n 1 > "$LASTLINE_FILE"
+
+echo "$new" | grep -Eq "$PATTERN" || exit 0
+
+matched_line="$(echo "$new" | grep -E "$PATTERN" | tail -n 1)"
+log "detected radio wedge signature: ${matched_line}"
+
+# --- windowed event count for escalation -----------------------------------
+now=$(date +%s)
+{ [ -f "$EVENTS_FILE" ] && awk -v n="$now" -v w="$WINDOW_SECS" '$1 > n-w' "$EVENTS_FILE"; echo "$now"; } > "$EVENTS_FILE.new"
+mv "$EVENTS_FILE.new" "$EVENTS_FILE"
+count=$(wc -l < "$EVENTS_FILE")
+
+reload_brcmfmac() {
+	# unload dependent modules first (e.g. brcmfmac_wcc), then brcmfmac
+	# itself, then bring it back -- this re-does the PCIe attach/reset
+	# path, unlike a plain "wifi reload" which stays above the driver.
+	for m in $(lsmod | awk '$1=="brcmfmac"{print $4}' | tr ',' ' '); do
+		[ -n "$m" ] && rmmod "$m" 2>/dev/null
+	done
+	rmmod brcmfmac 2>/dev/null
+	sleep 2
+	modprobe brcmfmac
+	sleep 5
+	wifi up
+}
+
+can_reboot() {
+	[ -f "$REBOOT_MARK" ] || return 0
+	last_reboot=$(cat "$REBOOT_MARK" 2>/dev/null)
+	[ -z "$last_reboot" ] && return 0
+	[ $((now - last_reboot)) -ge "$REBOOT_COOLDOWN_SECS" ]
+}
+
+if [ "$count" -eq 1 ]; then
+	log "tier 1 (1st event in ${WINDOW_SECS}s window): wifi reload"
+	wifi reload
+
+elif [ "$count" -eq 2 ]; then
+	log "tier 2 (2nd event in ${WINDOW_SECS}s window): full brcmfmac module reload (all 3 radios)"
+	reload_brcmfmac
+
+else
+	if can_reboot; then
+		log "tier 3 (${count} events in ${WINDOW_SECS}s window): module reload did not hold, rebooting"
+		echo "$now" > "$REBOOT_MARK"
+		sync
+		reboot
+	else
+		log "tier 3 reached but reboot is rate-limited (cooldown ${REBOOT_COOLDOWN_SECS}s); falling back to module reload"
+		reload_brcmfmac
+	fi
+fi
