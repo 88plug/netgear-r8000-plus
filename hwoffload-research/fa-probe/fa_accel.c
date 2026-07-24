@@ -60,6 +60,7 @@
 #include <linux/init.h>
 #include <linux/netdevice.h>
 #include <linux/list.h>
+#include <linux/ip.h>
 #include <net/flow_offload.h>
 #include <net/pkt_cls.h>
 
@@ -109,19 +110,83 @@ static void fa_log_ipv4_tuple(const char *what, struct flow_rule *rule)
 		&dst_ip, have_ports ? ntohs(dst_port) : 0);
 }
 
+/*
+ * Decode one FLOW_ACTION_MANGLE entry's IPv4 address rewrite, matching
+ * drivers/net/ethernet/mediatek/mtk_ppe_offload.c's mtk_flow_mangle_ipv4()
+ * exactly (offset identifies which iphdr field is being rewritten; the
+ * mangled value itself is the new post-NAT address).
+ */
+static void fa_decode_mangle_ipv4(const struct flow_action_entry *act,
+				   __be32 *nat_src, __be32 *nat_dst, bool *have_nat_ip)
+{
+	if (act->mangle.htype != FLOW_ACT_MANGLE_HDR_TYPE_IP4)
+		return;
+
+	switch (act->mangle.offset) {
+	case offsetof(struct iphdr, saddr):
+		memcpy(nat_src, &act->mangle.val, sizeof(*nat_src));
+		*have_nat_ip = true;
+		break;
+	case offsetof(struct iphdr, daddr):
+		memcpy(nat_dst, &act->mangle.val, sizeof(*nat_dst));
+		*have_nat_ip = true;
+		break;
+	default:
+		break;
+	}
+}
+
+/*
+ * Decode one FLOW_ACTION_MANGLE entry's TCP/UDP port rewrite, matching
+ * mtk_flow_mangle_ports() exactly: offset 0 packs both ports into one
+ * 32-bit word (mask selects which half), offset 2 is dst port alone.
+ */
+static void fa_decode_mangle_ports(const struct flow_action_entry *act,
+				    __be16 *nat_sport, __be16 *nat_dport, bool *have_nat_ports)
+{
+	u32 val;
+
+	if (act->mangle.htype != FLOW_ACT_MANGLE_HDR_TYPE_TCP &&
+	    act->mangle.htype != FLOW_ACT_MANGLE_HDR_TYPE_UDP)
+		return;
+
+	val = ntohl(act->mangle.val);
+
+	switch (act->mangle.offset) {
+	case 0:
+		if (act->mangle.mask == ~htonl(0xffff))
+			*nat_dport = cpu_to_be16(val);
+		else
+			*nat_sport = cpu_to_be16(val >> 16);
+		*have_nat_ports = true;
+		break;
+	case 2:
+		*nat_dport = cpu_to_be16(val);
+		*have_nat_ports = true;
+		break;
+	default:
+		break;
+	}
+}
+
 static void fa_log_would_be_napt_row(struct flow_rule *rule)
 {
 	struct flow_action_entry *act;
 	int i;
 	bool saw_mangle = false, saw_redirect = false;
+	bool have_nat_ip = false, have_nat_ports = false;
+	__be32 nat_src = 0, nat_dst = 0;
+	__be16 nat_sport = 0, nat_dport = 0;
 	struct net_device *egress_dev = NULL;
 
-	fa_log_ipv4_tuple("match", rule);
+	fa_log_ipv4_tuple("match (pre-NAT tuple, mirrors ctf_ipc_t->tuple)", rule);
 
 	flow_action_for_each(i, act, &rule->action) {
 		switch (act->id) {
 		case FLOW_ACTION_MANGLE:
 			saw_mangle = true;
+			fa_decode_mangle_ipv4(act, &nat_src, &nat_dst, &have_nat_ip);
+			fa_decode_mangle_ports(act, &nat_sport, &nat_dport, &have_nat_ports);
 			break;
 		case FLOW_ACTION_REDIRECT:
 			saw_redirect = true;
@@ -131,6 +196,16 @@ static void fa_log_would_be_napt_row(struct flow_rule *rule)
 			break;
 		}
 	}
+
+	if (have_nat_ip || have_nat_ports)
+		pr_info("fa_accel: post-NAT tuple (mirrors ctf_ipc_t->nat.ip/port, "
+			"what fa_napt_prep_ipv4_word() packs into tbl[1]/tbl[2]): "
+			"%pI4:%u -> %pI4:%u\n",
+			&nat_src, ntohs(nat_sport), &nat_dst, ntohs(nat_dport));
+	else
+		pr_info("fa_accel: no IPv4/port NAT mangle decoded (%s)\n",
+			saw_mangle ? "mangle action present but not an IP/port rewrite this driver decodes" :
+				     "no mangle action at all - not a NAT'd flow");
 
 	pr_info("fa_accel: would-be NAPT row: action=%s%s egress_dev=%s "
 		"(mirrors fa_napt_prep_ipv4_word()'s tbl[1..3] NAT/tuple words "
