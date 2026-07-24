@@ -602,6 +602,25 @@ hardening-relevant Kconfig options). It is not specific to brcmfmac —
 whatever it is would block ANY custom local kernel build for this target
 right now, independent of what feature prompted the rebuild.
 
+**Follow-up: build-order/race hypothesis tested directly — falsified, not
+assumed either way.** Before accepting "unresolved upstream bug" as final,
+tested the cheapest concrete alternative explanation: every attempt above
+used `make -j$(nproc) world`, letting make's own scheduler interleave the
+kernel package's build with mac80211/brcmfmac's. Reran with explicit
+forced serialization instead of trusting make's scheduling: `make -j$(nproc)
+tools/install toolchain/install target/linux/compile` run to full
+completion first (confirmed via `vmlinux`/`zImage` present, zero errors),
+*then* `make -j$(nproc) package/kernel/mac80211/compile` only after that,
+*then* the rest of `world`. Flashed and tested: **identical error.** This
+decisively rules out a build-order race as the cause — it was a real,
+cheap, well-reasoned hypothesis worth testing before calling anything
+"unresolved," and it came back false. The original conclusion (a deeper,
+non-obvious incompatibility between how this local buildroot toolchain
+compiles kernel-external module packages and however the official OpenWrt
+build farm does it) is now more confirmed, not less, having survived an
+actual falsification attempt rather than resting on a symptom-matched
+GitHub issue alone.
+
 **Router state: reverted to v9 (proven-good, unaffected — v9's kernel was
 never locally compiled) after every test.** No functional regression
 shipped; this section exists so the next person who wants

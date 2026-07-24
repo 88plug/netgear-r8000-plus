@@ -449,3 +449,12 @@ anywhere.
 Router reverted to v9 after every test - no regression shipped. Full
 diagnostic trail in `docs/FINDINGS.md` §15, so this doesn't need
 re-discovering next time someone wants a custom kernel build here.
+
+**Follow-up: tested the build-order/race hypothesis directly rather than
+assuming "unresolved upstream bug" was the final word.** Forced explicit
+serialization - fully finished the kernel compile first (confirmed via
+vmlinux/zImage present), only then built mac80211/brcmfmac, only then the
+rest of world - instead of trusting make's own parallel scheduling.
+Flashed, tested: identical error. This falsifies build ordering as the
+cause and leaves the original conclusion more confirmed, having actually
+survived a real test instead of resting on a matched GitHub issue alone.
