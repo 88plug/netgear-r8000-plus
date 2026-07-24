@@ -467,3 +467,78 @@ confirming a genuine cold boot restores full real-world power/channels while
 the `iw reg get` label remains unchanged either way. No fix needed or
 possible here — it's not broken, `iw reg get`'s per-phy summary just isn't
 the right place to look for this driver.
+
+## 14. WPA3-SAE never actually worked on this hardware — found via real-client testing, fixed (2026-07-23)
+
+**The v8 wireless config's `sae-mixed` encryption never actually broadcast
+WPA3-SAE over the air, on any radio, since the image first booted.**
+Discovered via real-client association testing (a real laptop WiFi client,
+not synthetic traffic) — the same rigor this project has applied to every
+other claim in this repo.
+
+**Evidence chain, in the order it was found:**
+
+1. A real client repeatedly completed 802.11 association to `phy0-ap0`
+   (channel 153, 5GHz) then was immediately disassociated, in rapid cycles
+   (7 cycles in ~10 seconds). This matched the interop-risk warning already
+   present in this repo's own config comment for OCV — but turned out to be
+   a different, larger problem.
+2. `dmesg` showed `ieee80211 phy0: brcmf_configure_wpaie: Invalid key mgmt
+   info` — a real kernel-level driver rejection, firing on **every radio, at
+   the very first hostapd startup of the session's very first boot**
+   (timestamps 44–48s into boot), independent of anything touched during
+   testing. This ruled out "something I broke while testing" — it's a
+   pre-existing condition of the shipped `sae-mixed` config itself.
+3. A live, sub-second-fresh `iw scan dump` of the actual broadcast RSN
+   information element showed `Authentication suites: PSK PSK/SHA-256` —
+   **SAE is completely absent from the real over-the-air beacon**, despite
+   `hostapd-phyN.conf` (the rendered config actually in use) explicitly
+   listing `wpa_key_mgmt=SAE WPA-PSK WPA-PSK-SHA256`. The driver silently
+   drops SAE from what it actually transmits rather than erroring loudly.
+4. Web research confirmed this is a known, documented brcmfmac bug class:
+   AP-mode SAE depends on firmware SAE-offload support, and there's a
+   community-documented kernel module workaround
+   (`brcmfmac.feature_disable=0x82000`) for a similar STA-mode bug on a
+   *different* chip family (Raspberry Pi's Cypress/Infineon chips). Applied
+   it here via `/etc/modprobe.d/brcmfmac.conf` + full module reload — **it
+   did not fix this chip's issue** (BCM43602 firmware, not Cypress); RSN
+   broadcast still showed no SAE afterward. Reverted the module override
+   since it didn't help.
+5. 802.11r (FT) made the driver-level rejection worse but was not the root
+   cause by itself: the 5-AKM list (`SAE FT-SAE WPA-PSK WPA-PSK-SHA256
+   FT-PSK`, all 3 main radios had `ieee80211r=1`) triggered the same
+   `Invalid key mgmt info` error even more severely, and removing FT alone
+   (keeping SAE) did not restore SAE to the broadcast RSN either — SAE
+   itself is what this firmware can't do, with or without FT.
+
+**Fix: switched all 4 wireless interfaces (3 main radios + guest) from
+`encryption 'sae-mixed'` to `encryption 'psk2'`** (plain WPA2-PSK/CCMP),
+removing `ocv`, `ieee80211r`, `ft_psk_generate_local`, `mobility_domain`
+(main radios only — none of these can do anything without a working SAE/FT
+foundation). Kept `ieee80211w` (MFP-optional — genuinely supported,
+confirmed via the same RSN scan showing `MFP-capable`), `ieee80211k`
+(802.11k RRM) and `bss_transition` (802.11v), since both are independent of
+SAE/FT and unaffected by this bug.
+
+**Verified after a full clean reboot** (not just a live reload, to rule out
+session-state artifacts): `wpa_key_mgmt=WPA-PSK WPA-PSK-SHA256` on every
+radio, **zero** `Invalid key mgmt info` errors this boot (down from 12+ per
+prior boot), config change persists across reboot (confirmed via the
+overlay), WAN and LAN connectivity unaffected, all 4 SSIDs enabled.
+
+**Also found and fixed as a byproduct of this investigation:** a periodic
+`hostapd: Failed to set beacon parameters` error recurring every ~6 seconds
+appeared during the live debugging session itself — traced to being an
+artifact of the extensive live `uci`/module-reload churn used to
+investigate the SAE issue, not a real condition of the shipped image: it
+did not reproduce on the clean reboot used for final verification.
+
+**Honest scope of what this changes:** this router's WiFi has never
+actually been WPA3 despite `docs/WINS.md`'s v8 entry describing it that
+way — it has always been WPA2-PSK with MFP-capable (optional) advertised,
+silently. This fix makes the shipped config match reality rather than
+claim a security posture that was never actually delivered. OCV, being
+entirely dependent on a working SAE/MFP-required negotiation that never
+happened, was never actually providing protection either — its removal
+here is not a regression, it's removing a config option that was already
+inert.

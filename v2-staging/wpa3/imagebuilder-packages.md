@@ -1,5 +1,21 @@
 # ImageBuilder PACKAGES change -- WPA3-SAE / 802.11w
 
+## SUPERSEDED (2026-07-23, see FINDINGS.md item 14)
+
+Real-client testing found item 2 below wrong in the way that matters:
+hostapd computing SAE correctly in userspace does NOT mean SAE actually
+works, because brcmfmac still has to push the resulting key-mgmt config
+down to firmware, and on this exact BCM43602 firmware that push fails
+(`brcmf_configure_wpaie: Invalid key mgmt info`, every boot, every radio)
+-- SAE is silently absent from the real broadcast RSN element regardless of
+what hostapd computed. The "no red flag" conclusion in item 2 was reached
+without ever testing a real client association; it should have been. v2
+now ships plain `psk2` (WPA2-PSK/CCMP + MFP-optional), not `sae-mixed` --
+see `docs/FINDINGS.md` §14 and the current `v2-files/etc/config/wireless`.
+`wpad-basic-mbedtls` is still the right package (it handles WPA2-PSK/MFP
+fine too), so the PACKAGES list below is unaffected -- only the SAE-capable
+framing of *why* it was chosen no longer applies.
+
 ## CORRECTION (2026-07-23, see FINDINGS.md item 2 / v7)
 
 This doc's "keep wpad-basic-mbedtls" recommendation is correct for WPA3-SAE

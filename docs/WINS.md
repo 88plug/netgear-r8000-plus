@@ -368,3 +368,37 @@ Ethernet driver project, not a flowtable-offload-backend project, and a
 different undertaking than anything scoped here. Full detail:
 `hwoffload-research/fa-probe/BRINGUP_RESULT.md` and
 `hwoffload-research/VERDICT.md`.
+
+## Correction, same night: v8's WPA3 claim was never actually true - found and fixed via real-client testing
+
+Real-client WiFi testing (a real laptop associating over the air, not
+synthetic traffic) found that **WPA3-SAE never actually broadcast on this
+router, on any radio, since v8 first booted** - the earlier v8 entry above
+describing OCV/WPA3 hardening was honest about being *unverified against
+real clients*, and that caution turned out to be exactly right, for a
+bigger reason than expected.
+
+`brcmf_configure_wpaie: Invalid key mgmt info` fires in dmesg on every
+radio at the very first hostapd startup of every boot (confirmed
+independent of anything touched this session), and a live, sub-second-fresh
+scan of the actual broadcast RSN element showed `Authentication suites: PSK
+PSK/SHA-256` only - SAE silently absent, despite hostapd's own config
+explicitly requesting it. This is a real BCM43602/brcmfmac firmware
+limitation (confirmed via web research as a known driver bug class; a
+documented module-parameter workaround for a similar bug on different
+chips did not fix it here - reverted). 802.11r (FT) made the same driver
+rejection worse but wasn't the root cause by itself.
+
+**Fixed:** all 4 wireless interfaces (3 main radios + guest) switched from
+`sae-mixed` to plain `psk2` (WPA2-PSK/CCMP), removing `ocv`/`ieee80211r`/
+`ft_psk_generate_local`/`mobility_domain` (dead weight without a working
+SAE/FT foundation) while keeping `ieee80211w` (MFP-optional - genuinely
+works, confirmed via the same RSN scan), `ieee80211k`, and `bss_transition`
+(both independent of SAE/FT). Verified clean after a full reboot: zero
+driver errors (down from 12+/boot), config persists across reboot, all 4
+SSIDs up, WAN/LAN unaffected. Full detail: `docs/FINDINGS.md` §14.
+
+This router's WiFi has always been WPA2-PSK with MFP-capable advertised,
+not WPA3 - this fix makes the shipped config honestly match what the
+hardware actually does, rather than silently claim a posture it never
+delivered.
