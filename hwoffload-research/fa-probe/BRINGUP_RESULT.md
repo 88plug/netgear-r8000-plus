@@ -238,6 +238,57 @@ flight - that requires wiring this into `fa_accel.c`'s real
 testing against real traffic, which still needs a second test client or
 real deployment.
 
+## Follow-up: real traffic verification - the last open gap, closed
+
+Every prior test used synthetic data or waited on a precondition ("needs
+real forwarded traffic"). This one didn't: the operator connected the
+R8000's WAN port to a real upstream (via a spare LAN port on their own
+network, safe double-NAT, no disruption to their primary network), and a
+real HTTP connection was routed from a laptop through the R8000's actual
+LAN->WAN NAT path (bound to a specific interface + a single narrow host
+route, so only this one test destination's traffic left via that path -
+everything else on the laptop stayed on its normal connection).
+
+**Prerequisite found and fixed live:** the flowtable didn't have `flags
+offload` set (`flow_offloading_hw` was `0`), so the kernel's hardware-
+offload dispatch was never even attempted regardless of traffic - this
+project's own earlier perf-tune research had already safely toggled this
+exact flag once before and reverted it, confirming it does nothing on its
+own (no driver was registered to receive it). This time something was:
+`fa_accel.c`. Toggled it on live, tested, toggled back off - same
+already-proven-safe pattern.
+
+**Result: `fa_accel.c`'s Phase B decode fired on a real connection and
+decoded both directions of the real NAT'd flow correctly:**
+```
+Forward (LAN->WAN): 192.168.1.2:41762 -> 104.20.23.154:80
+  post-NAT:         192.168.1.86:41762 -> (dst unchanged, correct for SNAT)
+  egress_dev=wan
+
+Reverse (WAN->LAN): 104.20.23.154:80 -> 192.168.1.86:41762
+  post-NAT:         (src unchanged) -> 192.168.1.2:41762
+  egress_dev=lan1
+```
+Both directions, both pre-NAT and post-NAT tuples, correct egress device
+per direction - exactly the data `fa_napt_prep_ipv4_word()` needs to build
+a real row, extracted from a real HTTP connection, not synthetic input.
+
+System stability re-checked: uptime unbroken, 0% ping loss, all 4 SSIDs
+intact throughout. Everything reverted afterward: `flow_offloading_hw`
+back to `0` (confirmed via `nft list flowtable`, device list back to
+`br-lan`/`br-guest`/`wan`), `fa_accel` unloaded cleanly, the laptop's
+temporary host route removed.
+
+**This closes the verification gap noted in every earlier entry in this
+file.** Combined with `fa_napt_row_test.c`'s proof that a complete, real
+NAPT row can be written/read/deleted on the hardware, and this proof that
+real connection data decodes correctly into exactly that row's inputs,
+the only remaining step to a working feature is connecting the two:
+having `fa_accel.c`'s `FLOW_CLS_REPLACE` handler actually construct and
+write the row (Phase C proper) instead of logging what it would contain.
+That is a real, separate, deliberate step - not a hardware unknown
+anymore, an integration task.
+
 ## What this changes
 
 `VERDICT.md`'s central open question — "is the FA silicon block physically

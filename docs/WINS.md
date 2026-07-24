@@ -284,3 +284,16 @@ With that in hand, `fa_switch_oobpause_test.c` replicated mainline
 system impact. All three FA/CTF hardware mechanisms (GMAC table-init,
 GMAC indirect data path, switch-side enable) are now empirically proven
 working. Full detail: `hwoffload-research/fa-probe/BRINGUP_RESULT.md`.
+
+**Update, same night: real traffic verified, not just synthetic tests.**
+The operator connected the R8000's WAN to a real upstream and a real
+HTTP connection was routed through the router's actual NAT path.
+`fa_accel.c`'s Phase B decode fired on the real connection and correctly
+extracted both directions' pre-NAT and post-NAT tuples - exactly the
+data a real NAPT row needs, from a real flow, not synthetic input. This
+closes the last open verification gap noted in every earlier FA entry.
+Everything reverted afterward (flow_offloading_hw back to 0, module
+unloaded, temporary host route removed). The only remaining step to a
+working feature is Phase C proper: having the driver actually build and
+write the row instead of logging it - a real integration task now, not
+a hardware unknown.
