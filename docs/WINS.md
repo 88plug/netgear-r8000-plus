@@ -297,3 +297,25 @@ unloaded, temporary host route removed). The only remaining step to a
 working feature is Phase C proper: having the driver actually build and
 write the row instead of logging it - a real integration task now, not
 a hardware unknown.
+
+**Update, same night: Phase C written; live packet test attempted but not
+completed.** `fa_accel.c` gained a real write path -
+`fa_flow_replace_live()` builds and writes a real NAPT row from a real
+`flow_rule`, reads it back, and only reports success if the readback
+matches. Two of the previously one-shot register writes (`fa_bringup`,
+switch OOBPAUSE) were re-built as leave-active-until-rmmod variants so a
+real test window was possible, and a stats-counter probe
+(`fa_stats_probe.c`, HIT/MISS/error/ecc_error) was staged as the
+before/after oracle. Bring-up sequence executed and confirmed clean at
+every step - but before the actual test packet could be sent, the
+operator disconnected the WAN uplink, so there was no path left for it to
+take. **The write path is built and matches every previously-proven real
+data input, but has not yet been exercised against a real forwarded
+packet.** Everything was fully reverted in order and confirmed
+byte-identical to baseline: `fa_accel` unloaded, `flow_offloading_hw` back
+to 0, OOBPAUSE back to 0x0000, control register back to 0x00001400.
+Router stable throughout (uptime unbroken, 0% ping loss, all 4 SSIDs up).
+Full detail: `hwoffload-research/fa-probe/BRINGUP_RESULT.md`. Real
+end-to-end forwarding proof is the one thing this project has never yet
+empirically shown - needs a fresh WAN-connected window, same staged
+procedure, new go/no-go.

@@ -289,12 +289,77 @@ write the row (Phase C proper) instead of logging what it would contain.
 That is a real, separate, deliberate step - not a hardware unknown
 anymore, an integration task.
 
+## Follow-up: Phase C real write path built; live=1 forwarding test attempted but not completed
+
+`fa_accel.c` gained a real Phase C: `fa_flow_replace_live()` decodes a real
+`flow_rule` (including destination MAC), builds both the next-hop and NAPT
+rows with the same verbatim macros proven in `fa_napt_row_test.c`, writes
+them via the same WAR777-wrapped indirect path proven in `fa_macc_test.c`,
+and — critically — **reads the row back and verifies it matches before ever
+returning success**; a mismatch frees the slot and returns `-EOPNOTSUPP`
+instead of silently claiming the offload. `fa_flow_destroy_live()` clears
+the valid bit and frees the slot on flow teardown. Gated behind
+`module_param(live, bool, 0444)`, default `false` (Phase A/B logging-only
+behavior unchanged).
+
+To make a real end-to-end test possible, two of the previously one-shot,
+auto-reverting register writes were re-implemented to persist for the
+duration of a test window instead of reverting immediately:
+`fa_switch_oobpause_persist.c` (OOBPAUSE stays set until `rmmod`, unlike
+`fa_switch_oobpause_test.c` which reverts inside its own `init()`) and
+`fa_bringup.c` loaded without an immediate `rmmod`. A new read-only
+`fa_stats_probe.c` was added specifically as the pre/post oracle for this
+test: `control`, `status`, `stats[HIT]`, `stats[MISS]`, `error`,
+`ecc_error`.
+
+**Sequence executed, this pass:**
+1. `fa_bringup.ko` loaded and left active (not rmmod'd) — `INIT_DONE`
+   confirmed, control `0x0007f408`.
+2. `fa_switch_oobpause_persist.ko` loaded and left active — OOBPAUSE
+   confirmed set to `0x0100`.
+3. `flow_offloading_hw=1` set live, `flags offload` confirmed present in
+   `nft list flowtable inet fw4 ft`.
+4. `fa_accel.ko live=1` loaded — clean registration confirmed via dmesg.
+5. Pre-test baseline read via `fa_stats_probe.ko`: `control=0x00041408
+   status=0x000003e2 hit=0 miss=222 error=0x00000000 ecc_error=0x00000000`.
+6. Stability re-checked at each step — uptime unbroken, 0% ping loss, no
+   new dmesg errors, all 4 SSIDs intact throughout.
+
+**The test packet itself was not sent.** Between step 5 and firing the test
+request, the operator disconnected the R8000's WAN uplink (the same spare
+port used for the earlier successful logging-mode verification). With no
+WAN link, `curl`'s request to the real test destination failed instantly
+(`http_code=000`) — there is no path off the router for it to take, not a
+driver or hardware failure. **`fa_flow_replace_live()`'s actual write path
+has therefore been built and code-reviewed against the same real-data
+inputs proven correct in `fa_napt_row_test.c` and the earlier real-traffic
+decode, but has never been exercised end-to-end against a live packet.**
+That is the one thing this project has still not empirically proven: that
+FA hardware, once brought up, actually consults a row this driver wrote and
+forwards a real packet through it correctly.
+
+**Full revert executed and confirmed, in order:** `fa_accel` unloaded
+(`unregistered, module unloaded`); `flow_offloading_hw` back to `0`
+(`nft list flowtable` shows the flowtable with no `flags offload`, device
+list back to `br-guest`/`br-lan`/`wan`); `fa_switch_oobpause_persist`
+unloaded (`reverted OOBPAUSE to 0x0000`); `fa_bringup` unloaded (control
+restored, final `fa_probe` read confirms `control=0x00001400
+status=0x000003e2` — byte-identical to every prior baseline in this file).
+Post-revert stability: uptime 2:57 unbroken, 0% ping loss, all 4 SSIDs
+(`R8000` x3 + `R8000-Guest`) enabled.
+
 ## What this changes
 
 `VERDICT.md`'s central open question — "is the FA silicon block physically
 present, powered, and functional" — is resolved: **yes**, on this exact
 board, confirmed via its own real init-done handshake, not just a
-plausible-looking register value. The next real step toward actual
-hardware NAT acceleration is the NAPT table-write path (with the WAR777
-workaround) and, separately, the switch-side SRAB enable — both are new,
-distinct go/no-go decisions, not authorized by this result.
+plausible-looking register value. Every register-level mechanism needed for
+real hardware NAT acceleration has now been individually proven: table-init
+control handshake, indirect data read/write path, switch-side enable
+register, a complete real NAPT row round-tripped correctly, and real
+connection data decoding correctly into that row's inputs. The one thing
+still not proven is the final integration — FA hardware actually consulting
+a driver-written row for a live packet and forwarding it correctly. That
+needs a fresh WAN-connected test window, using the exact procedure and
+`fa_stats_probe.ko` oracle already built and staged here, and is a new,
+distinct go/no-go — not something this result authorizes on its own.
