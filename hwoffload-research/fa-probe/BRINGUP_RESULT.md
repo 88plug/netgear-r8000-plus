@@ -348,18 +348,91 @@ status=0x000003e2` — byte-identical to every prior baseline in this file).
 Post-revert stability: uptime 2:57 unbroken, 0% ping loss, all 4 SSIDs
 (`R8000` x3 + `R8000-Guest`) enabled.
 
+## Follow-up: live=1 real-packet test completed — write path proven, hardware consultation NOT proven
+
+With WAN reconnected and link stable, the full sequence was re-run and the
+test packet actually sent this time (`curl` LAN->WAN through the router's
+real NAT path to `104.20.23.154:80`, `http_code=200`, `time=0.052s`,
+`local_ip=192.168.1.2 local_port=57534`).
+
+**`fa_accel`'s write path fired for real, on both directions, and the
+built-in verify-before-accept gate passed both times:**
+```
+fa_accel: live: cookie=0xc22b4304 nh_idx=1 nf_idx=1 written+verified,
+  192.168.1.2:57534 -> 104.20.23.154:80 egress=wan dir=LAN->WAN - accepting offload
+fa_accel: live: cookie=0xc22b4354 nh_idx=2 nf_idx=2 written+verified,
+  104.20.23.154:80 -> 192.168.52.247:57534 egress=lan1 dir=WAN->LAN - accepting offload
+```
+~38ms later, both flows tore down correctly via the framework's normal
+`FLOW_CLS_DESTROY` path:
+```
+fa_accel: FLOW_CLS_DESTROY cookie=0xc22b4304 -> marked invalid, freed
+fa_accel: FLOW_CLS_DESTROY cookie=0xc22b4354 -> marked invalid, freed
+```
+This proves, for the first time against a real live connection rather than
+synthetic data: the driver decodes a real flow correctly in both
+directions, builds a real NAPT+next-hop row pair, writes it, **reads it
+back and confirms the readback matches before ever reporting success**, and
+correctly tears it down on connection close. Every piece of software-side
+plumbing this project set out to build works.
+
+**What it does not prove: that FA hardware ever actually consulted either
+row to forward a real packet.** `fa_stats_probe.ko` read before and after:
+```
+before: hit=0 miss=378
+after:  hit=0 miss=40
+```
+`hit` never moved. (The `miss` drop, not a rise, indicates this counter is
+read-to-clear — each read zeroes it, so `378` and `40` are two independent
+windows, not a running total; not a red flag on its own.) But `hit`
+staying at `0` across a write-verified, accepted, real connection is a real
+negative result, not an absence of data.
+
+Two honest candidate explanations, neither confirmed:
+1. **The window was too short.** Only ~38ms separated write from destroy —
+   consistent with the kernel's flowtable offload typically engaging only
+   once a connection is already established+replied, for a single fast
+   HTTP GET that may have already been finishing by the time the row was
+   written. Very few or zero packets may have had any chance to traverse
+   the row before it was torn back down.
+2. **FA may not be wired into the live datapath at all.** Everything
+   touched this session — GMAC table-init, GMAC indirect data path, the
+   switch's `REG_FC_OOBPAUSE` bit — is FA's own control/config/table-write
+   surface. Nothing this session configured any mechanism that tells the
+   switch or MAC hardware to actually *route packets through* FA's lookup
+   engine for consultation. A perfectly valid row sitting in a table that
+   nothing queries would produce exactly this signature: correct writes,
+   zero hits, connection working fine the whole time via the ordinary
+   software path (which the framework guarantees regardless, per the
+   architecture in `drifting-dazzling-mccarthy.md`).
+
+Distinguishing these needs either a longer-lived connection (large
+download, many requests over a kept-alive session — a wider write-to-destroy
+window to give any real consultation a chance to register) or a return to
+`etc_fa.c`/vendor source specifically to find what, if anything, activates
+FA as a **datapath** participant rather than just a configured table.
+Neither has been done. This is a new, distinct research question, not a
+minor follow-up.
+
+**Full revert executed and confirmed:** `fa_accel` unregistered, flowtable
+back to `br-guest`/`br-lan`/`wan` with no `flags offload`,
+`fa_switch_oobpause_persist` and `fa_bringup` both unloaded cleanly,
+`fa_probe` re-read confirms `control=0x00001400 status=0x000003e2` —
+identical to every baseline in this file. `lsmod` confirms zero FA test
+modules remain loaded. Stability: uptime unbroken (3:48), 0% ping loss to
+both the router and the real internet test target, all 4 SSIDs enabled.
+
 ## What this changes
 
 `VERDICT.md`'s central open question — "is the FA silicon block physically
 present, powered, and functional" — is resolved: **yes**, on this exact
 board, confirmed via its own real init-done handshake, not just a
-plausible-looking register value. Every register-level mechanism needed for
-real hardware NAT acceleration has now been individually proven: table-init
-control handshake, indirect data read/write path, switch-side enable
-register, a complete real NAPT row round-tripped correctly, and real
-connection data decoding correctly into that row's inputs. The one thing
-still not proven is the final integration — FA hardware actually consulting
-a driver-written row for a live packet and forwarding it correctly. That
-needs a fresh WAN-connected test window, using the exact procedure and
-`fa_stats_probe.ko` oracle already built and staged here, and is a new,
-distinct go/no-go — not something this result authorizes on its own.
+plausible-looking register value. Every register-level mechanism and the
+full software write/verify/decode/teardown path are now proven correct
+against real connection data. What remains genuinely open, after a real
+end-to-end attempt: whether FA silicon is wired into the live packet
+datapath at all, versus being a correctly-programmable table that nothing
+in this project has yet connected to actual traffic. That is the real next
+research question — not a bring-up step, not a go/no-go on enabling
+something proven, but an open unknown that a short single-request test
+cannot resolve either way.

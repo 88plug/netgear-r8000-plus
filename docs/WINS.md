@@ -319,3 +319,26 @@ Full detail: `hwoffload-research/fa-probe/BRINGUP_RESULT.md`. Real
 end-to-end forwarding proof is the one thing this project has never yet
 empirically shown - needs a fresh WAN-connected window, same staged
 procedure, new go/no-go.
+
+**Update, same night: live=1 test completed with WAN reconnected - honest
+result, not a clean win.** Re-ran the full staged sequence and actually
+fired the test packet this time. `fa_accel`'s write path worked completely:
+both directions of a real connection were decoded, a real row built and
+written, read back and verified before ever reporting success, and torn
+down correctly on connection close - all against real data, no synthetic
+inputs anywhere. But the FA hardware's own HIT counter never moved (stayed
+at 0) across that entire test, despite the row being correctly written and
+marked valid. Two honest explanations, neither confirmed: the connection
+was too short (~38ms between write and teardown) for any packet to have a
+real chance to traverse the row, or FA silicon was never actually wired
+into the live packet datapath by anything built this session (only its own
+config/table registers were touched - nothing tells switch/MAC hardware to
+route packets through FA's lookup engine in the first place). Everything
+reverted and confirmed clean: `fa_accel` unloaded, hw offload back to 0,
+switch OOBPAUSE and GMAC control register back to exact baseline, zero FA
+modules left loaded, router stable throughout (0% ping loss to router and
+to the real internet, all 4 SSIDs up). Full detail:
+`hwoffload-research/fa-probe/BRINGUP_RESULT.md`. This is where the FA/CTF
+investigation honestly stands: every software mechanism proven correct,
+whether the silicon is actually in the datapath at all is now the open
+question - a new research question, not a remaining bring-up step.
