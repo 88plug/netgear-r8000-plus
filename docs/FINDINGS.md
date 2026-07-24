@@ -542,3 +542,73 @@ entirely dependent on a working SAE/MFP-required negotiation that never
 happened, was never actually providing protection either — its removal
 here is not a regression, it's removing a config option that was already
 inert.
+
+## 15. pstore/ramoops — kernel/DTS work proven correct, blocked by an unresolved OpenWrt build-environment bug (2026-07-23)
+
+**What was built, and confirmed correct in isolation:**
+- `openwrt/target/linux/bcm53xx/config-6.12`: added `CONFIG_PSTORE`,
+  `CONFIG_PSTORE_RAM`, `CONFIG_PSTORE_CONSOLE`, `CONFIG_PSTORE_PMSG`,
+  `CONFIG_PSTORE_ZONE`.
+- `openwrt/target/linux/bcm53xx/patches-6.12/334-ARM-dts-bcm53xx-netgear-r8000-add-ramoops.patch`:
+  reserves 512KB at `0x8ff80000` (the top of the second RAM bank — confirmed
+  free via grep across every parent `.dtsi`) for a ramoops region: 128KB
+  dmesg record, 128KB console log, 64KB pmsg.
+- **Both confirmed working on real hardware, twice**: `/sys/fs/pstore`
+  mounted successfully (`pstore on /sys/fs/pstore type pstore ...`) after
+  flashing a locally-built image with these changes.
+
+**What's blocked, and why — a real, isolated, unresolved upstream bug, not
+a mistake in these changes:**
+
+brcmfmac fails to load with `module brcmfmac: .gnu.linkonce.this_module
+section size must match the kernel's built struct module size at run
+time`. This was investigated rigorously, not assumed:
+
+1. Reproduced identically across three separate build attempts, including
+   one `make dirclean` full-from-scratch rebuild — rules out stale
+   incremental build state.
+2. Reproduced identically with **all pstore config changes reverted** —
+   rules out pstore/the DTS patch as the cause entirely.
+3. Vermagic strings (`6.12.94 SMP mod_unload ARMv7 p2v8`) match exactly
+   between the working (v9) and broken module — rules out a simple
+   kernel-version mismatch; this is a genuine binary struct-layout
+   difference, not a version-string one.
+4. **Decisive test**: swapped the exact, byte-identical (confirmed via
+   sha256) `brcmfmac.ko` that works fine on v9 directly into the locally
+   built image (bypassing this build's own compile of the module
+   entirely). It failed with the identical error. **This proves the
+   module itself is not the problem — the locally-built kernel has a
+   different `struct module` ABI than the kernel v9 actually runs.**
+5. v9's kernel was never compiled locally at all — it comes from
+   `openwrt-imagebuilder-25.12.5-...`, which uses the official OpenWrt
+   project's own pre-built kernel binary. A full diff of ImageBuilder's
+   `.config` against the local buildroot's `.config` (excluding package
+   selections) showed no difference in any hardening/struct-affecting
+   option (`RANDSTRUCT`, `MODULE_SIG`, `STACKPROTECTOR`, `LTO`, `KASAN`,
+   `UBSAN` all identical) — the only differences were `TARGET_MULTI_PROFILE`
+   and per-device package lists, neither of which should affect `struct
+   module`'s own layout.
+6. Confirmed via web search as a real, currently-open, unresolved upstream
+   bug: [openwrt/openwrt#18743](https://github.com/openwrt/openwrt/issues/18743),
+   hitting unrelated modules (`ip_set`, `x_tables`, `macvlan`) on a
+   different target (ipq40xx) with no root cause or fix documented by
+   maintainers.
+
+**Conclusion:** this is a real, reproducible incompatibility between
+locally-built (`make world`) kernels and modules built against them, for
+reasons not yet identified even after ruling out every hypothesis checked
+above (pstore, the module build itself, vermagic, and the visible
+hardening-relevant Kconfig options). It is not specific to brcmfmac —
+whatever it is would block ANY custom local kernel build for this target
+right now, independent of what feature prompted the rebuild.
+
+**Router state: reverted to v9 (proven-good, unaffected — v9's kernel was
+never locally compiled) after every test.** No functional regression
+shipped; this section exists so the next person who wants
+custom-kernel-level changes here (pstore or anything else) doesn't have to
+re-discover any of the above from scratch. The reusable work (861 patch
+correctly relocated into `openwrt/package/kernel/mac80211/patches/brcm/`,
+pstore kernel config, the ramoops DTS patch, a `files` symlink to
+`v2-files` for the FILES overlay) is left in place in the local `openwrt/`
+buildroot checkout, uncommitted (that tree is a checkout of upstream
+`openwrt/openwrt.git`, not this project's own repo).

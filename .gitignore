@@ -14,6 +14,7 @@ bin/
 
 # backups (contain live device config, kept locally only)
 backups/
+images/backup-*.tar.gz
 
 # vendor stock-firmware rootfs extraction (huge, third-party binaries)
 hwoffload-research/blob-analysis/rootfs/

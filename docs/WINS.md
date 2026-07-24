@@ -402,3 +402,50 @@ This router's WiFi has always been WPA2-PSK with MFP-capable advertised,
 not WPA3 - this fix makes the shipped config honestly match what the
 hardware actually does, rather than silently claim a posture it never
 delivered.
+
+## SQM WAN bandwidth - measurement method proven, still correctly NOT set
+
+The "Outstanding" item above (no real WAN link to measure) is partially
+resolved: WAN got a real connection tonight (double-NAT through the
+operator's own home network, for the FA/CTF live-traffic test) and a real
+download measurement is now proven feasible from the router itself -
+`wget -O /dev/null "https://speed.cloudflare.com/__down?bytes=52428800"`
+timed at 50MB/5.09s, ~82.4 Mbps. Upload measurement is not yet proven: the
+router's minimal `wget` couldn't complete a POST-based upload test against
+either Cloudflare's `__up` endpoint or a thinkbroadband mirror (connection
+reset / server error respectively) - needs `iperf3` or a working upload
+target, not attempted further tonight.
+
+**Deliberately NOT setting `sqm.wan.download`/`upload` from this number.**
+This bench connection is a temporary double-NAT through the operator's own
+home network, not the router's actual final ISP link - the real deployment
+bandwidth could be very different (faster or slower). Writing tonight's
+82.4 Mbps into production SQM config would silently misconfigure the
+shaper once deployed for real, which is worse than leaving it at the
+current `0`/disabled placeholder. What tonight actually adds: the exact
+command to run once the router is at its real deployment location, so
+this is a two-minute task then instead of an open question.
+
+## pstore/ramoops — real, rigorous investigation; genuine upstream wall found, not shipped
+
+Built a full custom kernel (CONFIG_PSTORE/CONFIG_PSTORE_RAM + a devicetree
+patch reserving 512KB for a ramoops region) via the full OpenWrt buildroot
+(a bigger undertaking than anything else tonight - hours-scale, toolchain
++ kernel + all packages from source). Both changes work: `/sys/fs/pstore`
+mounted successfully on real hardware, twice.
+
+But brcmfmac fails to load against this locally-built kernel with a
+`struct module` ABI mismatch - and this is not a mistake in the pstore
+work. Isolated rigorously: reproduces with pstore fully reverted (not the
+cause), reproduces even swapping in the exact byte-identical `brcmfmac.ko`
+that works fine on v9 (not a module-build problem - the *kernel* itself
+differs from what v9 actually runs, which was never locally compiled at
+all, only ever built by the official OpenWrt project). Matches a real,
+currently-open, unresolved upstream bug
+([openwrt/openwrt#18743](https://github.com/openwrt/openwrt/issues/18743))
+hitting unrelated modules on a different target, with no fix documented
+anywhere.
+
+Router reverted to v9 after every test - no regression shipped. Full
+diagnostic trail in `docs/FINDINGS.md` §15, so this doesn't need
+re-discovering next time someone wants a custom kernel build here.
