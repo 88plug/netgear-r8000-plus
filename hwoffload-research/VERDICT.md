@@ -25,6 +25,41 @@ driver expects. NAPT table-row programming and switch-side SRAB enable are
 still open, separate next steps — this resolved silicon presence, not
 full data-plane acceleration.
 
+**UPDATE 2026-07-23, later — the actual root cause of "why doesn't a
+correctly-written row ever get consulted" is now found, not just
+suspected.** A real live=1 test wrote a byte-correct, hardware-verified
+NAPT row for a real connection (`fa-probe/BRINGUP_RESULT.md`) but the
+FA hit counter never moved. Root cause, confirmed via primary source:
+`ctf_forward()` — the actual per-packet consultation call FA/CTF depends
+on — is invoked directly from Broadcom's own patched vendor Ethernet
+driver's RX handler (`graveyard-vendor/extracted-source/et_linux.c`,
+four call sites, all inside packet receive processing, confirmed as the
+GMAC-aware variant via its `bcmgmacrxh.h`/`ET_GMAC()` usage — the right
+driver for this exact chip). That call site has no equivalent anywhere in
+mainline `bgmac.c`, which is what this router actually runs — confirmed
+independently by direct inspection of current upstream `bgmac.c`/`b53*.c`
+(zero references to CTF, FA, or any packet-steering hook; the vendor
+attach point, `ctf_attach_fn`, is an exported-but-unpopulated function
+pointer with nothing in mainline to ever populate it) and corroborated by
+public community documentation (SNBForums/Merlin/DD-WRT) describing FA/CTF
+as requiring the closed-source vendor kernel module itself, plus WAN-type
+constraints (plain DHCP/static IP only, no PPPoE/VLAN, no active
+QoS/shaping/VPN) that don't apply here since nothing is attached at all.
+
+**This is the real, final answer, not a remaining escalation:** FA
+silicon on this exact board is present, powered, and its control/data/
+switch-enable registers all respond exactly as documented — every
+register-level and software-write-path claim this project made is true.
+But real hardware NAT acceleration is not reachable from mainline
+OpenWrt's driver stack, structurally, regardless of test duration,
+bring-up persistence, or anything else this project could build on top of
+the mainline kernel. Reaching it would require porting Broadcom's own
+closed-source CTF/FA kernel module (or reimplementing its RX-path hook)
+into `bgmac.c` itself — a mainline-driver-modification project, not a
+flowtable-offload-backend project. That is a different, much larger
+undertaking than anything scoped here, and is not something this result
+authorizes starting.
+
 **Original gap this update resolves, kept for context:** nobody had
 confirmed that the FA silicon block is physically present, powered, and
 functional on an actual R8000 board. The stock firmware analyzed in `blob-analysis` (build 10.1.88,

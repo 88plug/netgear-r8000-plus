@@ -338,7 +338,33 @@ reverted and confirmed clean: `fa_accel` unloaded, hw offload back to 0,
 switch OOBPAUSE and GMAC control register back to exact baseline, zero FA
 modules left loaded, router stable throughout (0% ping loss to router and
 to the real internet, all 4 SSIDs up). Full detail:
-`hwoffload-research/fa-probe/BRINGUP_RESULT.md`. This is where the FA/CTF
-investigation honestly stands: every software mechanism proven correct,
-whether the silicon is actually in the datapath at all is now the open
-question - a new research question, not a remaining bring-up step.
+`hwoffload-research/fa-probe/BRINGUP_RESULT.md`.
+
+**Update, same night: root cause found - the FA/CTF investigation is now
+closed.** Traced the actual per-packet consultation mechanism to its
+source: `ctf_forward()` is called directly from Broadcom's own patched
+vendor Ethernet driver (`et_linux.c`, confirmed the correct GMAC-generation
+driver for this SoC), on every received packet, before it reaches Linux's
+normal networking stack - that's the real hook FA/CTF depends on. This
+router runs mainline `bgmac.c`, an entirely separate upstream driver with
+zero CTF/FA awareness anywhere in it or in the b53/DSA switch driver
+family (independently verified against current mainline source). The
+vendor's own attach point (`ctf_attach_fn`) is an exported function
+pointer that only Broadcom's closed-source module would ever populate -
+nothing in mainline does. Public documentation (SNBForums/Merlin/DD-WRT)
+independently confirms FA/CTF always requires that closed-source module
+plus WAN-type constraints that don't apply here since nothing is attached.
+
+This means every hardware mechanism this project verified this session -
+table-init, indirect data read/write, switch-side enable, a complete real
+NAPT row, real connection data decoding, and now a real write-verified row
+for a live connection - was correct and real, and none of it was ever
+going to be consulted by actual traffic, on this software stack, no matter
+how long the test connection ran. That's not a bug in this project's
+driver; it's an architectural fact about mainline OpenWrt vs. Broadcom's
+closed vendor stack. Reaching real acceleration would mean porting
+Broadcom's own CTF/FA kernel module into `bgmac.c` itself - a mainline
+Ethernet driver project, not a flowtable-offload-backend project, and a
+different undertaking than anything scoped here. Full detail:
+`hwoffload-research/fa-probe/BRINGUP_RESULT.md` and
+`hwoffload-research/VERDICT.md`.

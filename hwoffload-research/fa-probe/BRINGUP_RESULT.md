@@ -422,17 +422,64 @@ identical to every baseline in this file. `lsmod` confirms zero FA test
 modules remain loaded. Stability: uptime unbroken (3:48), 0% ping loss to
 both the router and the real internet test target, all 4 SSIDs enabled.
 
+## Follow-up: root cause found — why the row is never consulted
+
+The question above ("is FA wired into the live datapath at all") is now
+answered, not just narrowed. Primary-source evidence in this repo's own
+extracted vendor tree:
+
+`graveyard-vendor/extracted-source/et_linux.c` (Broadcom's own patched
+GMAC-aware Ethernet driver — confirmed the right driver family for this
+exact SoC via its `bcmgmacrxh.h`/`ET_GMAC()` usage throughout) calls
+`ctf_forward()`/`et_ctf_forward()` at four separate points, all directly
+inside its own RX handler, on every received packet, before that packet
+ever reaches `netif_receive_skb()`/bridging/routing. That is the actual
+per-packet consultation point CTF/FA depends on — confirmed as the *only*
+call site for `ctf_forward` anywhere in the entire extracted vendor source
+tree (the macro is defined once, in `hndctf.h`, and called only from
+`et_linux.c`).
+
+This router runs mainline `bgmac.c`, not `et_linux.c` — an entirely
+separate, independently-written upstream driver. Independent confirmation
+(mainline source inspection this session): mainline `bgmac.c` and the
+`b53`/DSA switch driver family contain **zero** references to CTF, FA, or
+any packet-steering hook of this kind. The vendor's own attach point,
+`ctf_attach_fn`, is an exported function pointer that stays `NULL` unless
+Broadcom's closed-source `ctf.ko` (and FA's own module) is loaded to
+populate it — nothing in mainline ever does. Public community
+documentation (SNBForums/Merlin/DD-WRT forums) independently corroborates:
+FA/CTF activation always requires that closed-source vendor module plus
+constraints (plain DHCP/static-IP WAN only; no PPPoE/VLAN; nothing
+touching Netfilter's FORWARD chain like QoS/shaping/VPN) that make sense
+once you know it works by *bypassing* Netfilter entirely rather than
+extending it.
+
+**This is not a timing artifact and not fixable by a longer test.**
+Whether the live=1 test's connection lasted 38ms or 38 minutes, nothing in
+this router's actual running kernel ever calls anything resembling
+`ctf_forward()` — the row `fa_accel.c` wrote was real, byte-correct, and
+verified in real silicon, and remains permanently unreachable by real
+traffic on this software stack, because the code that would consult it
+does not exist in mainline `bgmac.c`. Reaching real acceleration would
+mean porting Broadcom's own closed-source CTF/FA kernel module (or
+reimplementing its RX hook) directly into `bgmac.c` — a mainline Ethernet
+driver modification project, categorically different in scope from a
+flowtable hardware-offload backend, and not something this result starts.
+
 ## What this changes
 
 `VERDICT.md`'s central open question — "is the FA silicon block physically
 present, powered, and functional" — is resolved: **yes**, on this exact
 board, confirmed via its own real init-done handshake, not just a
 plausible-looking register value. Every register-level mechanism and the
-full software write/verify/decode/teardown path are now proven correct
-against real connection data. What remains genuinely open, after a real
-end-to-end attempt: whether FA silicon is wired into the live packet
-datapath at all, versus being a correctly-programmable table that nothing
-in this project has yet connected to actual traffic. That is the real next
-research question — not a bring-up step, not a go/no-go on enabling
-something proven, but an open unknown that a short single-request test
-cannot resolve either way.
+full software write/verify/decode/teardown path are proven correct against
+real connection data — this project's own driver, `fa_accel.c`, does
+everything right. The remaining question — whether FA silicon is wired
+into the live packet datapath at all — is also now resolved: **no**, not on
+mainline OpenWrt's driver stack, and not fixable from this side. The path
+to real acceleration runs through Broadcom's own closed-source vendor
+driver, which this project has correctly never depended on. This closes
+the FA/CTF investigation: every hardware mechanism this project set out to
+verify is proven; the one thing that was never going to be provable by
+register work alone — real packet interception — has a confirmed,
+documented, architectural reason it doesn't happen.
