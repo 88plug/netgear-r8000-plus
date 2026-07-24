@@ -197,6 +197,47 @@ needs Phase B's logged output verified against real flows first) and
 Phase D (persistent GMAC/switch bring-up at driver load) - both remain
 their own separate decisions per the approved plan.
 
+## Follow-up: real, complete NAPT flow row - write, read, delete - CONFIRMED
+
+`fa_napt_row_test.c` closes the actual remaining hardware question: not an
+inert test slot this time, but a COMPLETE, realistic NAPT flow-table row,
+built with Broadcom's own bit-packing macros verbatim
+(`fa_napt_prep_ipv4_word()`, `CTF_FA_SET_NH_ENTRY`) - simulating a real LAN
+client (192.168.1.50:34567) NAT'd to a public destination (93.184.216.34:80,
+synthetic, no packet ever sent).
+
+**Result: every word matched, both ways.**
+```
+next-hop row:  0x00080004 0xf56df778 0x00000006  - all 3 words MATCH
+NAPT flow row: 0x00000000 0x6c110008 0x00282edc 0xc3838028
+               0x5db8d822 0xc0a80132 0x00100000 0x80000000  - all 8 words MATCH
+valid bit after write  = 1
+valid bit after delete = 0   DELETE-CONFIRMED
+```
+
+This is a meaningful upgrade from the earlier inert Next-Hop slot test
+(`fa_macc_test.c`), which used an arbitrary test pattern and saw one word
+truncate to a narrower real field width (correctly, as later analysis
+showed). This test used *correctly-scoped* real data throughout, and the
+complete 8-word flow row - the actual production data structure real
+hardware NAT acceleration depends on - round-tripped perfectly, including
+the full write -> read -> mark-invalid -> delete -> verify lifecycle
+`_fa_napt_del()` itself uses.
+
+System stability re-checked: uptime unbroken, 0% ping loss, all 4 SSIDs
+intact, clean `rmmod`. Table index 0 in both tables was never referenced
+by anything else in the running kernel (`fa_accel.c` still always returns
+`-EOPNOTSUPP`), so this remained fully isolated from any live packet path.
+
+**What this proves, precisely:** the complete data-plane write mechanism
+for real NAT flow entries works, correctly, on this exact silicon.
+**What it still doesn't prove:** that the hardware actually *consults*
+this table for real forwarded packets and rewrites them correctly in
+flight - that requires wiring this into `fa_accel.c`'s real
+`FLOW_CLS_REPLACE` handler (still returning `-EOPNOTSUPP` today) and
+testing against real traffic, which still needs a second test client or
+real deployment.
+
 ## What this changes
 
 `VERDICT.md`'s central open question — "is the FA silicon block physically
