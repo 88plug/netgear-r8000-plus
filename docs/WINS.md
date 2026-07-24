@@ -458,3 +458,57 @@ rest of world - instead of trusting make's own parallel scheduling.
 Flashed, tested: identical error. This falsifies build ordering as the
 cause and leaves the original conclusion more confirmed, having actually
 survived a real test instead of resting on a matched GitHub issue alone.
+
+## v10 — app-plus pass: build-recipe drift found and closed, reproducibility proven (2026-07-24)
+
+A full app-plus pass (repomix + edgar-morin) against this already heavily
+mined repo found no remaining hardware/feature work — FA/CTF, pstore/ramoops,
+OWE, and DFS are all confirmed-closed honest walls, and everything else on
+`hwoffload-research/`'s own bookkeeping index either already shipped or was
+never followed up on and turned out to be moot. The one real, confirmed gap:
+**this project's own build recipe had drifted from what it actually builds,
+for the third time.**
+
+- **`docs/RUNBOOK.md` §5 still documented `FILES=image-files/`**, three
+  shipped versions (v7, v8, v9) after commit `1e2baf2` made `v2-files/` the
+  real overlay. Following the runbook literally today would have silently
+  shipped a build missing guest-network isolation, `perf-tune`,
+  `radio-watchdog`'s rc.d enable symlink, and the LED netdev-binding fix —
+  exactly the class of mistake that already caused the v5→v6 packaging
+  regression and the v7 `wpad-basic-mbedtls` outage.
+- **`v2-staging/wpa3/imagebuilder-packages.md`'s copy-pasteable `make image`
+  command still said `wpad-basic-mbedtls`** even after two "SUPERSEDED"/
+  "CORRECTION" headers had been stacked on top of it identifying that as
+  wrong — the actual runnable command was never fixed. This is the literal
+  doc that produced the v7 regression; it was still loaded.
+- **`hwoffload-research/WAVE2_INDEX.md` had 4 research threads stuck at
+  "pending consolidation" indefinitely**, unlike threads 1-2 which got an
+  honest close-out. Closed 3 as moot/subsumed by later decisions already on
+  record (UART superseded by the pstore/ramoops choice, BCM53012 errata
+  subsumed by the already-closed EAP_MODE_SIMPLIFIED fix, SROM/NVRAM
+  cross-reference moot since calibration already works end-to-end); left
+  thread 6 (unused SoC blocks/crypto engine survey) honestly open rather
+  than silently marking it done.
+
+**Fix verified, not just written.** Reconstructed the actual correct
+`PACKAGES=` list from the live v9 router's own `apk list --installed`
+(ground truth), corrected `docs/RUNBOOK.md` to the real recipe (`FILES=v2-files`,
+`-wpad-basic-mbedtls wpad-mbedtls`, the local patched-`kmod-brcmfmac` repo
+requirement spelled out), then **built from the corrected recipe and diffed
+the result against the live router**: package manifest is byte-for-byte
+identical to v9's installed set (zero packages missing either direction),
+and `brcmfmac.ko`'s md5 matches the live, patches/861-verified module
+exactly (`8398326dd28491534f9e2ce35b71ee56`). `image-files/` marked
+deprecated in place (`image-files/DEPRECATED.md`) rather than silently left
+to mislead the next rebuild.
+
+**Shipped as `images/openwrt-25.12.5-r8000plus-v10-bcm53xx-generic-netgear_r8000-squashfs.chk`**,
+sha256 `f604c6b5c43dc2007e1c945d2758e8f37142ab54ef08b9ba0728a60f0e63b938`.
+**Not flashed to the router.** Content is functionally identical to the
+already-verified-live v9 (that's the point — it proves the fixed docs are
+correct); reflashing a running router for a docs-only fix with zero
+functional delta would be pure risk for no gain, given this project's own
+history of every flash surfacing at least one surprise. The earlier
+abandoned pstore-experiment `.chk` that had been occupying the `v10`
+filename (never shipped, see the pstore/ramoops entry above) was moved to
+`images/graveyard/` first so it wasn't silently overwritten.

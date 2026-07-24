@@ -1,5 +1,12 @@
 # ImageBuilder PACKAGES change -- WPA3-SAE / 802.11w
 
+**Authoritative build recipe is `docs/RUNBOOK.md` §5 -- this file is history,
+not a live reference.** Two correction layers already accumulated below
+(SUPERSEDED, then CORRECTION) without the actual `make image` command block
+ever being fixed to match -- that stale command block is exactly what v7
+copy-pasted and shipped an outage from. Fixed below (2026-07-24) so it can't
+happen a third time; keep RUNBOOK.md as the one place to check going forward.
+
 ## SUPERSEDED (2026-07-23, see FINDINGS.md item 14)
 
 Real-client testing found item 2 below wrong in the way that matters:
@@ -109,12 +116,21 @@ cd openwrt-imagebuilder-25.12.5-bcm53xx-generic.Linux-x86_64
 
 make image \
   PROFILE="netgear_r8000" \
-  PACKAGES="wpad-basic-mbedtls hostapd-utils wpa-cli wireless-regdb kmod-brcmfmac brcmfmac-firmware-43602a1-pcie kmod-usb-ohci kmod-usb2 kmod-phy-bcm-ns-usb2 kmod-usb-ledtrig-usbport kmod-usb3 kmod-phy-bcm-ns-usb3" \
+  PACKAGES="-wpad-basic-mbedtls wpad-mbedtls hostapd-utils wpa-cli wireless-regdb kmod-brcmfmac brcmfmac-firmware-43602a1-pcie kmod-usb-ohci kmod-usb2 kmod-phy-bcm-ns-usb2 kmod-usb-ledtrig-usbport kmod-usb3 kmod-phy-bcm-ns-usb3" \
   FILES="files/"
 ```
 
-- `wpad-basic-mbedtls` -- explicit (was implicit via `DEVICE_..._PACKAGES`).
-  Provides WPA3-SAE + 802.11w/MFP, matches v1 and the upstream default.
+**Fixed 2026-07-24: `-wpad-basic-mbedtls wpad-mbedtls`, not plain
+`wpad-basic-mbedtls`.** This command block still said `wpad-basic-mbedtls`
+even after the CORRECTION section below identified it as wrong once
+`bss_transition` ships in the merged config -- that stale copy-paste is what
+v7 actually ran, taking down all 4 SSIDs. See `docs/RUNBOOK.md` §5 for the
+full current recipe (also folds in `luci`/`usteer`/`sqm-scripts`/`ethtool`,
+none of which this narrower WPA3-scoped doc ever covered).
+
+- `wpad-basic-mbedtls` [now superseded by `wpad-mbedtls`, see above] --
+  explicit (was implicit via `DEVICE_..._PACKAGES`). Provides WPA3-SAE +
+  802.11w/MFP, matches v1 and the upstream default.
 - `hostapd-utils` -- installs `hostapd_cli`. Used post-flash to confirm the
   negotiated `key_mgmt`/`pairwise_cipher` per associated station
   (`hostapd_cli -i <ifname> all_sta`, `hostapd_cli -i <ifname> status`).

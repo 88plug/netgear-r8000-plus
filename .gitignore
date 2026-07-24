@@ -1,5 +1,7 @@
 # large firmware binaries — kept on disk, not in git
 images/*.chk
+images/**/*.chk
+images/*.manifest
 images/*.zip
 *.bin
 

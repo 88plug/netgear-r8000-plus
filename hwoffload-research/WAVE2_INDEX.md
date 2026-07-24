@@ -20,10 +20,10 @@ this index per the task framing above.
 |---|-------|------------------------|--------|
 | 1 | Live WiFi capability-string cross-check | Compare `iw phy info` output against claimed BCM43602 `brcmfmac` capabilities (WPA3/SAE, 802.11r/k/v, OWE) on the live bench unit, to confirm what the running radio actually advertises vs. what upstream docs/issue trackers claim | findings pending consolidation by main session |
 | 2 | Read two previously-unreviewed notes files | `graveyard-openwrt/notes.md` (OpenWrt/mainline FA-driver graveyard mining) and `v2-staging/extras/dsa-switch/NOTES.md` (b53/SRAB switch specifics) — folded into main docs if not already | findings pending consolidation by main session (see independent read-through below) |
-| 3 | UART/serial console hardware research | R8000 board-level UART header/pads, baud rate, pinout, and any CFE bootloader serial-console access path (recovery net item, ties into the "TFTP needs serial" caveat already in project `CLAUDE.md`) | findings pending consolidation by main session |
-| 4 | BCM53012 switch chip broader errata research | Wider errata/bug search on BCM53012 beyond the already-documented EAP_MODE_SIMPLIFIED regression — any other known silicon or driver-level issues on this switch family | findings pending consolidation by main session |
-| 5 | Remaining SROM/NVRAM calibration parameter cross-reference | Cross-check outstanding SROM/NVRAM calibration parameters (antenna/power tables, board-specific cal data) against what OpenWRT's `bcm53xx` target actually consumes vs. what stock Netgear firmware carries | findings pending consolidation by main session |
-| 6 | Other unused hardware blocks on BCM4709 SoC | Survey of SoC blocks beyond the Flow Accelerator that are present in silicon but undriven/unused in both stock and OpenWRT firmware (crypto engine, other GMACs, etc.) | findings pending consolidation by main session |
+| 3 | UART/serial console hardware research | R8000 board-level UART header/pads, baud rate, pinout, and any CFE bootloader serial-console access path (recovery net item, ties into the "TFTP needs serial" caveat already in project `CLAUDE.md`) | closed 2026-07-24 — moot, see "Closing out threads 3-6" below |
+| 4 | BCM53012 switch chip broader errata research | Wider errata/bug search on BCM53012 beyond the already-documented EAP_MODE_SIMPLIFIED regression — any other known silicon or driver-level issues on this switch family | closed 2026-07-24 — subsumed, see "Closing out threads 3-6" below |
+| 5 | Remaining SROM/NVRAM calibration parameter cross-reference | Cross-check outstanding SROM/NVRAM calibration parameters (antenna/power tables, board-specific cal data) against what OpenWRT's `bcm53xx` target actually consumes vs. what stock Netgear firmware carries | closed 2026-07-24 — moot, see "Closing out threads 3-6" below |
+| 6 | Other unused hardware blocks on BCM4709 SoC | Survey of SoC blocks beyond the Flow Accelerator that are present in silicon but undriven/unused in both stock and OpenWRT firmware (crypto engine, other GMACs, etc.) | genuinely open, low-priority — see "Closing out threads 3-6" below |
 | 7 | Upstream/mainline prior-art check for FA driver work | Fresh check of `openwrt/openwrt`, `torvalds/linux`, and standalone repos for any Flow-Accelerator driver work — substantially overlaps thread 2's `graveyard-openwrt/notes.md`, which already documents this in depth (see below); worth diffing the two reports for anything thread 7 turned up that predates or postdates that file | findings pending consolidation by main session |
 
 ## Independent cross-check of the two notes files (thread 2)
@@ -68,3 +68,32 @@ sibling `flow-offload/NOTES.md`.
 These two files are consistent with each other and non-contradictory — both
 converge on "no hardware NAT/FA path exists upstream for this chip family,
 CPU-side mitigations are the only working answer today."
+
+## Closing out threads 3-6 (2026-07-24)
+
+Threads 1-2 got the independent cross-check above; threads 3-6 never did and
+sat at "pending consolidation" indefinitely. Closing them out honestly rather
+than leaving a stale status:
+
+- **Thread 3 (UART/serial console research) — moot, superseded by a later
+  decision.** `docs/FINDINGS.md` §13 explicitly chose pstore/ramoops over UART
+  for post-crash visibility ("UART requires... soldering... pstore/ramoops is
+  software-only... decision: defer [UART], prefer pstore/ramoops"). Whatever
+  this thread found, the project deliberately routed around needing it.
+- **Thread 4 (BCM53012 broader errata) — subsumed.** The one concrete errata
+  item this project ever needed (`EAP_MODE_SIMPLIFIED` / upstream commit
+  `4227ea91e265`) was independently found and closed via thread 2's own
+  `dsa-switch/NOTES.md` cross-check above, and again in `docs/FINDINGS.md` §13.
+  No second errata item ever surfaced anywhere else in this repo's history to
+  suggest thread 4 found anything beyond that.
+- **Thread 5 (remaining SROM/NVRAM cross-reference) — moot.** The full
+  calibration set already works end-to-end (`docs/FINDINGS.md` §4: all 3
+  radios up, per-radio MACs matching extracted calibration exactly, 287 `N:`
+  cal keys live). A "what's left to cross-reference" question doesn't matter
+  once the thing it was checking already ships correctly.
+- **Thread 6 (other unused BCM4709 SoC blocks — crypto engine, other GMACs) —
+  genuinely never completed, and staying that way.** Unlike 3-5, nothing else
+  in this repo's history touches this topic, so there's no later work to point
+  to. It's also exploratory-survey in nature, not blocking anything shipped or
+  planned — recorded here as an honestly open, low-priority research idea for
+  a future pass, not as something quietly resolved.

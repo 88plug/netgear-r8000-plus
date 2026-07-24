@@ -121,16 +121,51 @@ here). `tftp-hpa` installed.
 ## 5. Building images
 
 - **Source patch (upstreamable):** edit `openwrt/` tree, capture diff to
-  `patches/`. Our fix: `patches/0001-nvram-bcm53xx-add-netgear-r8000-43602.patch`.
-- **ImageBuilder (fast, no toolchain compile):**
+  `patches/`. Our fixes: `patches/0001-nvram-bcm53xx-add-netgear-r8000-43602.patch`
+  (5GHz nvram init) and `patches/861-brcmfmac-r8000-legacy-mbss-fallback.patch`
+  (multi-BSS driver fix).
+- **ImageBuilder (fast, no toolchain compile) — the actual recipe used for
+  v7 through the current shipping image**, reconstructed and verified
+  2026-07-24 against the live router's own `apk list --installed` (ground
+  truth, not the stale doc this replaces):
   ```bash
   cd openwrt-imagebuilder-25.12.5-bcm53xx-generic.Linux-x86_64
   make image PROFILE=netgear_r8000 \
-    PACKAGES="<base + extras>" \
-    FILES=/home/andrew/netgearr8000/image-files \
-    EXTRA_IMAGE_NAME=r8000plus
-  # output: bin/targets/bcm53xx/generic/openwrt-...-r8000plus-...-squashfs.chk
+    PACKAGES="-wpad-basic-mbedtls wpad-mbedtls hostapd-utils wpa-cli wireless-regdb \
+      luci usteer sqm-scripts ethtool \
+      kmod-brcmfmac brcmfmac-firmware-43602a1-pcie kmod-usb-ohci kmod-usb2 \
+      kmod-phy-bcm-ns-usb2 kmod-usb-ledtrig-usbport kmod-usb3 kmod-phy-bcm-ns-usb3" \
+    FILES=/home/andrew/netgearr8000/v2-files \
+    EXTRA_IMAGE_NAME=r8000plus-vN
+  # output: bin/targets/bcm53xx/generic/openwrt-...-r8000plus-vN-...-squashfs.chk
   ```
-  `image-files/` overlays FILES into the rootfs (e.g. patched `/etc/init.d/nvram`,
-  firmware blobs in `/lib/firmware/brcm/`, `/etc/config/*`). Verify a FILES
-  override took: `unsquashfs -n <root.squashfs> <path>` and grep it.
+  **`FILES=v2-files`, not `image-files/`.** `image-files/` is the pre-v7 overlay
+  and is now stale/historical only — it lacks guest-network isolation,
+  `perf-tune`, the `radio-watchdog` rc.d enable symlink, the LED netdev-binding
+  uci-defaults script, and `board.d/01_leds`. Building from `image-files/` today
+  would silently regress all of those (see `docs/WINS.md`'s v5→v6 and v7
+  entries — this exact class of stale-overlay-path drift has already caused two
+  real regressions in this project). `v2-files/` has been the actual `FILES=`
+  source since commit `1e2baf2` ("Ship v7: consolidated FILES overlay actually
+  built and flashed").
+  - **`-wpad-basic-mbedtls wpad-mbedtls`, not plain `wpad-basic-mbedtls`.**
+    `wpad-basic-mbedtls` lacks `CONFIG_WNM`, so hostapd rejects
+    `bss_transition` (802.11v) and every AP interface fails to come up — the
+    exact bug that took down all 4 SSIDs on v7's first build. The device
+    profile pulls in `wpad-basic-mbedtls` by default, hence the explicit `-`
+    exclusion.
+  - **The patched `kmod-brcmfmac` must come from this project's own local
+    package repo, not the upstream feed.** The ImageBuilder tree's own
+    `packages/` directory (auto-used as a local repo by `make image`, no
+    `repositories.conf` edit needed) must contain
+    `kmod-brcmfmac-<ver>.apk` built from `patches/861` — already present
+    there as of this writing. If it's ever missing, rebuild it via the SDK
+    (`openwrt-sdk-25.12.5-...`) with `patches/861` applied and copy the
+    resulting `.apk` into ImageBuilder's `packages/` before running
+    `make image`. This is the exact mistake that silently shipped v5 with
+    the stock (unpatched) driver — see `docs/WINS.md`'s v5→v6 entry.
+  - `v2-files/` overlays FILES into the rootfs (patched `/etc/init.d/nvram`,
+    guest-network config, `perf-tune`, `radio-watchdog`, LED binding, etc).
+    Verify a FILES override took: `unsquashfs -n <root.squashfs> <path>` and
+    grep it, or after flashing, diff `ssh root@192.168.1.1 'apk list
+    --installed'` against the previous known-good version's list.
