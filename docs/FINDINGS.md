@@ -763,3 +763,61 @@ proper cross-referenced disassembly of the chanspec-validation routine)
 is a real, scoped, deliberately-deferred next step, not something ruled
 impossible — just not proven necessary to reach the practical answer this
 pass needed.
+
+## 18. DFS, part 3 — pulled the deferred lever, got a decisive answer: `BCME_UNSUPPORTED` (2026-07-25)
+
+§17 deferred one real, scoped next step: recovering the actual firmware
+`BCME_*` code instead of the generic `-EBADE` stand-in every prior test
+observed. Pulled it rather than leave it deferred indefinitely.
+
+**What was built:** `kmod-brcmfmac` rebuilt via the SDK (same mechanism
+already proven safe for `patches/861` — a single out-of-tree module rebuild
+against the already-running, unmodified kernel, not a full local kernel
+build; the pstore/ramoops `struct module` ABI wall in §15 was specific to
+`make world`, not this path). First attempt added `-DDEBUG` to the module's
+`ccflags-y` — failed to link (`__brcmf_dbg`, `brcmf_debugfs_*` undefined:
+those live in `debug.o`, gated by a separate Kconfig symbol the plain
+`DEBUG` macro doesn't pull in). Simplified instead of chasing the Kconfig
+plumbing: `brcmf_fil_get_errstr()`'s string table is self-contained and
+already degrades safely to `""` without `DEBUG` defined; the actual blocker
+was only the one `brcmf_dbg()` call that needed `debug.o`. Swapped that one
+call to `bphy_err()` — same always-compiled, always-printing pattern
+already used elsewhere in this exact file — recovering the raw firmware
+`fwerr` value with zero new module dependencies.
+
+**Live-tested** (router not in production service for this pass): pre-flight
+backup, `rmmod brcmfmac_wcc && rmmod brcmfmac` (unload order matters —
+`brcmfmac_wcc` holds a reference into `brcmfmac`), `insmod` the debug build,
+`/etc/init.d/network restart` (a bare `wifi reload` left hostapd unable to
+find the renumbered phys — the module swap reassigns phy indices, same
+"live reload alone isn't reliable after a driver-level change" lesson as
+§11/§16), confirmed all 4 SSIDs healthy on the debug module before testing
+anything. Set `radio2` (now `phy5`) to channel 52, `wifi reload radio2`.
+
+**Result:** `brcmf_fil_cmd_data: Firmware error:  (-23)` — the raw firmware
+code, not the generic `-52`/`EBADE` every earlier test saw. Index 23 in
+brcmfmac's own `BCME_*` table (`fwil.c`) is **`BCME_UNSUPPORTED`** — an
+explicit, unambiguous "not implemented" response from the firmware itself,
+not `BCME_BADCHAN`/`BCME_OUTOFRANGECHAN` (which would suggest a fixable
+request-formatting issue) and not a driver-side translation artifact. This
+is the cleanest possible negative result available from live testing on
+this hardware.
+
+**Reverted cleanly:** channel back to 36, stock `brcmfmac.ko` restored
+(md5 `8398326d...`, matching every prior verification this repo has done
+of that exact module), full reboot. Verified after reboot: fresh boot, all
+4 SSIDs, guest isolation, SQM still shaping, 0% ping loss. The diagnostic
+`bphy_err()` swap was never meant to ship and was not carried into
+`patches/861` or any shipped image — it lived only in the SDK's temporary
+build tree for this one test and was discarded when that tree's own
+post-build cleanup ran.
+
+**Final standing conclusion — now genuinely closed, not just repeatedly
+re-confirmed:** DFS on this exact firmware (`7.35.177.56`, 2015-09-18)
+returns `BCME_UNSUPPORTED` for the chanspec this router's only DFS-capable
+radio would need. Four independent tests (clm_blob re-pairing §11, direct
+request under the shipped `Q2` regulatory code §16, direct request under a
+real `US` regulatory code §17, and now the raw firmware error code itself)
+all converge, and the last one removes the only remaining ambiguity the
+first three had. Nothing shipped changes as a result — this is evidence
+quality, not a new capability.
