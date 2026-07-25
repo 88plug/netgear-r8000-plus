@@ -7,7 +7,7 @@ closed firmware over a PCIe message-ring protocol. That firmware wedges
 under sustained/heavy traffic on this exact chip+driver combination; when it
 does, the radio stops passing traffic until something resets it. This is the
 "radios hang every few days, reboot-to-recover" caveat already noted in this
-repo's own `CLAUDE.md`, and it's well documented upstream, specifically on
+repo's own `docs/FINDINGS.md`, and it's well documented upstream, specifically on
 R8000 hardware:
 
 - **openwrt/openwrt#14685** -- "brcmfmac makes CPU stalls" on Netgear R8000

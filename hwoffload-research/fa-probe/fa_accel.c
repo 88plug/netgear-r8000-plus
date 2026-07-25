@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * fa_accel.c - Phase A+B of the FA/CTF hardware NAT-acceleration driver,
- * per /home/andrew/.claude/plans/drifting-dazzling-mccarthy.md (approved
- * plan). Registers as an indirect TC-flower/flowtable hardware-offload
+ * fa_accel.c - Phase A+B of the FA/CTF hardware NAT-acceleration driver.
+ * Registers as an indirect TC-flower/flowtable hardware-offload
  * backend (the same interface real hardware offload drivers like
  * drivers/net/ethernet/mediatek/mtk_ppe_offload.c implement), and for now
  * ONLY logs what it sees - it never writes to any FA register and always

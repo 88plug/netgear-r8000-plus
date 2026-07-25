@@ -111,7 +111,7 @@ the real legally-certified ceiling: ~20.4-20.8 dBm conducted (3-chain total), no
 ## 3. RF hardware identification (from internal-photos exhibit, May 2014)
 
 - **Main SoC:** Broadcom **BCM4709A0KFEBG** (dual-core ARM, under the finned heatsink) —
-  matches the SoC already documented in this repo's `CLAUDE.md`.
+  matches the SoC already documented in this repo's `docs/FINDINGS.md`.
 - **Radio chips:** Broadcom **BCM43602KMLG** — at least two distinct physical instances
   photographed with different date/lot codes (`369059-02` and `369059-05`), consistent
   with **three separate BCM43602 radio daughter-modules** (2.4GHz, 5GHz Band1, 5GHz

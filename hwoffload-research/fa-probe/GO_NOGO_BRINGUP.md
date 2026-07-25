@@ -85,7 +85,7 @@ to insert a NAPT flow row — this is a fundamentally different risk class than
 a single read (§`GO_NOGO.md`'s own category-1/category-2 abort analysis was
 scoped to reads; it does not cover write-path failure modes, e.g. a
 write landing on an unclocked/held-in-reset block behaving differently than a
-read). Per this project's own standing discipline (`CLAUDE.md`: "confirm the
+read). Per this project's own standing discipline (`docs/RUNBOOK.md`: "confirm the
 recovery net is actually staged" before any panic/brick-risk operation) and
 the probe module's own explicit caution, this stays a **separate, deliberate
 decision** — not something this chip-identity confirmation authorizes by
@@ -98,7 +98,7 @@ itself. A real go/no-go for the bring-up step would additionally need:
    "non-repeating" values differently from a confirmed-stable reading, and
    this hasn't been checked.
 2. **`panic_on_oops=0` + recovery net re-confirmed staged** immediately
-   before the attempt (nmrpflash + known-good `.chk`, per `CLAUDE.md`) — a
+   before the attempt (nmrpflash + known-good `.chk`, per `docs/RUNBOOK.md`) — a
    register *write* going wrong is architecturally the same brick-class risk
    as the original read, and the mitigation is identical.
 3. **An explicit operator go-ahead for this specific step**, separate from

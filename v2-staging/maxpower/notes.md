@@ -194,7 +194,7 @@ Running all three radios at their calibrated ceiling simultaneously
 increases PA current draw and heat versus the stock ~20dBm default,
 especially on radio0/radio1 where the ceiling is ~6.5dB (>4×) above the
 20dBm baseline the firmware's fallback table currently uses. This board
-has a documented erratum independent of this workstream — `../../CLAUDE.md`
+has a documented erratum independent of this workstream — `../../docs/FINDINGS.md`
 already notes community reports of "radios hanging every few days, reboot
 to recover" on this exact device under OpenWrt/`brcmfmac`, and a hardware
 watchdog is present precisely because of that class of issue (nvram

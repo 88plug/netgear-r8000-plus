@@ -48,3 +48,6 @@ v2-staging/maxpower/verify/final-state.txt
 v2-files/etc/config/wireless
 v2-files/lib/modules/
 images/packages/*.apk
+
+# agent-session context file (local only, never published)
+/CLAUDE.md

@@ -170,8 +170,7 @@ question.
 ## Follow-up: real driver skeleton (Phase A+B), per the approved plan
 
 `fa_accel.c` is the first step toward an actual persistent feature, not
-another one-shot register test. Full design: `/home/andrew/.claude/plans/drifting-dazzling-mccarthy.md`
-(approved). Architecture: registers as an indirect TC-flower/flowtable
+another one-shot register test. Architecture: registers as an indirect TC-flower/flowtable
 hardware-offload backend (`flow_indr_dev_register()`), the exact interface
 real hardware NAT accelerators (e.g. MediaTek's `mtk_ppe_offload.c`) already
 use - not a bespoke netfilter/conntrack hook. This router's own `flow add @ft`

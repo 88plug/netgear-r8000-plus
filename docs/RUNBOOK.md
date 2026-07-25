@@ -3,6 +3,12 @@
 Everything needed to access, flash, recover, and rebuild the operator's R8000.
 Bench: Manjaro/Arch host → USB-ethernet dongle → router LAN port.
 
+**Conventions:** record exact commands, button/LED timings, and IPs used at
+the bench — this repo is the reproducible runbook, not a summary. Keep a copy
+of every image actually flashed (with its sha256) in `images/` (or alongside
+it) so a re-flash is deterministic. Verify package/tool versions and the
+current OpenWrt release live rather than trusting stale assumptions.
+
 ## 1. Host / bench network (the load-bearing gotcha)
 
 The dongle is `enp103s0f3u1` (Realtek USB NIC). **Do NOT put it on DHCP** — the

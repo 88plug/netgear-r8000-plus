@@ -568,7 +568,7 @@ the proven `patches/861` module, cake shaping live on `wan` at 89Mbit,
 Three follow-ups after v11, none of which changed what's actually shipped:
 
 1. **10-agent documentation audit** (separate detailed commit) closed real
-   drift across README.md, this file, CLAUDE.md, and a dozen research/staging
+   drift across README.md, this file, and a dozen research/staging
    docs — see git log for the full breakdown, not repeated here.
 2. **DFS channels re-tested live**, prompted by the audit flagging `iw phy
    info` showing them as `(radar detection)` instead of `(disabled)`.

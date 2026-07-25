@@ -104,7 +104,7 @@
  * readl() calls that follow it), (b) mapping only the minimal 0x100-byte
  * window needed, (c) performing no writes whatsoever, and (d) having a
  * known-good recovery path staged before running this on the router (see
- * /home/andrew/netgearr8000/CLAUDE.md "Recovery net": nmrpflash + stock
+ * docs/RUNBOOK.md "Recovery / unbrick": nmrpflash + stock
  * .chk on hand) in case a fault does occur and the board needs recovery.
  *
  * Net call: safe enough to justify running as a deliberate, later step

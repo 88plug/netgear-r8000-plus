@@ -121,9 +121,9 @@ couldn't have caught (e.g. a live probe failure message near this address
 already logged by `bgmac`, which would be a reason to stop and investigate
 further before loading a new module at a neighboring offset).
 
-## Precondition 2 (confirm before insmod, not new work — already required by project CLAUDE.md)
+## Precondition 2 (confirm before insmod, not new work — already required for this project)
 
-Confirm the recovery net described in `/home/andrew/netgearr8000/CLAUDE.md`
+Confirm the recovery net described in `docs/RUNBOOK.md`
 is actually staged and reachable right now: `nmrpflash` installed and able to
 see the dongle interface, known-good stock/OpenWrt `.chk` on hand. A kernel
 panic on `insmod` is architecturally the same class of "board stops responding,
@@ -157,7 +157,7 @@ same precaution.
    entirely after this command: **do not power-cycle blindly assuming it'll
    recover.** That is the category-1 external-abort/panic outcome the risk
    assessment flagged as low-probability-but-real. Go straight to the
-   nmrpflash recovery path from `CLAUDE.md`.
+   nmrpflash recovery path from `docs/RUNBOOK.md`.
 
 4. **Read the result**:
    ```sh
@@ -171,7 +171,7 @@ same precaution.
 | `control=0xffffffff status=0xffffffff` | Category-2 clean readback, consistent with FA block present-but-unclocked/absent on this SKU (most-likely outcome per the risk assessment above) | Converts "unverified" → "provisionally absent on this SKU," matching `VERDICT.md` §3's fallback plan. Does not distinguish "fused off" from "clocked off, gateable" — that needs the NVRAM/clock-gating angle, a separate follow-on, not urgent. |
 | `control=0x00000000 status=0x00000000` | Held-in-reset or uninitialized-but-present | Practically the same conclusion as above — do not proceed to the `fa_up()` bring-up/indirect-table-write sequence based on this alone. |
 | Non-trivial, non-repeating values | Possible sign FA is live | **Do not** jump straight to `fa_up()`/table writes from this one read (the module's own comment says the same). Before that phase: confirm R8000's actual BCM4709 die revision and whether WAR777 (or another undocumented erratum) applies — that's a new, separate go/no-go, not covered by this one. |
-| Nothing in dmesg / SSH session dead / router unresponsive | Likely category-1 external abort → kernel panic on load | Recover via `nmrpflash` + stock `.chk` per `CLAUDE.md`. This result is itself useful data: it means `0x18027c00` is *not* backed by a live backplane slave, which is a different (and equally definitive) way of confirming FA is absent/inaccessible here — but confirm it once, don't retry the same load again without changing something. |
+| Nothing in dmesg / SSH session dead / router unresponsive | Likely category-1 external abort → kernel panic on load | Recover via `nmrpflash` + stock `.chk` per `docs/RUNBOOK.md`. This result is itself useful data: it means `0x18027c00` is *not* backed by a live backplane slave, which is a different (and equally definitive) way of confirming FA is absent/inaccessible here — but confirm it once, don't retry the same load again without changing something. |
 
 5. **Unload.** The module already unmaps its own mapping and returns
    immediately after the one-time read in `init()` — there's nothing held
@@ -192,7 +192,7 @@ same precaution.
   and warranting a re-think before loading anything.
 - Precondition 2 finding the recovery net is *not* actually staged (nmrpflash
   not installed, no known-good `.chk` reachable) — fix that first regardless
-  of FA risk; it's a hard requirement from project `CLAUDE.md` for any
+  of FA risk; it's a hard requirement for any
   operation with panic/brick potential.
 - Discovery that the router in its current boot has any *other* pending
   changes/unsaved config that a panic-triggered reboot would lose — trivial

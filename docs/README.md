@@ -97,7 +97,6 @@ firmware) — not its reach.
 ## Repo layout
 
 ```
-CLAUDE.md              project context / framing
 docs/                  these docs
 patches/               upstreamable OpenWrt source patches (e.g. r8000 43602 init)
 v2-files/              canonical FILES overlay baked into images since v7
