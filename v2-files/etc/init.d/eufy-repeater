@@ -128,13 +128,38 @@ start_ap_relay() {
 	[ -n "$channel" ] || channel="$(uci -q get wireless."$device".channel)"
 
 	local ap_ifname="rpt_${section}"
-	iw dev "$ap_ifname" del 2>/dev/null
 
-	iw phy "$phy" interface add "$ap_ifname" type __ap || {
-		echo "eufy-repeater: raw interface add failed on $phy for $section - the one thing this exists to avoid"
-		return 0
-	}
-	iw dev "$ap_ifname" set channel "$channel"
+	# `iw phy interface add` with no `addr` defaults the new interface to
+	# the SAME MAC as the radio's existing interface (phy1-sta0 here) -
+	# confirmed live 2026-07-25 (FINDINGS.md §19 v17 addendum):
+	# `cat /sys/class/net/{rpt_eufy_ap,phy1-sta0}/address` both returned
+	# the identical e8:fc:af:f9:f1:37. relayd's `-I` explicitly does "ARP
+	# cache and host route management" per interface, keyed by MAC - two
+	# of its own interfaces sharing one MAC breaks that bookkeeping
+	# outright, independent of the -B/-D forwarding fix above.
+	#
+	# This driver silently IGNORES `addr <mac>` passed inline to
+	# `iw phy ... interface add` - confirmed live: the command succeeds,
+	# no error, but the resulting interface still has the default
+	# (colliding) MAC. The MAC has to be set as a separate step instead:
+	# `ip link set dev <ifname> down`, then `address <mac>`, then `up` -
+	# confirmed live this actually takes effect and survives bringing the
+	# interface back up.
+	#
+	# Derive a distinct MAC deterministically (XOR the locally-
+	# administered bit on the STA's own MAC's first octet) instead of
+	# leaving it to whatever the driver defaults to - same convention
+	# this project's own main_radioN AP interfaces already use (their
+	# real bssids are the router's base MAC with that same bit set,
+	# confirmed against
+	# `ubus call usteer local_info` output: ea:fc:af:f9:f1:39/...:37 vs
+	# base e8:fc:af:f9:f1:38).
+	local sta_mac ap_mac
+	sta_mac="$(cat "/sys/class/net/$sta_ifname/address" 2>/dev/null)"
+	if [ -n "$sta_mac" ]; then
+		local first="${sta_mac%%:*}" rest="${sta_mac#*:}"
+		ap_mac="$(printf '%02x' "$(( (0x$first ^ 0x02) & 0xff ))"):${rest}"
+	fi
 
 	# Raw-created interfaces bypass UCI's normal txpower plumbing entirely.
 	# hostapd.conf has no tx_power directive - confirmed directly against
@@ -144,7 +169,6 @@ start_ap_relay() {
 	# regulatory enforcement clamps the real RF output regardless.
 	local radio_txpower
 	radio_txpower="$(uci -q get wireless."$device".txpower)"
-	[ -n "$radio_txpower" ] && iw dev "$ap_ifname" set txpower fixed "$((radio_txpower * 100))"
 
 	local hw_mode="g"
 	case "$(uci -q get wireless."$device".band)" in
@@ -160,6 +184,15 @@ start_ap_relay() {
 		echo "hw_mode=$hw_mode"
 		echo "channel=$channel"
 		echo "ieee80211n=1"
+		# hostapd's own reference config is explicit about this (its
+		# ieee80211n=1 comment: "You will also need to enable WMM for
+		# full HT functionality") - confirmed directly against the real
+		# reference in this project's own SDK tree, not assumed. Without
+		# it, association can succeed at the plain 802.11 level while
+		# HT-dependent negotiation misbehaves - a real, plausible cause
+		# of the fast associate/disassociate loop seen live 2026-07-25
+		# (FINDINGS.md §19 v16 addendum) once a real client connected.
+		echo "wmm_enabled=1"
 		echo "ctrl_interface=/var/run/hostapd-${section}"
 		case "$encryption" in
 		none) ;;
@@ -172,13 +205,44 @@ start_ap_relay() {
 		esac
 	} > "$hostapd_conf"
 
+	# The raw interface's lifetime is tied to hostapd's own nl80211 socket -
+	# confirmed live 2026-07-25 (FINDINGS.md §19 addendum): killing hostapd
+	# also destroys `rpt_eufy_ap` (driver/kernel behavior, not something
+	# this script controls). A bare `procd_set_param command hostapd ...`
+	# respawn re-execs hostapd against an interface that no longer exists
+	# after ANY hostapd exit (crash, OOM-kill, whatever) and fails forever
+	# - confirmed live, it does not self-heal. Wrapping interface
+	# (re)creation into the respawned command itself, instead of only
+	# doing it once before the first start, means every respawn - not
+	# just the initial one - restores the interface first. `iw dev del`
+	# before `add` stays idempotent/safe whether or not the interface
+	# currently exists.
+	local recreate_iface="iw dev '$ap_ifname' del 2>/dev/null; iw phy '$phy' interface add '$ap_ifname' type __ap"
+	if [ -n "$ap_mac" ]; then
+		recreate_iface="$recreate_iface && ip link set dev '$ap_ifname' down && ip link set dev '$ap_ifname' address '$ap_mac' && ip link set dev '$ap_ifname' up"
+	fi
+	recreate_iface="$recreate_iface && iw dev '$ap_ifname' set channel '$channel'"
+	[ -n "$radio_txpower" ] && recreate_iface="$recreate_iface && iw dev '$ap_ifname' set txpower fixed $((radio_txpower * 100))"
+
 	procd_open_instance "hostapd-$section"
-	procd_set_param command /usr/sbin/hostapd "$hostapd_conf"
+	procd_set_param command /bin/sh -c "$recreate_iface && exec /usr/sbin/hostapd '$hostapd_conf'"
 	procd_set_param respawn
 	procd_close_instance
 
+	# -B/-D are NOT on by default (confirmed against `relayd --help` on
+	# this exact build, not assumed) - without them relayd relays
+	# unicast/ARP traffic between the two interfaces but never forwards
+	# DHCP broadcast requests across. A client associates to the raw AP
+	# cleanly (WiFi/EAPOL layer is fine - this is why WMM/usteer fixes in
+	# the FINDINGS.md §19 v16 addendum had no effect, that whole
+	# investigation was aimed at the wrong layer) but never gets a real
+	# IP from the actual Eufy DHCP server, and the client's own OS
+	# "no internet" detection disconnects it within seconds - matches the
+	# observed ~4s associate/disassociate pattern exactly, across every
+	# client tested. Confirmed live 2026-07-25 (FINDINGS.md §19 v17
+	# addendum).
 	procd_open_instance "relayd-$section"
-	procd_set_param command /usr/sbin/relayd -I "$ap_ifname" -I "$sta_ifname"
+	procd_set_param command /usr/sbin/relayd -B -D -I "$ap_ifname" -I "$sta_ifname"
 	procd_set_param respawn
 	procd_close_instance
 }

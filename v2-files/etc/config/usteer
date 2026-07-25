@@ -66,7 +66,20 @@ config usteer
 	# (comment out / omit) to steer every SSID; set explicitly once the
 	# SSID layout is finalized with the WPA3 workstream (see
 	# ../wireless-roaming.additions for why SSID alignment matters here).
-	# list ssid_list 'R8000'
+	#
+	# Set 2026-07-25 (FINDINGS.md §19 v16 addendum): without this, usteer's
+	# local_mode='0' auto-discovery picks up EVERY local hostapd node,
+	# including etc/init.d/eufy-repeater's `rpt_eufy_ap` - confirmed via
+	# `ubus call usteer local_info` listing it alongside this router's own
+	# unrelated R8000 nodes, with 802.11k neighbor-report entries for each.
+	# A client on a *repeated third-party network* has no business being
+	# told about this router's own SSIDs as roam targets. Scoping to
+	# 'R8000' here is a real, directionally-correct fix for that cross-
+	# contamination - NOT yet confirmed to be the full explanation for the
+	# separate live disconnect-loop issue also being investigated in that
+	# addendum (local_info still lists the node afterward; this option
+	# appears to gate active steering decisions, not discovery/reporting).
+	list ssid_list 'R8000'
 
 	# Useful while tuning: log what usteer accepts/denies/kicks and why.
 	list event_log_types 'probe_req_deny'

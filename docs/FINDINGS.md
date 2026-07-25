@@ -1038,3 +1038,136 @@ actually checks saying "working." Caught only by reading the config with
 fresh eyes and checking against the mechanism's real, external
 documentation instead of trusting an earlier assumption written into the
 code's own comments.
+
+**Addendum (2026-07-25, v16) — a real client, live traffic, and a 4th bug
+found trying to debug a 3rd.** With v15 flashed and verified clean, a real
+device joined `rpt_eufy_ap` for the first time and immediately got stuck
+in a fast associate/disassociate loop (~4s cycle), confirmed via `logread`
+across two different client MACs. Root cause not fully resolved this pass
+(see below), but investigating it directly caused, and then caught, a
+separate, real, and more fundamental bug:
+
+- **`usteer` (this router's band-steering daemon) auto-discovers every
+  local hostapd node, including the repeater's, and was injecting
+  cross-network 802.11k neighbor reports** (`ubus call usteer local_info`
+  showed `hostapd.rpt_eufy_ap` listed with `rrm_nr` alongside the router's
+  own unrelated `R8000` 5GHz nodes). A client on `Eufy_B838D4` being told
+  about neighbor APs named `R8000` is a plausible contributor to
+  roam/reconnect confusion. Attempted fix: `usteer.@usteer[0].ssid_list
+  'R8000'` to scope steering to the router's own SSID only — applied and
+  committed, but `local_info` still lists the node afterward (the option
+  appears to gate active steering decisions, not node discovery/neighbor
+  reporting), so this is only a **partial, unconfirmed** mitigation, not a
+  verified fix. Left in place since it's directionally correct and
+  harmless, but the disconnect loop itself is not yet confirmed resolved
+  by it — needs a real client retest, not just an unchanged `local_info`
+  reading.
+
+- **The 4th bug, found by accident while chasing the above.** Tried to
+  get real EAPOL-level detail by editing the live `hostapd-eufy_ap.conf`
+  to add verbose syslog logging and restarting hostapd. That killed the
+  service outright: **killing hostapd also destroys `rpt_eufy_ap`** — the
+  raw interface's lifetime is tied to hostapd's own nl80211 socket, a
+  driver/kernel behavior this script doesn't control, not something
+  assumed, confirmed by hitting it live (`Could not read interface
+  rpt_eufy_ap flags: No such device` on the next start attempt). Worse:
+  `etc/init.d/eufy-repeater`'s `hostapd-$section` procd instance had a
+  bare `respawn` pointed directly at `/usr/sbin/hostapd $conf` — after
+  the interface disappeared, procd kept re-executing that same command
+  against a device that no longer existed, forever (`"running": false,
+  "exit_code": 1`, no self-healing). **This means any hostapd crash for
+  any reason — not just a manual kill, an OOM-kill, a firmware hiccup,
+  anything — would have permanently taken the repeater down until the
+  next full reboot**, with nothing about the failure visible except the
+  service quietly not running.
+
+  Fixed by moving interface (re)creation *inside* the respawned command
+  itself, instead of doing it once before the first start: the procd
+  instance's command is now `/bin/sh -c "iw dev del ...; iw phy ...
+  interface add ... && iw dev ... set channel ... && exec hostapd ..."` —
+  every respawn, not just the first one, recreates the interface before
+  handing off to hostapd. Verified live, twice: normal `restart` still
+  works cleanly (fresh interface, fresh pid), and a direct `kill` of the
+  hostapd pid now self-heals within one respawn cycle (~5-8s) — new
+  ifindex, new hostapd pid, `relayd` (which also loses its raw socket
+  when the interface disappears) recovers shortly after on its own
+  respawn. Shipped as **v16**.
+
+**Standing lesson, again:** this is the second time this session a fix
+attempt for one problem (verbose debug logging, meant to be purely
+diagnostic and non-destructive) caused a worse, unrelated, real failure.
+Treat "just add logging and restart" as a real action with real risk on a
+live single-radio repeater, not a free/inert diagnostic step — the raw,
+manually-created interface has none of the safety nets a normal
+netifd-managed interface would have around a service restart.
+
+**Addendum (2026-07-25, v17) — a 5th infrastructure bug, and the real
+answer on whether this repeater can ever work for Eufy cameras specifically.**
+
+Two more real, confirmed things, one a fix and one a hard external limit:
+
+1. **`relayd -B -D` were never actually enabled.** `relayd --help` on this
+   exact build shows broadcast forwarding (`-B`) and DHCP forwarding
+   (`-D`) are both off unless passed explicitly - the v16 invocation was
+   bare `relayd -I ap -I sta`, so DHCP broadcasts from a client on the raw
+   AP were never relayed to the real upstream DHCP server at all. Fixed:
+   `relayd -B -D -I "$ap_ifname" -I "$sta_ifname"`.
+
+2. **`rpt_eufy_ap` and `phy1-sta0` shared an identical MAC address** -
+   `iw phy ... interface add ... type __ap` with no explicit `addr`
+   defaults to the radio's existing MAC, confirmed live (`cat
+   /sys/class/net/{rpt_eufy_ap,phy1-sta0}/address` both returned
+   `e8:fc:af:f9:f1:37`). relayd's `-I` explicitly does "ARP cache and
+   host route management" per interface, keyed by MAC - two of relayd's
+   own interfaces sharing one MAC breaks that bookkeeping outright,
+   independent of the `-B`/`-D` fix. Also confirmed: `addr <mac>` passed
+   inline to `iw phy ... interface add` is silently ignored by this
+   driver (command succeeds, MAC doesn't change) - the MAC has to be set
+   as a separate `ip link set dev <if> down / address <mac> / up`
+   sequence afterward, which does take effect and survives. Fixed:
+   `eufy-repeater` now derives a distinct MAC from the STA interface's
+   own address (XOR the locally-administered bit on the first octet -
+   same convention this project's own `main_radioN` AP interfaces already
+   use) and applies it via that down/set/up sequence, folded into the
+   same respawn-safe command from the v16 fix so a crash-recovery still
+   gets a correctly-MACed interface.
+
+3. **The actual client identity, checked rather than assumed.** The two
+   devices that kept associating-then-disassociating within ~4s
+   (`04:17:b6:c7:bb:ea`, `8c:85:80:65:f5:55`) both resolve via MAC-OUI
+   lookup to **Smart Innovation LLC** - the same manufacturer as the real
+   Eufy HomeBase's own BSSID (`04:17:b6:b8:38:d4`). These are genuine Eufy
+   hardware (cameras), not a phone auto-joining a familiar SSID name -
+   ruling out the "captive portal / OS no-internet detection" hypothesis
+   from the v16 addendum outright.
+
+4. **Researched rather than guessed further: does a generic hostapd+relayd
+   repeater have any real chance of extending a Eufy camera backhaul
+   network at all?** Answer, with sources, not assumption: most Eufy
+   devices talk to their HomeBase over a **proprietary wireless protocol**
+   - one independent developer community (working on the `eufy-security`
+   P2P integration) names it **ESWP (Eufy Security Wireless Protocol)**,
+   distinct from generic WiFi+DHCP. Eufy's own documented, supported
+   range-extension paths are a second real HomeBase in repeater mode,
+   Eufy's own branded WiFi Repeater accessory (T8024), or Multi-Bridge
+   (HomeBase 3 only, camera joins via a router's WiFi) - every one of
+   which works because it runs Eufy's real firmware/protocol stack, not
+   because it's "just WiFi." No documented case was found anywhere of
+   generic third-party/OpenWrt equipment successfully repeating this
+   backhaul network.
+
+**Standing conclusion:** all 4 infrastructure-level fixes across v13-v17
+(default-route leak, dead channel-detection, missing firewall zone,
+missing DHCP/broadcast forwarding, MAC collision) are real, independently
+verified, and correct - and every one of them still left the exact same
+~4-second associate/disassociate pattern unchanged, against devices now
+confirmed to be genuine Eufy hardware. That consistency across five
+independent, technically-unrelated fixes is itself evidence: this reads as
+a protocol-level rejection by the camera's own logic (it decides this
+isn't its real hub and leaves), not a WiFi/DHCP/firewall configuration
+gap. Shipped as **v17** regardless - the infrastructure fixes are correct
+and matter for repeating any ordinary (non-proprietary) network through
+this same feature, but this specific goal (extending eufyCam's own
+backhaul for the cameras themselves) may not be achievable by this
+project without reverse-engineering ESWP itself, which no prior art
+search found anyone having done for range-extension purposes.
