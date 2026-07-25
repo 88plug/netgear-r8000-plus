@@ -1,0 +1,106 @@
+name: Build, verify, and publish
+
+# Two-stage verification before anything gets published as "latest":
+#   1. build-and-static-verify (GitHub-hosted): the real build recipe from
+#      docs/RUNBOOK.md SS5, then hardware-less structural checks (manifest
+#      diff, DTB sanity, confirm the patched module - not the stock feed one
+#      - actually got embedded).
+#   2. hardware-verify-and-publish (self-hosted runner on the operator's own
+#      LAN): live-swaps the candidate module into the REAL router, checks
+#      real radios negotiate cleanly, always reverts. Only on a clean pass
+#      here does the release actually get published/updated - this is what
+#      makes "latest" mean something more than "it compiled".
+#
+# This job intentionally does nothing if no self-hosted runner is online -
+# GitHub queues it until one is (see docs/RUNBOOK.md CI section for setup).
+# A build never gets published on static-verify alone.
+
+on:
+  workflow_dispatch:
+    inputs:
+      openwrt_version:
+        description: "OpenWrt point release to build against, e.g. 25.12.6"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-static-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore the gitignored wireless config (real passphrases, never committed)
+        run: |
+          mkdir -p v2-files/etc/config
+          echo "${{ secrets.WIRELESS_CONFIG_B64 }}" | base64 -d > v2-files/etc/config/wireless
+          [ -s v2-files/etc/config/wireless ] || { echo "FATAL: WIRELESS_CONFIG_B64 secret is missing or empty - see docs/RUNBOOK.md CI section"; exit 1; }
+
+      - name: Install build deps
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq build-essential ncurses-dev zlib1g-dev gawk git gettext libssl-dev xsltproc rsync wget unzip python3 binwalk device-tree-compiler squashfs-tools zstd
+
+      - name: Build image
+        run: .github/scripts/build-image.sh "${{ inputs.openwrt_version }}"
+
+      - name: Fetch previous release's manifest for the diff check
+        run: |
+          gh release download --repo "${{ github.repository }}" --pattern '*.manifest' -D /tmp/prev-manifest 2>/dev/null || true
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Static verify
+        run: |
+          PREV="$(find /tmp/prev-manifest -iname '*.manifest' 2>/dev/null | head -1)"
+          .github/scripts/static-verify.sh BUILD_OUT "${PREV:-}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ inputs.openwrt_version }}
+          path: BUILD_OUT/
+          retention-days: 14
+
+  hardware-verify-and-publish:
+    needs: build-and-static-verify
+    runs-on: [self-hosted, r8000-lan]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: build-${{ inputs.openwrt_version }}
+          path: BUILD_OUT
+
+      - name: Extract candidate brcmfmac.ko from the built apk
+        run: |
+          APK="$(find BUILD_OUT -iname 'kmod-brcmfmac-*.apk' | head -1)"
+          mkdir -p /tmp/apk-extract && cd /tmp/apk-extract
+          tar xf "$APK"
+          find . -iname 'brcmfmac.ko' -exec cp {} /tmp/candidate-brcmfmac.ko \;
+          [ -f /tmp/candidate-brcmfmac.ko ] || { echo "FATAL: couldn't extract brcmfmac.ko from the apk"; exit 1; }
+
+      - name: Hardware verify (live-swap-and-revert against the real router)
+        run: .github/scripts/hardware-verify.sh /tmp/candidate-brcmfmac.ko
+
+      - name: Publish release
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          VERSION="${{ inputs.openwrt_version }}"
+          CHK="$(find BUILD_OUT -iname '*.chk' | head -1)"
+          MANIFEST="$(find BUILD_OUT -iname '*.manifest' | head -1)"
+          SHASUMS="$(find BUILD_OUT -iname 'sha256sums' | head -1)"
+
+          gh release create "auto-${VERSION}" \
+            "$CHK" "$MANIFEST" "$SHASUMS" \
+            --repo "${{ github.repository }}" \
+            --latest \
+            --title "auto-${VERSION} — OpenWrt ${VERSION}, hardware-verified" \
+            --notes "Built against OpenWrt ${VERSION}. Passed static structural checks (patched module confirmed, manifest/DTB sane) AND a real live-swap test against the operator's own R8000 (all 3 radios came up clean, no firmware errors, reverted afterward). Not a hand-flashed-and-lived-with-for-days verification like [v11](../v11) — this is a fresh compile-and-swap check on every new OpenWrt point release. See [R8000_PLUS.md](../../blob/netgear-r8000-plus/R8000_PLUS.md) and [docs/RUNBOOK.md](../../blob/netgear-r8000-plus/docs/RUNBOOK.md#ci) for exactly what that does and doesn't prove."
+
+      - name: Report failure (no release published)
+        if: failure()
+        run: |
+          echo "::error::Hardware verify failed for OpenWrt ${{ inputs.openwrt_version }} - no release published. The router was reverted to its known-good module regardless (see the hardware-verify.sh log above for confirmation)."

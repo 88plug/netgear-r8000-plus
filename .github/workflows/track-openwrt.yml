@@ -1,0 +1,61 @@
+name: Track OpenWrt releases
+
+# Detects a new OpenWrt point release on the current stable branch and
+# triggers the build+verify+publish pipeline. Polls real git tags, not the
+# Releases API - confirmed the API lags real tags by hours-to-days, tags are
+# ground truth (see docs/RUNBOOK.md CI section for the research behind this).
+#
+# 25.12.x point-release gaps have been as tight as 7-13 days; daily polling
+# keeps detection lag small without hammering upstream.
+
+on:
+  schedule:
+    - cron: "17 6 * * *"  # daily, off the hour to avoid the top-of-hour pile-up
+  workflow_dispatch: {}    # manual trigger for testing this workflow itself
+
+permissions:
+  contents: read
+  actions: write
+
+env:
+  OPENWRT_BRANCH_PATTERN: '^v25\.12\.[0-9]+$'   # bump when the project moves to a new minor branch - deliberately not auto-widened, see docs/RUNBOOK.md
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: List real upstream tags matching our branch
+        id: upstream
+        run: |
+          set -euo pipefail
+          TAGS="$(git ls-remote --tags https://github.com/openwrt/openwrt.git \
+            | awk '{print $2}' | sed 's#refs/tags/##' \
+            | grep -E "${OPENWRT_BRANCH_PATTERN}" | sort -V)"
+          echo "Upstream tags on branch:"
+          echo "$TAGS"
+          echo "latest=$(tail -1 <<<"$TAGS" | sed 's/^v//')" >> "$GITHUB_OUTPUT"
+
+      - name: Check which versions we haven't built yet
+        id: missing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          LATEST="${{ steps.upstream.outputs.latest }}"
+          if gh release view "auto-${LATEST}" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            echo "auto-${LATEST} already published, nothing to do"
+            echo "needs_build=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "auto-${LATEST} not published yet - triggering build"
+            echo "needs_build=true" >> "$GITHUB_OUTPUT"
+            echo "version=${LATEST}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Trigger build+verify+publish
+        if: steps.missing.outputs.needs_build == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run release.yml \
+            --repo "${{ github.repository }}" \
+            -f openwrt_version="${{ steps.missing.outputs.version }}"
