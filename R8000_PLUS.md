@@ -1,4 +1,4 @@
-# r8000-plus: what's different from a stock OpenWrt bcm53xx build
+# netgear-r8000-plus: what's different from a stock OpenWrt bcm53xx build
 
 Everything below was found by direct hardware testing on the operator's own
 R8000 — driver source reading, live register/firmware testing, and real-client

@@ -1,12 +1,17 @@
+> **netgear-r8000-plus** — the [88plug/netgear-r8000-plus](https://github.com/88plug/netgear-r8000-plus)
+> conversion of the **Netgear Nighthawk X6 R8000** (AC3200 tri-band, BCM4709 + 3× BCM43602) from
+> stock firmware to a custom OpenWRT 25.12.5 build. "Nighthawk X6" is a shared marketing name
+> across R8000/R8000P/R7900P — this repo targets **R8000 specifically**; check your unit's model
+> number, not just the "X6" badge, before flashing.
+>
+> **Full bug/feature matrix + upstream porting guidance → [R8000_PLUS.md](R8000_PLUS.md).**
+
 # Netgear R8000 → OpenWRT (the "plus" conversion)
 
 Converting the operator's own **Netgear Nighthawk X6 R8000** (AC3200, tri-band,
 BCM4709 + 3× BCM43602) from stock firmware to a **custom OpenWRT 25.12.5** build
 that fixes defects the community considered unfixable — and tunes the radios to
 their documented hardware ceiling.
-
-**What's different from a stock OpenWrt bcm53xx build, with the full bug/feature
-matrix and upstream porting guidance → [R8000_PLUS.md](R8000_PLUS.md).**
 
 ## Current status (2026-07-24)
 
