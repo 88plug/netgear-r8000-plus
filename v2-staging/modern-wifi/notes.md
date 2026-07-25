@@ -23,15 +23,24 @@ base `.config`, so the static `files/hostapd-basic.config` template alone
 is not reliable evidence of the real feature set -- see the "correction"
 note in section 2).
 
+**OWE and DFS rows below are superseded** -- both read package/string
+presence as capability, which later live testing disproved. OWE: confirmed
+unfixable, no `WPA3_AUTH_OWE` in the firmware blob (`docs/FINDINGS.md` §9,
+§12). DFS: `DFS_OFFLOAD` is necessary but not sufficient -- firmware
+rejects the chanspec (`-52`/`EBADE`) under three independent test
+mechanisms (`docs/FINDINGS.md` §11, §16, §17). Rows left as originally
+written for the historical record of what string/capability evidence alone
+suggested.
+
 | Feature | Status | Evidence |
 |---|---|---|
 | 802.11r (Fast BSS Transition) | **Works** | `ft_over_ds`, FT R0KH/R1KH, `ft_psk_generate_local`, `pmk_r1_push` strings present in `/usr/sbin/hostapd` |
 | 802.11k (RRM / neighbor reports) | **Works** | `rrm_neighbor_report`, `rrm_beacon_req`, `neighbor_report_tx`, `rrm_nr_get_own/set/list` strings present |
 | 802.11v (WNM / BSS Transition Mgmt) | **Works** | `bss_transition_query_rx`, `bss_transition_request_tx`, `bss_transition_response_rx`, `disassoc_imminent_rssi_threshold` strings present |
 | MBO (Multiband Operation) | **Works**, not used here | `MBO-CELL-PREFERENCE`, `mbo_cell_capa`, `mbo_cell_data_conn_pref` strings present; requires PMF (802.11w) on the BSS or hostapd refuses to start it -- not enabled in this workstream's config, see section 5 |
-| OWE (Enhanced Open) | **Works**, incl. transition mode | Full `owe_transition_ifname/ssid/bssid`, `owe_group(s)`, `owe_ptk_workaround` string set present |
+| OWE (Enhanced Open) | ~~Works~~ **superseded -- confirmed unfixable** | Full `owe_transition_ifname/ssid/bssid`, `owe_group(s)`, `owe_ptk_workaround` string set present in hostapd, but firmware lacks `WPA3_AUTH_OWE` -- see caveat above |
 | Multi-BSS (multiple SSIDs/radio) | **Works**, up to 4/radio | `iw phy phyN info` -- "valid interface combinations: `#{ AP } <= 4, total <= 4, #channels <= 1`" on all 3 phys |
-| DFS (radar detection/CAC) | **Works**, offloaded | `iw phy0/phy2 info` -- "Supported extended features: ... `[ DFS_OFFLOAD ]`" |
+| DFS (radar detection/CAC) | ~~Works~~ **superseded -- confirmed hard wall** | `iw phy0/phy2 info` -- "Supported extended features: ... `[ DFS_OFFLOAD ]`", but live `start_ap` on any DFS channel is rejected -- see caveat above |
 | 802.11s (mesh) | **Does NOT work** | See section 1a |
 | AP-VLAN / full dynamic VLAN | **Not advertised** | No "AP/VLAN" in `iw phy info` supported interface modes on any of the 3 phys; not needed for this task |
 | WMM (baseline QoS categories) | **Works** (mandatory) | Implicit in HT/VHT AP operation; all 3 radios report HT20/HT40 (+VHT80 on the two 5 GHz radios) capability |

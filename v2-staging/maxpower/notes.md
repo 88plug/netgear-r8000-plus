@@ -140,21 +140,28 @@ regdb-layer label, not a real change in what the driver will do.
 Live-tested directly: pre-flight backup taken, `radio2.channel` set to `52`
 (VHT80, squarely inside the range showing `(radar detection)`), `wifi
 reload`. Result: **`brcmf_cfg80211_start_ap: Set Channel failed:
-chspec=57402, -52`** — the exact `-52` error code already documented in
-this file and in `docs/FINDINGS.md` §11 for the clm_blob mismatch. hostapd
-then failed to set beacon parameters and the interface went to DISABLED.
-This is a direct, driver-level rejection of the channel request — not a
-CAC timeout, not a config error, not something that got further than the
-initial channel-spec negotiation. The DTS `ieee80211-freq-limit` hard gate
-this section already establishes as the real blocker is unchanged and
-still fully in effect; the regdb's `(radar detection)` label is just newer
-metadata (this build ships `wireless-regdb-2026.05.30-r1`, likely a later
-snapshot than whatever regdb was in effect during the original tests) that
-doesn't reflect what the firmware will actually accept — the same class of
-"iw's summary display doesn't reflect real gating" pattern already
-documented for `iw reg get`'s cosmetic country label in
-`docs/FINDINGS.md` §13. Now a second confirmed instance of that pattern
-for a different `iw` subcommand.
+chspec=57402, -52`** — numerically the same `-52` already documented in
+this file and in `docs/FINDINGS.md` §11 for the clm_blob mismatch, but
+**`docs/FINDINGS.md` §17 corrected that framing on a second pass**: reading
+`brcmf_fil_cmd_data()` in the driver source shows the raw firmware error
+code is only passed through when `ifp->fwil_fwerr` is set, which it isn't
+during normal `start_ap` — otherwise the driver returns the generic
+`-EBADE` (also numerically 52 on Linux). So the numeric match to the
+clmload `-52` is not proof of the same underlying firmware cause; what's
+established regardless of what the number means is that the firmware
+refused the chanspec. hostapd then failed to set beacon parameters and the
+interface went to DISABLED. This is a direct, driver-level rejection of
+the channel request — not a CAC timeout, not a config error, not something
+that got further than the initial channel-spec negotiation. The DTS
+`ieee80211-freq-limit` hard gate this section already establishes as the
+real blocker is unchanged and still fully in effect; the regdb's `(radar
+detection)` label is just newer metadata (this build ships
+`wireless-regdb-2026.05.30-r1`, likely a later snapshot than whatever
+regdb was in effect during the original tests) that doesn't reflect what
+the firmware will actually accept — the same class of "iw's summary
+display doesn't reflect real gating" pattern already documented for `iw
+reg get`'s cosmetic country label in `docs/FINDINGS.md` §13. Now a second
+confirmed instance of that pattern for a different `iw` subcommand.
 
 Reverting the channel change (`uci set` back to `36`, `wifi reload`) did
 **not** cleanly restore phy2 on its own — `hostapd.add_iface failed for
@@ -169,13 +176,17 @@ effect: `uci commit` during the test reformatted the live router's
 stripped) — values unchanged, and this doesn't touch the repo's `v2-files/`
 source at all.
 
-**Standing conclusion, now tested twice under two different specific
-mechanisms (CLM re-pairing in §11, direct channel request here): DFS
-remains a genuine, driver-enforced wall on this firmware, independent of
-what any regdb snapshot's summary label says.** Do not trust `iw phy info`'s
-per-channel flag word as a signal of real availability on this driver —
-only an actual `start_ap`/`wifi reload` attempt is decisive, and this
-section now has two independent ones landing on the same wall.
+**Standing conclusion, now tested under three independent mechanisms (CLM
+re-pairing in §11, direct channel request under the shipped `Q2`
+regulatory code here, and a direct channel-availability check under a real
+`US` regulatory code in `docs/FINDINGS.md` §17): DFS remains a genuine,
+driver-enforced wall on this firmware, independent of what any regdb
+snapshot's summary label says.** Do not trust `iw phy info`'s per-channel
+flag word as a signal of real availability on this driver — only an
+actual `start_ap`/`wifi reload` attempt (or, per §17, a live regulatory-
+domain change) is decisive. See `docs/FINDINGS.md` §17 for the full
+three-mechanism account and the firmware string-table check confirming
+DFS/radar code genuinely exists in this firmware (unlike OWE).
 
 ## Thermal / stability caution at max power
 
