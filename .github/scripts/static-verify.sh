@@ -40,20 +40,20 @@ if [ -z "$APK" ]; then
   echo "FAIL: no kmod-brcmfmac-*.apk carried alongside the image - can't confirm it's the patched build"
   FAIL=1
 else
-  rm -rf /tmp/apk-tool && mkdir -p /tmp/apk-tool
-  [ -f "$BUILD_OUT/apk-tool.tar.gz" ] && tar xzf "$BUILD_OUT/apk-tool.tar.gz" -C /tmp/apk-tool
-  APK_TOOL="/tmp/apk-tool/bin/apk"
-  # rm first, not just mkdir -p: a self-hosted or reused runner can have
-  # stale content here from a prior run, and apk extract errors on
-  # conflicting existing files - confirmed directly (worked fine into a
-  # clean dir, failed silently under set -e into a dirty one).
+  # build-image.sh runs in this same job/workspace and drops the real SDK
+  # apk tool's path here - no cross-job handoff needed for static-only CI.
+  APK_TOOL="$(cat "$BUILD_OUT/.sdk-apk-path" 2>/dev/null || true)"
+  # rm first, not just mkdir -p: a reused runner can have stale content
+  # here from a prior run, and apk extract errors on conflicting existing
+  # files - confirmed directly (worked fine into a clean dir, failed
+  # silently under set -e into a dirty one).
   rm -rf /tmp/apk-check && mkdir -p /tmp/apk-check && cd /tmp/apk-check
-  if [ -x "$APK_TOOL" ]; then
+  if [ -n "$APK_TOOL" ] && [ -x "$APK_TOOL" ]; then
     "$APK_TOOL" extract --allow-untrusted --destination . "$APK" >/dev/null 2>&1
   else
     # apk v3 packages aren't plain tar/gzip - fall back only if build-image.sh
-    # somehow didn't bundle its own apk tool (shouldn't happen).
-    echo "WARN: bundled apk tool not found at $APK_TOOL, falling back to tar (won't work on apk v3 packages)"
+    # somehow didn't record its own apk tool path (shouldn't happen).
+    echo "WARN: SDK apk tool not found at '$APK_TOOL', falling back to tar (won't work on apk v3 packages)"
     tar xf "$APK" 2>/dev/null || true
   fi
   KO="$(find . -iname 'brcmfmac.ko' | head -1)"

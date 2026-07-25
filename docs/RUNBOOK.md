@@ -183,70 +183,51 @@ here). `tftp-hpa` installed.
 
 ## 6. CI / auto-release pipeline
 
-Automates §5's build recipe against every new OpenWrt point release, but only
-publishes a release after it's actually proven against the real router — not
-just "it compiled." Three files: `.github/workflows/track-openwrt.yml`
-(daily detector), `.github/workflows/release.yml` (build → static-verify →
-hardware-verify → publish), `.github/scripts/*.sh` (the actual logic, kept
-as plain scripts rather than inline YAML so they're testable by hand).
+Automates §5's build recipe against every new OpenWrt point release. Runs
+entirely on GitHub-hosted runners — no self-hosted runner, no LAN access to
+the router, no persistent SSH credential on it. `.github/workflows/track-openwrt.yml`
+(daily detector) → `.github/workflows/release.yml` (build → static-verify →
+publish) → `.github/scripts/*.sh` (the actual logic, kept as plain scripts
+so they're testable by hand).
 
-**What each stage actually proves, stated honestly:**
+**What this actually proves, stated honestly:**
 
-| Stage | Runs on | Proves | Does NOT prove |
-|---|---|---|---|
-| `build-image.sh` | GitHub-hosted | The exact §5 recipe (SDK rebuild of `patches/861` + ImageBuilder assembly) reproduces cleanly against a new OpenWrt version | Nothing about correctness — a broken patch can still "compile" |
-| `static-verify.sh` | GitHub-hosted | The patched module (not the stock feed one) got embedded; package manifest didn't silently lose packages; the DTB parses and identifies as this board | Anything about runtime behavior |
-| `hardware-verify.sh` | Self-hosted, on the operator's LAN | The candidate `brcmfmac.ko` actually loads and negotiates with the **real BCM43602 radios** on the operator's own router — all 3 phys, wireless interfaces up, no firmware/panic errors — then reverts | Long-term stability, throughput, or anything the ~15s test window doesn't exercise. This is a fresh compile-and-swap smoke test on every point release, not the days-of-real-use verification `v11`'s hand-flashed release represents. |
+| Stage | Proves | Does NOT prove |
+|---|---|---|
+| `build-image.sh` | The exact §5 recipe (SDK rebuild of `patches/861` + ImageBuilder assembly) reproduces cleanly against a new OpenWrt version | Nothing about correctness — a broken patch can still "compile" |
+| `static-verify.sh` | The patched module (not the stock feed one) got embedded; package manifest didn't silently lose packages; the DTB parses and identifies as this board | **Anything about runtime behavior — this is the ceiling.** No real radio ever negotiates against this build in CI. |
 
-Publishing (`auto-<version>`, marked `--latest`) only happens if hardware-verify
-passes. A static-verify failure or a hardware-verify failure both leave the
-router untouched (hardware-verify's revert runs via a bash `trap` — happens
-even if the test itself fails) and publish nothing.
+This project deliberately ran a self-hosted-runner variant of this pipeline
+earlier (a machine on the operator's own LAN doing a live-swap-and-revert
+test against the real router before publishing) and it worked — confirmed via
+a real green run that swapped the built module onto the actual router, all
+3 radios came up clean, and reverted. **Traded back down to static-only by
+explicit choice**, not because the hardware test failed: running everything
+on GitHub's default infrastructure was worth more than the extra verification
+tier, and no persistent SSH credential sits on the router as a result. If
+that tradeoff ever needs revisiting, the hardware-verify approach (git history
+around the `hardware-verify.sh` script, now removed) is the known-working
+starting point, not something to redesign from scratch.
+
+Publishing (`auto-<version>`, marked `--latest`) happens whenever static-verify
+passes — meaning "compiles clean and looks structurally sane," not "verified
+on real hardware." `v11` (hand-flashed, lived with on the real router) remains
+the reference for what real-hardware verification looked like.
 
 **One-time setup required (cannot be automated from here):**
 
-1. **Self-hosted runner**, registered on a machine with real LAN access to
-   the router (the bench host is the natural choice — it already has proven
-   SSH access throughout this project):
-   ```bash
-   # From the repo settings page (Settings -> Actions -> Runners -> New
-   # self-hosted runner) get a fresh registration token, then on the bench host:
-   mkdir actions-runner && cd actions-runner
-   curl -o actions-runner.tar.gz -L https://github.com/actions/runner/releases/latest/download/actions-runner-linux-x64-<ver>.tar.gz
-   tar xzf actions-runner.tar.gz
-   ./config.sh --url https://github.com/88plug/netgear-r8000-plus --token <TOKEN> --labels r8000-lan
-   ./svc.sh install && ./svc.sh start   # runs as a system service, survives reboot
-   ```
-   `release.yml`'s hardware-verify job targets `runs-on: [self-hosted, r8000-lan]`
-   specifically (not just any self-hosted runner) — the label is the safety
-   boundary that keeps this job from ever landing on a machine without real
-   access to the router.
-2. **SSH deploy key** — a dedicated key (not the interactive blank-password
-   login), so the hardware-verify script never needs `sshpass` or an
-   interactive prompt:
-   ```bash
-   ssh-keygen -t ed25519 -N "" -f ~/.ssh/r8000_ci_deploy
-   ssh root@192.168.1.1 'mkdir -p /etc/dropbear; chmod 600 /etc/dropbear/authorized_keys' \
-     < <(cat ~/.ssh/r8000_ci_deploy.pub) # or just echo the pubkey into that file over SSH
-   # then add a Host block to ~/.ssh/config on the runner machine so plain
-   # `ssh 192.168.1.1` picks it up automatically (see hardware-verify.sh)
-   ```
-   Already generated and installed as of this writing (`~/.ssh/r8000_ci_deploy`
-   on the bench host, pubkey in the router's `/etc/dropbear/authorized_keys`).
-   This is a **persistent** access credential, unlike everything else this
-   project does to the router — worth knowing it's there. Rotate/remove it
-   from `/etc/dropbear/authorized_keys` the same way it was added if the
-   pipeline is ever decommissioned.
-3. **`WIRELESS_CONFIG_B64` repo secret** — `v2-files/etc/config/wireless` is
-   gitignored (real passphrases), so CI needs it supplied out-of-band:
-   ```bash
-   base64 -w0 v2-files/etc/config/wireless | gh secret set WIRELESS_CONFIG_B64 \
-     --repo 88plug/netgear-r8000-plus
-   ```
-4. **Test the pipeline manually before trusting the scheduled trigger**:
-   `gh workflow run release.yml --repo 88plug/netgear-r8000-plus -f openwrt_version=25.12.5`
-   (the version already shipping — should hardware-verify clean, giving a
-   known-good dry run before the tracker ever fires on a real new release).
+**`WIRELESS_CONFIG_B64` repo secret** — `v2-files/etc/config/wireless` is
+gitignored (real passphrases), so CI needs it supplied out-of-band:
+```bash
+base64 -w0 v2-files/etc/config/wireless | gh secret set WIRELESS_CONFIG_B64 \
+  --repo 88plug/netgear-r8000-plus
+```
+Already set as of this writing.
+
+**Test the pipeline manually before trusting the scheduled trigger**:
+`gh workflow run release.yml --repo 88plug/netgear-r8000-plus -f openwrt_version=25.12.5`
+(the version already shipping — should build and static-verify clean, giving
+a known-good dry run before the tracker ever fires on a real new release).
 
 **Branch-pattern reminder:** `track-openwrt.yml`'s `OPENWRT_BRANCH_PATTERN`
 is deliberately pinned to `25.12.x` and does not auto-widen to a new

@@ -117,30 +117,13 @@ cp "$CHK" "$OUT/"
 [ -n "$MANIFEST" ] && cp "$MANIFEST" "$OUT/"
 cp "$WORK/$SDK_DIR/$APK" "$OUT/"
 
-# Bundle a relocatable copy of the SDK's own apk tool with the artifact:
-# kmod-brcmfmac-*.apk is apk v3 (ADB) format, not a plain tar/gzip archive
-# (confirmed directly - magic bytes are "ADBd"), and whatever job/runner
-# extracts it downstream (a separate self-hosted runner in this pipeline)
-# has no other way to get a matching apk binary. staging_dir/host/bin/apk
-# is a wrapper script that execs a hidden .apk.bin via the SDK's own
-# bundled dynamic linker - copying the wrapper alone breaks
-# ("cannot open shared object file"), confirmed directly. Bundling just
-# the wrapper + hidden binary + its 4 actual NEEDED libs (readelf -d,
-# confirmed) keeps this at ~4MB instead of the SDK's full 142MB host lib/.
-# Packed into a single tarball, not left as loose files: confirmed directly
-# that actions/upload-artifact silently drops the hidden .apk.bin dotfile
-# and does not reliably preserve the executable bit across an
-# upload/download round-trip between jobs/runners. A tar stream sidesteps
-# both failure modes at once - upload-artifact only has to move one opaque
-# regular file, tar itself carries the permissions and the dotfile as data.
-HOST_BIN="$WORK/$SDK_DIR/staging_dir/host/bin"
-HOST_LIB="$WORK/$SDK_DIR/staging_dir/host/lib"
-APK_TOOL_STAGE="$(mktemp -d)"
-mkdir -p "$APK_TOOL_STAGE/bin" "$APK_TOOL_STAGE/lib"
-cp "$HOST_BIN/apk" "$HOST_BIN/.apk.bin" "$APK_TOOL_STAGE/bin/"
-cp "$HOST_LIB/libpthread.so.0" "$HOST_LIB/libc.so.6" "$HOST_LIB/ld-linux-x86-64.so.2" "$HOST_LIB/runas.so" "$APK_TOOL_STAGE/lib/"
-tar czf "$OUT/apk-tool.tar.gz" -C "$APK_TOOL_STAGE" .
-rm -rf "$APK_TOOL_STAGE"
+# static-verify.sh runs in this same job/workspace right after this script,
+# so it can use the SDK's own apk tool directly - no need to bundle/tar it
+# for a cross-job/cross-runner handoff (that only mattered when a separate
+# self-hosted runner did hardware-verify; static-only doesn't need it).
+# kmod-brcmfmac-*.apk is apk v3 (ADB format, magic bytes "ADBd"), not a
+# plain tar/gzip archive - static-verify.sh needs this path to extract it.
+echo "$WORK/$SDK_DIR/staging_dir/host/bin/apk" > "$OUT/.sdk-apk-path"
 
 sha256sum "$OUT"/*.chk > "$OUT/sha256sums"
 
