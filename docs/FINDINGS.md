@@ -920,3 +920,30 @@ bug (OpenWrt issue #14451); the latter needs its own direct test (`iw phy info` 
 a raw bring-up attempt) before being accepted. Route around the broken
 orchestration layer with the same underlying primitives it would have
 used, rather than accepting the combination as unsupported.
+
+**WDS/4addr considered and ruled out, not just skipped for relayd's sake:**
+before settling on relayd, checked whether a true L2 bridge (4addr/WDS —
+the option OpenWrt's own docs prefer over relayd where available, since it
+avoids relayd's proxy-ARP userspace overhead entirely) was possible
+instead. It isn't, on this hardware — confirmed directly against this
+repo's own build tree (`openwrt/build_dir/.../brcmfmac/cfg80211.c`, kernel
+6.12.94), not just cited from memory: `NL80211_IFTYPE_WDS` is explicitly
+rejected with `-EOPNOTSUPP` in `brcmf_cfg80211_add_iface()`,
+`brcmf_cfg80211_del_iface()`, and `brcmf_cfg80211_change_iface()` (the last
+one also logs `"type (%d): currently we do not support this type"`) — a
+hard driver-level rejection, not a config gap. Moot anyway even on
+WDS-capable drivers: 4addr client mode requires the *upstream* AP to
+negotiate it too, and an arbitrary third-party AP (a Eufy camera base
+station, someone else's router) isn't going to expose that. relayd is the
+only path this hardware/use-case combination actually supports, not merely
+the first one that worked.
+
+**Future consideration, not yet hit:** the operator's stated longer-term
+goal is other radios eventually repeating other networks too. Community
+reports (2 independent OpenWrt forum threads) describe real fragility
+running more than one relayd instance at once, even across dedicated
+radios — one maintainer called it "quite a hack." `etc/init.d/eufy-repeater`
+is already written generically (loops over every `repeater_mode='1'`
+section, not hardcoded to one), so a second instance is a config-only
+change to try — but treat the first multi-radio attempt as a real test,
+not an assumed-safe extension of what's proven here for one.
