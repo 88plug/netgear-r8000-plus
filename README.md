@@ -5,6 +5,9 @@ BCM4709 + 3× BCM43602) from stock firmware to a **custom OpenWRT 25.12.5** buil
 that fixes defects the community considered unfixable — and tunes the radios to
 their documented hardware ceiling.
 
+**What's different from a stock OpenWrt bcm53xx build, with the full bug/feature
+matrix and upstream porting guidance → [R8000_PLUS.md](R8000_PLUS.md).**
+
 ## Current status (2026-07-24)
 
 - **v11 SHIPPED, FLASHED, VERIFIED LIVE** —
@@ -15,22 +18,25 @@ their documented hardware ceiling.
   **SQM/cake** with real-measured WAN bandwidth (91000/89000 kbit/s down/up,
   live `tc qdisc` shaping confirmed), multi-BSS driver fix (`patches/861`),
   working LEDs, `radio-watchdog`, LuCI. The "dead 5GHz" (#20514) is not dead —
-  root cause and fix in [FINDINGS](FINDINGS.md) §3.
+  root cause and fix in [FINDINGS](docs/FINDINGS.md) §3.
 - **WPA3-SAE was removed, not shipped.** Real-client testing found it never
   actually broadcast on this hardware; reverted to plain WPA2-PSK (`psk2`) in
-  v9. See [FINDINGS](FINDINGS.md) §14.
+  v9. See [FINDINGS](docs/FINDINGS.md) §14.
 - **OWE (Enhanced Open) was removed, confirmed unfixable** — a firmware-side
   wall (no `WPA3_AUTH_OWE` support in the blob), not a driver bug. See
-  [FINDINGS](FINDINGS.md) §9, §12.
+  [FINDINGS](docs/FINDINGS.md) §9, §12.
+- **DFS channels confirmed permanently unsupported** — the firmware itself
+  returns `BCME_UNSUPPORTED`, not a driver/config gap. Four independent live
+  tests converge on this. See [FINDINGS](docs/FINDINGS.md) §16–18.
 - **No temp passphrase remains.** The `ChangeMe-R8000-2026` default from
   earlier versions was rotated out for real random passphrases; see
-  [WINS.md](WINS.md) "v6.1" (2026-07-23). Don't reuse that string.
-- Full version-by-version history (v1 → v11) — what shipped, what regressed,
-  what was fixed: [WINS.md](WINS.md).
+  [WINS.md](docs/WINS.md) "v6.1" (2026-07-23). Don't reuse that string.
+- Full version-by-version history (v1 → v12) — what shipped, what regressed,
+  what was fixed: [WINS.md](docs/WINS.md).
 
 ## Device support beyond this router (researched 2026-07-25)
 
-`patches/861` (the multi-BSS/guest-network driver fix, [WINS.md](WINS.md)
+`patches/861` (the multi-BSS/guest-network driver fix, [WINS.md](docs/WINS.md)
 headline win) was found and tested on this one R8000, but the code it touches
 — `brcmf_cfg80211_request_ap_if()` in mainline's shared `brcmfmac` driver — has
 **zero chip-ID checks**. It's the same function for every Broadcom FullMAC chip
@@ -84,20 +90,24 @@ firmware) — not its reach.
 
 ## Docs
 
-- **[RUNBOOK.md](RUNBOOK.md)** — operations: host/bench setup, router access
-  (stock telnet + OpenWrt SSH), flashing (GUI / sysupgrade / nmrpflash / TFTP),
-  recovery/unbrick, building images.
-- **[FINDINGS.md](FINDINGS.md)** — technical findings: hardware (FCC-confirmed
-  3×3), calibration extraction, root cause of #20514 + the fix, multi-BSS
-  driver fix, OWE/DFS hardware walls, the WPA3-SAE failure + fix, the
-  pstore/ramoops build-environment wall, and FCC certified RF ceilings.
-- **[WINS.md](WINS.md)** — chronological version log (v1 → v11): what
-  shipped, what regressed, what was fixed, and the honest walls at each step.
+- **[R8000_PLUS.md](R8000_PLUS.md)** — bug/feature matrix, walls confirmed
+  closed, and upstream porting guidance.
+- **[docs/RUNBOOK.md](docs/RUNBOOK.md)** — operations: host/bench setup,
+  router access (stock telnet + OpenWrt SSH), flashing (GUI / sysupgrade /
+  nmrpflash / TFTP), recovery/unbrick, building images.
+- **[docs/FINDINGS.md](docs/FINDINGS.md)** — technical findings: hardware
+  (FCC-confirmed 3×3), calibration extraction, root cause of #20514 + the fix,
+  multi-BSS driver fix, OWE/DFS hardware walls, the WPA3-SAE failure + fix,
+  the pstore/ramoops build-environment wall, FCC certified RF ceilings, and
+  the FA/CTF hardware-offload closure.
+- **[docs/WINS.md](docs/WINS.md)** — chronological version log (v1 → v12):
+  what shipped, what regressed, what was fixed, and the honest walls at each
+  step.
 
 ## Repo layout
 
 ```
-docs/                  these docs
+docs/                  operational + technical docs (see Docs above)
 patches/               upstreamable OpenWrt source patches (e.g. r8000 43602 init)
 v2-files/              canonical FILES overlay baked into images since v7
                        (patched /etc/init.d/nvram, guest network, perf-tune,
@@ -118,4 +128,11 @@ openwrt/               OpenWrt v25.12.5 source clone (gitignored)
 ## Branch
 
 All work on `openwrt-r8000-plus`.
-```
+
+## License
+
+GPL-2.0 — see [LICENSE](LICENSE). Patches modify GPL-licensed Linux
+kernel/OpenWrt source; extracted vendor reference source under
+`hwoffload-research/graveyard-vendor/` carries its own original Broadcom
+license headers (see that directory's `notes.md` for provenance — sourced
+from public GPL-compliance trees, not leaked material).

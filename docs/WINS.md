@@ -34,7 +34,7 @@ The `-95`/EOPNOTSUPP that made OWE, guest networks, and multi-SSID-per-radio
   on other BCM43602-class tri-band hardware (R7900, RT-AC3200 — confirmed same
   chip + OpenWrt-supported; **not** R7000/R7000P/R8500/R7500, which use
   different chips despite similar model numbers/marketing). See
-  [README.md](README.md#device-support-beyond-this-router-researched-2026-07-25)
+  [README.md](../README.md#device-support-beyond-this-router-researched-2026-07-25)
   for the full breakdown — realistic population is real but modest, not the
   "millions" a first guess assumed before checking.
 
@@ -80,7 +80,7 @@ The `-95`/EOPNOTSUPP that made OWE, guest networks, and multi-SSID-per-radio
 - **Patches:** `patches/0001` (5GHz nvram init), `patches/861` (brcmfmac MBSS) — both upstreamable.
 - **Images:** `images/*-r8000plus-v11-*.chk` (current, flashed), plus full v1–v10 history + stock revert `.chk`.
 - **Built package:** `images/packages/kmod-brcmfmac-*.apk`.
-- **Docs:** [README](README.md) · [RUNBOOK](RUNBOOK.md) (access/flash/recovery) · [FINDINGS](FINDINGS.md) (technical detail §1–15).
+- **Docs:** [README](../README.md) · [RUNBOOK](RUNBOOK.md) (access/flash/recovery) · [FINDINGS](FINDINGS.md) (technical detail §1–15).
 
 ## v5/v6 — app-plus pass, sysupgrade bug caught live, packaging regression found+fixed
 
