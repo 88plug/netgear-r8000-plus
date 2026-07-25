@@ -76,14 +76,18 @@ echo "--- Check 2: package manifest diff against last published release ---"
 if [ -n "$MANIFEST" ] && [ -n "$PREV_MANIFEST" ] && [ -f "$PREV_MANIFEST" ]; then
   echo "Diff (previous -> new), review anything beyond expected version bumps:"
   diff -u "$PREV_MANIFEST" "$MANIFEST" || true
-  # Not fatal by design - version bumps are the whole point of this pipeline.
-  # This is for a human to glance at in the workflow log, not an auto-fail
-  # gate; a REMOVED package (not just bumped) is the real red flag.
-  REMOVED="$(diff "$PREV_MANIFEST" "$MANIFEST" | grep '^<' | wc -l)"
-  ADDED="$(diff "$PREV_MANIFEST" "$MANIFEST" | grep '^>' | wc -l)"
-  echo "Packages removed: $REMOVED, added/changed: $ADDED"
-  if [ "$REMOVED" -gt 5 ]; then
-    echo "FAIL: $REMOVED packages disappeared from the manifest - that's not a normal version bump pattern"
+  # Compare PACKAGE NAMES only (manifest lines are "name - version"), not
+  # full lines. A plain line diff conflates a version bump (one line
+  # removed + one added for the SAME package - normal, expected churn,
+  # confirmed hit live: a routine luci feed bump on 25.12.5 tripped a
+  # false FAIL here) with a package genuinely disappearing. Only names
+  # present in the old manifest and absent from the new one are real.
+  REALLY_GONE="$(comm -23 \
+    <(awk '{print $1}' "$PREV_MANIFEST" | sort -u) \
+    <(awk '{print $1}' "$MANIFEST" | sort -u) | wc -l)"
+  echo "Packages that actually disappeared (name absent, not just version-bumped): $REALLY_GONE"
+  if [ "$REALLY_GONE" -gt 5 ]; then
+    echo "FAIL: $REALLY_GONE package names vanished entirely from the manifest - that's not a normal version bump pattern"
     FAIL=1
   fi
 else
