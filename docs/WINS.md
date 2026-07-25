@@ -654,12 +654,49 @@ build at all, as expected.
 
 **Shipped:** `images/openwrt-25.12.5-r8000plus-v13-bcm53xx-generic-netgear_r8000-squashfs.chk`,
 sha256 `d2bcd057d550fb9db857f14bcc4d24fdfee349eb832e006189a4f70a2d39780b`.
-**Not (yet) flashed:** the router is currently running the live-hacked
-equivalent of this exact config (built via SSH/UCI during the investigation,
-confirmed surviving a full `/etc/init.d/network restart`, `hostapd-eufy_ap`
-and `relayd-eufy_ap` both procd-tracked and running) — v13 reproduces that
-state from a clean build rather than replacing a currently-working live
-config. Flash when convenient to confirm the built image matches the live
-state exactly; not urgent since the live config already works and a flash
-is never zero-risk on this device (per every prior version's own stated
-reasoning for not reflashing on zero functional delta).
+Flashed the same day — see v15 entry below for what that actually found.
+
+## v13 → v15 — flashed for real, found and fixed 3 bugs the live-SSH testing never caught (2026-07-25)
+
+v13 above was written and shipped before actually being flashed. Flashing
+it immediately surfaced what "verified live over SSH" had missed, in three
+rounds — each one caught by testing the real thing (reboot, real routing,
+real firewall rules), not by re-checking the same service-status signals
+that had already looked healthy every time. Full technical detail in
+`docs/FINDINGS.md` §19 addendum; summary here:
+
+1. **v13 flash → default-route leak found.** `ping 8.8.8.8` showed ~50%
+   loss right after boot, while a 1-hop gateway ping stayed clean the
+   whole time — `network.eufy_wwan`'s DHCP lease had installed a default
+   route at the same metric as `wan`, and the kernel silently preferred
+   the third-party Eufy network for this router's own traffic. Fixed live
+   (`defaultroute=0`, `peerdns=0`), rebuilt as **v14**
+   (sha256 `10493bcd75095d161154962a957b713d998e9da91e38619552e81797cfc8bb56`),
+   reflashed, verified 0% loss.
+
+2. **v14 flash, adversarial re-read → two more bugs, neither with any
+   symptom yet.** Channel detection (`iw dev link`) was parsing a field
+   (`channel`) that doesn't exist in this OpenWrt/iw version's output —
+   dead code since the day it was written, silently papered over by a
+   static fallback that happened to already be correct. And the firewall
+   zone only covered the STA-side interface, leaving the raw AP interface
+   real clients connect to in zero zones — default REJECT would have
+   silently dropped every repeated client's traffic while every service
+   health check kept reporting green. Both fixed, rebuilt as **v15**
+   (sha256 `e19da8acf47e315886a58e01dba43ddaa5bbd03fb8a04c99b9b6822adb868fba`),
+   reflashed.
+
+**v15 verified clean, fresh boot:** correct route table (`default via
+192.168.52.1 dev wan`), `uci show firewall.eufy` shows `device
+'rpt_eufy_ap'`, generated nft ruleset covers `rpt_eufy_ap` in
+input/forward/output/helper chains, `hostapd-eufy_ap` + `relayd-eufy_ap`
+both running, STA `Connected`, `ping 8.8.8.8` 5/5 (0% loss), `uci changes`
+0. **v15 is the current running image.**
+
+**The actual lesson, stated plainly:** "hostapd is running, relayd is
+running, the STA shows Connected" is not the same claim as "a real client
+gets internet through this." All three bugs above passed every one of
+those checks. The thing that actually caught them was flashing for real
+and testing multi-hop connectivity plus the generated firewall ruleset —
+not more service-status polling of the same signals that were already
+green.
