@@ -82,6 +82,13 @@ Either:
    re-runs `packet-steering.sh` and repositions RPS -- no separate step
    needed.)
 
+**Status: already shipped**, via a third method not listed above --
+`v2-files/etc/uci-defaults/99-flow-offload` runs `uci batch` to set the same
+two options on first boot. The resulting values are also present directly in
+`v2-files/etc/config/firewall`'s `config defaults` block
+(`flow_offloading='1'`, `flow_offloading_hw='0'`). Confirmed live via
+`uci show firewall.@defaults[0]` (2026-07-24).
+
 ## Verify
 
 ```sh

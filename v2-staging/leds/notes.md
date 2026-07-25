@@ -1,5 +1,15 @@
 # R8000 LED workstream — findings and fix
 
+> **Superseded for the 3 per-band WiFi LEDs (2026-07-24):** this session's fix
+> bound `wlan0`/`wlan1`/`wlan2` netdev names, which was correct for the bench
+> image running at the time. The production image creates multi-BSS
+> `phyN-apM` interfaces instead, so those `wlanN` names stopped matching and
+> the LEDs went dark again on reflash. Re-fixed in
+> `v3-staging/leds/notes.md` (uci-defaults `99-led-wifi-netdev-fix`, binds to
+> `phyN-ap0`) — that is the current state for those 3 LEDs. Everything below
+> (GPIO map, DTS analysis, WAN/USB/power fixes, `ledbh` finding) is still
+> accurate and is the basis the v3 session builds on.
+
 ## TL;DR
 
 The device tree is fine. The bug is 100% in userspace: `board.d/01_leds`

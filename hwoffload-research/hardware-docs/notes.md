@@ -296,6 +296,25 @@ Enough exists publicly (as of this survey) to attempt it, with real risk:
   init path, which itself depends on the closed `robo`/switch attach sequence
   (`fa_attach()` takes a `void *robo` handle from the switch driver).
 
+## 8. Update (2026-07-23): the open items in §7 are now resolved
+
+Live register probing (`hwoffload-research/fa-probe/`) closed all three
+"missing/unverified" items above: (1) `0x18027c00` is confirmed correct —
+a live read returned exactly the `CTF_INTSTAT_*_INIT_DONE` behavior this
+register map predicts; (3) no extra clock/reset sequencing was needed
+beyond what the table-init write itself did — the block was already
+reachable. (2) the prepended-tag requirement turned out moot for this
+board: mainline's own driver already runs in `BRCM_HDR` tag mode, so
+nothing needed reverse-engineering there. The silicon is real, present,
+and its control/data-table/switch-enable registers all respond exactly
+as this document predicts — but the investigation's final conclusion is
+that mainline OpenWrt has no code path that ever consults FA per-packet
+(`ctf_forward()` is only called from Broadcom's own closed vendor driver,
+which `bgmac.c` doesn't replicate). Full story:
+`hwoffload-research/VERDICT.md`, `docs/WINS.md` ("FA/CTF hardware
+accelerator: silicon presence CONFIRMED"),
+`hwoffload-research/fa-probe/BRINGUP_RESULT.md`.
+
 ## Files in `extracted-sources/`
 
 - `fa_core.h` — FA register struct + bit fields (Broadcom, © 2013)

@@ -1,5 +1,18 @@
 # Synthesis: Static Analysis Pass on brcmfmac43602-pcie.ap.bin — OWE Question
 
+> **Superseded (2026-07-24):** this pass's own recommended next step — redo
+> the DHD event-ID cross-reference and `wpa_auth` security-constant anchor
+> search that didn't complete here — was carried out against these same raw
+> outputs (`full_disasm.txt`, `strings_with_offsets.txt`, etc., in this
+> directory) and reached a decisive answer. See `docs/FINDINGS.md` §12: the
+> real AKM-dispatch routine was located and fully characterized
+> (`0x01ad7e`–`0x01aecc`), confirmed to have no case for OWE/SAE-extension,
+> and ~30% of the firmware's hottest call targets were shown to resolve into
+> a physically separate, unreadable on-die mask-ROM region. That supersedes
+> this document's "inconclusive, gap-limited" verdict below with a confirmed
+> structural finding — the OWE-unfixable conclusion stands on stronger
+> evidence than what's captured here.
+
 **Target:** `/home/andrew/netgearr8000/v2-staging/firmware/brcmfmac43602-pcie.ap.bin`
 (595,472 bytes, ARM Thumb-2, no ELF/symbol table, version banner confirms
 `7.35.177.56`, built `Fri 2015-09-18 03:31:06 PDT`, FWID `01-6cb8e269` —

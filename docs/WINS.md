@@ -32,14 +32,14 @@ The `-95`/EOPNOTSUPP that made OWE, guest networks, and multi-SSID-per-radio
 |---|---|---|
 | 1 | **5GHz revived** (OpenWrt #20514, "unfixable") | Root-caused to a missing `netgear,r8000` bcm53xx nvram-init entry (present for the twin RT-AC3200, never the R8000); fixed with this unit's own extracted calibration. `patches/0001`. 3 radios up. |
 | 2 | **Calibration extracted** from the live router | Nighthawk telnet backdoor → root shell → full NVRAM dump; 137 per-radio cal keys incl. 5GHz `pa5ga`. Community said this data was "embedded in the driver binary" / unrecoverable. `extracted/`. |
-| 3 | **WPA3-SAE + MFP** | `SAE / FT-SAE (CCMP)` on all radios |
-| 4 | **802.11r fast roaming** | `FT-SAE / FT-PSK` in beacons |
-| 5 | **802.11k RRM** | neighbor/beacon reports |
-| 6 | **802.11v BSS-Transition** | switched to full `wpad-mbedtls` (`CONFIG_WNM=y`) — enabled the feature instead of stripping it; `bss_transition=1`, 0 hostapd errors |
-| 7 | **usteer band-steering** | `/sbin/usteerd` steering across the 3 radios (unified `R8000` SSID) |
-| 8 | **OWE (Enhanced Open)** | transition pair live (driver fix) |
-| 9 | **Guest network / multi-SSID** | `R8000-Guest` 2nd BSS (driver fix) |
-| 10 | **SQM/cake** | installed; set WAN bandwidth to activate |
+| 3 | ~~WPA3-SAE + MFP~~ → **WPA2-PSK (`psk2`) + MFP-optional** | SAE never actually broadcast — firmware rejects the key-mgmt on every boot, found via real-client RSN scan; reverted project-wide, live-confirmed (`wireless.*.encryption='psk2'`). See "Correction" section below, FINDINGS.md §14. |
+| 4 | ~~802.11r fast roaming~~ **removed** | Depended on the same SAE/FT foundation; dropped alongside WPA3-SAE (`ieee80211r`/`ft_psk_generate_local`/`mobility_domain` removed, live-confirmed absent). See "Correction" section below. |
+| 5 | **802.11k RRM** | neighbor/beacon reports; live-confirmed `ieee80211k='1'` |
+| 6 | **802.11v BSS-Transition** | switched to full `wpad-mbedtls` (`CONFIG_WNM=y`) — enabled the feature instead of stripping it; `bss_transition=1`, 0 hostapd errors, live-confirmed |
+| 7 | **usteer band-steering** | `/sbin/usteerd` steering across the 3 radios (unified `R8000` SSID); live-confirmed running |
+| 8 | ~~OWE (Enhanced Open)~~ **removed** | Confirmed unfixable — this firmware (2015) predates OWE's 2016 RFC, no `WLC_E_OWE_INFO` in the binary. Removed from shipped config (v6). See v5/v6 section below, FINDINGS.md §9/§12. |
+| 9 | **Guest network / multi-SSID** | `R8000-Guest` 2nd BSS (driver fix); live-confirmed on `br-guest`/192.168.2.0/24 |
+| 10 | **SQM/cake** | installed; WAN bandwidth set 91000/89000 kbit/s (v11) — live-confirmed `tc qdisc` shaping both directions |
 | 11 | **Software flow-offload** | `flow_offloading=1` |
 | 12 | **LEDs fixed** | all front-panel LEDs defined (Power/WAN/2.4/5-1/5-2/USB/WPS) |
 | 13 | **LuCI web UI** | :80 |
@@ -64,9 +64,9 @@ The `-95`/EOPNOTSUPP that made OWE, guest networks, and multi-SSID-per-radio
 ## Reproducibility
 
 - **Patches:** `patches/0001` (5GHz nvram init), `patches/861` (brcmfmac MBSS) — both upstreamable.
-- **Images:** `images/*-r8000plus-v3-*.chk` (final), plus v1/v2/v2b/v2c history + stock revert `.chk`.
+- **Images:** `images/*-r8000plus-v11-*.chk` (current, flashed), plus full v1–v10 history + stock revert `.chk`.
 - **Built package:** `images/packages/kmod-brcmfmac-*.apk`.
-- **Docs:** [README](README.md) · [RUNBOOK](RUNBOOK.md) (access/flash/recovery) · [FINDINGS](FINDINGS.md) (technical detail §1–8).
+- **Docs:** [README](README.md) · [RUNBOOK](RUNBOOK.md) (access/flash/recovery) · [FINDINGS](FINDINGS.md) (technical detail §1–15).
 
 ## v5/v6 — app-plus pass, sysupgrade bug caught live, packaging regression found+fixed
 

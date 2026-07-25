@@ -80,3 +80,27 @@ SSH -- not asserted from memory. Full citations are in each topic's
 | 5 | Per-radio PCIe function reset (surgical single-radio recovery instead of watchdog's all-3 module reload) | **Defer** | Real improvement, materially more complex (`/sys/bus/pci/.../remove`+rescan scripting, PCIe function-to-phy mapping at runtime) for a failure mode that recurs on the order of hours-to-days. Not worth the fragility for v2; the all-3 reload is simple and already verified to work. |
 | 6 | CLM/txcap regulatory blob (unlocks DFS channels 52-144 on radio2, full US ccode power tables) | **Defer -- tracked, not in this workstream's scope** | Already tracked in `extracted/FINDINGS.md` as a separate, larger effort (extracting/formatting the blob from the stock `wl` driver). The channel-defaults note here deliberately works around its absence (defaults to non-DFS channels) rather than blocking on it. |
 | 7 | b53 EAP standalone-port `br-wan` workaround from #21349 | **Defer / do not apply** | Superseded by the real upstream fix already in this tree. Listed only as a "don't re-add this" note in `dsa-switch/NOTES.md`. |
+
+## Status vs `v2-files/` (verified 2026-07-24)
+
+Items 1-4 above are no longer pending -- all are shipped in `v2-files/` and
+confirmed live on the flashed router (currently v11):
+
+- **#1 5ghz-channel-defaults**: `v2-files/etc/config/wireless` radio0/1/2
+  `band`/`channel`/`htmode` match `wireless.snippet` exactly (149/VHT80,
+  1/HT20, 36/VHT80). Confirmed live via `uci show wireless`.
+- **#2 flow-offload**: shipped as `v2-files/etc/uci-defaults/99-flow-offload`
+  (a uci-defaults script, not a static merge into `firewall.snippet`'s file)
+  -- same effect, `flow_offloading='1'` / `flow_offloading_hw='0'`, and those
+  two options are also already present directly in
+  `v2-files/etc/config/firewall`'s `config defaults` block. Confirmed live
+  via `uci show firewall.@defaults[0]`.
+- **#3 radio-watchdog**: `v2-staging/extras/radio-watchdog/files/` is
+  byte-for-byte identical (`diff`, no output) to
+  `v2-files/etc/init.d/radio-watchdog` and
+  `v2-files/usr/sbin/radio-watchdog-check`. Confirmed live: both files
+  present on the router and the cron entry is active (`crontab -l`).
+- **#4 dsa-switch**: no code to ship (documentation-only item) -- status
+  claim re-confirmed live, see `dsa-switch/NOTES.md`.
+
+Items 5-7 remain deferred/not-applied as originally recorded.

@@ -95,7 +95,29 @@ independent finding on the SAE/MFP side:
 **No wpad/hostapd package change is needed for this workstream.** See
 `imagebuilder-packages.md`.
 
+**CORRECTION (2026-07-24):** this conclusion was contradicted by the real
+v7 build. `wpad-basic-mbedtls` (`CONFIG_WNM` off) made hostapd reject
+`bss_transition` as an unknown config item and fail `add_iface` on every
+phy, taking down all 4 SSIDs -- the binary-`strings` evidence above shows
+the symbols exist, but that's not the same as the compiled `.config`
+accepting the corresponding hostapd.conf directive at parse time. Fix:
+`wpad-mbedtls`, not `wpad-basic-mbedtls`. See `docs/FINDINGS.md`'s v2b
+entry, `docs/RUNBOOK.md` §5, and `imagebuilder-packages.md`'s own
+correction note.
+
 ## 3. Fast roaming / handoff (802.11r/k/v) -- honest impact assessment
+
+**Forward pointer (2026-07-24):** the shipped config took Option B below
+(unified SSID) but did NOT keep 802.11r/FT -- it was dropped in the same
+pass that removed WPA3-SAE (`docs/FINDINGS.md` §14: the 5-AKM
+SAE+FT-SAE+PSK combination made brcmfmac's config rejection worse and
+caused real associate/disassociate cycling against a live client; FT-PSK
+alone was never separately re-tested after that). Production
+`v2-files/etc/config/wireless` ships a single SSID `R8000` across all 3
+radios with `ieee80211k`/`bss_transition` (802.11k/v) only -- the
+three-distinct-SSID premise this section analyzes is no longer what's
+shipped. See `docs/WINS.md`'s v7-v9 entries for the roaming-feature
+timeline.
 
 Per the task framing: 802.11r/k/v roaming benefit is fundamentally a
 **between-AP** thing. Here's exactly how that plays out on this specific
@@ -141,7 +163,11 @@ tin classification is a strict upgrade for a home-router link.
 **Download/upload bandwidth in the shipped config are placeholders (`0`)
 and must be set from a real measured speed test before this does anything
 useful** -- see the file's header comment for the measurement/tuning
-procedure. Link-layer `overhead`/`linklayer` default to a DOCSIS/cable
+procedure. **Update (2026-07-24): done.** WAN got a live connection, was
+measured (101.3 Mbps down / 99.4 Mbps up), and real values
+(`download 91000` / `upload 89000`, 90% headroom) are now baked into
+`v2-files/etc/config/sqm` as the shipped default -- see `docs/WINS.md`'s
+v11 entry. Link-layer `overhead`/`linklayer` default to a DOCSIS/cable
 profile (22 bytes, ethernet framing) as the most common consumer WAN type
 for this router; the file documents the full overhead table (DOCSIS/pure
 Ethernet/PPPoE-VDSL2/bridged-VDSL2/ADSL) so it can be corrected to the

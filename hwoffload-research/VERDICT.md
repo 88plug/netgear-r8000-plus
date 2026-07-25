@@ -129,7 +129,7 @@ is alive.** Concretely, what's recoverable and where from:
 | SRAB bus protocol to reach switch registers | **Open, complete, and already running in mainline** (`drivers/net/dsa/b53/b53_srab.c`) | `bcmrobo.c`, `chipcommonb.h`; base `0x18007000` |
 | GMAC/UniMAC reset & speed/duplex control | **Open, complete, and already running in mainline OpenWrt** (`bgmac`/`unimac.h`) — verified bit-for-bit against the blob's `gmac_init_reset` disassembly | `blob-analysis/dumps/et_disasm.txt`, mainline `bgmac.h`/`unimac.h` |
 | CTF flow-selection policy (which flows get offloaded) | **Closed** (`hndctf.c` never shipped as source anywhere) | but ABI is fully known (`hndctf.h`), and has a ready-made open substitute: Linux `nf_flowtable` / act_ct hardware-offload hooks |
-| Confirmation FA silicon is present/enabled on R8000's specific stepping | **Unknown — never tested by anyone, in or out of tree** | requires a physical probe |
+| Confirmation FA silicon is present/enabled on R8000's specific stepping | **Resolved (2026-07-23) — confirmed present, powered, and responding correctly** | `fa-probe/fa_bringup.c` live table-init write against the real board; see `fa-probe/BRINGUP_RESULT.md` |
 | Chip-rev-specific quirks (e.g. the documented "777 WAR" erratum) | **Partially open** — one rev-2 erratum is documented; whether R8000's stepping needs it or others is unconfirmed | `etc_fa.c: CTF_FA_WAR777_ON/OFF` |
 
 Verdict on Q1: **tractable, not intractable.** The register-level spec is not
@@ -301,7 +301,18 @@ ctf.ko" does not hold; that closed module simply never had it.
 
 ---
 
-## Recommended next step
+## Recommended next step (superseded — kept for context)
+
+**UPDATE 2026-07-23, later — this section is now historical.** It describes
+the pre-probe plan. The probe below was actually run
+(`fa-probe/fa_probe.c` → `fa_bringup.c` → the switch-side and NAPT-row
+tests) and came back **alive**, not the "confirmed absent" branch this
+section anticipated — see the UPDATE banners at the top of this document.
+The follow-on root-cause finding (`ctf_forward()` has no equivalent hook in
+mainline `bgmac.c`) then closed the investigation. There is no experiment
+left to run; see "This is the real, final answer, not a remaining
+escalation" above for the actual conclusion. Original text kept below
+unmodified for the record of what was planned before execution:
 
 Run the §2 MMIO probe (`ioremap(0x18027c00, ...)`, read `control`/`status`,
 attempt the init-strobe/poll sequence) against real R8000 hardware, using the

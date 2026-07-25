@@ -272,6 +272,18 @@ upstream.
   different, and much simpler, situation than newer Broadcom home-router
   SoCs.
 
+  **Correction (2026-07-23, later the same day):** this bullet's
+  conclusion does not hold. Live register probing (`hwoffload-research/
+  fa-probe/`) confirmed the FA block is physically present, powered, and
+  functional at the address `hardware-docs/notes.md` §4c derived
+  (`0x18027c00`). What this section's evidence actually shows is narrower:
+  *this specific firmware build* ships no `fa.ko`/driver and gates nothing
+  through it — not that the silicon is absent. The real root cause (why
+  no consultation happens on mainline OpenWrt regardless) is architectural,
+  not an absence of hardware: see `docs/WINS.md` ("FA/CTF hardware
+  accelerator: silicon presence CONFIRMED") and
+  `hwoffload-research/VERDICT.md` for the closed investigation.
+
 ## 6. Verdict
 
 **How much of the hardware-programming path is recoverable from the GPL
@@ -317,3 +329,14 @@ and already shipped in this repo's OpenWrt bcm53xx target. The only
 software fast-path shortcut, which is fully characterized above and has
 a direct open substitute (kernel software/hardware flow offload) rather
 than requiring RE of undocumented registers.
+
+**Superseded (2026-07-23):** the FA engine does exist as silicon on this
+board — this blob-only analysis just couldn't see it, since this firmware
+build never loads a driver for it. Live probing confirmed the block
+present, powered, and register-correct, and the investigation later
+found the real reason it's unreachable from OpenWrt: `ctf_forward()` is
+only ever invoked from Broadcom's own closed vendor Ethernet driver,
+which mainline `bgmac.c` has no equivalent hook for. See
+`hwoffload-research/VERDICT.md` and `docs/WINS.md` for the closed
+investigation; this section's software-only characterization of CTF
+itself (§3) still stands unchanged.

@@ -1,5 +1,26 @@
 # WPA3-SAE + 802.11w (MFP) -- investigation notes
 
+**SUPERSEDED (2026-07-23, see `docs/FINDINGS.md` §14).** The plan below
+(keep `wpad-basic-mbedtls`, ship `sae-mixed`) was flashed as v8, then found
+broken by real-client testing: brcmfmac silently drops SAE from the
+broadcast RSN element (`brcmf_configure_wpaie: "Invalid key mgmt info"`,
+every radio, every boot) instead of erroring -- exactly the class of risk
+section 5 below flagged as unverifiable from source/package inspection
+alone ("only a live join test proves it"). That risk assessment was
+correct; the specific failure signature differed from `#9855`'s
+association-then-disassociate pattern but the underlying "SAE doesn't
+actually work on this firmware" conclusion matches. **Current shipped
+config uses `psk2` (WPA2-PSK/CCMP), not `sae-mixed` or `sae`** -- see
+`v2-files/etc/config/wireless`. `ieee80211w` (MFP-optional), `ieee80211k`,
+and `bss_transition` were kept (independent of the SAE/FT failure);
+`ieee80211r`/`ft_psk_generate_local`/`mobility_domain`/`ocv` were removed
+(dead weight without a working SAE/FT foundation). The package decision
+(`wpad-basic-mbedtls` is enough for SAE/MFP alone) remains accurate in
+isolation, but see `imagebuilder-packages.md`'s own CORRECTION section --
+a *different* feature (`bss_transition`/802.11v) this same package lacks
+forced a switch to `wpad-mbedtls` regardless. Rest of this file preserved
+as an accurate record of the original investigation.
+
 Device: NETGEAR R8000, OpenWrt 25.12.5 r33051-f5dae5ece4 (bcm53xx/generic),
 brcmfmac, 3x BCM43602 (2x 5 GHz PCIe + 1x 2.4 GHz PCIe). Root SSH,
 192.168.1.1.

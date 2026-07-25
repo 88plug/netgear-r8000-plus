@@ -62,7 +62,9 @@ Fix: add a `netgear,r8000` case using this unit's own extracted values
 (`devid 0x43bc`/`0x43bb`, `sromrev 11`, `boardrev 0x1421`, real per-radio
 `boardflags`, devpaths). Shipped two ways:
 - `patches/0001-nvram-bcm53xx-add-netgear-r8000-43602.patch` (upstreamable)
-- `image-files/etc/init.d/nvram` (ImageBuilder FILES override)
+- `image-files/etc/init.d/nvram` (ImageBuilder FILES override at v1; this
+  overlay is deprecated since v7 — the same fix now lives in
+  `v2-files/etc/init.d/nvram`, the canonical overlay, see RUNBOOK.md §5)
 
 Also added the `netgear,r8000` case to `set_wireless_led_behaviour`
 (`0/1/2:ledbh10=0x7`) — see LEDs workstream.
@@ -139,6 +141,11 @@ test rather than trust:
 - **WPA3-SAE + 802.11r (FT-SAE) + 802.11k (RRM) + 802.11v (BSS-Transition)** —
   `Encryption: SAE / FT-SAE / WPA-PSK / FT-PSK (CCMP)`, `bss_transition=1` in all
   hostapd confs, **0 hostapd config errors**.
+  **Correction (§14, 2026-07-23): this WPA3-SAE claim was config-valid but
+  never actually true over the air** — real-client testing later proved SAE
+  was silently dropped from the broadcast RSN on every boot. 802.11r/FT were
+  removed along with it; only 802.11k/v and `psk2`+MFP-optional actually work
+  on this hardware. Read §14 before relying on anything in this bullet.
 - **5GHz split at VHT80**: phy0 upper (ch149/153, 5.765 GHz), phy2 lower (ch36,
   5.180 GHz); phy1 = 2.4 GHz ch1.
 - **usteer** band-steering up, **flow-offload** on, **SQM/cake** installed (idle
@@ -151,7 +158,8 @@ test rather than trust:
 airtime-fairness (brcmfmac driver ceiling, not a package choice); regulatory
 "table de-neuter" (channels are DT `ieee80211-freq-limit`-gated, not
 table-gated — proven empirically). Temp WiFi passphrase `ChangeMe-R8000-2026`
-must be changed.
+must be changed. **(Resolved v6.1, 2026-07-23 — rotated to random 20-char
+passphrases on-device and in `v2-files/etc/config/wireless`; see WINS.md.)**
 
 ## 7. Engineering lessons
 

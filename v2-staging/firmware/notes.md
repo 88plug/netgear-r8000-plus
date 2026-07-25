@@ -185,6 +185,18 @@ calibrated clm_blob for this chip.
   reboot, and check `dmesg | grep -i clm` for either successful load or a
   clean rejection (vs. the current "no clm_blob available" absence).
 
+**Test was run — see `docs/FINDINGS.md` §11 (2026-07-23) for the outcome.**
+This blob's own trailing compatibility stamp (`Version: 7.10.274.3.REBASE.R493518`,
+FWID `01-a20087dc`) turned out to be paired with a **2021** firmware build,
+not the 2015 AP firmware (`7.35.177.56`, FWID `01-6cb8e269`) actually running
+on the router — a version mismatch between this blob and the `.ap.bin` above,
+not a firmware policy rejection. Live-tested with the *matched* firmware+CLM
+pair from the same `dlarray_43602a1` array: no `clmload -52` abort, but DFS
+channels stayed DT-gated (unrelated to CLM) and multi-BSS regressed (a
+different `interface_create` error code on the newer firmware that the
+existing MBSS-fallback patch doesn't catch). **Reverted to the known-good
+2015 firmware with no clm_blob** — this pairing is not shipped in v2-files.
+
 ## 3. `txcap_blob` — not extractable from this source, documented
 
 Searched the entire unpacked vendor rootfs (`grep -rlI txcap`, `find -iname

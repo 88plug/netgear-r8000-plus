@@ -96,6 +96,13 @@ running router and `chmod +x` both files, then:
 /etc/init.d/radio-watchdog start
 ```
 
+**Status: already shipped.** `files/etc/init.d/radio-watchdog` and
+`files/usr/sbin/radio-watchdog-check` here are byte-for-byte identical
+(`diff`, no output) to `v2-files/etc/init.d/radio-watchdog` and
+`v2-files/usr/sbin/radio-watchdog-check`. Confirmed live: both files present
+on the router and the cron entry active (`crontab -l | grep radio-watchdog`,
+2026-07-24).
+
 ## Verify
 
 ```sh

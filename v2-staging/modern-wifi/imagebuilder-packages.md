@@ -1,5 +1,11 @@
 # ImageBuilder PACKAGES change -- roaming / steering / QoS
 
+**Authoritative build recipe is `docs/RUNBOOK.md` §5 -- this file is
+history, not a live reference.** Two things below are now known stale
+(fixed 2026-07-24): the "No wpad/hostapd package change" conclusion, and
+the `make image` command block's plain `wpad-basic-mbedtls`. See the
+correction notes inline.
+
 All package names below were verified to exist for this exact target by
 grepping the ImageBuilder's own package index
 (`openwrt-imagebuilder-25.12.5-bcm53xx-generic.Linux-x86_64/.packageinfo`,
@@ -9,7 +15,22 @@ The router itself has no WAN/internet route in this environment
 (`apk update` fails with "Network unreachable"), so `.packageinfo` is the
 authoritative source of truth here, not a live `apk search`.
 
-## No wpad/hostapd package change
+## CORRECTION (2026-07-24, see docs/FINDINGS.md v2b entry): wpad DOES need to change
+
+The "No wpad/hostapd package change" conclusion originally below was wrong
+in the way that matters: `strings`-on-binary evidence that `bss_transition`
+symbols exist in `wpad-basic-mbedtls` does not mean hostapd will actually
+*start* with a `bss_transition '1'` config option. On the real v7 build,
+`wpad-basic-mbedtls` (`CONFIG_WNM` off) made hostapd reject the config
+outright ("unknown configuration item 'bss_transition'"), failing
+`hostapd.add_iface` **for every phy** and taking down all 4 SSIDs on first
+boot -- the same bug `docs/FINDINGS.md`'s v2b entry had already found and
+fixed once. Fix: **`wpad-mbedtls`** (`CONFIG_WNM=y`), not
+`wpad-basic-mbedtls`. See `docs/RUNBOOK.md` §5 and
+`../wpa3/imagebuilder-packages.md`'s own CORRECTION section (same
+underlying issue, found independently by two workstreams).
+
+## No wpad/hostapd package change [SUPERSEDED, see correction above]
 
 v1 and the sibling WPA3 workstream both keep `wpad-basic-mbedtls`. This
 workstream's own investigation (`../notes.md` section 1) independently
@@ -18,7 +39,11 @@ BSS-Transition), OWE, and MBO compiled in -- verified via `strings
 /usr/sbin/hostapd` on the live device, not just source inspection. Nothing
 here requires `wpad-mbedtls`/`wpad-openssl` ("full") or `wpad-mesh-*`
 (802.11s mesh doesn't work on this hardware regardless of package -- see
-notes.md section 1).
+notes.md section 1). **This reasoning is real (the symbols are genuinely
+compiled in) but incomplete: symbol presence isn't the same as the compiled
+`.config` accepting the corresponding hostapd.conf directive at parse time.
+The live production failure above is the actual test that matters, and it
+says `wpad-mbedtls` is required whenever `bss_transition` ships.**
 
 ## New packages
 
@@ -57,13 +82,21 @@ cd openwrt-imagebuilder-25.12.5-bcm53xx-generic.Linux-x86_64
 
 make image \
   PROFILE="netgear_r8000" \
-  PACKAGES="wpad-basic-mbedtls hostapd-utils wpa-cli wireless-regdb kmod-brcmfmac brcmfmac-firmware-43602a1-pcie kmod-usb-ohci kmod-usb2 kmod-phy-bcm-ns-usb2 kmod-usb-ledtrig-usbport kmod-usb3 kmod-phy-bcm-ns-usb3 usteer sqm-scripts" \
+  PACKAGES="-wpad-basic-mbedtls wpad-mbedtls hostapd-utils wpa-cli wireless-regdb kmod-brcmfmac brcmfmac-firmware-43602a1-pcie kmod-usb-ohci kmod-usb2 kmod-phy-bcm-ns-usb2 kmod-usb-ledtrig-usbport kmod-usb3 kmod-phy-bcm-ns-usb3 usteer sqm-scripts" \
   FILES="files/"
 ```
 
-(WPA3 workstream's package set unchanged, left verbatim; `usteer` and
-`sqm-scripts` appended. Add `luci-app-usteer luci-app-sqm` too if the merged
-image ships LuCI.)
+**Fixed 2026-07-24: `-wpad-basic-mbedtls wpad-mbedtls`, not plain
+`wpad-basic-mbedtls`** -- see the CORRECTION section above; this is the
+exact command block that would have reproduced v7's all-4-SSIDs-down outage
+if copy-pasted verbatim. `usteer`/`sqm-scripts` appended, `wpad` swap
+otherwise matches `../wpa3/imagebuilder-packages.md`'s own fixed command.
+Add `luci-app-usteer luci-app-sqm` too if the merged image ships LuCI. **The
+actual shipping build (v7 onward) additionally sets `FILES=/home/andrew/netgearr8000/v2-files`
+(not `files/"`) and adds `luci`/`ethtool`** to the merged `PACKAGES=` line
+-- see `docs/RUNBOOK.md` §5 for the exact, currently-used recipe; the
+`FILES="files/"` staging note below describes this workstream's own
+narrower package additions, not the full merged command.
 
 If `FILES="files/"` is used, this directory's `etc/config/usteer` and
 `etc/config/sqm` should be staged at `files/etc/config/usteer` and

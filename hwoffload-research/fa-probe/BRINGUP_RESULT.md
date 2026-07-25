@@ -1,5 +1,10 @@
 # FA/CTF control-register bring-up — RESULT (2026-07-23)
 
+> **Investigation closed, same day** — see this file's final section
+> ("root cause found") and `docs/WINS.md`'s "FA/CTF hardware accelerator"
+> section for the canonical summary. This file is the detailed,
+> chronological result log, kept as written.
+
 ## Verdict: silicon presence CONFIRMED. Table-init control-plane works.
 
 This closes the exact gap `VERDICT.md`'s TL;DR called out as unresolved:

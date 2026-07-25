@@ -121,6 +121,32 @@ than needing extra host-side config. radio0 cannot reach any DFS channel
 regardless of clm_blob — its whole DT-permitted range (5735-5835MHz) is
 non-DFS UNII-3.
 
+**Update — this expectation was tested, and did not hold as predicted:**
+`docs/FINDINGS.md` §11 subsequently re-carved a correctly version-matched
+clm_blob (fixing the v2 mismatch) and live-loaded it — `clmload` succeeded
+with no `-52` abort, but the DFS channels (52-64, 100-140) stayed
+`disabled` regardless, and MBSS broke as a regression. Confirms the DT gate
+was never the DFS blocker to begin with (consistent with this section's own
+conclusion), but the specific mechanism this section speculated about (CLM
+adding CAC-eligible entries once loaded) was tried and did not produce that
+result. Reverted, not shipped. See `docs/FINDINGS.md` §11 for the full
+account.
+
+**Open item, flagged 2026-07-24 (not resolved by this pass):** a live
+re-check of `iw phy phy2 info` on the router today shows channels 52-64 and
+100-140 present as `(radar detection)` rather than `(disabled)` — i.e. DFS
+channels now *appear* in radio2's channel list, contradicting this
+paragraph's "none of the DFS-eligible channels even appear" claim and this
+workstream's own `verify/final-state.txt` capture. `dmesg` on the same
+live check confirms **no clm_blob is loaded** (`err=-2`, same 2015
+firmware, same nvram `ccode=Q2`/`regrev=86`), and no patch/DTS change has
+landed in git since this workstream's testing that would explain it. Cause
+unknown — did not chase further live on an unfamiliar, possibly
+concurrently-used router rather than risk stepping on other in-flight work
+or documenting a transient state as permanent. Needs a clean re-verification
+pass (ideally right after a known, isolated boot) before trusting either
+this file's original capture or today's read as current truth.
+
 ## Thermal / stability caution at max power
 
 Running all three radios at their calibrated ceiling simultaneously
@@ -232,6 +258,13 @@ operator's own stock firmware, not yet deployed on this live device (all
 testing in this workstream, including `verify/before-after.md`, was done
 against the current no-CLM state — none of it tests against that blob).
 For whoever deploys it:
+
+**This has since been tried** — `docs/FINDINGS.md` §11 re-carved a
+version-matched clm_blob and live-loaded it (2026-07-23): it loaded cleanly
+(no `-52`), but DFS channels stayed disabled and MBSS regressed. Reverted,
+not shipped. The bullets below were written before that test; treat them
+as this workstream's pre-registered predictions, not current status — see
+§11 for what actually happened.
 
 - **The `ieee80211-freq-limit` DT gate does not go away and does not need
   to.** It sits *above* CLM in the stack (kernel-level, board-hardware

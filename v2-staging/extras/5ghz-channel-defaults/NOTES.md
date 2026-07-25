@@ -126,3 +126,8 @@ into `/etc/config/wireless` (radio1/2.4 GHz block included for completeness,
 already OpenWrt's own default). This matches what board detection already
 produces -- the value of shipping it explicitly is that it's documented and
 won't drift silently if `/etc/config/wireless` is ever regenerated.
+
+**Status: already shipped.** `v2-files/etc/config/wireless` carries these
+exact values on radio0/radio1/radio2 (`band`/`channel`/`htmode`: 5g/149/
+VHT80, 2g/1/HT20, 5g/36/VHT80) -- confirmed both in the repo and live on
+the router via `uci show wireless` (2026-07-24).

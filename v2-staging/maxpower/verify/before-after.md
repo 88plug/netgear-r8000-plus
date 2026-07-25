@@ -135,6 +135,12 @@ channel-enabled/disabled pattern to the baseline above, on all three radios.
 captured before any of the above began (2260 lines), for diff/restore
 reference.
 
+**This is a 2026-07-23 capture, not current state.** A live re-check on
+2026-07-24 found radio2 (phy2)'s channel table no longer matches this
+capture -- see notes.md's "Open item, flagged 2026-07-24" note in the DFS
+section for the discrepancy and why it wasn't chased further or used to
+rewrite this file's historical record.
+
 ## Bottom line
 
 None of the four mechanisms available from userspace/nvram changed which
@@ -143,3 +149,13 @@ channels this firmware reports as available, on any radio, and one of them
 CLM-less firmware) crashed the router. See notes.md for the source-level
 explanation (`ieee80211-freq-limit` devicetree hard-gate) and what would
 actually need to change for more channels to become available.
+
+**Note on reading `iw reg get`'s per-phy `country 99: DFS-UNSET` line above:**
+`docs/FINDINGS.md` §13 later root-caused this label as a cosmetic display
+artifact of brcmfmac's self-managed wiphys — it stays at that placeholder
+regardless of whether country/power is genuinely applied; the real signal
+is the per-phy channel list and `iw dev <if> info`'s applied txpower, which
+is what Attempts 1-4 above actually checked (not just the label). Does not
+change any conclusion here — this repo's own testing already used the
+correct signal — but don't cite the `country 99` line by itself as proof of
+anything in future work; see §13 for the full explanation.

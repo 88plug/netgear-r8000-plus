@@ -1,5 +1,12 @@
 # GO/NO-GO: loading `fa_probe.ko` on the live R8000
 
+> **Resolved 2026-07-23 — this gate is closed, not an open decision.**
+> `fa_probe.ko` loaded per the procedure below, and the investigation
+> continued through GMAC bring-up, switch-side enable, real-traffic
+> testing, and root-cause closure. See `docs/WINS.md`'s "FA/CTF hardware
+> accelerator" section for the final narrative. Investigation closed; the
+> historical record below is left as written at the time.
+
 ## Verdict: **GO, WITH TWO CHEAP ZERO-RISK PRECONDITIONS FIRST**
 
 Load `fa_probe.ko` on the bench router. Risk of the MMIO read itself is

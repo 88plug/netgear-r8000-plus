@@ -1,5 +1,13 @@
 # GO/NO-GO: `fa_up()` bring-up + first NAPT table write
 
+> **Resolved 2026-07-23 — this gate is closed, not an open decision.** The
+> item this doc left open (a separate operator go-ahead for the
+> register-write bring-up) was subsequently obtained, and the bring-up
+> ran successfully — see `BRINGUP_RESULT.md` and `docs/WINS.md`'s "FA/CTF
+> hardware accelerator" section for the outcome. Investigation closed;
+> the historical record below (written before that authorization) is
+> left as written.
+
 This is the **next** gate after `GO_NOGO.md` (the read-only register-probe
 gate, already run — see its outcome below). It does **not** authorize running
 the bring-up sequence; it answers the two open questions `GO_NOGO.md` itself
