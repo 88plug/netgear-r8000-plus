@@ -127,11 +127,20 @@ cp "$WORK/$SDK_DIR/$APK" "$OUT/"
 # ("cannot open shared object file"), confirmed directly. Bundling just
 # the wrapper + hidden binary + its 4 actual NEEDED libs (readelf -d,
 # confirmed) keeps this at ~4MB instead of the SDK's full 142MB host lib/.
+# Packed into a single tarball, not left as loose files: confirmed directly
+# that actions/upload-artifact silently drops the hidden .apk.bin dotfile
+# and does not reliably preserve the executable bit across an
+# upload/download round-trip between jobs/runners. A tar stream sidesteps
+# both failure modes at once - upload-artifact only has to move one opaque
+# regular file, tar itself carries the permissions and the dotfile as data.
 HOST_BIN="$WORK/$SDK_DIR/staging_dir/host/bin"
 HOST_LIB="$WORK/$SDK_DIR/staging_dir/host/lib"
-mkdir -p "$OUT/apk-tool/bin" "$OUT/apk-tool/lib"
-cp "$HOST_BIN/apk" "$HOST_BIN/.apk.bin" "$OUT/apk-tool/bin/"
-cp "$HOST_LIB/libpthread.so.0" "$HOST_LIB/libc.so.6" "$HOST_LIB/ld-linux-x86-64.so.2" "$HOST_LIB/runas.so" "$OUT/apk-tool/lib/"
+APK_TOOL_STAGE="$(mktemp -d)"
+mkdir -p "$APK_TOOL_STAGE/bin" "$APK_TOOL_STAGE/lib"
+cp "$HOST_BIN/apk" "$HOST_BIN/.apk.bin" "$APK_TOOL_STAGE/bin/"
+cp "$HOST_LIB/libpthread.so.0" "$HOST_LIB/libc.so.6" "$HOST_LIB/ld-linux-x86-64.so.2" "$HOST_LIB/runas.so" "$APK_TOOL_STAGE/lib/"
+tar czf "$OUT/apk-tool.tar.gz" -C "$APK_TOOL_STAGE" .
+rm -rf "$APK_TOOL_STAGE"
 
 sha256sum "$OUT"/*.chk > "$OUT/sha256sums"
 

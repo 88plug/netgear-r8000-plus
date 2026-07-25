@@ -40,7 +40,9 @@ if [ -z "$APK" ]; then
   echo "FAIL: no kmod-brcmfmac-*.apk carried alongside the image - can't confirm it's the patched build"
   FAIL=1
 else
-  APK_TOOL="$BUILD_OUT/apk-tool/bin/apk"
+  rm -rf /tmp/apk-tool && mkdir -p /tmp/apk-tool
+  [ -f "$BUILD_OUT/apk-tool.tar.gz" ] && tar xzf "$BUILD_OUT/apk-tool.tar.gz" -C /tmp/apk-tool
+  APK_TOOL="/tmp/apk-tool/bin/apk"
   # rm first, not just mkdir -p: a self-hosted or reused runner can have
   # stale content here from a prior run, and apk extract errors on
   # conflicting existing files - confirmed directly (worked fine into a
