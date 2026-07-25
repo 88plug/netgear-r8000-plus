@@ -62,6 +62,12 @@ jobs:
           MANIFEST="$(find BUILD_OUT -iname '*.manifest' | head -1)"
           SHASUMS="$(find BUILD_OUT -iname 'sha256sums' | head -1)"
 
+          # Idempotent: re-running for a version that's already published
+          # (manual re-trigger, retry after an earlier failure) must replace
+          # it, not hard-fail - confirmed hit this directly ("a release with
+          # the same tag name already exists"). Delete first if present.
+          gh release delete "auto-${VERSION}" --repo "${{ github.repository }}" --yes --cleanup-tag 2>/dev/null || true
+
           gh release create "auto-${VERSION}" \
             "$CHK" "$MANIFEST" "$SHASUMS" \
             --repo "${{ github.repository }}" \
