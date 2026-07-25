@@ -589,3 +589,18 @@ that landed in the image actually changed (the DFS test was fully reverted;
 the docs-only commits don't touch `v2-files/`). Not shipped as a separate
 version number — a byte-identical duplicate of v11 would just be clutter.
 v11 remains the current running image.
+
+## v12 — DFS investigation closure marker (2026-07-25)
+
+Built as the closure point for the DFS investigation (FINDINGS.md §18 —
+raw firmware error recovered, `BCME_UNSUPPORTED`, four independent tests
+now converge). Package manifest and `brcmfmac.ko` are both **byte-identical**
+to v11 — confirmed via direct diff/md5, same as the v12 build in the entry
+above. The `.chk`'s sha256 differs from v11's this time (`5fe8020b...` vs
+`7d1fdd67...`) despite identical content — build non-determinism in the
+image container itself (timestamps/metadata baked into the squashfs/kernel
+packaging step, not `SOURCE_DATE_EPOCH`-pinned), not a real difference.
+Recorded in `images/sha256sums-r8000plus.txt` for the record. **Not
+flashed** — same reasoning as before: zero functional delta from what's
+already live as v11, so reflashing would be pure risk for no gain. v11
+remains the current running image.
