@@ -116,6 +116,23 @@ MANIFEST="$(find bin/targets/bcm53xx/generic -iname '*.manifest' | head -1)"
 cp "$CHK" "$OUT/"
 [ -n "$MANIFEST" ] && cp "$MANIFEST" "$OUT/"
 cp "$WORK/$SDK_DIR/$APK" "$OUT/"
+
+# Bundle a relocatable copy of the SDK's own apk tool with the artifact:
+# kmod-brcmfmac-*.apk is apk v3 (ADB) format, not a plain tar/gzip archive
+# (confirmed directly - magic bytes are "ADBd"), and whatever job/runner
+# extracts it downstream (a separate self-hosted runner in this pipeline)
+# has no other way to get a matching apk binary. staging_dir/host/bin/apk
+# is a wrapper script that execs a hidden .apk.bin via the SDK's own
+# bundled dynamic linker - copying the wrapper alone breaks
+# ("cannot open shared object file"), confirmed directly. Bundling just
+# the wrapper + hidden binary + its 4 actual NEEDED libs (readelf -d,
+# confirmed) keeps this at ~4MB instead of the SDK's full 142MB host lib/.
+HOST_BIN="$WORK/$SDK_DIR/staging_dir/host/bin"
+HOST_LIB="$WORK/$SDK_DIR/staging_dir/host/lib"
+mkdir -p "$OUT/apk-tool/bin" "$OUT/apk-tool/lib"
+cp "$HOST_BIN/apk" "$HOST_BIN/.apk.bin" "$OUT/apk-tool/bin/"
+cp "$HOST_LIB/libpthread.so.0" "$HOST_LIB/libc.so.6" "$HOST_LIB/ld-linux-x86-64.so.2" "$HOST_LIB/runas.so" "$OUT/apk-tool/lib/"
+
 sha256sum "$OUT"/*.chk > "$OUT/sha256sums"
 
 echo "==> Built: $(basename "$CHK")"

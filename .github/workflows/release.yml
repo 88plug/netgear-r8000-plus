@@ -73,9 +73,20 @@ jobs:
 
       - name: Extract candidate brcmfmac.ko from the built apk
         run: |
-          APK="$(find BUILD_OUT -iname 'kmod-brcmfmac-*.apk' | head -1)"
-          mkdir -p /tmp/apk-extract && cd /tmp/apk-extract
-          tar xf "$APK"
+          # Absolute paths throughout - BUILD_OUT is relative to the job's
+          # working directory, which stops being true after `cd`.
+          BUILD_OUT_ABS="$(pwd)/BUILD_OUT"
+          APK="$(find "$BUILD_OUT_ABS" -iname 'kmod-brcmfmac-*.apk' | head -1)"
+          APK_TOOL="$BUILD_OUT_ABS/apk-tool/bin/apk"
+          [ -n "$APK" ] || { echo "FATAL: no kmod-brcmfmac-*.apk in the downloaded artifact"; exit 1; }
+          [ -x "$APK_TOOL" ] || { echo "FATAL: apk-tool not in the downloaded artifact - build-image.sh should have bundled it"; exit 1; }
+          # rm first: this is a self-hosted, reused runner - stale content
+          # from a prior run makes apk extract fail (confirmed directly).
+          rm -rf /tmp/apk-extract && mkdir -p /tmp/apk-extract && cd /tmp/apk-extract
+          # apk v3 packages are not plain tar/gzip archives - must use the
+          # bundled apk tool itself, confirmed directly against a real
+          # build (plain tar fails with "does not look like a tar archive").
+          "$APK_TOOL" extract --allow-untrusted --destination . "$APK"
           find . -iname 'brcmfmac.ko' -exec cp {} /tmp/candidate-brcmfmac.ko \;
           [ -f /tmp/candidate-brcmfmac.ko ] || { echo "FATAL: couldn't extract brcmfmac.ko from the apk"; exit 1; }
 
