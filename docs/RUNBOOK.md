@@ -124,6 +124,11 @@ here). `tftp-hpa` installed.
   `patches/`. Our fixes: `patches/0001-nvram-bcm53xx-add-netgear-r8000-43602.patch`
   (5GHz nvram init) and `patches/861-brcmfmac-r8000-legacy-mbss-fallback.patch`
   (multi-BSS driver fix).
+- **First build only:** `v2-files/etc/config/wireless` is gitignored (real
+  passphrases, never committed) and won't exist on a fresh clone —
+  `cp v2-files/etc/config/wireless.example v2-files/etc/config/wireless` and
+  replace the `CHANGE-ME` placeholders with your own values before running
+  `make image` below, or it'll fail (or worse, build with no passphrase set).
 - **ImageBuilder (fast, no toolchain compile) — the actual recipe used for
   v7 through the current shipping image**, reconstructed and verified
   2026-07-24 against the live router's own `apk list --installed` (ground

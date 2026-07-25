@@ -1,0 +1,153 @@
+# NETGEAR R8000 — v2 merged wireless config
+# Integrates: WPA2-PSK+MFP (see note below — WPA3-SAE does NOT work on this
+#             hardware) · PA-ceiling power+PHY (maxpower) · 11k/v roaming
+#             (no 11r/FT — see note) · unified SSID for steering.
+#
+# TXPOWER: requests 1 dB above the decoded PA calibration ceiling so the
+# firmware's own hardware clamp sets the true max (radio0/radio1 26.5,
+# radio2 22.5 dBm/chain). country 'US' is baked here and applied at FRESH
+# BOOT only — never hot-reload with country set (crash-repro, see docs).
+#
+# SSID 'R8000' is unified (same name + mobility_domain a8f0) across all three
+# radios so usteer band-steers + 802.11r/k/v roam across 2.4/5-low/5-high NOW.
+#
+# *** TEMPLATE — copy to wireless (gitignored) and set your own passphrases
+# before building ***: cp wireless.example wireless, then replace every
+# CHANGE-ME value below (min 8 chars for WPA2-PSK). The real `wireless` file
+# is gitignored on purpose — never commit real passphrases here.
+#
+# bss_transition (802.11v) requires the FULL wpad-mbedtls package
+# (CONFIG_WNM=y) — wpad-basic-mbedtls does not have it and hostapd rejects
+# the whole config as an "unknown configuration item", which fails
+# hostapd.add_iface for every phy (confirmed live 2026-07-23: took down all
+# 4 SSIDs on a fresh v7 flash built with wpad-basic-mbedtls, matching this
+# repo's own FINDINGS.md v2b entry which already found and fixed this
+# exact issue). PACKAGES must list wpad-mbedtls, NOT wpad-basic-mbedtls,
+# whenever this file is used as a FILES overlay.
+#
+# WPA3-SAE and 802.11r (FT) are deliberately NOT used — confirmed via real
+# client testing 2026-07-23 (see FINDINGS.md §14) that this exact
+# BCM43602/brcmfmac firmware rejects AP-mode SAE outright
+# (brcmf_configure_wpaie: "Invalid key mgmt info", every boot, every radio)
+# and silently drops it from the broadcast RSN element rather than
+# erroring — sae-mixed was never actually broadcasting WPA3 despite being
+# configured that way in every prior version of this file. Plain psk2
+# (WPA2-PSK/CCMP) + ieee80211w=1 (MFP-optional, genuinely works) is what
+# this hardware can actually do. Do not re-add sae/sae-mixed/ieee80211r to
+# this file without first re-testing against a real client and checking
+# dmesg for brcmf_configure_wpaie errors.
+
+config wifi-device 'radio0'
+	option type 'mac80211'
+	option path '18000000.axi/bcma0:7/pci0000:00/0000:00:00.0/0000:01:00.0'
+	option band '5g'
+	option channel '149'
+	option htmode 'VHT80'
+	option country 'US'
+	option txpower '27'
+	option rxldpc '1'
+	option short_gi_80 '1'
+	option su_beamformer '1'
+	option su_beamformee '1'
+
+config wifi-device 'radio1'
+	option type 'mac80211'
+	option path '18000000.axi/bcma0:8/pci0001:00/0001:00:00.0/0001:01:00.0/0001:02:01.0/0001:03:00.0'
+	option band '2g'
+	option channel '1'
+	option htmode 'HT20'
+	option country 'US'
+	option txpower '27'
+
+config wifi-device 'radio2'
+	option type 'mac80211'
+	option path '18000000.axi/bcma0:8/pci0001:00/0001:00:00.0/0001:01:00.0/0001:02:02.0/0001:04:00.0'
+	option band '5g'
+	option channel '36'
+	option htmode 'VHT80'
+	option country 'US'
+	option txpower '23'
+	option rxldpc '1'
+	option short_gi_80 '1'
+	option su_beamformer '1'
+	option su_beamformee '1'
+
+# ---- Primary unified network: R8000 (WPA2-PSK, MFP optional) ----
+# WPA3-SAE and 802.11r FT are NOT used here: confirmed via real-client
+# testing (2026-07-23) that this exact BCM43602/brcmfmac firmware rejects
+# AP-mode SAE outright (brcmf_configure_wpaie: "Invalid key mgmt info",
+# logged on every boot, every radio) and silently drops it from the
+# broadcast RSN element rather than erroring - the AP was never actually
+# broadcasting WPA3 despite sae-mixed being configured. 802.11r/FT made
+# this worse: the 5-AKM combination (SAE FT-SAE WPA-PSK WPA-PSK-SHA256
+# FT-PSK) caused the same driver rejection AND real, reproducible
+# rapid associate/disassociate cycling against a real client. Plain
+# WPA2-PSK + MFP-optional is what this hardware can actually do; ieee80211k
+# (RRM) and bss_transition (802.11v) are unaffected by this and stay, since
+# they're independent of SAE/FT. See hwoffload-research/../BRINGUP note is
+# unrelated; this fix is documented in docs/WINS.md and docs/FINDINGS.md.
+
+config wifi-iface 'main_radio0'
+	option device 'radio0'
+	option network 'lan'
+	option mode 'ap'
+	option ssid 'R8000'
+	option encryption 'psk2'
+	option ieee80211w '1'
+	option key 'CHANGE-ME-min-8-chars'
+	option ieee80211k '1'
+	option rrm_neighbor_report '1'
+	option rrm_beacon_report '1'
+	option bss_transition '1'
+	option disabled '0'
+
+config wifi-iface 'main_radio1'
+	option device 'radio1'
+	option network 'lan'
+	option mode 'ap'
+	option ssid 'R8000'
+	option encryption 'psk2'
+	option ieee80211w '1'
+	option key 'CHANGE-ME-min-8-chars'
+	option ieee80211k '1'
+	option rrm_neighbor_report '1'
+	option rrm_beacon_report '1'
+	option bss_transition '1'
+	option disabled '0'
+
+config wifi-iface 'main_radio2'
+	option device 'radio2'
+	option network 'lan'
+	option mode 'ap'
+	option ssid 'R8000'
+	option encryption 'psk2'
+	option ieee80211w '1'
+	option key 'CHANGE-ME-min-8-chars'
+	option ieee80211k '1'
+	option rrm_neighbor_report '1'
+	option rrm_beacon_report '1'
+	option bss_transition '1'
+	option disabled '0'
+
+# ---- OWE (Enhanced Open) — NOT SHIPPED, confirmed unfixable ----
+# Multi-BSS itself works (patches/861 fixed the driver's legacy bsscfg:ssid
+# fallback), but OWE specifically fails at brcmf_parse_configure_security():
+# the driver's AKM-suite switch (cfg80211.c) has no case for suite 18 (OWE),
+# and the BCM43602 firmware on this device is dated 2015-09-18 — a full year
+# before RFC 8110 (OWE) was published in 2016. There is no driver-side fix:
+# the firmware predates the standard it would need to speak. See FINDINGS.md
+# §9 for the full trace (kernel.org cfg80211.c read, isolation experiments).
+
+# ---- Guest SSID on 2.4GHz (2nd BSS on radio1 — also unlocked) ----
+# Isolated: own bridge/subnet (192.168.2.0/24, see config/network) + firewall
+# zone 'guest' (config/firewall) — forward-allowed to wan only, explicit
+# reject rule blocks guest->lan. No physical switch ports on br-guest.
+config wifi-iface 'guest'
+	option device 'radio1'
+	option network 'guest'
+	option mode 'ap'
+	option ssid 'R8000-Guest'
+	option encryption 'psk2'
+	option key 'CHANGE-ME-guest-key'
+	option isolate '1'
+	option disabled '0'

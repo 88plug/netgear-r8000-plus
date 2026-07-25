@@ -120,7 +120,14 @@ after two full flash-and-recovery cycles.
 
 - **Real WiFi passphrases live.** Temp `ChangeMe-R8000-2026`/`GuestChangeMe2026`
   replaced with random 20-char alnum passphrases on the router and in
-  `v2-files/etc/config/wireless`.
+  `v2-files/etc/config/wireless` (real passphrases — that file is gitignored,
+  never committed, confirmed 2026-07-25 when the repo's GitHub-publish
+  readiness was audited). **Gap found and fixed the same day:** the repo had
+  no tracked template for that gitignored file, so a fresh clone would be
+  missing it entirely and `make image` would fail. Added
+  `v2-files/etc/config/wireless.example` (tracked, `CHANGE-ME` placeholders)
+  as the reference to copy from — `docs/RUNBOOK.md` §5 now documents the
+  copy-and-fill step.
 - **Guest network isolated.** `R8000-Guest` moved off `lan` onto its own
   bridge/subnet (`br-guest`, 192.168.2.0/24) with a dedicated firewall zone
   (forward-allowed to `wan` only, explicit reject rule to `lan`) — verified
