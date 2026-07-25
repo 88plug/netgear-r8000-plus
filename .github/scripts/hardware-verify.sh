@@ -25,7 +25,11 @@ set -uo pipefail  # deliberately not -e: the trap must run even on failure
 
 ROUTER="${ROUTER_HOST:-192.168.1.1}"
 SSH="ssh -o ConnectTimeout=8 -o StrictHostKeyChecking=accept-new -o BatchMode=yes root@${ROUTER}"
-SCP="scp -o ConnectTimeout=8 -o StrictHostKeyChecking=accept-new -o BatchMode=yes"
+# -O forces the legacy SCP protocol - dropbear (this router's SSH server)
+# doesn't ship sftp-server, and modern OpenSSH clients default to SFTP,
+# which fails outright ("sftp-server: not found") without this flag.
+# Confirmed by direct testing against the real router.
+SCP="scp -O -o ConnectTimeout=8 -o StrictHostKeyChecking=accept-new -o BatchMode=yes"
 NEW_KO="${1:?usage: hardware-verify.sh <path-to-new-brcmfmac.ko>}"
 RESULT=1
 REVERTED=0
@@ -85,12 +89,21 @@ echo "==> Test window: letting radios settle, then checking real state"
 sleep 15
 
 DMESG_SINCE="$($SSH "dmesg | awk -v m='$MARKER' 'found{print} \$0==m{found=1}'")"
-if grep -qiE 'firmware load.*failed|external abort|kernel panic|Oops|brcmf_c_process_clm_blob.*err' <<<"$DMESG_SINCE"; then
-  fail "dmesg shows firmware/driver errors during the candidate's test window:"
-  echo "$DMESG_SINCE" | grep -iE 'firmware load.*failed|external abort|kernel panic|Oops|brcmf_c_process_clm_blob.*err'
+# NOT flagged, confirmed routine on THIS hardware by direct comparison
+# against the router's own original-boot dmesg: "Direct firmware load for
+# ...netgear,r8000.bin failed" and "brcmf_c_process_clm_blob: no clm_blob
+# available (err=-2)" both fire on every single module load, including the
+# known-good module on a fresh boot - they're brcmfmac trying board-specific
+# firmware filenames that were never shipped (only the generic name is)
+# before falling through to what actually exists. Only genuinely fatal
+# signals are checked here; the phy/SSID-count checks below are the real
+# gate for "did the radios actually come up."
+if grep -qiE 'external abort|kernel panic|Oops|Call trace' <<<"$DMESG_SINCE"; then
+  fail "dmesg shows a real fault during the candidate's test window:"
+  echo "$DMESG_SINCE" | grep -iE 'external abort|kernel panic|Oops|Call trace'
   exit 1
 fi
-ok "no firmware/panic errors in dmesg during test window"
+ok "no kernel faults in dmesg during test window"
 
 PHY_COUNT="$($SSH 'iw phy 2>/dev/null | grep -c "^Wiphy"')"
 if [ "${PHY_COUNT:-0}" -lt 3 ]; then

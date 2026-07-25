@@ -39,21 +39,50 @@ tar xf "$IB_TARBALL"
 
 echo "==> Stage 1: rebuild kmod-brcmfmac with patches/861 applied (SDK - module only, never a full kernel rebuild)"
 cd "$WORK/$SDK_DIR"
-# Deliberately NOT running ./scripts/feeds update/install: mac80211 is a
-# base-tree package (ships directly under package/kernel/, not via any
-# feed), confirmed by testing against the already-proven-working local SDK
-# tree, which has never had feeds installed at all. Running feeds install -a
-# here pulls in every feed package's Kconfig and, on 25.12.5 at least,
-# breaks resolution of the package/kernel/mac80211/clean target entirely -
-# this is not needed for building a single base-tree kernel module.
+
+# Deliberately NOT running ./scripts/feeds update/install -a: confirmed by
+# direct testing that an SDK release tarball ships package/kernel/ with only
+# linux/ present - mac80211 is a "base" feed package (feeds.conf.default's
+# src-git --root=package base entry) that a fresh SDK does NOT carry, but
+# feeds install -a pulls in every OTHER feed package's Kconfig too and, on
+# 25.12.5, that made package/kernel/mac80211/clean's target resolution
+# non-deterministic (sometimes failed outright) - never needed for building
+# one base-tree kernel module. Fetching mac80211 directly, sparse and
+# shallow, from the exact commit feeds.conf.default itself pins, is
+# deterministic and doesn't touch anything else in package/.
+BASE_FEED_COMMIT="$(awk '/^src-git --root=package base /{print $NF}' feeds.conf.default | sed 's/.*\^//')"
+[ -n "$BASE_FEED_COMMIT" ] || { echo "FATAL: couldn't find the base feed's pinned commit in feeds.conf.default - format may have changed upstream"; exit 1; }
+echo "base feed pinned at: $BASE_FEED_COMMIT"
+
+MAC80211_SRC="$(mktemp -d)"
+(
+  cd "$MAC80211_SRC"
+  git init -q
+  git remote add origin https://git.openwrt.org/openwrt/openwrt.git
+  git config core.sparseCheckout true
+  echo "package/kernel/mac80211/*" > .git/info/sparse-checkout
+  git fetch --depth 1 origin "$BASE_FEED_COMMIT"
+  git checkout FETCH_HEAD -- package/kernel/mac80211
+)
+rm -rf package/kernel/mac80211
+cp -r "$MAC80211_SRC/package/kernel/mac80211" package/kernel/
+rm -rf "$MAC80211_SRC"
+
 MAC80211_PATCH_DIR="package/kernel/mac80211/patches/brcm"
 mkdir -p "$MAC80211_PATCH_DIR"
-cp "$REPO_ROOT/patches/861-brcmfmac-r8000-legacy-mbss-fallback.patch" "$MAC80211_PATCH_DIR/"
+PATCH="$REPO_ROOT/patches/861-brcmfmac-r8000-legacy-mbss-fallback.patch"
+cp "$PATCH" "$MAC80211_PATCH_DIR/"
 
+# make defconfig must run AFTER mac80211 is in place - its Kconfig symbols
+# (CONFIG_PACKAGE_kmod-brcmfmac etc) don't exist in .config otherwise, which
+# silently breaks the clean/compile targets later with a confusing
+# "No rule to make target" error that has nothing to do with the patch.
 make defconfig >/dev/null
+grep -q '^CONFIG_PACKAGE_kmod-brcmfmac=' .config || { echo "FATAL: CONFIG_PACKAGE_kmod-brcmfmac missing from .config after defconfig - mac80211 didn't get picked up"; exit 1; }
+
 make package/kernel/mac80211/{clean,download,prepare,compile} -j"$(nproc)" V=s
 
-APK="$(find bin/packages -iname 'kmod-brcmfmac-*.apk' | head -1)"
+APK="$(find bin -iname 'kmod-brcmfmac-*.apk' | head -1)"
 [ -n "$APK" ] || { echo "FATAL: kmod-brcmfmac apk not produced - patch may have failed to apply, check the log above"; exit 1; }
 echo "Built: $APK"
 
