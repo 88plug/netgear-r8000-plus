@@ -53,7 +53,7 @@ The `-95`/EOPNOTSUPP that made OWE, guest networks, and multi-SSID-per-radio
 
 | Item | Why it's a real wall |
 |---|---|
-| DFS-channel unlock | Confirmed twice under independent mechanisms (clm_blob re-pairing, direct channel request 2026-07-24) — driver rejects with `-52` both times. `iw phy info`'s channel-flag label isn't trustworthy on this driver (regdb snapshot drift, not real availability); the real gate is DTS `ieee80211-freq-limit`. FINDINGS.md §16. |
+| DFS-channel unlock | Confirmed under three independent mechanisms (clm_blob re-pairing, direct channel request under shipped `Q2` regulatory code, direct channel request under a real `US` regulatory code — 2026-07-24) — same real-world outcome every time. Firmware genuinely contains DFS/radar code (unlike OWE, which has none), but nothing testable makes it deliver a usable channel. `iw phy info`'s channel-flag label isn't a trustworthy signal on this driver. FINDINGS.md §16-17. |
 | 802.11s mesh · airtime-fairness | brcmfmac driver/firmware doesn't advertise them on these radios |
 | Latest radio firmware | Newest upstream `brcmfmac43602-pcie.bin` is byte-identical to the 2015 blob already installed |
 | "De-neuter regulatory tables" for more channels | Channels are gated by DTS `ieee80211-freq-limit` (hardware antenna diplexing), not by the regdb — regdb is inert here (4 override methods tested; one crashed the router) |

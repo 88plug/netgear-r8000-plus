@@ -680,3 +680,86 @@ genuine driver-enforced wall on this firmware**, regardless of what any
 given regdb snapshot's summary label claims. `iw phy info`'s per-channel
 flag word is not a trustworthy signal on this driver — only an actual
 `start_ap` attempt is decisive.
+
+## 17. DFS, part 2 — read the driver instead of trusting the error number, tested under two regulatory domains, converges on the same wall (2026-07-24)
+
+§16 treated `chspec=57402, -52` as "the identical `-52` error already
+documented in §11" — that phrasing overclaimed precision the evidence
+didn't support, caught on a second pass rather than left standing.
+
+**Reading `brcmf_fil_cmd_data()` in the actual driver source**
+(`drivers/net/wireless/broadcom/brcm80211/brcmfmac/fwil.c`): when a
+firmware IOCTL/IOVAR returns an error, the function only passes the *raw*
+firmware error code back to the caller if `ifp->fwil_fwerr` is set on that
+interface. `feature.c` only sets that flag transiently around specific
+capability-probe calls — not during normal `start_ap`. Otherwise the
+function discards the real firmware code and returns the generic
+**`-EBADE`** ("Invalid exchange") — which is **also numerically 52** on
+Linux. So `-52` from `Set Channel failed` is not provably the firmware's
+own `BCME_*` status at all; it may just be this driver's generic
+"something failed" stand-in, coincidentally the same magnitude as one
+`BCME_*` table entry. The one path that would print the real code
+(`brcmf_dbg(FIL, "Firmware error: %s (%d)\n", ...)`, present in the same
+function) compiles to a hard no-op in this exact build — neither
+`CONFIG_BRCMDBG` nor `CONFIG_BRCM_TRACING` is set — so it can't be
+recovered without rebuilding the module with one of those defined. Correcting
+§16: the numeric match to the clmload `-52` is not established evidence of
+the same underlying cause. What *is* established, independent of what the
+number means, is that the firmware refused the chanspec.
+
+**Checked the actual firmware binary for whether DFS exists there at all**
+(same static-analysis toolkit §12 used for OWE, `v2-staging/firmware/re-analysis/`):
+unlike OWE — zero related strings anywhere — this firmware's string table
+has real DFS/radar machinery: `dfs_preism`, `dfs_postism`, `dfs_status`,
+`dfs_ism_monitor`, `dfs_channel_forced`, `radarargs`, `radarargs40`,
+`radarthrs`, `clear_radar_status`, `phy_dfs_lp_buffer`, `xpCAC`. DFS is not
+architecturally absent from this firmware the way OWE is. Attempting a
+call-graph trace to whatever gates chanspec validation against this code
+was not reliable — the disassembly tool's known section-boundary
+limitation (already documented in §12) means naive address-based
+cross-referencing on this ROML-overlay firmware isn't trustworthy for a
+confident answer here, so this line of attack was not pushed further; the
+live regulatory-domain test below was more decisive per dollar spent.
+
+**Tested under two different regulatory domains, not just one.** The
+router was not in production service for this pass, so a more invasive
+live test was reasonable. `nvram set 2:ccode=US 2:regrev=0` (in-memory
+only, never committed to flash), then `echo 0001:04:00.0 >
+.../driver/unbind` + `> .../drivers/brcmfmac/bind` to force a real
+firmware re-attach on just that one radio (surgical — phy0/phy1 untouched)
+instead of a full module reload. Firmware re-downloaded cleanly (same
+2015-09-18 build, no clm_blob, as always). Result, under a real national
+code instead of Broadcom's generic `Q2` worldwide placeholder: **every DFS
+channel (52-144) now shows flatly `(disabled)`** in `iw phy info` — not
+`(radar detection)`. The opposite of the naive "maybe US unlocks it"
+hypothesis, and a cleaner, more explicit rejection than `Q2`'s ambiguous
+label ever was. `Q2` nominally allows attempting the channel (then the
+firmware rejects the actual chanspec set, per §16); `US` doesn't even
+offer it as regulatorily eligible in the first place. Two different
+mechanisms, same real-world outcome: no usable DFS.
+
+**Reverted cleanly:** `nvram set 2:ccode=Q2 2:regrev=86` (restoring the
+flashed values, nothing was ever committed to the nvram partition), full
+reboot (needed — a driver re-attach doesn't automatically recreate
+netifd's AP interface, and this project's own established lesson is that
+a live reload alone isn't reliable for restoring radio state after this
+class of test anyway). Verified after reboot: fresh boot, `2:ccode`/`2:regrev`
+back to `Q2`/`86`, all 4 SSIDs up, `phy2-ap0` back on channel 36, SQM still
+shaping, 0% ping loss.
+
+**Standing conclusion, now the most thoroughly tested wall in this
+project:** three independent mechanisms (CLM re-pairing §11, direct
+channel request under the shipped `Q2` regulatory code §16, direct channel
+availability under a real `US` regulatory code here) all converge on the
+same answer — this exact firmware does not deliver usable DFS on this
+hardware, regardless of regulatory domain or CLM pairing. The firmware
+*contains* DFS-related code (unlike OWE, where it doesn't exist at all),
+so this isn't provably an architectural absence the way OWE is — but
+nothing available to this project (live testing, static analysis within
+tool limits, regulatory-domain changes) can make it functional, and the
+remaining path to a definitive root cause (rebuilding brcmfmac with
+`CONFIG_BRCM_TRACING`/`DEBUG` to recover the real `BCME_*` string, or a
+proper cross-referenced disassembly of the chanspec-validation routine)
+is a real, scoped, deliberately-deferred next step, not something ruled
+impossible — just not proven necessary to reach the practical answer this
+pass needed.
