@@ -39,9 +39,13 @@ tar xf "$IB_TARBALL"
 
 echo "==> Stage 1: rebuild kmod-brcmfmac with patches/861 applied (SDK - module only, never a full kernel rebuild)"
 cd "$WORK/$SDK_DIR"
-./scripts/feeds update -a >/dev/null
-./scripts/feeds install -a >/dev/null
-
+# Deliberately NOT running ./scripts/feeds update/install: mac80211 is a
+# base-tree package (ships directly under package/kernel/, not via any
+# feed), confirmed by testing against the already-proven-working local SDK
+# tree, which has never had feeds installed at all. Running feeds install -a
+# here pulls in every feed package's Kconfig and, on 25.12.5 at least,
+# breaks resolution of the package/kernel/mac80211/clean target entirely -
+# this is not needed for building a single base-tree kernel module.
 MAC80211_PATCH_DIR="package/kernel/mac80211/patches/brcm"
 mkdir -p "$MAC80211_PATCH_DIR"
 cp "$REPO_ROOT/patches/861-brcmfmac-r8000-legacy-mbss-fallback.patch" "$MAC80211_PATCH_DIR/"
