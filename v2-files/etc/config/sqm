@@ -14,22 +14,26 @@
 # it directly, not eth0.2/eth1-style) -- verified via `cat
 # /sys/class/net/wan/address` matching board.json's wan.macaddr.
 #
-# *** DOWNLINK/UPLINK BELOW ARE PLACEHOLDERS -- MUST BE SET BEFORE USE ***
-# Run a real bufferbloat-aware speed test (e.g. waveform.com/tools/bufferbloat,
-# or `speedtest-cli`) on the actual WAN link, then set download/upload to
-# ~90% of the measured throughput. Re-run the test after deploying; if
-# latency-under-load is still bad, lower another 5-10%; if idle throughput
-# feels short-changed, raise back up in small steps. Cake's queue starves
-# itself into extra latency if download/upload are set *above* the real
-# line rate, so err low on the first pass.
+# Measured 2026-07-24 with the WAN cable plugged into the bench network
+# (private DHCP lease on wan, 192.168.52.0/24 -- NAT'd upstream, not a
+# direct modem/ONT handoff). Method: tunneled through the router itself
+# (ssh -D SOCKS proxy) so the transfer used the real WAN path end-to-end,
+# then curl'd a clean test target from the host side (the router's own
+# minimal wget got 403'd by Cloudflare and gave misleadingly slow numbers
+# against a congested OVH mirror -- neither reflected the real link).
+# Download 101.3 Mbps (Linode Newark), upload 99.4 Mbps (Cloudflare) --
+# consistent with the earlier 82.4 Mbps double-NAT test, so trusted.
+# Set to 90% of measured. If this router is later moved to a different
+# physical WAN connection, re-measure and update -- these numbers are
+# this link's, not a property of the router.
 
 config queue 'wan'
 	option enabled '1'
 	option interface 'wan'
 
-	# kbit/s. Placeholders -- REPLACE with ~90% of measured WAN throughput.
-	option download '0'
-	option upload '0'
+	# kbit/s, 90% of measured (see above).
+	option download '91000'
+	option upload '89000'
 
 	option qdisc 'cake'
 	option script 'piece_of_cake.qos'

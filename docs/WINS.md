@@ -164,12 +164,9 @@ after two full flash-and-recovery cycles.
 
 ## Outstanding (genuinely blocked, not effort gaps)
 
-- **SQM WAN bandwidth** — cannot be set correctly right now: `wan@eth2` is
-  link-down (`LOWERLAYERDOWN`, no cable connected) in this bench setup, so
-  there's no real ISP link to measure. `sqm.wan.download`/`upload` are `0`
-  (idle) until the router is deployed at its real network location with the
-  actual WAN link connected — set them from a real speed test at that point,
-  not a guessed number now.
+- **SQM WAN bandwidth — set 2026-07-24, see the v10/v11 entries below.**
+  Superseded: this used to say it couldn't be set without a real link. WAN
+  got connected this session and real numbers are live and shipped.
 - Always run `sysupgrade -b` and download the backup **before** any future
   sysupgrade — config loss on this device is confirmed, not hypothetical
   (process rule, see RUNBOOK.md, not a one-time task).
@@ -512,3 +509,35 @@ history of every flash surfacing at least one surprise. The earlier
 abandoned pstore-experiment `.chk` that had been occupying the `v10`
 filename (never shipped, see the pstore/ramoops entry above) was moved to
 `images/graveyard/` first so it wasn't silently overwritten.
+
+## v11 — SQM bandwidth measured for real and shipped, flashed live (2026-07-24)
+
+WAN got connected this session (previous "Outstanding" blocker). The
+router's own minimal `wget` gave misleading numbers — 403'd by Cloudflare's
+speed endpoint, and consistently slow (~1.5 Mbps, twice) against a congested
+OVH mirror — neither reflected the real link. Fix: tunneled through the
+router itself (`ssh -D` SOCKS proxy) so the transfer used the actual WAN
+path end-to-end, then measured with the host's real `curl` instead of the
+router's constrained wget. Clean, consistent results: **101.3 Mbps down**
+(Linode Newark), **99.4 Mbps up** (Cloudflare) — in the same ballpark as
+the earlier 82.4 Mbps double-NAT test, so trusted.
+
+Set `sqm.wan.download=91000` / `upload=89000` kbit/s (90% headroom) live via
+UCI first, verified `tc qdisc show` — cake actually shaping both directions,
+not just configured — then folded the same numbers into `v2-files/etc/config/sqm`
+as the shipped default so they're baked into the image, not dependent on
+sysupgrade's config preservation (which this device has a confirmed history
+of losing, #21655).
+
+**Shipped and flashed:** `images/openwrt-25.12.5-r8000plus-v11-bcm53xx-generic-netgear_r8000-squashfs.chk`,
+sha256 `7d1fdd678f109ee03cdf2fc03d12d3c480cbb363937138e464ab062232f819fd`.
+Only content delta from v9/v10: the SQM numbers — package manifest and
+`brcmfmac.ko` checksum both confirmed identical before flashing. Pre-flight
+backup taken (`sysupgrade -b`, verified non-empty, contains
+wireless/firewall/sqm) per the mandatory RUNBOOK procedure. Flashed via
+`sysupgrade`, back up in 64s. **Verified live, not just flashed:**
+fresh boot (uptime 0 min), config sizes healthy on every file
+`#21655` has previously reset (no hit this time), all 4 SSIDs up
+(R8000 ×3 + R8000-Guest), guest bridge up, `brcmfmac.ko` md5 still matches
+the proven `patches/861` module, cake shaping live on `wan` at 89Mbit,
+`radio-watchdog` enabled, 0% ping loss to the real internet.
