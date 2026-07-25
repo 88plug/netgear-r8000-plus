@@ -28,6 +28,60 @@ their documented hardware ceiling.
 - Full version-by-version history (v1 → v11) — what shipped, what regressed,
   what was fixed: [WINS.md](WINS.md).
 
+## Device support beyond this router (researched 2026-07-25)
+
+`patches/861` (the multi-BSS/guest-network driver fix, [WINS.md](WINS.md)
+headline win) was found and tested on this one R8000, but the code it touches
+— `brcmf_cfg80211_request_ap_if()` in mainline's shared `brcmfmac` driver — has
+**zero chip-ID checks**. It's the same function for every Broadcom FullMAC chip
+brcmfmac supports. Confirmed directly against current `torvalds/linux` master:
+the bug is still present and unpatched there today. Whether a given device hits
+it depends on **firmware vintage, not chip model** — any brcmfmac device whose
+loaded firmware predates the `interface_create` iovar (roughly pre-2016
+Broadcom firmware builds) hits the same early-return-instead-of-fallback bug.
+
+**Confirmed-affected hardware (same BCM43602 chip, sourced against
+WikiDevi/DeviWiki hardware teardowns):**
+
+| Device | BCM43602? | OpenWrt (bcm53xx) status |
+|---|---|---|
+| Netgear R8000 | yes (×3) | supported — this repo |
+| Netgear R7900 | yes (×3, same board family) | supported |
+| Asus RT-AC3200 | yes (×3) | supported since 2024-2025 |
+| Netgear D7000 | yes (×2) | no mainline OpenWrt target found |
+| Linksys EA9200 | yes (×3) | no mainline OpenWrt target found |
+| TP-Link Archer C3200 | yes (×3) | no confirmed mainline support |
+
+**Do not assume from model-number similarity — these are a *different* chip and
+are unaffected:** Netgear R7000 (BCM4360), R7000P/R8000P (BCM4365/E), R8500/R8300/R7800
+(BCM4366), R7500 (Qualcomm, no Broadcom radio at all). The R7000 in particular
+is the one genuinely best-selling router in this family — conflating its
+popularity with the actually-affected R8000/R7900/RT-AC3200 population would
+overstate this by a wide margin. We're not doing that here.
+
+**Provenance-searched, not just assumed novel** (11 queries across
+lore.kernel.org, patchwork.kernel.org, bugzilla.kernel.org, GitHub, and the
+Infineon community forum — Infineon engineers are brcmfmac's current upstream
+maintainers): closest prior art is Ian Lin/Infineon's 2022 patch, which added
+a fallback for a *different* failure point in the same function (the
+`interface_create` *creation call* failing after a successful version query) —
+not for the version-*query* itself failing, which is what this fix addresses.
+No anticipating reference found for this specific fix; gaps: no access to
+non-public Broadcom/Cypress SDK trackers, linux-wireless mailing list archive
+searched via lore.kernel.org's web index only (not a full local mirror).
+
+**Realistic scope, not a round number.** No sales figures exist for the
+actually-affected models (R8000/R7900 were premium tri-band flagships, not
+mass-market). Stock vendor firmware uses Broadcom's closed driver and never
+hits this code path at all — only OpenWrt (or another mainline-brcmfmac-based
+build) exposes it. The honest population is **OpenWrt users on BCM43602-class
+tri-band hardware who want a working guest network or multi-SSID** — a real
+but modest number, not "millions." The value of this fix is that it's a small,
+clean, upstream-submittable 2-line change against the driver's own documented
+design intent (confirmed on-list: brcmfmac's maintainer has stated the driver
+is supposed to fall back to the legacy interface-creation path for older
+firmware) — not its reach.
+
 ## Docs
 
 - **[RUNBOOK.md](RUNBOOK.md)** — operations: host/bench setup, router access

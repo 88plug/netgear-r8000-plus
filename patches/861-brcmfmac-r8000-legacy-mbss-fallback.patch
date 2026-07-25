@@ -13,5 +13,5 @@ detected. Fall through to the legacy path instead of bailing.
  	if (err) {
  		brcmf_err("fail to get supported version, err=%d\n", err);
 -		return -EOPNOTSUPP;
-+		iface_create_ver = 0; /* R8000: fall through to legacy mbss */
++		iface_create_ver = 0; /* fall through to legacy bsscfg:ssid MBSS */
  	}

@@ -23,6 +23,20 @@ The `-95`/EOPNOTSUPP that made OWE, guest networks, and multi-SSID-per-radio
 - **Proven on hardware:** 2nd AP `add_iface` → exit 0 (was -95); **6 BSSes**
   beaconing (R8000 ×3 + R8000-Open + R8000-Open-OWE + R8000-Guest), up from a
   hard cap of 3. Upstreamable to OpenWrt mac80211 / linux brcmfmac.
+- **Confirmed 2026-07-25, not just found here: this is a shared-driver bug,
+  not an R8000 quirk.** `request_ap_if()` has zero chip-ID checks — same code
+  path for every brcmfmac chip. Confirmed still present, unpatched, in current
+  `torvalds/linux` master. Provenance-searched (11 queries, lore.kernel.org/
+  patchwork/bugzilla/GitHub/Infineon community — Infineon are brcmfmac's
+  current maintainers): closest prior art (Ian Lin/Infineon 2022) fixes a
+  different failure point in the same function, not this one — no anticipating
+  reference found for this specific fix. Realistically affects OpenWrt users
+  on other BCM43602-class tri-band hardware (R7900, RT-AC3200 — confirmed same
+  chip + OpenWrt-supported; **not** R7000/R7000P/R8500/R7500, which use
+  different chips despite similar model numbers/marketing). See
+  [README.md](README.md#device-support-beyond-this-router-researched-2026-07-25)
+  for the full breakdown — realistic population is real but modest, not the
+  "millions" a first guess assumed before checking.
 
 ---
 
