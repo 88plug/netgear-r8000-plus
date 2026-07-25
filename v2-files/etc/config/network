@@ -50,6 +50,20 @@ config interface 'guest'
 # repeated network. Deliberately NOT a dependency for the repeater itself:
 # etc/init.d/eufy-repeater checks radio-level association (iw link), not
 # this interface's DHCP state, before bringing up the AP+relay side.
+#
+# defaultroute/peerdns MUST both be '0'. Confirmed live 2026-07-25
+# (FINDINGS.md §19 addendum): without these, this interface's DHCP lease
+# installs a default route at the same metric (0) as the real `wan`
+# interface's, and the kernel silently preferred the Eufy-network one -
+# this router's own outbound traffic (not repeated-client traffic, which
+# relayd handles separately at L2) started intermittently routing out
+# through the third-party Eufy network instead of the real WAN, causing
+# ~50% loss to real internet hosts. Caught by testing multi-hop
+# connectivity (ping 8.8.8.8) after a real flash, not by the 1-hop
+# gateway ping alone, which stayed clean throughout and would have masked
+# this.
 config interface 'eufy_wwan'
 	option proto 'dhcp'
+	option defaultroute '0'
+	option peerdns '0'
 

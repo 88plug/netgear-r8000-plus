@@ -114,8 +114,17 @@ start_ap_relay() {
 		return 0
 	}
 
+	# `iw dev link` has NO channel field on this iw/OpenWrt version (only
+	# `freq: <MHz>`) - confirmed live, this repo does not carry an untested
+	# assumption here. `iw dev info` is what actually reports the channel
+	# number ("channel 6 (2437 MHz), width: ..."). Getting this wrong meant
+	# the dynamic detection silently never matched, always falling through
+	# to the static UCI channel below - which happened to be correct only
+	# because it was manually kept in sync, not because the fallback logic
+	# ever really needed testing. If the upstream AP ever changes channel,
+	# the static fallback would silently go stale with no error anywhere.
 	local channel
-	channel="$(iw dev "$sta_ifname" link 2>/dev/null | sed -n 's/.*channel \([0-9]*\).*/\1/p')"
+	channel="$(iw dev "$sta_ifname" info 2>/dev/null | sed -n 's/.*channel \([0-9]*\).*/\1/p')"
 	[ -n "$channel" ] || channel="$(uci -q get wireless."$device".channel)"
 
 	local ap_ifname="rpt_${section}"

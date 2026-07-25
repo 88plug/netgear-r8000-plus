@@ -947,3 +947,94 @@ is already written generically (loops over every `repeater_mode='1'`
 section, not hardcoded to one), so a second instance is a config-only
 change to try — but treat the first multi-radio attempt as a real test,
 not an assumed-safe extension of what's proven here for one.
+
+**Addendum (2026-07-25) — default-route leak, found by actually flashing
+v13, not just building it.** `network.eufy_wwan` (`proto=dhcp`, the STA
+side's own lease) had no `defaultroute`/`peerdns` override. Live-tested
+right after flashing v13 for real (not just building/inspecting it):
+`ip route show` after boot showed the default route pointing at
+`192.168.32.2 dev phy1-sta0` — the *repeated* network — not `wan`.
+`network.wan` and `network.eufy_wwan` both installed a default route at
+the same metric (`0`), and the kernel kept whichever was installed last,
+which was `eufy_wwan`'s. This router's own outbound traffic (unrelated to
+what the repeater relays for other devices — that's handled separately,
+at L2, by `relayd`) started intermittently routing out through the
+third-party Eufy network instead of the real WAN: `ping 8.8.8.8` showed
+~50% loss, while a 1-hop `ping` to the real WAN gateway stayed a clean 0%
+the whole time — the 1-hop test alone would have missed this completely,
+since it never touches the default route at all.
+
+**Fixed** by setting `option defaultroute '0'` and `option peerdns '0'` on
+`network.eufy_wwan` (both real config and the documented
+`wireless.example` pattern) — standard OpenWrt options for exactly this
+case, telling `netifd`/`udhcpc` not to install a route or DNS servers
+from that interface's lease. Verified live: `ip route show` correct
+(`default via 192.168.52.1 dev wan`), `ping 8.8.8.8` 10/10 (0% loss),
+DNS still resolving via the router's own resolver, `eufy_wwan` itself
+still reaches its own subnet fine (`ping -I phy1-sta0 192.168.32.2`,
+0% loss — so `relayd` can still relay real client traffic through it),
+and both `hostapd-eufy_ap`/`relayd-eufy_ap` survived the `/etc/init.d/network
+restart` needed to apply the fix. Shipped in v14 (see `docs/WINS.md`).
+
+**Standing lesson:** repeating a third-party network's STA side is not
+just "add a `proto=dhcp` interface" — that network's DHCP server can
+compete for this router's own default route and DNS resolution, silently,
+with no error anywhere. Any future repeater instance (the multi-radio
+future-consideration above) needs `defaultroute '0'`/`peerdns '0'` from
+the start, not discovered the same way again. Also: a 1-hop gateway ping
+is not sufficient evidence of real internet reachability when a second
+default-route candidate exists on the box — test a real multi-hop target.
+
+**Addendum (2026-07-25) — two more real bugs, found by adversarial review
+before shipping v15, not by symptom.** After flashing and fixing the
+default-route leak above, did a fresh-eyes read of `etc/init.d/eufy-repeater`
+and its config looking for other real bugs before calling the feature done
+— found two, neither of which had produced any visible symptom yet:
+
+1. **Channel detection was dead code.** Line parsed `iw dev "$sta_ifname"
+   link` for a `channel` field to match the raw AP's channel to wherever
+   the STA actually associated. Real `iw dev link` output on this
+   OpenWrt/iw version has no `channel` field at all — only `freq: <MHz>`
+   (confirmed live, both before and after this fix). The regex never
+   matched, silently falling through to the static `uci get
+   wireless.<device>.channel` fallback every single time. Worked in
+   practice only because that static value was kept manually in sync with
+   reality — the actual designed mechanism (dynamically follow the
+   upstream AP's real channel) never ran once. Fixed: parse `iw dev
+   "$sta_ifname" info` instead, which does report `channel N (... MHz)`
+   — verified against real output before and after the fix.
+
+2. **The raw AP interface had zero firewall coverage — the more serious
+   one.** `firewall.eufy` only listed `list network 'eufy_wwan'`, which
+   covers `phy1-sta0` (the STA side). `rpt_eufy_ap` — the interface real
+   clients actually connect to — is deliberately never bound to any UCI
+   `network` section (it doesn't need its own IP; relayd bridges it
+   directly), which made it invisible to `list network` and therefore
+   subject to the default `forward 'REJECT'` policy. A prior version of
+   this same file's own comment claimed relayd operates "L2, not routed
+   through netfilter the same way" — that was wrong, asserted without
+   checking. Verified via the official OpenWrt relayd guide (fetched
+   directly, not from memory): relayd is a routed mechanism, and its
+   guide's own example config places the local AP-side interface in the
+   *same firewall zone* as the upstream link, not outside the firewall
+   entirely. Confirmed against this router's own generated nft ruleset:
+   before the fix, zero rules referenced `rpt_eufy_ap` anywhere. Fixed
+   with `list device 'rpt_eufy_ap'` on the `eufy` zone — `device` is a
+   real, separate fw4 zone-membership option (confirmed against
+   `/usr/share/ucode/fw4.uc`, not assumed), letting a zone cover a raw
+   device that has no UCI `network` section. Verified: the regenerated
+   nft ruleset's `input_eufy`/`forward_eufy`/`output_eufy`/`helper_eufy`
+   chains all expanded their interface match set to include
+   `rpt_eufy_ap` alongside `phy1-sta0`.
+
+**Why this pair matters more than the default-route bug:** both of these
+are invisible to every check this project had already been running —
+`hostapd-eufy_ap` and `relayd-eufy_ap` both report healthy, the STA shows
+`Connected`, `iwinfo` reports correct signal/power — none of that
+depends on the firewall zone or the channel-follow logic at all. A real
+client joining the repeated SSID would have associated fine and then
+gotten nothing, silently, with every internal signal this project
+actually checks saying "working." Caught only by reading the config with
+fresh eyes and checking against the mechanism's real, external
+documentation instead of trusting an earlier assumption written into the
+code's own comments.

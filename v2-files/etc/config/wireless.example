@@ -204,7 +204,33 @@ config wifi-iface 'guest'
 # 	option disabled '1'
 # 	option repeater_mode '1'
 #
-# Also needs (see config/network.example and config/firewall.example):
+# Also needs (see config/network and config/firewall for the real,
+# working example - this repo's eufy_wwan/eufy sections):
 # a 'my_repeater_wwan' interface (proto dhcp, bound to the STA's network)
 # for the STA side's own DHCP lease, and a firewall zone allowing that
 # network to reach wan/lan as appropriate.
+#
+# CRITICAL #1: that interface MUST set `option defaultroute '0'` and
+# `option peerdns '0'`. Without them, the repeated network's own DHCP
+# server can hand out a default route that silently wins over this
+# router's real `wan` default route at the same metric - this router's
+# OWN outbound traffic (not the repeated clients' traffic, which the
+# repeater handles separately) then intermittently routes out through
+# the third-party network instead of the real WAN. Confirmed live
+# (FINDINGS.md §19 addendum): ~50% loss to real internet hosts, silent,
+# not caught by a 1-hop gateway ping - only visible testing multi-hop
+# connectivity after a real flash.
+#
+# CRITICAL #2: the firewall zone MUST cover the raw AP interface itself
+# (`rpt_<section-name>`, e.g. `rpt_my_repeater_ap` for the section above)
+# via `list device`, not just `list network` on the STA-side interface.
+# relayd is a routed mechanism subject to netfilter, not a firewall
+# bypass (confirmed against the official OpenWrt relayd guide and this
+# router's own generated nft ruleset). The raw AP interface is never
+# bound to any UCI `network` section, so it's invisible to
+# `list network` alone - without `list device`, the default REJECT
+# forward policy silently drops every repeated client's traffic while
+# hostapd/relayd/STA association all still look completely healthy.
+# Confirmed live (FINDINGS.md §19 addendum). Real working example:
+# config/firewall's `eufy` zone has both
+# `list network 'eufy_wwan'` AND `list device 'rpt_eufy_ap'`.
