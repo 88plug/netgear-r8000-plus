@@ -53,7 +53,7 @@ The `-95`/EOPNOTSUPP that made OWE, guest networks, and multi-SSID-per-radio
 
 | Item | Why it's a real wall |
 |---|---|
-| DFS-channel unlock (clm_blob) | Extracted blob firmware-rejected (`-52`), fatal to radio init; no valid clm exists for 43602 |
+| DFS-channel unlock | Confirmed twice under independent mechanisms (clm_blob re-pairing, direct channel request 2026-07-24) — driver rejects with `-52` both times. `iw phy info`'s channel-flag label isn't trustworthy on this driver (regdb snapshot drift, not real availability); the real gate is DTS `ieee80211-freq-limit`. FINDINGS.md §16. |
 | 802.11s mesh · airtime-fairness | brcmfmac driver/firmware doesn't advertise them on these radios |
 | Latest radio firmware | Newest upstream `brcmfmac43602-pcie.bin` is byte-identical to the 2015 blob already installed |
 | "De-neuter regulatory tables" for more channels | Channels are gated by DTS `ieee80211-freq-limit` (hardware antenna diplexing), not by the regdb — regdb is inert here (4 override methods tested; one crashed the router) |
@@ -541,3 +541,30 @@ fresh boot (uptime 0 min), config sizes healthy on every file
 (R8000 ×3 + R8000-Guest), guest bridge up, `brcmfmac.ko` md5 still matches
 the proven `patches/861` module, cake shaping live on `wan` at 89Mbit,
 `radio-watchdog` enabled, 0% ping loss to the real internet.
+
+## Doc audit + DFS re-test + package audit, no new image needed (2026-07-24)
+
+Three follow-ups after v11, none of which changed what's actually shipped:
+
+1. **10-agent documentation audit** (separate detailed commit) closed real
+   drift across README.md, this file, CLAUDE.md, and a dozen research/staging
+   docs — see git log for the full breakdown, not repeated here.
+2. **DFS channels re-tested live**, prompted by the audit flagging `iw phy
+   info` showing them as `(radar detection)` instead of `(disabled)`.
+   Confirmed still a hard driver-level wall (`-52`, same as the clm_blob
+   test) — the regdb label changed, reality didn't. Full account:
+   `docs/FINDINGS.md` §16.
+3. **Package upgrade audit** (`use-latest-version` scan): nothing in this
+   repo is actually ours to bump. The only real dependency manifest it found
+   was `hwoffload-research/ghidra-cli/` — a third-party RE tool (its own
+   `.git`, gitignored, not this project's code, same category as `openwrt/`
+   itself). OpenWrt 25.12.5 confirmed as the current point release; the
+   `PACKAGES=` list carries no version pins, so every build already pulls
+   whatever's current in the feed.
+
+Rebuilt anyway to confirm reproducibility: the result is **byte-for-byte
+identical** to v11 (same sha256, same manifest) — expected, since nothing
+that landed in the image actually changed (the DFS test was fully reverted;
+the docs-only commits don't touch `v2-files/`). Not shipped as a separate
+version number — a byte-identical duplicate of v11 would just be clutter.
+v11 remains the current running image.

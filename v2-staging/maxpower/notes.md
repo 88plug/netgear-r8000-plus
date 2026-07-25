@@ -132,20 +132,50 @@ adding CAC-eligible entries once loaded) was tried and did not produce that
 result. Reverted, not shipped. See `docs/FINDINGS.md` §11 for the full
 account.
 
-**Open item, flagged 2026-07-24 (not resolved by this pass):** a live
-re-check of `iw phy phy2 info` on the router today shows channels 52-64 and
-100-140 present as `(radar detection)` rather than `(disabled)` — i.e. DFS
-channels now *appear* in radio2's channel list, contradicting this
-paragraph's "none of the DFS-eligible channels even appear" claim and this
-workstream's own `verify/final-state.txt` capture. `dmesg` on the same
-live check confirms **no clm_blob is loaded** (`err=-2`, same 2015
-firmware, same nvram `ccode=Q2`/`regrev=86`), and no patch/DTS change has
-landed in git since this workstream's testing that would explain it. Cause
-unknown — did not chase further live on an unfamiliar, possibly
-concurrently-used router rather than risk stepping on other in-flight work
-or documenting a transient state as permanent. Needs a clean re-verification
-pass (ideally right after a known, isolated boot) before trusting either
-this file's original capture or today's read as current truth.
+**Resolved 2026-07-24 — tested live, confirmed still a hard wall, root cause
+found.** The `(radar detection)` vs `(disabled)` label discrepancy flagged
+below turned out to be exactly what it looked like it might be: a cosmetic
+regdb-layer label, not a real change in what the driver will do.
+
+Live-tested directly: pre-flight backup taken, `radio2.channel` set to `52`
+(VHT80, squarely inside the range showing `(radar detection)`), `wifi
+reload`. Result: **`brcmf_cfg80211_start_ap: Set Channel failed:
+chspec=57402, -52`** — the exact `-52` error code already documented in
+this file and in `docs/FINDINGS.md` §11 for the clm_blob mismatch. hostapd
+then failed to set beacon parameters and the interface went to DISABLED.
+This is a direct, driver-level rejection of the channel request — not a
+CAC timeout, not a config error, not something that got further than the
+initial channel-spec negotiation. The DTS `ieee80211-freq-limit` hard gate
+this section already establishes as the real blocker is unchanged and
+still fully in effect; the regdb's `(radar detection)` label is just newer
+metadata (this build ships `wireless-regdb-2026.05.30-r1`, likely a later
+snapshot than whatever regdb was in effect during the original tests) that
+doesn't reflect what the firmware will actually accept — the same class of
+"iw's summary display doesn't reflect real gating" pattern already
+documented for `iw reg get`'s cosmetic country label in
+`docs/FINDINGS.md` §13. Now a second confirmed instance of that pattern
+for a different `iw` subcommand.
+
+Reverting the channel change (`uci set` back to `36`, `wifi reload`) did
+**not** cleanly restore phy2 on its own — `hostapd.add_iface failed for
+phy phy2` persisted after the reload, matching this project's own
+established lesson that a live reload isn't always sufficient to fully
+reset radio-chip state after a rejected/aborted negotiation (`docs/RUNBOOK.md`
+§3, `docs/FINDINGS.md` §11). A full reboot cleanly restored all 4 SSIDs,
+`radio2` back on channel 36, config values intact (verified: correct
+passphrases, guest isolation, SQM still shaping). One harmless side
+effect: `uci commit` during the test reformatted the live router's
+`/etc/config/wireless` to UCI's canonical minimal serialization (comments
+stripped) — values unchanged, and this doesn't touch the repo's `v2-files/`
+source at all.
+
+**Standing conclusion, now tested twice under two different specific
+mechanisms (CLM re-pairing in §11, direct channel request here): DFS
+remains a genuine, driver-enforced wall on this firmware, independent of
+what any regdb snapshot's summary label says.** Do not trust `iw phy info`'s
+per-channel flag word as a signal of real availability on this driver —
+only an actual `start_ap`/`wifi reload` attempt is decisive, and this
+section now has two independent ones landing on the same wall.
 
 ## Thermal / stability caution at max power
 

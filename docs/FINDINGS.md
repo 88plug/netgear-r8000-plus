@@ -639,3 +639,44 @@ pstore kernel config, the ramoops DTS patch, a `files` symlink to
 `v2-files` for the FILES overlay) is left in place in the local `openwrt/`
 buildroot checkout, uncommitted (that tree is a checkout of upstream
 `openwrt/openwrt.git`, not this project's own repo).
+
+## 16. DFS channels — a documentation audit flagged `iw phy info` showing them as available; live-tested, confirmed still a hard wall (2026-07-24)
+
+A systematic doc-vs-code audit noticed `iw phy phy2 info` labeling DFS
+channels 52-64/100-140 as `(radar detection)` rather than `(disabled)` —
+contradicting every earlier test in this repo, with no CLM/firmware/DTS
+change to explain it. Rather than leave this ambiguous, tested it directly:
+
+Pre-flight backup taken, `wireless.radio2.channel` set to `52` (VHT80,
+inside the range showing `(radar detection)`), `wifi reload`. Result:
+`brcmf_cfg80211_start_ap: Set Channel failed: chspec=57402, -52` — the
+identical `-52` error already documented in §11 for the clm_blob mismatch.
+hostapd failed to set beacon parameters, `phy2-ap0` went to `DISABLED`.
+Direct, immediate driver-level rejection — never got past the initial
+channel-spec negotiation, no CAC ever started.
+
+**Root cause of the label change:** this build ships
+`wireless-regdb-2026.05.30-r1`; the original DFS tests in §6/§11/§12
+predate that package snapshot. The regulatory database's own channel-flag
+data has evidently been revised upstream since — the DTS
+`ieee80211-freq-limit` gate (the actual, confirmed-unchanged, hard block)
+never moved. This is a second, independent instance of the same pattern
+§13 already found for `iw reg get`'s cosmetic country-label line: an `iw`
+summary display that doesn't reflect what the driver will actually do.
+
+**Reverting was not clean via live reload alone** — `uci set` back to `36`
++ `wifi reload` left `phy2-ap0` in `hostapd.add_iface failed` state, same
+"live reload insufficient after a rejected negotiation" lesson as §11. A
+full reboot restored all 4 SSIDs cleanly; config values confirmed intact
+(passphrases, guest isolation, SQM). Minor, harmless side effect: the
+`uci commit` calls during the test reformatted the live router's
+`/etc/config/wireless` to UCI's canonical serialization (comments
+stripped, values unchanged) — doesn't touch `v2-files/`, the repo's source
+of truth.
+
+**Standing conclusion, now confirmed under two independent mechanisms**
+(CLM re-pairing in §11, direct channel request here): **DFS remains a
+genuine driver-enforced wall on this firmware**, regardless of what any
+given regdb snapshot's summary label claims. `iw phy info`'s per-channel
+flag word is not a trustworthy signal on this driver — only an actual
+`start_ap` attempt is decisive.
