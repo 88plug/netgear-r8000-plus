@@ -2,7 +2,7 @@
 
 Every capability shipped, from a factory-reset router to a custom OpenWRT build
 that fixes bugs the community called unfixable and a kernel driver limit called
-impossible. All verified on the live device. Branch `openwrt-r8000-plus`.
+impossible. All verified on the live device. Branch `netgear-r8000-plus`.
 
 ---
 

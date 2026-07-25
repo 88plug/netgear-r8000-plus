@@ -132,7 +132,7 @@ openwrt/               OpenWrt v25.12.5 source clone (gitignored)
 
 ## Branch
 
-All work on `openwrt-r8000-plus`.
+All work on `netgear-r8000-plus`.
 
 ## License
 
