@@ -143,7 +143,7 @@ here). `tftp-hpa` installed.
   cd openwrt-imagebuilder-25.12.5-bcm53xx-generic.Linux-x86_64
   make image PROFILE=netgear_r8000 \
     PACKAGES="-wpad-basic-mbedtls wpad-mbedtls hostapd-utils wpa-cli wireless-regdb \
-      luci usteer sqm-scripts ethtool \
+      luci usteer sqm-scripts ethtool relayd \
       kmod-brcmfmac brcmfmac-firmware-43602a1-pcie kmod-usb-ohci kmod-usb2 \
       kmod-phy-bcm-ns-usb2 kmod-usb-ledtrig-usbport kmod-usb3 kmod-phy-bcm-ns-usb3" \
     FILES=/home/andrew/netgearr8000/v2-files \
@@ -165,6 +165,15 @@ here). `tftp-hpa` installed.
     exact bug that took down all 4 SSIDs on v7's first build. The device
     profile pulls in `wpad-basic-mbedtls` by default, hence the explicit `-`
     exclusion.
+  - **`relayd`** — required by `etc/init.d/eufy-repeater` (the WiFi repeater
+    feature, see `docs/FINDINGS.md` §15 and `wireless.example`'s repeater
+    section). Confirmed 2026-07-24: `relayd` is a real, pre-built package in
+    the 25.12.5 feed (no compilation needed) — but note it ships the older
+    standalone-init-script implementation (`/etc/init.d/relayd`, direct
+    `relayd -I ... -I ...` invocation), not the newer netifd `proto=relay`
+    style some online docs describe (`/lib/netifd/proto/relay.sh` does not
+    exist in this package). `eufy-repeater` invokes the `relayd` binary
+    directly and does not depend on either init mechanism.
   - **The patched `kmod-brcmfmac` must come from this project's own local
     package repo, not the upstream feed.** The ImageBuilder tree's own
     `packages/` directory (auto-used as a local repo by `make image`, no

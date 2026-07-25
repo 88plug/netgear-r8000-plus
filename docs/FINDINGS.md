@@ -821,3 +821,102 @@ real `US` regulatory code §17, and now the raw firmware error code itself)
 all converge, and the last one removes the only remaining ambiguity the
 first three had. Nothing shipped changes as a result — this is evidence
 quality, not a new capability.
+
+## 19. WiFi repeater (AP+STA on one radio) — the orchestration layer breaks it, not the hardware (2026-07-24)
+
+Requested feature: repeat an existing third-party 2.4GHz network
+(`Eufy_B838D4`, WPA2-PSK, channel 6) on `radio1`, so devices near this
+router get a strong signal without their own connection to the original AP.
+Initial attempts through the standard path (a normal `mode=ap` `wifi-iface`
+on `radio1` alongside the `mode=sta` interface associating to Eufy) were
+initially treated as "impossible" — that conclusion was wrong, and testing
+it properly is what this section documents.
+
+**What actually fails, precisely:** bringing up an AP-mode `wifi-iface` via
+UCI/`wifi reload` on a radio that already has an active STA-mode interface
+routes through `brcmf_cfg80211_request_ap_if()` in
+`drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c`. This
+project's own `patches/861` already fixes that function's v1/v2
+version-query failure to fall through to the legacy `bsscfg:ssid` MBSS path
+(`iface_create_ver = 0`) instead of returning `-EOPNOTSUPP` outright — that
+fix is real and is what unlocked the 6-BSS multi-SSID setup documented in
+§8. But that legacy MBSS fallback path itself only supports adding AP-role
+interfaces alongside *other AP-role interfaces* — the §8 scenario (2nd/3rd
+AP SSID on one radio). It does not support adding an AP-role interface
+alongside an *active STA-role* interface on this firmware. Confirmed via
+dmesg, tested with both bring-up orders (AP-first, STA-first — same result
+either way, proving it's order-independent, not a race): the driver reaches
+the v0 legacy fallback and still fails there — `brcmf_cfg80211_add_iface:
+... Does not support interface_create (-95)` — with `netifd`/`hostapd`
+visibly cycling the interface name back and forth
+(`phy1-ap0`↔`phy1-sta0`) as it retries and fails.
+
+**Whether this is a real hardware/firmware limit or an orchestration bug
+was the actual open question**, and it was tested rather than assumed:
+
+- `iw phy phy1 info`'s advertised interface combinations list AP+STA
+  together as a supported combination on this radio — the chip/firmware
+  claims it can do this.
+- A raw `iw phy phy1 interface add rpt0 type __ap`, issued directly while
+  the STA interface was live and associated, **succeeded immediately and
+  stably** — confirmed repeatedly, including across full reboots. This
+  bypasses `request_ap_if()`'s MBSS-bsscfg allocation entirely; it's a
+  plain vif creation, which the firmware handles cleanly even with an
+  active STA interface. `hostapd` run directly against that raw interface
+  (not through `netifd`'s `hostapd.sh`/wifi-scripts glue) came up cleanly
+  and did not disturb the STA interface's association.
+- Prior art search (not assumed, checked): OpenWrt issue **#14451**
+  documents the same symptom class — AP+STA failing through the generic
+  wifi-scripts orchestration — on **ath/ipq40xx hardware**, a completely
+  different chipset and driver. That rules out a brcmfmac-specific defect;
+  this is a cross-chipset limitation in how OpenWrt's generic
+  `wifi-scripts`/`wireless-device.uc` orchestrates AP+STA bring-up
+  (confirmed by reading `/usr/share/ucode/wifi/*.uc` and
+  `/lib/netifd/wireless-device.uc`: wdev/whole-phy teardown-and-setup is
+  driven as one atomic operation per phy, not per-vif, which is what
+  collides here), not a limit of this hardware or of `patches/861`.
+
+**The shipped fix** (`etc/init.d/eufy-repeater`, `START=96`/`USE_PROCD=1`):
+reads any `wireless` `wifi-iface` section with `mode=ap` and
+`repeater_mode='1'` set (that section stays `disabled='1'` from
+`wifi-scripts`'/`netifd`'s own point of view — it must never try to bring
+it up itself, since that's exactly the broken path above). For each one, it
+resolves the section's radio to a `phyN` via `wireless.<device>.path`
+(stable across reboots; `phyN` numbering itself is not), waits for the
+existing STA interface on that radio to show `Connected` via `iw dev
+<ifname> link` (deliberately radio-level, not netifd's DHCP-gated
+interface state — this router's own DHCP lease on the repeated network has
+nothing to do with whether the repeater itself can relay other devices'
+traffic, and waiting on it was blocking startup for no reason), then
+creates the AP side with the same raw `iw phy <phy> interface add <name>
+type __ap` proven above, sets its channel to match the STA's associated
+channel, and runs `hostapd` + `relayd -I <ap_ifname> -I <sta_ifname>`
+directly as procd instances (respawning). This uses the exact same
+underlying tools (`iw`, `hostapd`, `relayd`) `wifi-scripts` itself would
+use — it deliberately routes around only the specific orchestration step
+that's broken for this combination, not around the standard stack
+wholesale.
+
+**TX power, a secondary finding caught during this work:** `hostapd.conf`
+has no `tx_power` directive — confirmed directly against the real
+`hostapd.conf` reference generated in this project's own SDK build tree,
+not assumed from memory. TX power is set at the `iw`/cfg80211 level
+instead (`iw dev <ifname> set txpower fixed <mBm>`, mBm = dBm × 100),
+applied by `eufy-repeater` to the raw-created interface after creation.
+Checking the real ceiling in the process (`iw phy phy1 channels`, "Maximum
+TX power" per channel) found `radio1`'s configured `txpower='27'` was never
+achievable on channel 6/US regulatory domain — the real ceiling there is
+20.0 dBm. Fixed in `config/wireless` (`radio1.txpower` 27→20) as part of
+this same pass, independent of the repeater feature itself but caught
+while max-power-verifying it, per the operator's explicit ask
+("is it max strength for repeating the eufy — it should be also
+documented").
+
+**Standing pattern this establishes:** an "X+Y combination is impossible on
+this radio" claim, sourced from OpenWrt's generic orchestration failing, is
+not the same claim as "the hardware/firmware cannot do X+Y." The former is
+common and was confirmed here to be a real, cross-chipset orchestration
+bug (OpenWrt issue #14451); the latter needs its own direct test (`iw phy info` combos +
+a raw bring-up attempt) before being accepted. Route around the broken
+orchestration layer with the same underlying primitives it would have
+used, rather than accepting the combination as unsupported.

@@ -138,3 +138,15 @@ config rule 'guest_isolate'
 	option dest 'lan'
 	option target 'REJECT'
 
+# Eufy_B838D4 repeater STA (config/network eufy_wwan, config/wireless
+# eufy_sta/eufy_ap). Open in all directions: this router relays other
+# devices' traffic through relayd (L2, not routed through netfilter the
+# same way), and needs to reach the upstream Eufy network/internet freely
+# for its own DHCP lease and any local traffic.
+config zone 'eufy'
+	option name 'eufy'
+	list network 'eufy_wwan'
+	option input 'ACCEPT'
+	option output 'ACCEPT'
+	option forward 'ACCEPT'
+

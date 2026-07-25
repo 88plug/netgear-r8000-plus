@@ -151,3 +151,60 @@ config wifi-iface 'guest'
 	option key 'CHANGE-ME-guest-key'
 	option isolate '1'
 	option disabled '0'
+
+# ---- WiFi repeater / range extender (OPTIONAL — disabled by default) ----
+# Repeats an existing third-party network on one radio: this router
+# associates as a client (STA) AND rebroadcasts it as an AP, bridging the
+# two via relayd, so devices near this router get a strong signal without
+# needing their own connection to the original AP.
+#
+# Root cause this exists to route around, confirmed on real BCM43602
+# hardware (see FINDINGS.md §15): OpenWrt's generic wifi-scripts
+# orchestration cannot bring up an AP-mode interface on a radio that
+# already has an active STA-mode interface on this firmware — it reaches
+# the legacy MBSS bsscfg fallback (patches/861) and still fails there
+# ("Does not support interface_create (-95)"), because that fallback only
+# supports AP+AP, not AP+STA. This is a cross-chipset wifi-scripts
+# limitation (see OpenWrt issue #14451 on ath/ipq40xx — same symptom,
+# different driver), not a brcmfmac-specific defect, and the underlying
+# hardware/firmware genuinely supports AP+STA concurrently (confirmed via
+# `iw phy <phy> info` interface combinations AND direct testing). The fix:
+# etc/init.d/eufy-repeater creates the AP side with a raw
+# `iw phy <phy> interface add <name> type __ap` instead of going through
+# wifi-scripts, then runs hostapd + relayd directly against it — same
+# underlying tools OpenWrt itself uses, just without the orchestration
+# path that breaks for this combination on this firmware. Requires the
+# `relayd` package (see PACKAGES in docs/RUNBOOK.md §5).
+#
+# To repeat a network: rename this section (used as the raw AP interface
+# name, "rpt_<section>", and the hostapd instance name), fill in the
+# CHANGE-ME values below, and set repeater_mode='1'. The AP-mode section
+# MUST stay disabled='1' — that's what keeps wifi-scripts/netifd from
+# trying (and failing) to bring it up itself; etc/init.d/eufy-repeater is
+# what actually reads repeater_mode and brings it up correctly. Point
+# 'device' at whichever radio has spare capacity to dedicate to
+# repeating — if that radio is also carrying one of the main_radioN
+# sections above, delete/disable that section first, since only one
+# STA+AP combo per radio is supported this way.
+#
+# config wifi-iface 'my_repeater_sta'
+# 	option device 'radio1'
+# 	option network 'my_repeater_wwan'
+# 	option mode 'sta'
+# 	option ssid 'CHANGE-ME-target-ssid'
+# 	option encryption 'psk2'
+# 	option key 'CHANGE-ME-target-passphrase'
+#
+# config wifi-iface 'my_repeater_ap'
+# 	option device 'radio1'
+# 	option mode 'ap'
+# 	option ssid 'CHANGE-ME-target-ssid'
+# 	option encryption 'psk2'
+# 	option key 'CHANGE-ME-target-passphrase'
+# 	option disabled '1'
+# 	option repeater_mode '1'
+#
+# Also needs (see config/network.example and config/firewall.example):
+# a 'my_repeater_wwan' interface (proto dhcp, bound to the STA's network)
+# for the STA side's own DHCP lease, and a firewall zone allowing that
+# network to reach wan/lan as appropriate.

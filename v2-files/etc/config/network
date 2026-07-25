@@ -45,3 +45,11 @@ config interface 'guest'
 	option ipaddr '192.168.2.1'
 	option netmask '255.255.255.0'
 
+# STA side of the Eufy_B838D4 repeater (see config/wireless eufy_sta/eufy_ap
+# and etc/init.d/eufy-repeater) - this router's own DHCP lease from the
+# repeated network. Deliberately NOT a dependency for the repeater itself:
+# etc/init.d/eufy-repeater checks radio-level association (iw link), not
+# this interface's DHCP state, before bringing up the AP+relay side.
+config interface 'eufy_wwan'
+	option proto 'dhcp'
+

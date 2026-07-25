@@ -604,3 +604,62 @@ Recorded in `images/sha256sums-r8000plus.txt` for the record. **Not
 flashed** — same reasoning as before: zero functional delta from what's
 already live as v11, so reflashing would be pure risk for no gain. v11
 remains the current running image.
+
+## v13 — WiFi repeater (Eufy_B838D4) baked into the real build (2026-07-25)
+
+The repeater feature (FINDINGS.md §19) was built and verified live on the
+router first, over SSH, before touching the repo — same discipline as
+every other feature here: prove it works on hardware, then port the proven
+result into the reproducible build, not the other way around. This entry
+is that port.
+
+**What shipped:**
+- `v2-files/etc/init.d/eufy-repeater` — the procd service that creates the
+  raw AP interface, runs `hostapd` + `relayd` against it, bypassing the
+  broken AP+STA orchestration path (full mechanism in FINDINGS.md §19).
+  `USE_PROCD=1`, `START=96`; enabled via `rc.d/S96eufy-repeater` +
+  `rc.d/K10eufy-repeater` symlinks, same pattern as `radio-watchdog`.
+- `config/wireless` — `radio1` (2.4GHz) repurposed: channel 1→6, txpower
+  27→20 (matching the real regulatory ceiling for channel 6/US, not the
+  unachievable configured value — caught while max-power-verifying the
+  repeater). `main_radio1` (2.4GHz main SSID) and `guest` (2.4GHz guest
+  SSID) removed — no spare BSS capacity once the radio is dedicated to
+  repeating, and the operator didn't want any stock-device-branded SSID
+  kept regardless. New `eufy_sta` (STA, normal UCI/netifd-managed) and
+  `eufy_ap` (AP, `disabled='1'` + `repeater_mode='1'`, brought up by
+  `eufy-repeater` instead of netifd) sections.
+- `config/network` — new `eufy_wwan` interface (`proto=dhcp`) for the STA
+  side's own lease.
+- `config/firewall` — new `eufy` zone (`eufy_wwan`, ACCEPT all directions).
+- `config/wireless.example` — a generic, CHANGE-ME-templated version of the
+  same repeater pattern, so this is a documented, reusable repo feature and
+  not just a hardcoded personal config. `main_radioN`/`guest` sections in
+  the template are untouched — the template still documents the default
+  3-band+guest layout; the repeater section is clearly marked optional and
+  explains which section to remove if a radio is being dedicated to it.
+- `PACKAGES=` (`docs/RUNBOOK.md` §5 and `.github/scripts/build-image.sh`)
+  — added `relayd` (confirmed a real, pre-built 25.12.5-feed package, no
+  compilation needed).
+
+**Built and verified, not just compiled:** `make image` completed clean.
+Confirmed directly in the built rootfs before packaging: `etc/init.d/eufy-repeater`
+present with correct mode/size; `rc.d/S96eufy-repeater` and
+`rc.d/K10eufy-repeater` symlinks present and pointing correctly;
+`etc/config/wireless` in the rootfs has `radio1`'s corrected path/channel
+and both `eufy_sta`/`eufy_ap` sections; the manifest lists
+`relayd - 2025.10.04~708a76fa-r1`; `brcmfmac.ko` md5 (`8398326d...`) matches
+every prior verification this repo has done of the `patches/861`-patched
+module — the FILES-overlay-only change didn't touch the kernel module
+build at all, as expected.
+
+**Shipped:** `images/openwrt-25.12.5-r8000plus-v13-bcm53xx-generic-netgear_r8000-squashfs.chk`,
+sha256 `d2bcd057d550fb9db857f14bcc4d24fdfee349eb832e006189a4f70a2d39780b`.
+**Not (yet) flashed:** the router is currently running the live-hacked
+equivalent of this exact config (built via SSH/UCI during the investigation,
+confirmed surviving a full `/etc/init.d/network restart`, `hostapd-eufy_ap`
+and `relayd-eufy_ap` both procd-tracked and running) — v13 reproduces that
+state from a clean build rather than replacing a currently-working live
+config. Flash when convenient to confirm the built image matches the live
+state exactly; not urgent since the live config already works and a flash
+is never zero-risk on this device (per every prior version's own stated
+reasoning for not reflashing on zero functional delta).

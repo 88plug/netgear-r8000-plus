@@ -1,0 +1,189 @@
+#!/bin/sh /etc/rc.common
+# Repeats an existing WiFi network by running hostapd + relayd directly
+# against a manually-created AP interface, deliberately bypassing OpenWrt's
+# wifi-scripts orchestration for the AP side of an AP+STA combo.
+#
+# Root cause, confirmed directly on this hardware (not assumed): bringing
+# up an AP-mode wifi-iface via UCI/wifi-scripts, on a radio that already has
+# an active STA-mode interface, routes through brcmfmac's
+# brcmf_cfg80211_request_ap_if(). patches/861 already fixes that function's
+# v1/v2 version-query failure to fall through to the legacy bsscfg:ssid MBSS
+# path (iface_create_ver = 0) instead of bailing with -EOPNOTSUPP - but that
+# legacy MBSS path itself only supports adding AP-role interfaces alongside
+# OTHER AP-role interfaces (the original patches/861 scenario: 2nd/3rd AP
+# SSID on one radio). It does not support adding an AP-role interface
+# alongside an active STA-role interface on this firmware - confirmed via
+# dmesg: it reaches v0 (the legacy fallback) and STILL fails there
+# ("Does not support interface_create (-95)").
+#
+# A raw `iw phy <phy> interface add <name> type __ap` for the SAME radio,
+# SAME moment (STA already connected), succeeds immediately and stably -
+# confirmed live, repeatedly, across reboots. This does not go through
+# request_ap_if()'s MBSS-bsscfg allocation at all; it's a plain vif
+# creation, which this firmware handles fine. hostapd run directly against
+# that interface (not through netifd's hostapd.sh/wifi-scripts glue) works
+# cleanly and does not disturb the STA interface.
+#
+# This is the "proper" fix given that constraint: it doesn't paper over a
+# config mistake, it deliberately routes around a real, confirmed
+# limitation in how OpenWrt's generic wifi-scripts drives this specific
+# combination on this specific firmware, using the exact same underlying
+# tools (iw, hostapd, relayd) wifi-scripts itself would use, just without
+# the orchestration path that breaks here.
+#
+# The STA side (associating with the real upstream network being repeated)
+# is NOT handled here - it stays a normal UCI wifi-iface in mode=sta,
+# managed by netifd exactly as usual, because STA-only bring-up on this
+# radio works perfectly through the standard path. Only the AP+relay side
+# needs this script.
+#
+# Config comes from UCI, not hardcoded: for each `wireless` wifi-iface
+# section with mode=ap AND repeater_mode='1' set, this script creates a
+# matching raw AP interface on the same radio as that section's device,
+# using its ssid/key/encryption, and relays it against whichever STA
+# interface is already associated on that same radio. A section like this
+# stays 'disabled=1' from wifi-scripts' own point of view (netifd/hostapd.sh
+# must never try to bring it up itself - that's exactly the broken path) -
+# this script is what actually reads and acts on it instead.
+
+START=96
+USE_PROCD=1
+
+resolve_phy_for_device() {
+	# $1 = wireless.radioN.path value (matches the PCI/platform device path)
+	local devpath="/sys/devices/platform/$1" p
+	for p in /sys/class/ieee80211/*; do
+		[ -e "$p" ] || continue
+		[ "$(readlink -f "$p/device" 2>/dev/null)" = "$(readlink -f "$devpath" 2>/dev/null)" ] && { basename "$p"; return 0; }
+	done
+	return 1
+}
+
+wait_for_sta_ifname() {
+	# Deliberately checks radio-level association (iw link), NOT netifd's
+	# DHCP-gated interface state - this router's own DHCP lease on the
+	# repeated network has nothing to do with whether the repeater itself
+	# can work (relayd relays OTHER devices' DHCP traffic through; it
+	# doesn't need this router to have completed its own first). Confirmed
+	# directly: radio association stayed solid (100+ packets flowing) even
+	# while this router's own udhcpc sat retrying - waiting on the latter
+	# was blocking this needlessly.
+	local phy="$1" i=0 ifn
+	while [ $i -lt 30 ]; do
+		for ifn in /sys/class/ieee80211/"$phy"/device/net/*; do
+			[ -e "$ifn" ] || continue
+			ifn="$(basename "$ifn")"
+			iw dev "$ifn" link 2>/dev/null | grep -q "^Connected" && { echo "$ifn"; return 0; }
+		done
+		sleep 1
+		i=$((i + 1))
+	done
+	return 1
+}
+
+start_ap_relay() {
+	local section="$1"
+	local device ssid key encryption repeater_mode
+	config_get device "$section" device
+	config_get ssid "$section" ssid
+	config_get key "$section" key
+	config_get encryption "$section" encryption "psk2"
+	config_get_bool repeater_mode "$section" repeater_mode 0
+
+	[ "$repeater_mode" = "1" ] || return 0
+	[ -n "$device" ] && [ -n "$ssid" ] || {
+		echo "eufy-repeater: section $section missing device/ssid, skipping"
+		return 0
+	}
+
+	local devpath
+	devpath="$(uci -q get wireless."$device".path)" || {
+		echo "eufy-repeater: wireless.$device.path not set, skipping $section"
+		return 0
+	}
+
+	local phy
+	phy="$(resolve_phy_for_device "$devpath")" || {
+		echo "eufy-repeater: could not resolve phy for $device ($devpath), skipping $section"
+		return 0
+	}
+
+	local sta_ifname
+	sta_ifname="$(wait_for_sta_ifname "$phy")" || {
+		echo "eufy-repeater: no associated STA found on $phy within 30s, skipping $section"
+		return 0
+	}
+
+	local channel
+	channel="$(iw dev "$sta_ifname" link 2>/dev/null | sed -n 's/.*channel \([0-9]*\).*/\1/p')"
+	[ -n "$channel" ] || channel="$(uci -q get wireless."$device".channel)"
+
+	local ap_ifname="rpt_${section}"
+	iw dev "$ap_ifname" del 2>/dev/null
+
+	iw phy "$phy" interface add "$ap_ifname" type __ap || {
+		echo "eufy-repeater: raw interface add failed on $phy for $section - the one thing this exists to avoid"
+		return 0
+	}
+	iw dev "$ap_ifname" set channel "$channel"
+
+	# Raw-created interfaces bypass UCI's normal txpower plumbing entirely.
+	# hostapd.conf has no tx_power directive - confirmed directly against
+	# the real hostapd.conf reference shipped in this project's own SDK
+	# tree, it isn't a real option there. txpower is an iw/cfg80211-level
+	# setting, applied here to match the radio's own configured ceiling;
+	# regulatory enforcement clamps the real RF output regardless.
+	local radio_txpower
+	radio_txpower="$(uci -q get wireless."$device".txpower)"
+	[ -n "$radio_txpower" ] && iw dev "$ap_ifname" set txpower fixed "$((radio_txpower * 100))"
+
+	local hw_mode="g"
+	case "$(uci -q get wireless."$device".band)" in
+		5g) hw_mode="a" ;;
+	esac
+
+	local hostapd_conf="/var/etc/hostapd-${section}.conf"
+	mkdir -p /var/etc
+	{
+		echo "interface=$ap_ifname"
+		echo "driver=nl80211"
+		echo "ssid=$ssid"
+		echo "hw_mode=$hw_mode"
+		echo "channel=$channel"
+		echo "ieee80211n=1"
+		echo "ctrl_interface=/var/run/hostapd-${section}"
+		case "$encryption" in
+		none) ;;
+		*)
+			echo "wpa=2"
+			echo "wpa_passphrase=$key"
+			echo "wpa_key_mgmt=WPA-PSK"
+			echo "rsn_pairwise=CCMP"
+			;;
+		esac
+	} > "$hostapd_conf"
+
+	procd_open_instance "hostapd-$section"
+	procd_set_param command /usr/sbin/hostapd "$hostapd_conf"
+	procd_set_param respawn
+	procd_close_instance
+
+	procd_open_instance "relayd-$section"
+	procd_set_param command /usr/sbin/relayd -I "$ap_ifname" -I "$sta_ifname"
+	procd_set_param respawn
+	procd_close_instance
+}
+
+start_service() {
+	. /lib/functions.sh
+	config_load wireless
+	config_foreach start_ap_relay wifi-iface
+}
+
+stop_service() {
+	local ifn
+	for ifn in /sys/class/net/rpt_*; do
+		[ -e "$ifn" ] || continue
+		iw dev "$(basename "$ifn")" del 2>/dev/null
+	done
+}

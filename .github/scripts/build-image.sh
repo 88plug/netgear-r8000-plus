@@ -103,7 +103,7 @@ fi
 
 make image PROFILE=netgear_r8000 \
   PACKAGES="-wpad-basic-mbedtls wpad-mbedtls hostapd-utils wpa-cli wireless-regdb \
-    luci usteer sqm-scripts ethtool \
+    luci usteer sqm-scripts ethtool relayd \
     kmod-brcmfmac brcmfmac-firmware-43602a1-pcie kmod-usb-ohci kmod-usb2 \
     kmod-phy-bcm-ns-usb2 kmod-usb-ledtrig-usbport kmod-usb3 kmod-phy-bcm-ns-usb3" \
   FILES="$REPO_ROOT/v2-files" \
