@@ -2144,3 +2144,34 @@ running, filtered to `rpt_eufy_ap|American-RPT-TEST` only (the known
 it's understood). Awaiting a real join attempt against the unambiguous
 SSID - this is the actual, first-ever unconfounded test of the
 PROMISC/ALLMULTI fix.
+
+**Correction: the SSID-rename above was a misdiagnosis, reverted.**
+Checked project memory (total-recall) against the operator's actual,
+original repeater spec: every prior config, from the very first working
+version through today, has the repeater's AP side use the **identical**
+SSID (and password) as the target network -
+`wireless.eufy_ap.ssid='Eufy_B838D4'` matching `eufy_sta.ssid`, likewise
+`'American'` matching `'American'` before this session's rename. This is
+correct, intentional, and how every real-world repeater/repeater-bridge
+(DD-WRT, Tomato, stock consumer firmware) works: "setting the SSID,
+channel, encryption and password to match the primary router" is the
+standard, not a bug to fix. **Reverted `wireless.eufy_ap.ssid` back to
+`American`, matching the STA side, as it always should be.**
+
+This means the "client might have joined the real neighbor's AP instead
+of ours" framing was directionally real (a repeater's whole point is
+that either BSSID works, so a client preferring the real upstream is
+not a failure) but it does **not** explain away the actual open
+question: hostapd on `rpt_eufy_ap` has still never logged a single
+`IEEE 802.11: associated` event, under any SSID, across this entire
+session's testing. That result stands, uncorrected. The only honest
+way to test it unambiguously - given the operator's own real devices
+are always in range of the real upstream and will happily roam to the
+stronger/known BSSID - is a client with no path to the real upstream at
+all, or a client pinned to this AP's specific BSSID
+(`ea:fc:af:f9:f1:37`), matching this project's own established
+wpa_supplicant `bssid=` pinning technique from earlier probe testing.
+`wildnuc`, the test client used for that technique, is as of this
+writing fully unreachable (escalated from SSH-down-but-ping-alive to
+100% ping loss) - this is now the hard blocker on a decisive real-client
+test, not architecture.
