@@ -1,0 +1,117 @@
+brcmfmac: advertise DWDS repeater capability, report per-station DWDS state
+
+Broadcom's firmware on this chip family (confirmed live on BCM43602,
+netgear,r8000) implements Dynamic WDS (DWDS) - a per-station 4-address
+framing negotiation between DWDS-capable Broadcom APs/repeaters that
+lets a backhaul link carry real client MAC addresses end-to-end,
+without the NAT/proxy-ARP hiding a plain 3-address STA link forces on
+userspace repeater tools (relayd and friends). The driver has carried
+the firmware's own status bits for this since day one
+(BRCMF_STA_DWDS_CAP, BRCMF_STA_DWDS in fwil_types.h) but never read or
+acted on them anywhere, and NL80211_IFTYPE_WDS is unconditionally
+rejected (-EOPNOTSUPP) in all three of add_iface/change_iface/del_iface
+with no per-chip branch at all.
+
+Confirmed empirically before writing this (not assumed): a small
+out-of-tree probe module (hwoffload-research/psta-probe/dwds_probe.c),
+built against this exact SDK/kernel tree, set the "dwds" iovar via
+brcmf_fil_iovar_data_set() DOWN/UP-bracketed on the STA interface and
+read it back - accepted and durably retained (err=0), where the
+classic "wds" iovar is rejected outright (err=-52). That confirms the
+firmware genuinely implements this and the iovar name/semantics are
+real, not guessed.
+
+This patch does two small, narrowly-scoped things:
+
+1. brcmf_cfg80211_start_ap(): advertise DWDS capability on an AP-role
+   bsscfg by setting "dwds"=1 via brcmf_fil_bsscfg_int_set(), the same
+   per-bsscfg helper already used for wpa_auth/wsec/mfp just above it.
+   Non-fatal if firmware rejects it (logged, not gated) - AP bring-up
+   must never depend on it. This is advertisement only: it does not
+   force 4-address framing on anything. An ordinary 802.11 client
+   (a phone, an IoT camera) has no concept of DWDS, never sets
+   BRCMF_STA_DWDS_CAP, and is completely unaffected either way.
+
+2. brcmf_cfg80211_get_station(): read BRCMF_STA_DWDS_CAP/BRCMF_STA_DWDS
+   out of the sta_info_le flags word already being decoded here, and
+   log via brcmf_dbg(CONN, ...) when either bit is set. There is no
+   existing generic nl80211 station-info field for "this station has a
+   DWDS/4-address link active" (checked: no NL80211_STA_FLAG_4ADDR_MODE
+   or equivalent exists anywhere in this tree) - a real UAPI attribute
+   for that is an upstream API discussion in its own right, not
+   something to invent unilaterally in an out-of-tree patch. This is
+   deliberately log-only for now: real, honest observability (dmesg
+   will show a peer negotiating DWDS if it ever does) without
+   overclaiming a UAPI surface that doesn't exist yet.
+
+Explicitly NOT claimed by this patch: this does not make an ordinary
+client (a Eufy camera, a phone) get 4-address/MAC-preserving treatment
+through a repeated AP - DWDS is a Broadcom-to-Broadcom (or wl/dhd-
+compatible) peer negotiation, not a client-facing feature. It is only
+useful when the *other end* of a backhaul link (another Broadcom-family
+AP or repeater) also speaks DWDS. No such peer was available to test
+against in this environment, so the negotiated-link path
+(BRCMF_STA_DWDS actually going set on a real association) is untested
+here and should be called exactly that: firmware-confirmed-accepting,
+driver-wired, functionally unverified pending a real DWDS-capable peer.
+
+Compile-tested against openwrt-sdk-25.12.5-bcm53xx-generic, backports-
+6.18.26, this router's exact shipping kernel/driver combination.
+
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c	2026-07-26 10:45:17.394226652 -0700
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c	2026-07-26 10:45:17.394226652 -0700
+@@ -3181,6 +3181,25 @@
+ 		sinfo->sta_flags.set |= BIT(NL80211_STA_FLAG_TDLS_PEER);
+ 	else
+ 		sinfo->sta_flags.set &= ~BIT(NL80211_STA_FLAG_TDLS_PEER);
++	/*
++	 * Dynamic WDS (DWDS): firmware negotiates 4-address framing
++	 * per-station with another DWDS-capable Broadcom AP/repeater, which
++	 * lets that link carry real client MAC addresses end-to-end instead
++	 * of NAT/proxy-ARP hiding them behind this device's own MAC. The
++	 * firmware already reports these bits per station (BRCMF_STA_DWDS_CAP
++	 * = peer negotiated DWDS support, BRCMF_STA_DWDS = link is actively
++	 * using it) - the driver has carried the #defines since day one but
++	 * never read them. There is no existing generic nl80211 station-info
++	 * field for this (checked: no NL80211_STA_FLAG_4ADDR_MODE or
++	 * equivalent exists), so this is intentionally log-only for now
++	 * rather than force-fitting it onto an unrelated flag - a real nl80211
++	 * attribute for this is an upstream API discussion, not something to
++	 * invent unilaterally here.
++	 */
++	if (sta_flags & (BRCMF_STA_DWDS_CAP | BRCMF_STA_DWDS))
++		brcmf_dbg(CONN, "%pM: dwds_cap=%d dwds_active=%d\n", mac,
++			  !!(sta_flags & BRCMF_STA_DWDS_CAP),
++			  !!(sta_flags & BRCMF_STA_DWDS));
+ 	if (sta_flags & BRCMF_STA_ASSOC) {
+ 		sinfo->filled |= BIT_ULL(NL80211_STA_INFO_CONNECTED_TIME);
+ 		sinfo->connected_time = le32_to_cpu(sta_info_le.in);
+@@ -5318,6 +5337,28 @@
+ 			goto exit;
+ 		}
+ 
++		/*
++		 * Advertise DWDS (Dynamic WDS) capability on this AP bsscfg.
++		 * Confirmed live on this exact firmware/chip (BCM43602,
++		 * netgear,r8000): the "dwds" iovar is accepted and durably
++		 * retained (err=0, verified via readback) where the classic
++		 * "wds" iovar is rejected outright (err=-52) - see
++		 * hwoffload-research/psta-probe/dwds_probe.c. This only
++		 * advertises the capability; it does not force anything on
++		 * ordinary (non-DWDS) clients, which never set
++		 * BRCMF_STA_DWDS_CAP and are completely unaffected - matching
++		 * how wpa_auth/wsec/mfp are set unconditionally just above.
++		 * A real DWDS *link* still needs a peer that also speaks
++		 * Broadcom's DWDS negotiation (another Broadcom-family AP or
++		 * repeater in wl/dhd-compatible mesh/backhaul mode) - it is
++		 * not something an ordinary 802.11 client (a phone, an IoT
++		 * camera) can or will ever negotiate, regardless of this
++		 * change. Non-fatal if firmware rejects it on some other
++		 * chip/branch - AP bring-up must not depend on it.
++		 */
++		if (brcmf_fil_bsscfg_int_set(ifp, "dwds", 1))
++			brcmf_dbg(INFO, "dwds capability not accepted on this bsscfg\n");
++
+ 		brcmf_dbg(TRACE, "AP mode configuration complete\n");
+ 	} else if (dev_role == NL80211_IFTYPE_P2P_GO) {
+ 		err = brcmf_fil_iovar_int_set(ifp, "chanspec", chanspec);

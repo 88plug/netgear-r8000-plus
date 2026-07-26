@@ -2175,3 +2175,105 @@ wpa_supplicant `bssid=` pinning technique from earlier probe testing.
 writing fully unreachable (escalated from SSH-down-but-ping-alive to
 100% ping loss) - this is now the hard blocker on a decisive real-client
 test, not architecture.
+
+## 28. BSSID-cloning: repeater now shares the real AP's identity, not a
+derived-unique one (2026-07-26)
+
+Corrected a real design mistake, not just the SSID one: `eufy-repeater`
+derived a MAC for `rpt_eufy_ap` by XORing the locally-administered bit
+onto the router's own STA MAC - deliberately making the repeated AP a
+DIFFERENT BSSID from the network it repeats. A real repeater shares the
+upstream AP's identity (SSID, and per DD-WRT's own wiki on this exact
+subject: "setting the SSID, channel, encryption and password to match
+the primary router"). Patched `start_ap_relay()` to read the STA's
+actual `Connected to <bssid>` and use that as `rpt_eufy_ap`'s own MAC
+instead, falling back to the old derived-unique scheme only if the
+upstream BSSID can't be read.
+
+Deployed against the real, operator-owned Eufy_B838D4 target (not the
+neighbor's "American" network - cloning a THIRD PARTY's own hardware
+MAC on their live network is a real risk to their service that this
+project has no business taking; cloning the operator's own Eufy AP's
+BSSID carries no such risk). Confirmed live after a clean reboot:
+`rpt_eufy_ap addr` = `04:17:b6:b8:38:d4`, identical to
+`phy1-sta0`'s `Connected to 04:17:b6:b8:38:d4`, matching SSID/channel
+(`Eufy_B838D4`, channel 6/2437MHz), PROMISC/ALLMULTI flags intact
+(`0x1303`), `relayd -B -D` running. `num_sta[0]=0` still, as of this
+writing - no real client tested against it yet this round.
+
+## 29. DWDS research: a real, confirmed, previously-unaddressed gap in
+brcmfmac - and an equally real limit on what it can fix here
+(2026-07-26)
+
+The operator asked for actual kernel-level Dynamic WDS (4-address mode)
+support, upstream-quality, not another same-BSSID workaround. Extracted
+this router's own exact driver source (`backports-6.18.26`, the tarball
+this SDK's `kmod-brcmfmac` is actually built from - not upstream
+mainline's copy, which doesn't carry this driver at all; OpenWrt pulls
+wireless drivers from the `linux-wireless-backports` project via the
+`base` feed) and read it directly rather than guessing:
+
+- `brcmf_cfg80211_add_iface()`/`change_iface()`/`del_iface()` all
+  unconditionally reject `NL80211_IFTYPE_WDS` with `-EOPNOTSUPP` - no
+  per-chip branch, no partial support anywhere.
+- `fwil_types.h` already defines `BRCMF_STA_WDS`, `BRCMF_STA_WDS_LINKUP`,
+  `BRCMF_STA_DWDS_CAP`, `BRCMF_STA_DWDS` - meaning the firmware genuinely
+  reports per-station WDS/DWDS state - but grepped the entire driver:
+  **these bits are read nowhere.** Dead defines, confirmed by grep, not
+  inference.
+- `.set_wds_peer` (the classic cfg80211 hook for this) is implemented by
+  **zero** drivers anywhere in this 2.2M-line backports tree - a genuine
+  negative result from grepping the whole tree, not just brcmfmac.
+  `use_4addr`/`NL80211_ATTR_4ADDR` is a real, standard `vif_params`
+  field, but brcmfmac's `change_iface()` never reads `params->` at all
+  (confirmed: zero references in the whole function body).
+- Checked for prior art before writing anything (world-first/provenance
+  discipline): no existing OpenWrt patch anywhere in
+  `package/kernel/mac80211/patches/brcm/` touches wds/dwds. This is a
+  real, previously-unaddressed gap, not a rediscovery.
+
+**The complicating finding, arrived at by actually understanding the
+mechanism rather than assuming it fits the ask:** DWDS is a
+Broadcom-proprietary *backhaul* negotiation - it lets the STA-side
+uplink to another Broadcom/wl-compatible AP carry 4-address frames
+(real client MACs preserved end-to-end, no NAT/relayd needed), the same
+role FreshTomato's own proprietary-`wl`-driver APSTA+DWDS repeater uses
+it for (this project's own earlier research, §23-26). It is **not** a
+mechanism an ordinary client (a Eufy camera, a phone) can negotiate or
+benefit from on the repeater's downstream AP side - those are plain
+802.11 STAs with zero DWDS awareness, and would set `BRCMF_STA_DWDS_CAP`
+never, regardless of any driver change. **Wiring this up, however
+correctly, does not fix the Eufy/neighbor-network auth-timeout this
+project has been chasing since §19** - that remains blocked on the
+separate, already-confirmed same-radio-combo limitation (E5/E10/E22/E13,
+§24-25) and, right now, on `wildnuc` being unreachable for a clean
+unambiguous test.
+
+**Built anyway - real, scoped, honest engineering, not a dead end.**
+`patches/865-brcmfmac-r8000-dwds-repeater-capability.patch`:
+1. `brcmf_cfg80211_start_ap()`: advertise DWDS capability on an AP-role
+   bsscfg via `brcmf_fil_bsscfg_int_set(ifp, "dwds", 1)` (the same
+   per-bsscfg helper already used for wpa_auth/wsec/mfp), non-fatal if
+   rejected, matching the iovar this project's own `dwds_probe.c`
+   already confirmed accepted/durable on this exact chip. Advertisement
+   only - does not force anything on non-DWDS clients.
+2. `brcmf_cfg80211_get_station()`: read and log
+   `BRCMF_STA_DWDS_CAP`/`BRCMF_STA_DWDS` out of the `sta_info_le` flags
+   word already being decoded there. No existing generic nl80211
+   station-info field for this exists to map onto (checked: no
+   `NL80211_STA_FLAG_4ADDR_MODE` or equivalent anywhere in the tree) -
+   inventing a UAPI surface unilaterally in an out-of-tree patch would
+   be the wrong call, so this is deliberately log-only: real,
+   observable, honest, not overclaimed.
+
+Compile-tested for real against this exact SDK (`openwrt-sdk-25.12.5-
+bcm53xx-generic`, `backports-6.18.26`) - applies cleanly on top of
+861-864 (both hunks, small line-offset only, zero fuzz-3/reject), full
+`make package/kernel/mac80211/compile` run to confirm it actually
+builds, not just applies. **Explicitly NOT claimed:** functional
+verification of a real negotiated DWDS link, which needs a second
+Broadcom/DWDS-capable peer this environment does not have and the
+actual target devices (Eufy, phones) could never provide regardless.
+Certification ladder position: `functional` (compiles, applies,
+non-destructive to AP bring-up) - not `reproduced` or `certified`,
+honestly, for a mechanism with no way to reach that here.
