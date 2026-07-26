@@ -1637,3 +1637,118 @@ capability this exact chip does not advertise, confirmed from its own
 closed door is Thread 4: a second, independent physical radio via USB.
 That step needs hardware this session doesn't have - a decision for the
 operator, not a further software lever to pull.
+
+## 24. Full peer-review round on the §19-23 impossibility claim - the
+apsta methodology gap found, corrected, and stress-tested to convergence
+(2026-07-26)
+
+Ran a formal 5-reviewer blind peer-review round (soundness, prior-art/
+provenance, reproducibility, significance, fatal-flaw lenses) against the
+full §19-23 claim, followed by a rebuttal round with new live evidence,
+re-scoring, and a second fatal-flaw pass. This section records what
+changed as a result - not a repeat of §19-23's own content.
+
+**The one real gap the round found:** patches 862/863 (§20) never
+re-applied the same rigor §21/§22 eventually used for `psta` - a
+DOWN/UP-bracketed set on the correct (primary/STA) ifp, applied before a
+fresh reassociation rather than as a late toggle on an already-settled
+radio. Patch 862 brackets DOWN/UP but on the wrong (AP-role) ifp after
+the STA already associated under `apsta=0`; patch 863 uses the right ifp
+but with no bracket at all. Both are the exact methodology bug that
+originally gave `psta` a false negative before the DOWN/UP fix reversed
+it.
+
+**Closed directly, live, three times over, not argued:**
+
+1. `apsta_probe.ko` - `BRCMF_C_DOWN` -> set `apsta=1` -> `BRCMF_C_UP` on
+   `phy1-sta0`, matching `brcmf_p2p_set_firmware()`'s own precedent
+   exactly, before any reassociation. All three firmware calls
+   `err=0`; STA's RX/TX counters reset and climbed fresh, confirming a
+   genuinely new association under `apsta=1`, not carried-over state
+   from `apsta=0`. A real, independent Linux client (not the Eufy
+   camera, a separate machine, -48dBm signal - rules out range) then
+   tried to join `rpt_eufy_ap`: **`AUTH_TIMED_OUT`, four consecutive
+   attempts** - the client's first 802.11 Authentication frame gets no
+   response at all.
+2. **Control** (peer-review demanded, since applying `apsta=1` correctly
+   necessarily bounces the STA, and this project's own §19 already
+   documents the co-resident AP vif as fragile): bounced `phy1-sta0` via
+   `wpa_cli` with `apsta` held at 0 throughout, no probe module
+   involved. Confirmed `hostapd`'s `rpt_eufy_ap` PID identical before and
+   after (not restarted). Client join: **identical `AUTH_TIMED_OUT`.**
+3. **Disambiguator:** re-armed `apsta=1`, waited 45 seconds of confirmed-
+   stable association (no further bounce), then tried the client join
+   well past any bounce-recency window. **Still identical
+   `AUTH_TIMED_OUT`.**
+
+Three conditions - `apsta=1` freshly bounced, `apsta=0` freshly bounced
+(control), `apsta=1` settled 45s - converge on the exact same failure.
+This is a stronger result than either the original §20 test or the first
+corrected re-test alone: **`apsta`'s value is demonstrated irrelevant to
+this specific failure, and it is not a bounce-recency artifact either.**
+Real client authentication to the AP-role vif fails whenever a STA
+association is active on this radio, independent of both variables the
+review round correctly identified as unisolated in the original patches.
+This is the same conclusion §20 already reached, now arrived at by
+systematic elimination rather than a single test pair - the methodology
+gap the review found real, and closing it made the claim stronger, not
+weaker.
+
+**Secondary probe run in the same round:** `dwds_probe.ko` (raw-iovar,
+same DOWN/UP-bracketed technique) found `wds=1` rejected (`err=-52`) but
+`dwds=1` accepted and durably retained (`err=0`, confirmed via readback)
+- a new data point, parallel to `psta`'s own pattern. No new interface
+appeared before or after. Joins `psta` as "firmware-accepted, not
+Linux-exposed," not as a working mechanism.
+
+**Other review-round corrections, evidence-backed:**
+- Verified via multiple independent official Eufy support sources (not
+  inference from the network's own band): both the HomeBase and
+  standalone camera models are 2.4GHz-only, ecosystem-wide, vendor-
+  stated. Closes the one significance-lens gap in §19-23's own
+  architectural-mismatch argument.
+- This router has exactly one 2.4GHz radio (`radio1`) - the other two
+  are 5GHz-only by distinct RF front-end parts (Skyworks SKY85309-11 vs.
+  SKY85710-11/SKY85712, per §1), not firmware-selectable. Combined with
+  the point above: there is no second same-band radio to split STA/AP
+  roles across on this hardware, regardless of driver capability -
+  stated explicitly here rather than left for a reader to reconstruct.
+- Added corroboration found during independent provenance re-search:
+  DD-WRT's own wiki states categorically that "Broadcom dhd driver
+  models... cannot support RB (nor Station Bridge) modes since the
+  driver is controlled by wireless firmware internal to the chipset" -
+  a competing firmware project's own maintainers naming the same
+  limitation as a driver-family fact. A 2018 linux-wireless mailing-list
+  post independently dumped BCM43602's `cap` string with the same MCHAN
+  absence found live in E13 (§23), seven years apart - the same absence
+  across firmware generations, not an artifact of the two vintages this
+  project tested.
+- Confirmed which firmware was loaded for §23's decisive `cap` string
+  read: the 2021-era v18 firmware (536708 bytes, md5
+  `6756c443973fb44169deb238a68ebb61`), the current, more-capable shipping
+  firmware - not the older 2015 blob. Strengthens rather than weakens
+  that finding.
+
+**Honestly still open, not papered over:**
+- `docs/RUNBOOK.md` does not yet have a standalone section documenting
+  the actual patches-862/863/864 SDK build/deploy/revert workflow (SDK
+  path, build command, `scp`/backup convention) - it exists only as
+  prose narrated inside this file. Flagged, not fixed, this round.
+- Every result in §19-24 comes from one author, one physical router
+  unit, across a handful of days. No independent second run, second
+  unit, or second reviewer has reproduced any of it - this stands at
+  "available/functional" on the certification ladder, not "reproduced."
+- The USB WiFi dongle path (MT7612U/AR9271, §23 Thread 4) remains a
+  literature-based recommendation, not a validated fix. The practical
+  problem - a working camera repeater - is still open pending that
+  hardware; nothing in this section or §19-23 should be read as solving
+  it.
+- Unloading `apsta_probe.ko` (reverting `apsta` to 0) left the router
+  briefly unreachable twice, both times recovered on its own via
+  `radio-watchdog` within ~2 minutes. Recorded as a repeatable property
+  of unwinding this specific DOWN/UP/iovar sequence, not investigated
+  further since it doesn't bear on the core finding.
+
+New probe source: `hwoffload-research/psta-probe/apsta_probe.c`,
+`hwoffload-research/psta-probe/dwds_probe.c` (same `symbol_get()`
+pattern as the existing probes in that directory).
