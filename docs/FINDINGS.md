@@ -1357,3 +1357,146 @@ the USB dongle path or a real brcmfmac patch adding PSR-companion-bsscfg
 handling (out of scope for this session; flagged here as the one
 concretely-scoped follow-on worth a dedicated future effort, unlike the
 other nine dead ends).
+
+## 22. psta driver patch built, deployed, and tested twice - the companion
+interface genuinely does not exist; psta is also the wrong mechanism for
+this project's repeater shape anyway (2026-07-26)
+
+Wrote the real fix §21 called for: `patches/864-brcmfmac-r8000-psta-repeater-vif.patch`
+adds `brcmf_start_psta_repeater()` to `cfg80211.c`, following
+`brcmf_apsta_add_vif()`'s exact template - `brcmf_alloc_vif()` ->
+`brcmf_cfg80211_arm_vif_event()` -> `BRCMF_C_DOWN` -> set
+`psta`=`PSTA_MODE_REPEATER` (+`psta_mrpt`) -> `BRCMF_C_UP` ->
+`brcmf_cfg80211_wait_vif_event(cfg, BRCMF_E_IF_ADD, ...)` -> on success,
+`brcmf_net_attach()` the companion netdev. Exported
+(`BRCMF_EXPORT_SYMBOL_GPL`) so a small trigger module can call it against
+the live, associated `phy1-sta0` ifp. Confirmed via provenance search
+(background research agent, kernel mailing list/patchwork/lore.kernel.org,
+GitHub code search across all public repos including Infineon's own
+actively-maintained downstream fork, OpenWrt issue tracker): **no prior
+attempt at brcmfmac psta support exists anywhere searchable.** This is
+genuinely unattempted driver work, not a rediscovery.
+
+**Real build-system trap, fixed:** the first build (against this
+project's own `openwrt/` source buildroot) compiled and exported the
+symbol cleanly but **failed to load on the router at all** -
+`module brcmfmac: .gnu.linkonce.this_module section size must match the
+kernel's built struct module size at run time`. Root cause: this
+project's shipping `kmod-brcmfmac` (all v7-v18 images) is built from the
+separate **SDK tree**
+(`openwrt-sdk-25.12.5-bcm53xx-generic_gcc-14.3.0_musl_eabi.Linux-x86_64`),
+not the main `openwrt/` source buildroot - the two kernel trees have
+drifted (confirmed via the OpenWrt kernel-ABI tracking hash embedded in
+each `kmod-brcmfmac` package's `depends:` field: the SDK-built package's
+`kernel=6.12.94~1110cdcc08e084d9841c1b3fdebb4940-r1` hash matched the
+router's currently-installed package exactly; the `openwrt/`-tree build's
+hash did not). Confirmed by direct comparison, not assumption. Fixed by
+copying the patch into the SDK's own
+`package/kernel/mac80211/patches/brcm/` and rebuilding there - this SDK
+tree is the one already used all session for patches 862/863 and the
+psta-probe modules, per that Makefile's own `SDK_ROOT` comment. Recovered
+WiFi via the established revert-safe methodology (on-disk `.ko` swap +
+reboot, backup kept alongside) both times this was hit - zero lasting
+impact, confirmed via the router's own dmesg and `iw dev` state after
+each recovery.
+
+**First live test (SDK-built module, correct ABI): clean negative.**
+`psta_trigger.ko` (new module, calls the exported
+`brcmf_start_psta_repeater()` via `symbol_get()`, same pattern as
+`psta_probe.c`) ran the full arm/DOWN/set/UP sequence with no errors, then
+**timed out waiting for `BRCMF_E_IF_ADD`** (`BRCMF_VIF_EVENT_TIMEOUT` =
+1.5s) - no new netdev, `iw dev` unchanged, STA connection intact
+afterward.
+
+**Second live test, ruling out the obvious confound: real reassociation,
+wait widened to 8s, still a clean timeout.** The DOWN/UP cycle inside
+`brcmf_start_psta_repeater()` necessarily drops the STA's live
+association - the first test's 1.5s window couldn't possibly have given
+a real WPA2 handshake time to complete, so a timeout there proved
+nothing about whether an *associated* PSR companion bsscfg would ever
+announce itself. Changed the wait to `msecs_to_jiffies(8000)` (one-line
+patch edit, same SDK rebuild pipeline, re-verified export + kernel-ABI
+hash before redeploying) and reran. dmesg confirms a real reassociation
+actually completed inside the window (a second
+`brcmf_inetaddr_changed` event ~4s after the disassociate, meaning
+DHCP/IP configuration re-ran successfully) - and **still no
+`BRCMF_E_IF_ADD`, still a clean timeout at the full 8s.** This is strong
+evidence, not merely an unlucky timing window: even with the STA fully
+reassociated and passing traffic while `psta=PSTA_MODE_REPEATER` is set,
+the firmware never fires an interface-add event for any companion bsscfg.
+The likely explanation has changed from "brcmfmac doesn't arm for the
+event" (§21's hypothesis, now fixed by this patch) to **"this firmware's
+PSR mode does not create a separate bsscfg at all - it operates inline
+within the existing STA bsscfg."**
+
+**Third test, the direct check of that inline-bridging hypothesis: also
+blocked, one layer deeper.** If PSR reconfigures `phy1-sta0` itself into
+4-address/WDS-style framing (the same mechanism Broadcom calls "wet" -
+Wireless Ethernet Bridge - elsewhere in its own stack), the interface
+should be bridgeable directly into `br-lan` with `psta` still active.
+Confirmed via readback (`psta_readback.ko`) that `psta=2` was still
+durably set from the prior test, then tried `brctl addif br-lan
+phy1-sta0` live: **`brctl: bridge br-lan: Not supported`.** This is the
+Linux bridge layer's own standard rejection of a non-4-address wireless
+station netdev - independent confirmation of this project's earlier
+finding (§19/§20) that brcmfmac never sets `WIPHY_FLAG_4ADDR_STATION` on
+its STA interfaces. Whatever `psta` does at the firmware level, brcmfmac
+never told cfg80211 this interface supports 4-address framing, so the
+kernel refuses to bridge it - a second, independent driver gap, not a
+firmware gap.
+
+**Both plausible mechanisms by which `psta` could ever become a *usable*
+Linux-visible feature are now confirmed blocked, at two different layers:**
+a companion-interface event that the firmware never sends (tested twice,
+including through a real completed reassociation), and 4-address bridging
+that the driver never advertises to the kernel (tested directly, kernel
+refuses outright). Fixing either would mean real, substantial brcmfmac
+driver development - reverse-engineering what event type (if any) the
+firmware actually does emit for PSR mode, or implementing full 4-address
+frame handling in brcmfmac's netdev ops from scratch. Neither is a
+config/iovar-level fix; both are genuine kernel driver projects.
+
+**Architectural mismatch, independent of whether psta could be made to
+work: it solves a different problem than this project has.** This
+project's actual repeater need (documented in `wireless.example` and
+`/etc/init.d/eufy-repeater`, confirmed via live `uci show wireless`) is a
+**rebroadcast AP with the identical SSID** (`wireless.eufy_sta.ssid` and
+`wireless.eufy_ap.ssid` are both literally `Eufy_B838D4`) - the classic
+range-extender pattern, relaying between a STA uplink and a second AP so a
+distant client (the pond-house camera) can roam onto the closer,
+repeated copy of the same network. `psta`/`wet`-style bridging, even
+working perfectly, does not create a second broadcast SSID at all - it
+only makes the upstream network's traffic reachable from the router's own
+wired LAN and AP-side devices (`br-lan` members). That helps a
+LAN-attached client reach the Eufy network; it does nothing for a
+WiFi-only, physically-distant camera that needs something to associate
+to. **Even a fully-working psta implementation would not solve this
+project's repeater problem** - the real, load-bearing blocker remains
+exactly what §20 already concluded: same-radio concurrent AP+STA with a
+working data plane, which this chip's firmware does not support
+(`apsta` forced to 0, no RSDB/MCHAN).
+
+Cleanup: reverted the router to the exact known-good v18 `brcmfmac.ko`
+(md5-verified against the pre-existing backup) after each test - the
+patched module is real, stable, and was live-verified not to regress
+anything (all 3 radios, STA association, guest MBSS all functioned
+identically throughout), but is kept as research (`patches/864-...`,
+`hwoffload-research/psta-probe/psta_trigger.c`) rather than shipped, since
+it adds no working feature yet. In-memory `psta` state resets to
+`PSTA_MODE_DISABLED` on every reboot regardless (firmware default), so no
+separate revert of that setting was needed.
+
+**Bottom line:** eleventh and twelfth angles closed, both cleanly. `psta`
+is real, firmware-accepted, and now has a correctly-built, ABI-verified
+brcmfmac patch that arms for its companion interface exactly like
+`brcmf_apsta_add_vif()`/`brcmf_p2p_add_vif()` do - and the firmware still
+never uses that path. This is the strongest evidence yet that Broadcom's
+PSR implementation on this exact chip/firmware genuinely does not expose
+a separate Linux-manageable interface through any mechanism this project
+has access to without disassembling and patching the firmware blob
+itself (out of scope). Combined with the architectural mismatch above,
+psta is not the path to a working repeater for this project even in
+principle - future effort belongs back on §20's conclusively-identified
+real blocker (same-radio AP+STA data plane) or on non-brcmfmac approaches
+(a second physical radio via USB WiFi dongle, already flagged in §21 as
+the remaining practical option).

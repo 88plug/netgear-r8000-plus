@@ -1,0 +1,153 @@
+brcmfmac: expose a real netdev for Proxy-STA-Repeater (psta) companion bsscfg
+
+Broadcom's proprietary "wl" driver stack (used by stock Netgear/DD-WRT/
+FreshTomato/Asuswrt-Merlin firmware) implements a real WiFi repeater via
+a firmware-native "psta"/"psr" iovar (Proxy-STA / Proxy-STA-Repeater,
+PSTA_MODE_DISABLED=0 / PROXY=1 / REPEATER=2) set directly on the STA
+interface - not via a second concurrently-scheduled AP-role bsscfg the
+way our existing repeater architecture (and the apsta iovar patches
+862/863) work. brcmfmac has zero code referencing "psta" at all.
+
+Live-tested this session (small out-of-tree probe module, symbol_get()
+against brcmf_fil_iovar_data_set(), no driver changes) that the firmware
+DOES accept and durably retain psta=PSTA_MODE_REPEATER on this exact
+router's chip - confirmed via readback after the fact, not just the set
+call's return code. The set only succeeds when bracketed with
+BRCMF_C_DOWN ... BRCMF_C_UP (matching the real Broadcom wlconf.c
+sequence); setting it on an already-up interface returns -52.
+
+But no Linux netdev appears for whatever companion bsscfg the firmware
+manages internally for repeater mode, and no BRCMF_E_IF_ADD event was
+observed reaching cfg80211. Root cause, confirmed by reading
+brcmf_notify_vif_event() (the real BRCMF_E_IF_ADD handler): it checks
+`if (!cfg->vif_event.vif) return -EBADF;` - an unarmed IF_ADD event is
+unconditionally dropped. brcmfmac only creates a netdev for a firmware
+interface-add event when the driver itself pre-armed for one via
+brcmf_cfg80211_arm_vif_event() first - exactly the pattern
+brcmf_apsta_add_vif() (this same file) already uses for AP/STA vifs, and
+brcmf_p2p_add_vif() (p2p.c) uses for P2P-GO.
+
+This patch adds brcmf_start_psta_repeater(), following that exact
+alloc-vif -> arm -> trigger -> wait -> wire-up-netdev template, with the
+"trigger" step being the DOWN/psta=REPEATER/UP sequence instead of a
+request_ap_if()/request_sta_if() call. Exported (EXPORT_SYMBOL_GPL) so
+higher layers (a future small trigger module/tool, or the repeater
+service itself) can call it against an already-associated STA ifp to
+attempt exposing the repeater companion interface as a real netdev.
+
+This is exploratory: it is unverified whether the firmware's psta
+companion bsscfg actually announces itself via BRCMF_E_IF_ADD at all
+(vs. some other event type, or no event at all) - that is precisely
+what this patch makes testable for the first time. If the wait times
+out, the function fails cleanly (frees the vif, returns -EIO) with no
+persistent side effect beyond psta having been set (which a subsequent
+call with mode=PSTA_MODE_DISABLED reverts, same as the existing
+apsta patches' revert path).
+
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c
+@@ -880,6 +880,5 @@
+ 	return ERR_PTR(err);
+ }
+
++#define BRCMF_PSTA_MODE_DISABLED	0
++#define BRCMF_PSTA_MODE_PROXY		1
++#define BRCMF_PSTA_MODE_REPEATER	2
++
++/**
++ * brcmf_start_psta_repeater() - enable Proxy-STA-Repeater mode on an
++ * already-associated STA interface and attempt to expose the firmware's
++ * companion bsscfg as a real netdev.
++ *
++ * @ifp: the associated STA interface's brcmf_if.
++ * @ifname: name to give the resulting netdev if the firmware announces
++ *          a companion interface (e.g. "psta_rpt0").
++ * @mrpt: value for the companion "psta_mrpt" iovar (repeater max hop /
++ *        retry parameter in Broadcom's own wlconf.c - pass 0 unless a
++ *        specific value is known to be needed).
++ *
++ * Returns the new netdev on success, or an ERR_PTR. On timeout waiting
++ * for BRCMF_E_IF_ADD, psta is left at BRCMF_PSTA_MODE_REPEATER (the
++ * iovar set itself already succeeded) but no netdev is created - call
++ * again with mode BRCMF_PSTA_MODE_DISABLED via the normal iovar path to
++ * revert if desired.
++ */
++struct net_device *brcmf_start_psta_repeater(struct brcmf_if *ifp,
++					      const char *ifname, u32 mrpt)
++{
++	struct brcmf_cfg80211_info *cfg = ifp->drvr->config;
++	struct brcmf_pub *drvr = ifp->drvr;
++	struct brcmf_cfg80211_vif *vif;
++	struct brcmf_if *new_ifp;
++	int err;
++
++	if (brcmf_cfg80211_vif_event_armed(cfg))
++		return ERR_PTR(-EBUSY);
++
++	vif = brcmf_alloc_vif(cfg, NL80211_IFTYPE_AP);
++	if (IS_ERR(vif))
++		return (struct net_device *)vif;
++
++	brcmf_cfg80211_arm_vif_event(cfg, vif);
++
++	err = brcmf_fil_cmd_int_set(ifp, BRCMF_C_DOWN, 1);
++	if (err) {
++		bphy_err(drvr, "psta: BRCMF_C_DOWN failed: %d\n", err);
++		goto fail_disarm;
++	}
++
++	err = brcmf_fil_iovar_int_set(ifp, "psta", BRCMF_PSTA_MODE_REPEATER);
++	if (err) {
++		bphy_err(drvr, "psta: set psta=REPEATER failed: %d\n", err);
++		brcmf_fil_cmd_int_set(ifp, BRCMF_C_UP, 1);
++		goto fail_disarm;
++	}
++
++	err = brcmf_fil_iovar_int_set(ifp, "psta_mrpt", mrpt);
++	if (err)
++		bphy_err(drvr, "psta: set psta_mrpt=%u failed (non-fatal): %d\n",
++			 mrpt, err);
++
++	err = brcmf_fil_cmd_int_set(ifp, BRCMF_C_UP, 1);
++	if (err) {
++		bphy_err(drvr, "psta: BRCMF_C_UP failed: %d\n", err);
++		goto fail_disarm;
++	}
++
++	/* wait for the firmware's companion bsscfg BRCMF_E_IF_ADD event */
++	err = brcmf_cfg80211_wait_vif_event(cfg, BRCMF_E_IF_ADD,
++					    msecs_to_jiffies(8000));
++	brcmf_cfg80211_arm_vif_event(cfg, NULL);
++	if (!err) {
++		bphy_err(drvr, "psta: timeout waiting for companion bsscfg IF_ADD event\n");
++		err = -EIO;
++		goto fail_free;
++	}
++
++	new_ifp = vif->ifp;
++	if (!new_ifp) {
++		bphy_err(drvr, "psta: IF_ADD event arrived but no ifp set\n");
++		err = -ENOENT;
++		goto fail_free;
++	}
++
++	strscpy(new_ifp->ndev->name, ifname, sizeof(new_ifp->ndev->name));
++	err = brcmf_net_attach(new_ifp, true);
++	if (err) {
++		bphy_err(drvr, "psta: registering companion netdevice failed: %d\n", err);
++		free_netdev(new_ifp->ndev);
++		goto fail_free;
++	}
++
++	brcmf_dbg(INFO, "psta: companion netdev '%s' attached\n", ifname);
++	return new_ifp->ndev;
++
++fail_disarm:
++	brcmf_cfg80211_arm_vif_event(cfg, NULL);
++fail_free:
++	brcmf_free_vif(vif);
++	return ERR_PTR(err);
++}
++BRCMF_EXPORT_SYMBOL_GPL(brcmf_start_psta_repeater);
++
+ static bool brcmf_is_apmode(struct brcmf_cfg80211_vif *vif)
