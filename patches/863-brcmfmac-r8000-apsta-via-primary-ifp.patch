@@ -1,0 +1,33 @@
+brcmfmac: also set apsta=1 on the primary interface (matching P2P's routing)
+
+patches/862 forced the firmware "apsta" iovar to 1 (instead of the
+stock 0) when a plain AP-role interface starts on a chip lacking
+RSDB/MCHAN - but set it on the AP vif's OWN ifp. The only other in-tree
+precedent for apsta=1 is p2p.c's brcmf_p2p_set_firmware(), which always
+sets it via brcmf_get_ifp(cfg->pub, 0) - the PRIMARY interface
+(bsscfgidx/ifidx 0) - never via whichever vif is actually using the
+resulting concurrent mode. brcmf_fil_iovar_int_set()/_data_set() are
+dispatched per-ifp (fwil.c), so this is a real routing difference, not
+cosmetic: if firmware only honors this iovar when addressed via
+bsscfgidx 0, setting it on a non-zero-ifidx AP vif (as patches/862 did)
+would silently no-op.
+
+This patch additionally sets apsta=1 via the primary interface
+(brcmf_get_ifp(drvr, 0)), matching P2P's exact routing, alongside the
+existing AP-vif-local set from patches/862 - belt and suspenders, since
+which routing (if either) the firmware actually honors is unverified
+without a live test.
+
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c
+@@ -5199,6 +5199,12 @@
+ 				goto exit;
+ 			}
+ 			brcmf_fil_iovar_int_set(ifp, "apsta", 1);
++			if (ifp->ifidx != 0) {
++				struct brcmf_if *pri_ifp = brcmf_get_ifp(drvr, 0);
++
++				if (pri_ifp)
++					brcmf_fil_iovar_int_set(pri_ifp, "apsta", 1);
++			}
+ 		}

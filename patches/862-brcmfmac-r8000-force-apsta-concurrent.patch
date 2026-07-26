@@ -1,0 +1,33 @@
+brcmfmac: force apsta=1 instead of 0 when bringing up an AP role
+
+brcmf_cfg80211_start_ap() unconditionally forces the firmware "apsta"
+iovar to 0 whenever an AP-role interface starts on a chip lacking RSDB
+or MCHAN (BCM43602 has neither) - this disables the firmware's real
+concurrent AP+STA data-plane scheduling engine. Confirmed live on this
+exact router (R8000, BCM43602): a raw AP interface created via
+`iw phy <phy> interface add <name> type __ap` alongside an already-
+active STA interface on the same radio associates/beacons fine
+(control-plane, low duty cycle, doesn't need the scheduler), but
+RX stays at 0 bytes forever on the AP netdev once a real client tries
+to exchange actual data - encrypted frames never make it up from the
+firmware. Confirmed independent of any specific upstream network
+(reproduced identically against two completely unrelated 2.4GHz
+networks). apsta=1 is the same iovar value the driver already sets
+for P2P concurrent operation (p2p.c, brcmf_p2p_set_firmware()) - this
+patch requests the same real concurrent-scheduling firmware mode for
+the plain AP+STA repeater case, instead of leaving it off.
+
+Does not change behavior on radios with no concurrent STA (this
+project's own multi-BSS 3-SSID setup on radio0/radio2, patches/861) -
+apsta only affects AP+STA concurrent scheduling; with no STA present
+on those radios there is nothing for it to schedule concurrently with.
+
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c
+@@ -5199,5 +5199,5 @@
+ 					 err);
+ 				goto exit;
+ 			}
+-			brcmf_fil_iovar_int_set(ifp, "apsta", 0);
++			brcmf_fil_iovar_int_set(ifp, "apsta", 1);
+ 		}

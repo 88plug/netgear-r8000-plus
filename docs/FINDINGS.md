@@ -1171,3 +1171,112 @@ this same feature, but this specific goal (extending eufyCam's own
 backhaul for the cameras themselves) may not be achievable by this
 project without reverse-engineering ESWP itself, which no prior art
 search found anyone having done for range-extension purposes.
+
+## 20. Same-radio AP+STA repeater — definitively a chip-level limit, not Eufy/ESWP-specific (2026-07-25)
+
+**The §19 "ESWP protocol rejection" theory above is superseded.** Retested
+the identical repeater architecture against a completely unrelated,
+ordinary 2.4GHz WPA2 network ("American", a real neighboring router, zero
+Eufy/ESWP involvement) - same result: `iw dev rpt_eufy_ap station dump`
+empty, RX bytes permanently 0, real client (`wpa_supplicant` directly on a
+separate Linux box) gets `SME: Authentication timed out` - the very first
+802.11 management frame never completes. This is not a camera-side
+protocol decision; it never was. Nine independent angles were tested this
+session, live, all converging on the same wall:
+
+1. **Raw `iw`-created AP + `apsta=0`→`1` driver patch**
+   (`patches/862-brcmfmac-r8000-force-apsta-concurrent.patch`) - fails,
+   RX=0.
+2. **Same + apsta routed via the primary ifp** (matching P2P's exact
+   addressing - `patches/863-brcmfmac-r8000-apsta-via-primary-ifp.patch`)
+   - fails identically. Traced why: this router's AP vif already satisfies
+   the driver's `!mbss && (ifidx==0 || no-RSDB-and-no-MCHAN)` OR-condition
+   via the RSDB/MCHAN term alone, so 862 and 863 hit the exact same code
+   path - the ifidx routing was never the gating factor.
+3. **OpenWrt's own official, documented method** (plain UCI `wifi-iface`
+   sections, AP+STA both on one `device`, netifd/hostapd owning interface
+   creation - confirmed via the current `wifiextenders/relay_configuration`
+   wiki page, not the retired page names) - fails *worse*: netifd's atomic
+   whole-phy teardown-and-rebuild on wifi-iface changes collides with the
+   live STA, regressing to `brcmf_cfg80211_request_ap_if: ... Does not
+   support interface_create (-95)` before the apsta/mbss branch is ever
+   reached. Confirms the project's existing raw-`iw`-after-STA-is-stable
+   approach is the *better* of the two, not a mistake.
+4. **P2P-GO firmware path** (the mechanism P2P actually uses for real
+   concurrent AP+STA, via the `p2p_ifadd` firmware iovar with an explicit
+   role field - structurally different from a plain AP vif) - blocked
+   before even reaching that far: creating the P2P Device management
+   interface itself fails (`brcmf_p2p_set_firmware: failed to update
+   device address ret -52`).
+5. **Firmware upgrade, 2015→2021** (see below) - byte-for-byte identical
+   symptom on both. Rules out stale/incomplete firmware as the cause.
+6. **WDS / 4-address mode** - structurally impossible on two independent
+   grounds: brcmfmac never sets `WIPHY_FLAG_4ADDR_STATION` (kernel's
+   `nl80211_valid_4addr()` rejects it before any driver code runs), and
+   even on a driver that supported it, WDS requires the *upstream AP's*
+   explicit cooperation - unusable against an arbitrary third-party
+   network by definition.
+7. **Force `mbss=true` via a throwaway second AP-role interface**, created
+   first (so the *real* repeater AP is the 2nd AP-role vif on that phy at
+   allocation time, per `brcmf_alloc_vif()`'s `vif_walk->wdev.iftype ==
+   NL80211_IFTYPE_AP` count, which does not count the STA) - the
+   interface-creation attempt itself now fails one level deeper:
+   `brcmf_cfg80211_add_iface: iface validation failed: err=-16` (EBUSY).
+   **cfg80211's own advertised valid-interface-combinations reject "1 STA
+   + 2 AP" outright**, before mbss or apsta are ever consulted. This is
+   the most fundamental wall found: not a driver bug, not a firmware
+   iovar, a kernel-level combination the chip's driver never advertises
+   as legal.
+8. **LuCI's wizard tooling** - confirmed to have no repeater-specific
+   wizard at all (only a WISP "Join Network" client-uplink flow) and zero
+   driver-capability validation on its manual "Add interface" path - it
+   would let a user build the exact same doomed config with no warning.
+9. **External corroboration** - a DD-WRT user on this *exact* hardware
+   (R8000, BCM43602/1, same brcmfmac/Cypress firmware stack) hit the
+   identical `wl apsta failed` crash
+   (community.infineon.com/t5/.../need-help-with-fw-crash/td-p/379024).
+   Cypress's own engineer, in the 2018 upstream commit that introduced the
+   apsta iovar, states the failure mode by name: *"When starting station
+   mode on wlan0 and AP mode on wlan1, the apsta will be disabled and
+   cause data stall on wlan0 (station)."* The same wall is independently
+   reported on BCM43455 (openwrt/openwrt#23069, raspberrypi/linux#7092),
+   cyw43438, and BCM4355 - a chip-family pattern, not an R8000 or Eufy
+   quirk. Cypress/Infineon submitted further AP+STA-concurrency fixes as
+   late as July 2022 with no evidence they ever shipped to this chip's
+   firmware.
+
+**Verdict: same-radio AP+STA repeating is not achievable on this
+hardware/firmware combination, full stop.** Every layer that could
+plausibly be blamed - our driver patch, our interface-creation method,
+firmware vintage, the specific upstream network, the specific concurrent-
+role mechanism - has been independently tested and ruled out. The
+remaining, only-viable path to a working repeater is a USB WiFi dongle
+providing a genuinely separate radio for the STA role (`kmod-rt2800-usb`
++ an RT5370-chipset dongle is the recommended combination - confirmed
+present in the 25.12.5 feed for this exact kernel/arch, hardware-side two
+idle USB ports confirmed present), keeping the AP-repeater role on
+radio1's native BCM43602 antenna/power. Not attempted this session -
+needs a physical dongle.
+
+### Firmware upgrade (real, unrelated win, kept regardless of the above)
+
+The stock/`kmod-brcmfmac`-packaged `brcmfmac43602-pcie.bin` is version
+`7.35.177.56 (r587209)`, dated **September 2015** - confirmed via the
+Ubuntu kernel-team mailing list to be the final-ever refresh of that exact
+file (595472 bytes) in the linux-firmware ecosystem; nothing has updated
+it since. Netgear's own stock R8000 firmware (`R8000-V1.0.4.88_10.1.88`,
+this project's own recovery-net image) ships a proprietary Broadcom `DHD`
+driver (`dhd.ko`, compiled May 2024, still actively maintained) with an
+embedded firmware image for chip revision **43602a1** - matching this
+router's own chip stepping (`BCM43602/1` in dmesg) - at **version
+7.10.274.3.REBASE.R493518, dated 2021-06-02**, six years newer. Extracted
+the raw ucode array (`dlarray_43602a1` symbol, `.init.data` section) from
+that `.ko` via `readelf`/`dd`; container/header format matches the
+existing brcmfmac-loaded blob byte-for-byte. Deployed live (module
+unload/firmware-swap/reload): loads clean, all 3 radios up, no new
+instability, confirmed via reboot. Same-radio repeater symptom unchanged
+(see above) - this firmware is not the bottleneck for that specific
+problem, but it's a real six-year currency improvement kept regardless.
+Baked into `v2-files/lib/firmware/brcm/brcmfmac43602-pcie.bin` (overrides
+the `brcmfmac-firmware-43602a1-pcie` package's own bundled 2015 blob via
+the `FILES=` overlay) starting v18.

@@ -700,3 +700,39 @@ those checks. The thing that actually caught them was flashing for real
 and testing multi-hop connectivity plus the generated firewall ruleset —
 not more service-status polling of the same signals that were already
 green.
+
+## v18: BCM43602 firmware upgrade 2015→2021 (real win); same-radio repeater conclusively closed out
+
+Two separate results this round — one shipped, one closed.
+
+**Shipped: six-year-newer WiFi firmware.** The stock `brcmfmac43602-pcie.bin`
+(version `7.35.177.56`, dated Sep 2015) is confirmed the final-ever refresh
+of that file anywhere in the open-source linux-firmware ecosystem — nothing
+upstream has replaced it since. Found something better in an unexpected
+place: Netgear's own stock R8000 firmware (`R8000-V1.0.4.88`, already kept
+as this project's recovery-net image) ships a proprietary `dhd.ko` driver,
+compiled May 2024, with an embedded firmware blob for chip revision
+**43602a1** (matching this exact router's chip stepping) dated **June
+2021, version 7.10.274.3.REBASE.R493518** — six years newer. Extracted the
+raw ucode array directly from the `.ko`'s `.init.data` section via
+`readelf`/`dd`; format matched the existing loaded blob byte-for-byte.
+Live-tested (module unload → firmware swap → reload → reboot): loads
+clean, all 3 radios up, no instability. Baked into
+`v2-files/lib/firmware/brcm/brcmfmac43602-pcie.bin` starting this build,
+overriding the `brcmfmac-firmware-43602a1-pcie` package's own bundled 2015
+blob.
+
+**Closed out: same-radio AP+STA repeater is a chip-level limit, not
+fixable from software.** Nine independent angles tested live this session
+(driver patch x2, official OpenWrt UCI method, P2P-GO firmware path, the
+new 2021 firmware, WDS/4addr, forcing `mbss=true` via interface ordering,
+LuCI's own tooling, plus external corroboration from a DD-WRT user on this
+exact hardware and Cypress's own 2018 commit message naming this precise
+failure) — all converge on the same wall: **cfg80211's own advertised
+interface combinations reject "1 STA + 2 AP" outright**, a kernel-level
+rejection beneath any driver bug or firmware iovar. Full writeup:
+`docs/FINDINGS.md` §20. Only remaining path to a working repeater: a USB
+WiFi dongle for a genuinely separate STA-side radio (`kmod-rt2800-usb` +
+an RT5370 dongle — router has 2 idle USB ports confirmed, package
+confirmed present in the 25.12.5 feed) — not attempted, needs physical
+hardware.

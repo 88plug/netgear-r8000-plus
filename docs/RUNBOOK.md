@@ -135,6 +135,30 @@ here). `tftp-hpa` installed.
   `cp v2-files/etc/config/wireless.example v2-files/etc/config/wireless` and
   replace the `CHANGE-ME` placeholders with your own values before running
   `make image` below, or it'll fail (or worse, build with no passphrase set).
+- **Also first build only:** `v2-files/lib/firmware/brcm/brcmfmac43602-pcie.bin`
+  (the 2021 firmware upgrade, `docs/FINDINGS.md` §20/`docs/WINS.md` v18) is a
+  binary and gitignored by the repo's blanket `*.bin` rule — won't exist on a
+  fresh clone either. Its source (`hwoffload-research/blob-analysis/rootfs/`,
+  the extracted stock-firmware rootfs) is *also* gitignored (vendor binary
+  rule) — both are "kept on disk, not in git" per this repo's convention, same
+  as the stock `.chk`/`.zip` in `images/` (see "Recovery net" above for
+  obtaining the stock firmware if it's not already on disk). If the rootfs
+  extraction is gone, re-extract `R8000-V1.0.4.88_10.1.88.chk` (squashfs) to
+  get `dhd.ko` back, then:
+  ```bash
+  DHD=hwoffload-research/blob-analysis/rootfs/lib/modules/2.6.36.4brcmarm+/kernel/drivers/net/dhd/dhd.ko
+  SEC_OFF=$(readelf -S "$DHD" | awk '/\.init\.data/{print "0x"$5; exit}')
+  SYM=$(readelf -s "$DHD" | awk '/dlarray_43602a1/{print $2, $3; exit}')
+  SYM_VAL=$(echo "$SYM" | awk '{print "0x"$1}')
+  SYM_SIZE=$(echo "$SYM" | awk '{print strtonum("0x"$2)}')
+  ABS_OFF=$(( SEC_OFF + SYM_VAL ))
+  mkdir -p v2-files/lib/firmware/brcm
+  dd if="$DHD" of=v2-files/lib/firmware/brcm/brcmfmac43602-pcie.bin bs=1 skip=$ABS_OFF count=$SYM_SIZE
+  # sanity check: should print "version 7.10.274.3.REBASE.R493518 ... Date: Wed 2021-06-02"
+  strings v2-files/lib/firmware/brcm/brcmfmac43602-pcie.bin | grep -i "43602a1-roml.*Version:"
+  ```
+  Confirmed reproducible (byte-identical container/header format to the
+  stock-loaded blob, correct chip stepping match to `BCM43602/1` in dmesg).
 - **ImageBuilder (fast, no toolchain compile) — the actual recipe used for
   v7 through the current shipping image**, reconstructed and verified
   2026-07-24 against the live router's own `apk list --installed` (ground
