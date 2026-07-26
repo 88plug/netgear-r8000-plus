@@ -1280,3 +1280,48 @@ problem, but it's a real six-year currency improvement kept regardless.
 Baked into `v2-files/lib/firmware/brcm/brcmfmac43602-pcie.bin` (overrides
 the `brcmfmac-firmware-43602a1-pcie` package's own bundled 2015 blob via
 the `FILES=` overlay) starting v18.
+
+## 21. Proxy-STA / Proxy-STA-Repeater ("psta"/"psr") — tenth angle, also dead (2026-07-26)
+
+Deep research into FreshTomato/DD-WRT/Asuswrt-Merlin (all three drive
+Broadcom radios via the proprietary closed `wl`/`wlconf` stack, never
+brcmfmac) surfaced a genuinely different mechanism from everything tried
+in §20: Broadcom's firmware-native **Proxy STA / Proxy STA Repeater**
+mode. Unlike our apsta-based approach (a second concurrent AP-role vif),
+`psta`/`psr` is set as a firmware iovar **on the STA interface itself**
+(`WLC_SET_INFRA=1`, no `WLC_SET_AP`, `apsta` stays 0) - real repeater
+behavior implemented internally by firmware, not by a second Linux-level
+bsscfg going through `brcmf_cfg80211_start_ap()`'s apsta-forcing code at
+all. Confirmed real, not speculative:
+
+- `PSTA_MODE_DISABLED=0` / `PSTA_MODE_PROXY=1` / `PSTA_MODE_REPEATER=2`,
+  from Broadcom's own `wlioctl_defs.h` (cross-checked against multiple
+  vendor SDK trees on GitHub).
+- The exact sequence (from FreshTomato's own `wlconf.c`, line ~2000-2011):
+  `WL_IOVAR_SETINT(name, "psta", PSTA_MODE_REPEATER)` then
+  `WL_IOVAR_SETINT(name, "psta_mrpt", val)`.
+- The literal ASCII string **"psta psr" is embedded in both of this
+  router's own firmware blobs** (the 2015 stock blob and the 2021 blob
+  extracted from Netgear's own `dhd.ko` in §20) - real, checked via
+  `strings`, not assumed.
+
+**Live-tested, real negative result.** Wrote `hwoffload-research/psta-probe/`
+- a small, revert-safe, one-shot diagnostic kernel module (same pattern
+as this project's `fa_probe.ko` work) that calls brcmfmac's own
+`EXPORT_SYMBOL_GPL`'d `brcmf_fil_iovar_data_set()` directly via
+`symbol_get()` (no brcmfmac source modification - brcmfmac was built in a
+different tree so no `Module.symvers` was available for normal static
+cross-module linking, hence the runtime symbol lookup) to send
+`psta=PSTA_MODE_REPEATER` to the live, already-associated `phy1-sta0`
+interface. Result: `err=-52` - the same generic firmware-rejection code
+seen throughout §19/§20 for every other unsupported operation on this
+chip/firmware. Unload cleanly reverted (also `-52`, consistent - nothing
+was ever set), zero side effects, STA connection unaffected throughout.
+
+**Conclusion:** the "psta psr" string in our firmware blob is very likely
+leftover shared-SDK string-table data (Broadcom firmware images for a
+whole chip family are often built from one shared codebase with many
+optional features compiled in but not all enabled/licensed per-SKU), not
+a functioning code path on this specific firmware build. Tenth
+independent angle tested this session, tenth wall. USB dongle remains the
+only real path to working repeater functionality on this hardware.

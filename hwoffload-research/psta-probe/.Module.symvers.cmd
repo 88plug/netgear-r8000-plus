@@ -1,0 +1,1 @@
+savedcmd_/home/andrew/netgearr8000/hwoffload-research/psta-probe/Module.symvers :=  scripts/mod/modpost -M        -o /home/andrew/netgearr8000/hwoffload-research/psta-probe/Module.symvers -n -T /home/andrew/netgearr8000/hwoffload-research/psta-probe/modules.order -i Module.symvers -e 
