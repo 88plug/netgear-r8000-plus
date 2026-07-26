@@ -2297,3 +2297,74 @@ Certification ladder position: `functional`, now with a real
 non-regression deployment behind it, not just a clean compile - still
 not `reproduced`/`certified` for the actual DWDS negotiation itself,
 honestly, since that needs a peer this environment cannot provide.
+
+## 30. "Extender" LuCI page - reusing stock Join Network, adding only
+the part that's actually missing, verified live in a real browser
+(2026-07-26)
+
+The operator's actual ask, corrected mid-session: not a camera-specific
+or phone-specific feature - a general "repeat any network" UI, GL.iNet-
+style, and pointedly: "doesn't openwrt have this already obviously."
+It does, mostly. Checked before building anything (break-dogma, not
+assumed): stock LuCI's `network/wireless.js` already has a full
+Scan → Join Network flow (`handleScan`/`handleJoin`/`handleJoinConfirm`),
+mature, well-tested, creating a STA-mode `wifi-iface` on submit. That
+part was NOT rebuilt.
+
+**What's actually missing, confirmed by reading that flow line by
+line:** `handleJoinConfirm` only ever creates the STA section - nothing
+in stock LuCI creates the AP-side repeat companion this project's
+`eufy-repeater` architecture needs (BSSID-cloned per §28, PROMISC/
+ALLMULTI per §26, relayd-bridged per §15/§19), and nothing checks the
+other band.
+
+**Built exactly that gap, nothing more,** as a new LuCI page (`Network
+› Extender`), this router's LuCI being the modern ucode/JS framework
+(`luci-26.205`, no classic Lua controllers on this build - confirmed by
+checking, not assumed, `lua` isn't even present as a binary here):
+- `usr/share/luci/menu.d/luci-app-extender.json` - menu entry
+- `usr/share/rpcd/acl.d/luci-app-extender.json` - ACL (wireless/network/
+  firewall UCI + `system.reboot` ubus, matching the reboot-not-restart
+  design below)
+- `www/luci-static/resources/view/extender.js` - the actual page: lists
+  every `mode=sta` wifi-iface (from stock Join Network OR anywhere
+  else - it doesn't care how the STA got there), and for each, either
+  shows "Repeating" if a matching AP companion
+  (`mode=ap`+`repeater_mode=1`, same device+ssid) already exists, or an
+  "Enable Repeating" button. Clicking it creates that companion
+  (device/ssid/encryption/key copied straight from the STA section -
+  same identity, per the operator's own "just repeats" correction in
+  §28), then scans the OTHER band's radio (`radio1`↔`radio2`, the same
+  pairing established in §28's rationale) for the identical SSID - if
+  found, provisions a second STA+AP pair there too. This is the
+  operator's "auto repeat 2.4 and 5ghz... if found" request, done as a
+  one-click extension of the per-band mechanism already proven working,
+  not a special case.
+
+**Deliberately does NOT auto-restart on save.** The generic LuCI
+pattern (a `ucitrack` entry "affecting" a service, like firewall's own)
+would restart `eufy-repeater` on every wireless save - but this
+project's own confirmed, repeated failure mode is `iw dev <if> del`
+wedging (`err=-52`) on an already-in-use interface, with a clean reboot
+as the only reliable recovery found all project (§ multiple). Silently
+auto-restarting into that wedge would be worse than asking. The page
+saves UCI only and surfaces an explicit "Reboot Now" button instead -
+slower, but it's the operation actually verified reliable here, not a
+guess dressed as convenience.
+
+**Verified live, in a real browser (Playwright), not just deployed:**
+logged into this router's real LuCI, navigated to the new page -
+correctly listed the real `Eufy_B838D4` STA entry and correctly showed
+"Repeating" (its real AP companion, confirmed present, correctly
+matched). Added a throwaway fake STA section
+(`UITEST-FAKE-NETWORK-XYZ`, radio1, never able to associate - chosen
+specifically so nothing real could be affected) to exercise the
+untested branch: clicked "Enable Repeating", confirmed the success
+notification and "Unsaved Changes" staging, then "Save & Apply", then
+confirmed via SSH that `wireless.ext0_ap` landed on disk with every
+field correct (device/mode/ssid/encryption/key/disabled/repeater_mode).
+Cleaned up the test section immediately after (`uitest_sta`/`ext0_ap`
+both removed, confirmed zero remaining). Zero new console errors (the
+one pre-existing `protocol/relay.js` 404 is stock LuCI probing an
+uninstalled proto handler, unrelated to this page, present before this
+change too).

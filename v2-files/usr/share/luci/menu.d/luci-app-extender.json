@@ -1,0 +1,14 @@
+{
+	"admin/network/extender": {
+		"title": "Extender",
+		"order": 65,
+		"action": {
+			"type": "view",
+			"path": "extender"
+		},
+		"depends": {
+			"acl": [ "luci-app-extender" ],
+			"uci": { "wireless": true }
+		}
+	}
+}

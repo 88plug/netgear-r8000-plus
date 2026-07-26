@@ -1,0 +1,14 @@
+{
+	"luci-app-extender": {
+		"description": "Grant access to the WiFi Extender page (repeat any scanned network, both bands if available)",
+		"read": {
+			"uci": [ "wireless", "network", "firewall" ]
+		},
+		"write": {
+			"uci": [ "wireless", "network", "firewall" ],
+			"ubus": {
+				"system": [ "reboot" ]
+			}
+		}
+	}
+}
