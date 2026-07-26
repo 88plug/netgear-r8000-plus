@@ -2068,3 +2068,79 @@ authentication against `rpt_eufy_ap` as it stands right now** (the
 PROMISC/ALLMULTI fix is already live) before spending effort on the
 creation-method variable, which hostapd's own source now suggests is
 less likely to matter.
+
+## 27. Real-client test with PROMISC/ALLMULTI live: zero associations
+in seven minutes of uptime - and the confound that explains the earlier
+"promising" DHCP signal was an SSID collision, not a repeater success
+(2026-07-26)
+
+Repointed `eufy_sta`/`eufy_ap` UCI to a real neighboring 2.4GHz network
+(SSID "American", -59dBm, password provided directly by the operator)
+so the repeater could be tested against real over-the-air traffic
+without waiting on the Eufy camera or the SSH-unreachable test client.
+The operator confirmed joining the repeated AP "a few times" with a
+real device.
+
+**Initial read looked promising, then fell apart under scrutiny.**
+`logread` showed repeating `dnsmasq-dhcp[1]: DHCPDISCOVER(phy1-sta0)` /
+`DHCPOFFER(phy1-sta0) 192.168.1.135` cycles for a real MAC
+(`d0:50:99:f3:ee:19`) every few seconds. First reaction: a client's
+broadcast reached our DHCP server through `relayd`, so something *did*
+associate. Checked further before believing it.
+
+**The disproof, in order:**
+- `iw dev rpt_eufy_ap station dump` - empty, repeatedly, across a dozen
+  checks spanning several minutes.
+- `hostapd_cli -p /var/run/hostapd-eufy_ap status` - `num_sta[0]=0`,
+  every check.
+- `logread | grep -iE 'rpt_eufy_ap.*(assoc|auth|deauth|IEEE 802.11)'` -
+  **zero results, for the entire router uptime (7 minutes, spanning the
+  operator's whole test window).** hostapd logs association/auth events
+  unconditionally; if a client had ever completed even a failed
+  handshake attempt against this BSS, it would be here. It is not.
+- The only real `Associated with ...` line in the whole boot log is our
+  own `phy1-sta0` joining the upstream American AP - not a client of
+  ours.
+- `uci show dhcp` - no `interface=`/`except-interface=` restriction
+  scopes dnsmasq away from `phy1-sta0`. `relayd -B -D -I rpt_eufy_ap -I
+  phy1-sta0` bridges L2 broadcast between the two interfaces by design.
+  So a real device's DHCP broadcast on the **actual, real** American
+  network can reach our dnsmasq via the STA side, get an incompatible
+  192.168.1.x offer it never uses, and repeat - independent of whether
+  our own AP works at all. Confirmed this is still happening on its own,
+  unprompted, well after the "test" window: same MAC, same
+  DHCPDISCOVER/DHCPOFFER pattern, live during the SSID-rename retest
+  below.
+
+**Conclusion: the PROMISC/ALLMULTI fix from §26 is not confirmed to fix
+anything. The DHCP signal that looked like success was unrelated
+background noise from the real neighbor's own network leaking through
+the STA-side relay.** Ruled out cheaply and quickly before writing this
+up: channel mismatch (STA and AP both confirmed on channel 11/2462MHz -
+a real risk on this MCHAN-less chip, but not what happened here) and a
+tx-power anomaly (`rpt_eufy_ap` reads 20.00 dBm vs `phy0-ap0`'s 31.00 dBm
+- explained entirely by 2.4GHz-channel-11 vs 5GHz-UNII-3 regulatory
+limits, not a bug; not a fair same-band comparison).
+
+**The likely real explanation, not yet disproven: an SSID collision.**
+The repeated AP and the real neighbor's AP were both broadcasting the
+identical SSID "American" with the identical password. A phone scanning
+for "American" has no way to distinguish the two and may have joined the
+real neighbor's AP directly - which perfectly explains all three
+observations at once: zero hostapd events on our BSS (never touched),
+the DHCP noise (the phone's real traffic on the real network, leaking
+through our relay), and the operator's honest "yes I joined it a few
+times" (they did - just not necessarily through us).
+
+**Retest deployed to remove the ambiguity:** renamed the repeated AP's
+broadcast SSID to `American-RPT-TEST` (UCI `wireless.eufy_ap.ssid`,
+STA side unchanged, still associates to the real "American" upstream),
+rebooted, confirmed live: `rpt_eufy_ap` broadcasting
+`ssid=American-RPT-TEST` on channel 11, PROMISC/ALLMULTI flags still
+`0x1303`, `relayd` running. A join to this exact name cannot be
+confused with any other network. Real-time `logread -f` monitor
+running, filtered to `rpt_eufy_ap|American-RPT-TEST` only (the known
+`phy1-sta0` DHCP noise is explicitly excluded from the filter now that
+it's understood). Awaiting a real join attempt against the unambiguous
+SSID - this is the actual, first-ever unconfounded test of the
+PROMISC/ALLMULTI fix.
