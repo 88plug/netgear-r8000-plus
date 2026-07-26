@@ -1752,3 +1752,96 @@ Linux-exposed," not as a working mechanism.
 New probe source: `hwoffload-research/psta-probe/apsta_probe.c`,
 `hwoffload-research/psta-probe/dwds_probe.c` (same `symbol_get()`
 pattern as the existing probes in that directory).
+
+## 25. The single-role baseline test - a real complication, reported
+honestly rather than smoothed over (2026-07-26)
+
+Two independent reviewers (fatal-flaw and soundness, in the same
+peer-review round as §24), tracing the evidence trail rather than
+re-litigating what was already closed, converged on the same next
+question: **no test anywhere in this project - not §19, not §20, not
+this round's three-condition convergence - has ever established what
+happens when `phy1` has an AP-role vif and genuinely no STA vif at all**,
+as opposed to a STA that is connected, bounced, or settled. Every prior
+test varies STA *state*; none removes the STA *entirely*. That's the one
+control that can distinguish "fails because a STA association is active"
+from "fails always, for a reason unrelated to STA concurrency."
+
+**Ran it.** Disabled `wireless.eufy_sta` in UCI (so `phy1-sta0` is never
+created and `eufy-repeater`'s own `wait_for_sta_ifname()` - which
+requires a connected STA before it will create the AP at all - never
+fires), rebooted for a clean baseline, stopped `usteer`, and manually
+replicated the AP-side half of `eufy-repeater`'s own documented recipe
+(§19's `iw phy phy1 interface add rpt_isotest type __ap`, matching MAC
+convention, `hostapd` invoked directly against `hostapd-isotest.conf`
+with the same `ssid`/`wpa_passphrase`/`hw_mode`/`channel` as the real
+`rpt_eufy_ap`). Confirmed `AP-ENABLED`, confirmed via `iw dev` that
+`phy1` has exactly one vif (the AP) and nothing else. A real, independent
+client (-48dBm signal) tried to join:
+
+```
+wlp2s0: SME: Trying to authenticate with ea:fc:af:f9:f1:99 (SSID='Eufy_B838D4' freq=2437 MHz)
+wlp2s0: Event AUTH_TIMED_OUT (14) received
+wlp2s0: SME: Authentication timed out
+```
+
+**Four consecutive attempts, identical result - with zero STA vif
+present anywhere on the radio.** Repeated cleanly on a second fresh
+reboot to rule out leftover state. The result held both times.
+
+**This is a real complication, not a footnote, and it needs to be stated
+plainly: the auth-timeout symptom used as evidence throughout §20's
+"American network" test, and reproduced again in this round's §24
+three-condition convergence, does not by itself demonstrate a
+same-radio-concurrency limit.** It reproduces with no concurrency
+present at all. Read plainly, the honest interpretation is one of:
+
+(a) the minimal, standalone `iw phy ... interface add ... type __ap` +
+    directly-invoked-`hostapd` harness (used for a quick validation check
+    in §20 and reused here) has a bug, unrelated to STA concurrency,
+    that prevents it from ever completing 802.11 authentication with a
+    real client - independent of MCHAN, apsta, or anything else this
+    document has tested; or
+(b) something about *this specific test SSID/config* (shared with the
+    real Eufy network's own credentials) fails regardless of harness.
+
+**What this does NOT overturn:** §23's E13 finding (the firmware's own
+`cap` string genuinely lacks `mchan`/`rsdb`) is a direct, unmediated
+firmware self-report - it does not depend on hostapd, `iw`-created
+interfaces, or any client authentication attempt, and stands entirely on
+its own regardless of this section's finding. Sections §19's v13-v17
+addenda separately and importantly documented that the **real production
+mechanism** - `eufy-repeater`'s actual service, with `relayd -B -D` and
+the STA-MAC-XOR-derived (not arbitrary) AP MAC address, run against real
+Eufy camera hardware with a STA genuinely present and associated - shows
+a *different* symptom entirely: clients complete authentication and
+association, then disassociate in a fast ~4-second loop. That is a
+materially different failure point than "authentication itself never
+completes," observed under the full production setup this section's
+isolation test did not replicate (no `relayd`, an arbitrary rather than
+XOR-derived MAC).
+
+**Honestly still open, the necessary next experiment:** does the *full*
+production mechanism (real MAC derivation, `relayd -B -D` running, exact
+`eufy-repeater` invocation) also fail identically - either symptom -
+when tested with the STA genuinely absent, the way this section's
+simplified harness was? That is the control that would cleanly settle
+whether §20's causal attribution (same-radio STA+AP concurrency, gated by
+MCHAN/apsta) actually explains the auth-timeout symptom, or whether the
+auth-timeout symptom has always been a separate, harness-specific defect
+riding alongside a real-but-differently-evidenced concurrency limit.
+Not run this session - flagging it here rather than either quietly
+patching over the discrepancy or claiming a resolution that hasn't been
+earned.
+
+**Standing revision to this document's own confidence:** §20's "same-
+radio AP+STA repeating is not achievable on this hardware/firmware
+combination, full stop" should be read, after this section, as strongly
+supported by the *independent* MCHAN/RSDB firmware evidence (§23) and by
+external corroboration (§20 point 9, §23/§24's DD-WRT and vendor-driver
+citations) - but the specific real-client auth-timeout test that has
+been cited repeatedly across §20/§21/§22/§24 as direct behavioral proof
+of that limit is now shown to reproduce with no STA-side concurrency
+whatsoever, and should not continue to be cited as if it demonstrates
+the concurrency claim specifically until the full-mechanism, STA-absent
+control above is actually run.
