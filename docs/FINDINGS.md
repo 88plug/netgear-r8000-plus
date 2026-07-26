@@ -1905,6 +1905,26 @@ honestly as incomplete, not silently dropped or assumed either way.
 rebooted back to normal repeater operation regardless of this test's
 outcome.
 
+**Fourth reconciling check, identified by peer review, not yet run:** the
+config diff above rules out hostapd *config content* as a variable, but
+not the interface *creation method* - a raw `iw phy phy1 interface add
+... type __ap` (used by `eufy-repeater` and by every isolation test in
+this section) is a structurally different path into
+`NL80211_CMD_NEW_INTERFACE`/`brcmf_cfg80211_start_ap()` than a fully
+netifd/UCI-managed `wifi-iface` bring-up, regardless of what's in
+`hostapd.conf`. A UCI-managed AP-only `wifi-iface` on `radio1` (STA still
+disabled, so none of §20's netifd/whole-phy-teardown collision applies)
+would test this directly, on the actual 2.4GHz radio this whole
+investigation concerns - and would also close a narrower gap in the
+client-elimination check above: that check used the router's 5GHz
+`R8000` SSID, so it rules out the client's WiFi stack in general but not
+specifically on 2.4GHz/`radio1`. Not run - the test client became
+SSH-unreachable (ping-reachable throughout, consistent with the earlier
+interruption) for an extended period, and this is treated as a genuine
+anomaly on the operator's own machine rather than pushed through.
+Flagged as the next concrete experiment once the test client is
+confirmed recovered.
+
 **Standing revision to this document's own confidence:** §20's "same-
 radio AP+STA repeating is not achievable on this hardware/firmware
 combination, full stop" should be read, after this section, as strongly
