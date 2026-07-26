@@ -1936,3 +1936,62 @@ of that limit is now shown to reproduce with no STA-side concurrency
 whatsoever, and should not continue to be cited as if it demonstrates
 the concurrency claim specifically until the full-mechanism, STA-absent
 control above is actually run.
+
+**Formal peer-review closure (2026-07-26).** A 5-reviewer blind round
+(soundness, prior-art, reproducibility, significance, fatal-flaw) plus a
+meta-review area-chair decision were run on the full §19-25 claim, using
+this project's own `scientific-method` peer-review discipline. Final
+scores: soundness 4/5, prior-art 5/5, reproducibility 4/5, significance
+3/5, fatal-flaw 2/5 (authoritative, held the line hardest). **Decision:
+major-revision**, not accept and not reject. The meta-review's own
+reasoning, preserved here for the ledger:
+
+- **CONFIRMED, independent of any harness confound:** MCHAN/RSDB absence
+  read directly off the firmware's own `cap` string (E13); the
+  interface-combination table's architecture, read from
+  `brcmf_setup_ifmodes()` source, purely feature-flag-driven with no
+  chip-ID branch (E5); psta's companion `BRCMF_E_IF_ADD` event never
+  firing, a driver-event test independent of any client-auth harness
+  (E10); external corroboration from a named Cypress/Infineon engineer's
+  own commit message and a competing firmware project's (DD-WRT) own
+  documentation (E9, R8).
+- **NOT YET CONFIRMED:** that the observed real-client `AUTH_TIMED_OUT`
+  is caused by same-radio concurrency specifically, as opposed to an
+  untested confound in the raw-`iw`-interface-creation-plus-hostapd
+  harness used to generate that evidence.
+- **Required before this moves to accept:** (1) the UCI/netifd-managed
+  `wifi-iface`-on-`radio1`-with-STA-absent test identified above,
+  (2) the full production `eufy-repeater` mechanism (real `relayd -B
+  -D`, real MAC-XOR address) tested with the STA genuinely absent, to
+  reconcile against §19's own differently-symptomed production result,
+  (3) the interrupted MAC-address check from earlier in this section,
+  re-run once the test client's SSH reachability is confirmed restored
+  (not just ping), (4) the `docs/RUNBOOK.md` 862/863/864 workflow
+  section (conceded open, unrelated to the causal question but required
+  for third-party reproduction).
+- **The USB WiFi dongle recommendation (MT7612U/AR9271, §23 Thread 4)
+  stands as reasonable practical advice regardless of this open
+  question** - it is justified by the confound-independent capability-
+  absence evidence, not by the contested auth-timeout evidence, and
+  should keep its existing "literature-based, untested on this hardware"
+  label rather than being read as validated.
+- **Dissent on record:** soundness/prior-art/reproducibility/significance
+  all recommended minor-revision, judging the independent capability-
+  absence evidence sufficient on its own narrower grounds. Overruled at
+  the meta-review level because this document's own "claim under
+  review" is a causal/mechanism claim, not merely a capability-absence
+  claim, and that specific causal link has a named, cheap, still-open
+  confound.
+
+None of the required follow-up experiments were run this session: the
+test client became SSH-unreachable for an extended period during the
+exact window these tests were needed (ping-reachable throughout - the
+machine itself, not down; only its SSH daemon stopped answering,
+possibly disk-space exhaustion from this session's own repeated verbose
+`wpa_supplicant -d` logging, worth checking first). Treated as a genuine
+operational anomaly on a machine this project already handles with
+documented caution, not pushed through. **This document's status is
+therefore: capability-absence claim CONFIRMED and closed; causal
+attribution of the specific auth-timeout symptom to same-radio
+concurrency OPEN, with a concrete, cheap, fully-specified experiment
+queued to resolve it as soon as the test client is available again.**
