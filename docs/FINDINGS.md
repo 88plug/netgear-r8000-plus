@@ -1318,10 +1318,42 @@ seen throughout §19/§20 for every other unsupported operation on this
 chip/firmware. Unload cleanly reverted (also `-52`, consistent - nothing
 was ever set), zero side effects, STA connection unaffected throughout.
 
-**Conclusion:** the "psta psr" string in our firmware blob is very likely
-leftover shared-SDK string-table data (Broadcom firmware images for a
-whole chip family are often built from one shared codebase with many
-optional features compiled in but not all enabled/licensed per-SKU), not
-a functioning code path on this specific firmware build. Tenth
-independent angle tested this session, tenth wall. USB dongle remains the
-only real path to working repeater functionality on this hardware.
+**Correction (same session, retested more carefully): the -52 above was a
+test-methodology bug, not a firmware rejection.** Re-reading `wlconf.c`
+more closely showed the real driver always brackets the `psta` set with
+`WLC_DOWN` ... `WLC_UP` (`BRCMF_C_DOWN`/`BRCMF_C_UP` in brcmfmac's own
+command numbering) - our first probe set `psta` on an already-up,
+already-associated interface. Rebuilt the probe to do
+`BRCMF_C_DOWN` -> set `psta`=`PSTA_MODE_REPEATER` (+ `psta_mrpt`) ->
+`BRCMF_C_UP`, matching the real sequence exactly. Result: **every call
+returned err=0** (accepted), and a separate read-only readback module
+(`psta_readback.c`, same `symbol_get()` technique) confirmed
+`psta` genuinely stuck at 2 through re-association - not silently reset.
+**This firmware does support Proxy-STA-Repeater mode; that part is real.**
+
+**But it is not a usable repeater today.** No new Linux netdev/interface
+appeared, no `WLC_E_IF` interface-add event was logged, and a real client
+test against the router's own (separately-created, unrelated)
+`rpt_eufy_ap` interface still showed the identical zero-RX/auth-timeout
+behavior - because that interface has nothing to do with `psta`. The
+likely explanation: brcmfmac's event handler only turns a firmware
+`WLC_E_IF` event into a Linux netdev when the driver itself *armed* an
+expectation for one first (`brcmf_cfg80211_arm_vif_event()`, the same
+mechanism used for P2P-GO creation) - since brcmfmac never sends `psta`
+and never arms for it, any companion bsscfg the firmware creates
+internally for PSR mode has no path to becoming a usable Linux interface
+we could bridge into the LAN, regardless of whether the firmware itself
+is doing something with it. Turning this into an actual working repeater
+would require real brcmfmac driver development (teaching the event
+handler to recognize and expose a PSR-mode companion bsscfg) - a genuine
+kernel driver project, not a config/iovar-only fix like the rest of this
+document's findings.
+
+**Revised bottom line:** the tenth angle found a real, corrected fact
+(PSR mode is genuinely supported and settable on this exact firmware, not
+rejected) but not a working feature - the gap is now precisely a driver
+gap, not an unknown/firmware gap. Still no repeater today without either
+the USB dongle path or a real brcmfmac patch adding PSR-companion-bsscfg
+handling (out of scope for this session; flagged here as the one
+concretely-scoped follow-on worth a dedicated future effort, unlike the
+other nine dead ends).
