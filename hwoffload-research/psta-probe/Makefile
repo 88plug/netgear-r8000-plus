@@ -19,7 +19,7 @@ CROSS_COMPILE ?= arm-openwrt-linux-muslgnueabi-
 PWD := $(shell pwd)
 export PATH := $(TOOLCHAIN_DIR)/bin:$(PATH)
 
-obj-m := psta_probe.o psta_readback.o psta_trigger.o
+obj-m := psta_probe.o psta_readback.o psta_trigger.o cap_readback.o
 
 all:
 	$(MAKE) -C $(KDIR) M=$(PWD) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) modules

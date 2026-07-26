@@ -1500,3 +1500,140 @@ principle - future effort belongs back on §20's conclusively-identified
 real blocker (same-radio AP+STA data plane) or on non-brcmfmac approaches
 (a second physical radio via USB WiFi dongle, already flagged in §21 as
 the remaining practical option).
+
+## 23. Full "no mercy" break-dogma campaign - four parallel investigations,
+MCHAN absence directly confirmed from the firmware itself, no thirteenth
+angle survives (2026-07-26)
+
+Explicit instruction to fan out and keep breaking dogma until a working
+repeater exists. Four independent research threads plus one direct,
+zero-risk live falsifier, run in parallel against every remaining
+assumption from §20-§22.
+
+**Thread 1 - does Netgear's own stock firmware (`dhd.ko`, proprietary
+Broadcom driver, same chip) have a working repeater the open brcmfmac
+driver just doesn't implement?** Read the actual extracted stock rootfs
+(`hwoffload-research/blob-analysis/rootfs/`). The stock GUI ships exactly
+two "extend the network" features, neither the mechanism this project
+needs: **"Wireless Access Point Mode"** (`ap_mode.cgi`) is a *wired*-uplink
+layer-2 bridge with no WiFi client role at all; **WDS bridging**
+(`wds.cgi`) needs an explicit cooperating peer's MAC list - unusable
+against an arbitrary third-party network. `dhd.ko`/`wl`/`wlconf` all carry
+live, parsed `psta`/`apsta`/`wet`/`dwds` tokens (confirming, independently,
+that these modes exist at the vendor-driver level on this exact chip) -
+but Netgear **never shipped a GUI path to exercise them**, so no live
+vendor-firmware test of same-radio AP+STA exists anywhere, including in
+the vendor's own product. Most valuable independent confirmation: `dhd.ko`
+and `wl` contain **zero** `rsdb`/`mchan` strings either - the hardware
+lack is confirmed from a second, completely separate codebase, not just
+brcmfmac's own assumption.
+
+**Thread 2 - is RSDB/MCHAN absence a hard silicon fact, or an artifact of
+brcmfmac's own probe logic?** Web research into Broadcom's own
+architecture disclosures. RSDB absence is unambiguous and structural:
+Broadcom's own 2015 launch material states "RSDB... requires dual MAC,
+PHY, and radio hardware," and RSDB silicon (BCM4359/4366) launched a full
+year *after* BCM43602 shipped - RSDB cannot apply to this chip by
+definition, not by firmware choice. MCHAN's status was the one point the
+research agent flagged as **genuinely unresolved from public sources** -
+the driver treats it as a live firmware query (`feature.c`, substring
+match against the firmware's own `cap` iovar string), not a hardcoded
+chip-ID fact, and nobody has published that query's result for 43602
+specifically.
+
+**That gap was the cheapest falsifier available and was closed directly,
+same session, zero risk:** wrote `cap_readback.ko` (read-only, same
+`symbol_get()` pattern as `psta_readback.c`, calls the already-exported
+`brcmf_fil_iovar_data_get()` for the `"cap"` iovar - no interface state
+touched). Live result, this router's actual currently-running firmware,
+not inferred:
+```
+cap="ap sta wet wet_tunnel led wme 802.11d 802.11h rm cqa cac mbss4
+     ampdu ampdu_tx ampdu_rx amsdurx amsdutx rxchain_pwrsave
+     radio_pwrsave bcm_dcs proptxstatus psta psr wds dwds
+     traffic-mgmt traffic-mgmt-dwm p2po anqpo vht-prop-rates
+     dfrts stbc-tx stbc-rx-1ss pspretend wnm bsstrans
+     probresp_mac_filter mfp"
+contains 'mchan'? no
+contains 'rsdb'? no
+contains 'p2p'?   YES
+```
+**MCHAN is genuinely absent from what this exact firmware advertises
+about itself - confirmed directly, not inferred from a driver code path
+or a chip family assumption.** This retires the one open question the
+hardware-research thread flagged; there is no live-firmware ambiguity
+left to resolve on RSDB/MCHAN.
+
+**Thread 3 - the P2P-GO path re-examined at the source level (not just
+its outer failure code).** Re-read `brcmf_p2p_set_firmware()` directly:
+it forces `apsta=1` **unconditionally**, with no RSDB/MCHAN gate at all -
+a structurally different code path from the AP-role function §20's
+patches modified. The function proceeds past that apsta-forcing step
+without incident and fails two calls later, on `p2p_da_override` (setting
+the P2P Discovery interface's MAC address) - a real firmware rejection,
+but the actual BCME error code is masked: `brcmf_fil_cmd_data()` only
+returns the true firmware code when the caller sets `ifp->fwil_fwerr`,
+which `p2p.c` never does here, so all we ever see is the generic `-EBADE`
+(`-52`) stand-in. No missing driver-side "enable" step was found -
+`brcmf_p2p_create_p2pdev()` doesn't even check `set_firmware()`'s return
+value before continuing, so nothing is being skipped on our end. Checked
+whether `BRCMF_FEAT_P2P` (a passive `cap`-string flag, confirmed present
+above) gates this call: it does not - `brcmf_p2p_attach()` runs
+unconditionally regardless of that flag. This point (the real BCME code
+behind the P2P Discovery interface's address-override rejection) remains
+formally unresolved without a debug-tracing patch - but is now known to
+be immaterial regardless: P2P-GO creates a WiFi-Direct group-owner
+interface, which negotiates via WiFi Direct's own discovery/provisioning
+protocol, not plain WPA2-PSK association - a security camera has no way
+to associate to a P2P-GO interface as an ordinary client even if creation
+succeeded. This path was already ruled out by mechanism, independent of
+its firmware-level fate.
+
+**Also checked directly from source, definitively closing every
+interface-type angle:** `NL80211_IFTYPE_MESH_POINT` is not implemented at
+all in this driver (`-EOPNOTSUPP`, dead case label, never added to
+`wiphy->interface_modes`) - not gated, simply absent. `NL80211_IFTYPE_ADHOC`
+exists but only as a mode *change* on the single existing primary vif
+(exclusive with AP, not concurrent) - creating it as a second, separate
+vif hits the identical `-EOPNOTSUPP`. And `brcmf_setup_ifmodes()` (the
+function that builds this chip's advertised `iface_combinations`) is
+purely feature-flag-driven with no chip-ID branch: with this chip's real
+flags (`mbss=1, rsdb=0, mchan=0`) the only combinations this driver will
+ever advertise are STA-alone, STA+1-AP+P2P-types, or MBSS's AP-only(x4).
+**No combination this driver can ever produce includes STA+2AP** - the
+`err=-16`/EBUSY finding from §20 angle 7 is architectural, confirmed at
+the code that generates the combination table itself, not a bug with a
+workaround.
+
+**Thread 4 - USB WiFi dongle, the one remaining practical path (needs new
+hardware).** Confirmed no USB WiFi adapter is currently attached (only
+the USB storage key from the monitoring-stack work). Chipset research,
+evidence-graded: **MT7601U confirmed client-mode-only** in OpenWrt's own
+package (no AP mode, ever). **RTL8188EU-family confirmed no AP mode**
+(the chipset in most sub-$10 dongles - explicitly avoid). **MT7612U
+confirmed solid AP-mode support** (dedicated community guides, multiple
+working `hostapd` configs; its sibling MT7610U has open upstream AP-mode
+bugs - chipset-specific, not family-wide). **AR9271 (`ath9k_htc`)
+confirmed AP-capable** - native mainline `mac80211` driver, the most
+historically dependable USB AP chipset, 2.4GHz/N150 only (sufficient for
+a camera link). Recommendation: **Alfa AWUS036ACM (MT7612U)** as first
+choice, a generic AR9271 dongle as the simpler/cheaper fallback. No
+bcm53xx-specific report of this exact onboard-radio + USB-dongle
+combination was found either way - the router's USB host controllers are
+architecturally independent of the PCIe-attached BCM43602 radios, so no
+conflict is expected, but this is engineering inference, not a documented
+precedent.
+
+**Verdict, thirteen angles now closed with zero survivors on the original
+two-radio hardware:** every lever break-dogma discipline can name - the
+vendor's own competing driver stack, the chip's own self-reported firmware
+capabilities (verified live, not inferred), every alternate firmware
+concurrency path (P2P-GO) and every alternate interface type (mesh,
+IBSS), and the combination-table generation code itself - has been
+checked directly against source or live hardware, not assumed. **Same-
+radio AP+STA repeating is not an implementation gap; it is a firmware
+capability this exact chip does not advertise, confirmed from its own
+`cap` string.** The only path left that isn't re-litigating an already-
+closed door is Thread 4: a second, independent physical radio via USB.
+That step needs hardware this session doesn't have - a decision for the
+operator, not a further software lever to pull.
