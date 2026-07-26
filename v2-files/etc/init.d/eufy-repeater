@@ -221,6 +221,20 @@ start_ap_relay() {
 	if [ -n "$ap_mac" ]; then
 		recreate_iface="$recreate_iface && ip link set dev '$ap_ifname' down && ip link set dev '$ap_ifname' address '$ap_mac' && ip link set dev '$ap_ifname' up"
 	fi
+	# A netifd-managed AP interface (e.g. main_radioN) always ends up
+	# PROMISC+ALLMULTI - confirmed live: it's a bridge-membership side
+	# effect (br-lan member ports get these set automatically by the
+	# kernel's own bridging code so all traffic needed for L2 forwarding
+	# reaches them). This raw-`iw`-created interface is never a br-lan
+	# member (it's relayed via userspace `relayd`, not kernel bridging),
+	# so it never gets them - confirmed live, flags read UP|BROADCAST|
+	# MULTICAST only, missing PROMISC|ALLMULTI that a working AP has.
+	# Setting them explicitly is safe and reversible (confirmed live,
+	# driver accepts it cleanly - "entered promiscuous mode"/"entered
+	# allmulticast mode" in dmesg) - exploratory candidate fix for the
+	# real-client auth-timeout under investigation (docs/FINDINGS.md
+	# §25/26), not yet confirmed to actually fix it.
+	recreate_iface="$recreate_iface && ip link set dev '$ap_ifname' promisc on allmulticast on"
 	recreate_iface="$recreate_iface && iw dev '$ap_ifname' set channel '$channel'"
 	[ -n "$radio_txpower" ] && recreate_iface="$recreate_iface && iw dev '$ap_ifname' set txpower fixed $((radio_txpower * 100))"
 

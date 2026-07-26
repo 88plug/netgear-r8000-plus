@@ -1995,3 +1995,76 @@ therefore: capability-absence claim CONFIRMED and closed; causal
 attribution of the specific auth-timeout symptom to same-radio
 concurrency OPEN, with a concrete, cheap, fully-specified experiment
 queued to resolve it as soon as the test client is available again.**
+
+## 26. Invention campaign on the auth-timeout - a real, concrete,
+already-deployed candidate fix found via source research, untested
+against a live client (2026-07-26)
+
+Ran a structured invention campaign (frame → ideate → refute → build/
+measure → provenance-search) against the meta-review's #1 open question:
+is the auth-timeout caused by same-radio concurrency, or by something
+else entirely in the raw-`iw`-interface-creation/hostapd harness this
+project uses? Full ideation record:
+`/tmp/claude-1000/.../scratchpad/invent-repeater-fix.md` (not part of
+this repo - session scratch).
+
+**Ideated six candidate mechanisms** across dogma-breaking lenses
+(borrowed-runtime: let hostapd create its own interface; asserted-limit:
+disable HT to isolate a capability-negotiation mismatch; the meta-
+review's own required UCI/netifd-managed test; a sequenced netifd
+recombination; a missing `NL80211_CMD_START_AP` step; and a direct
+router-side comparison of interface state).
+
+**Research (Idea E) - hostapd's own upstream source, cloned and traced
+directly (`w1.fi/hostap.git`, `driver_nl80211.c`):** the frame-
+registration call chain
+(`wpa_driver_nl80211_finish_drv_init()` → `nl80211_setup_ap()` →
+`nl80211_mgmt_subscribe_ap()`, which issues the actual `NL80211_CMD_FRAME`
+registration for Auth/Assoc/Disassoc/Deauth/Probe-Req) is **identical**
+whether hostapd creates the interface itself or attaches to one created
+externally - confirmed by reading the real source, not inferred. The
+only confirmed difference (`NL80211_ATTR_IFACE_SOCKET_OWNER`) affects
+interface lifecycle/cleanup, not frame reception. No hostapd
+documentation requires self-creation either. **This means the interface-
+creation-method hypothesis (the meta-review's own top-ranked open item)
+is now less likely to be the actual fix than it looked** - hostapd's
+code genuinely does not care. It reframes the likely bug location away
+from hostapd and toward the driver/kernel layer.
+
+**Direct router-side comparison (Idea F), no client needed for this
+part:** compared `/sys/class/net/<if>/flags` between a real, working,
+netifd-managed AP interface (`phy0-ap0`, real 5GHz clients connect
+daily) and the raw-`iw`-created `rpt_eufy_ap`:
+```
+phy0-ap0    (working, br-lan member):  0x1303 = UP|BROADCAST|MULTICAST|PROMISC|ALLMULTI
+rpt_eufy_ap (raw-iw, relayd-relayed):  0x1003 = UP|BROADCAST|MULTICAST                 (missing PROMISC|ALLMULTI)
+```
+Manually set `ip link set dev rpt_eufy_ap promisc on allmulticast on` -
+**accepted cleanly, confirmed live via dmesg** ("entered promiscuous
+mode", "entered allmulticast mode"), flags now read `0x1303`, matching
+the working interface exactly. The likely explanation: `phy0-ap0` gets
+these flags automatically as a side effect of `br-lan` bridge membership
+(the kernel's own bridging code sets them on member ports); `rpt_eufy_ap`
+is deliberately never a bridge member (it's relayed via userspace
+`relayd`, not kernel bridging, per §19's own architecture), so it never
+picks them up.
+
+**Deployed as a real, persistent, respawn-safe fix - not yet confirmed
+to solve the auth-timeout, but live and ready.** Patched
+`etc/init.d/eufy-repeater`'s `recreate_iface` sequence to set these flags
+unconditionally, matching the existing MAC-address fix's respawn-safety
+pattern (every recreation, not just the first, gets the flags). Deployed,
+rebooted, confirmed live: `rpt_eufy_ap` now reads `0x1303`, hostapd and
+`relayd -B -D` both running normally against it.
+
+**Not yet tested against a real client - the practical limit of this
+session.** The test client became SSH-unreachable for the remainder of
+the session (ping-reachable throughout, treated as a genuine anomaly on
+a machine handled with documented caution, not pushed through). This is
+therefore the concrete next step, ranked ahead of the meta-review's
+originally-proposed interface-creation-method test given the hostapd-
+source finding above: **the moment a real client is available, test
+authentication against `rpt_eufy_ap` as it stands right now** (the
+PROMISC/ALLMULTI fix is already live) before spending effort on the
+creation-method variable, which hostapd's own source now suggests is
+less likely to matter.
