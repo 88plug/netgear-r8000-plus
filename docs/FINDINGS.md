@@ -2274,6 +2274,26 @@ builds, not just applies. **Explicitly NOT claimed:** functional
 verification of a real negotiated DWDS link, which needs a second
 Broadcom/DWDS-capable peer this environment does not have and the
 actual target devices (Eufy, phones) could never provide regardless.
-Certification ladder position: `functional` (compiles, applies,
-non-destructive to AP bring-up) - not `reproduced` or `certified`,
-honestly, for a mechanism with no way to reach that here.
+
+**Deployed live and verified, not just compile-tested.** Extracted the
+real, stripped `brcmfmac.ko` from the built `.apk` (285772 bytes,
+`dwds` string confirmed present via `strings` - the true 861-864-only
+baseline, pulled independently from ImageBuilder's package cache for
+comparison, is 283240 bytes/hash `82dc952c...` with no `dwds` string at
+all, so this is a real, confirmed-different binary, not a no-op
+rebuild). Pushed to `/lib/modules/6.12.94/brcmfmac.ko`, rebooted clean.
+Post-boot verification: `lsmod` shows the new module loaded (hash
+matches); all four WiFi interfaces up (`phy0-ap0`/`phy2-ap0` real APs,
+`rpt_eufy_ap` repeater, `phy1-sta0` STA); BSSID clone from §28 still
+correct (`04:17:b6:b8:38:d4` on both sides); PROMISC/ALLMULTI flags
+still `0x1303`; `relayd` running; zero new dmesg errors beyond the
+already-known, already-explained ones (firmware blob-variant probe
+misses matching earlier sessions' findings, the legacy-MBSS-fallback
+`err=-52` path patch 861 already works around). A genuine safety net
+was also staged on the router
+(`/tmp/brcmfmac-TRUEORIG-861-864.ko`, hash-verified against the
+independently-pulled original) in case of regression - none occurred.
+Certification ladder position: `functional`, now with a real
+non-regression deployment behind it, not just a clean compile - still
+not `reproduced`/`certified` for the actual DWDS negotiation itself,
+honestly, since that needs a peer this environment cannot provide.
