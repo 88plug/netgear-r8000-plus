@@ -1174,6 +1174,21 @@ search found anyone having done for range-extension purposes.
 
 ## 20. Same-radio AP+STA repeater — definitively a chip-level limit, not Eufy/ESWP-specific (2026-07-25)
 
+> **Reader's note, added after §25 (2026-07-26):** this section's title and
+> the "SME: Authentication timed out" behavioral evidence below were, at
+> the time of writing, believed to directly demonstrate a same-radio
+> STA+AP concurrency limit. §25 later ran the one control this section
+> never did - the identical AP-alone test with the STA vif genuinely
+> absent, not just disconnected - and got the **same auth-timeout with no
+> concurrency present at all**. That does not overturn this project's
+> conclusion (§23's direct firmware `cap`-string read independently
+> confirms the underlying MCHAN/RSDB absence this section attributes the
+> symptom to), but the specific real-client auth-timeout evidence quoted
+> immediately below is now known **not** to be diagnostic of concurrency
+> by itself. Read this section for the architectural/driver-source
+> findings (still solid); read §25 before treating the client-auth
+> symptom quoted here as proof of the concurrency claim specifically.
+
 **The §19 "ESWP protocol rejection" theory above is superseded.** Retested
 the identical repeater architecture against a completely unrelated,
 ordinary 2.4GHz WPA2 network ("American", a real neighboring router, zero
@@ -1833,6 +1848,62 @@ riding alongside a real-but-differently-evidenced concurrency limit.
 Not run this session - flagging it here rather than either quietly
 patching over the discrepancy or claiming a resolution that hasn't been
 earned.
+
+**Addendum, same session - the cheapest reconciling check, run
+immediately: is this a client-side artifact?** Before trusting any of the
+above, checked the one thing that could invalidate all of it: can the
+same test client (the separate Linux box used throughout this round, not
+the router) actually complete a real authentication and 4-way handshake
+against *anything* at all, right now? Pointed it at this router's own
+real, working `R8000` main SSID (5GHz, `radio0`/`radio2`, confirmed daily
+driver via normal use per `docs/WINS.md`) with the real PSK. Result:
+```
+wlp2s0: SME: Trying to authenticate with ea:fc:af:f9:f1:39 (SSID='R8000' freq=5745 MHz)
+wlp2s0: WPA: RX message 1 of 4-Way Handshake from ea:fc:af:f9:f1:39 (ver=2)
+wlp2s0: WPA: RX message 3 of 4-Way Handshake from ea:fc:af:f9:f1:39 (ver=2)
+```
+repeated identically against both real 5GHz BSSIDs on this router. Full
+802.11 Authentication, Association, and EAPOL key-exchange initiation all
+completed cleanly and repeatedly (the run never settled on one BSSID long
+enough to finish the handshake and get an IP, because both radios
+broadcast the identical `R8000` SSID and the client kept re-evaluating
+which to roam to - a roaming-noise artifact of the test setup, not a
+failure of anything being measured here). **This rules out the client
+itself, its WiFi hardware, and its `wpa_supplicant` stack as an
+explanation for any of this section's or this document's auth-timeout
+results.** The client can and does complete real, working WPA2
+authentication against this exact router, on this exact chip family (5GHz
+BCM43602 siblings), today. Whatever produces `AUTH_TIMED_OUT` against the
+raw-`iw`-created, STA-isolated `rpt_isotest`/`rpt_eufy_ap` mechanism is a
+property of that specific AP-side mechanism (or this exact radio/
+interface), not of the test client used to probe it.
+
+**Second reconciling check, also run immediately: is the config
+identical to production?** Diffed the live, currently-running
+`/var/etc/hostapd-eufy_ap.conf` against this section's own
+`hostapd-isotest.conf` - byte-for-byte identical apart from the
+interface/`ctrl_interface` names. Rules out a config divergence as the
+explanation; whatever differs between this section's isolation harness
+and the real production repeater is not in the hostapd config.
+
+**Third reconciling check, attempted, not completed - reported
+honestly.** The one remaining candidate difference from the real
+production mechanism is the AP's own MAC address (`eufy-repeater`
+derives it from the STA's address via XOR; this section's harness used
+an arbitrary address in the same format). Rebuilt the isolation test a
+second time using the exact MAC the real `rpt_eufy_ap` uses in normal
+operation (`ea:fc:af:f9:f1:37`), confirmed via `iw dev` before testing -
+but the test client (a separate machine on this network, not the router)
+became unreachable over SSH mid-test (ping continued to succeed
+throughout - the machine itself was never down, only its SSH daemon
+stopped answering within the connection timeout). Out of caution for a
+machine this project treats as sensitive, further connection attempts
+were stopped rather than repeated aggressively. **The MAC-address
+hypothesis is therefore neither confirmed nor ruled out** - flagged
+honestly as incomplete, not silently dropped or assumed either way.
+`rpt_isotest` and the STA-disabled UCI state were reverted and the router
+rebooted back to normal repeater operation regardless of this test's
+outcome.
 
 **Standing revision to this document's own confidence:** §20's "same-
 radio AP+STA repeating is not achievable on this hardware/firmware
