@@ -15,8 +15,21 @@
 // Network, or manually) and provision its missing half - the AP-side
 // repeat companion (etc/init.d/extender's generic repeater_mode='1'
 // mechanism, unchanged - see docs/FINDINGS.md §15/§26/§28 for why it's a
-// raw iw+hostapd+relayd vif rather than a normal wifi-scripts AP, and why
-// its BSSID is cloned from the upstream AP rather than derived-unique).
+// raw iw+hostapd+relayd vif rather than a normal wifi-scripts AP).
+//
+// BSSID: REVERSED 2026-07-26. This AP vif uses its own natural/derived
+// MAC, NOT the upstream AP's BSSID. Earlier design cloned the upstream
+// BSSID on the theory that a "real" repeater is transparent down to the
+// BSSID - externally researched and confirmed wrong (OpenWrt's own
+// relayd/WDS guides and every commercial extender use a distinct BSSID
+// with the same SSID; same-BSSID/same-channel across independent,
+// uncoordinated transmitters is only a supported pattern under enterprise
+// Single-Channel Architecture, which needs a central controller doing
+// frame-level TX scheduling - nothing like that exists here). Confirmed
+// live: with BSSID cloned, kernel RX counters on the repeat AP sat at an
+// exact, unbroken zero indefinitely - the client's radio has no way to
+// prefer our clone over the already-established real AP using the
+// identical BSSID, so it never even attempts contact with our interface.
 //
 // Dual-band: on "Enable Repeating", scans the OTHER band's radio for the
 // SAME SSID (confirmed live this session: a real neighboring network,
@@ -110,6 +123,20 @@ function ensureNetworkAndZone(networkName, apIfname) {
 	uci.set('network', networkName, 'defaultroute', '0');
 	uci.set('network', networkName, 'peerdns', '0');
 
+	// This router's own dnsmasq (nonwildcard notwithstanding) answers DHCP
+	// broadcasts it overhears on ANY up interface unless explicitly told to
+	// ignore one - confirmed live 2026-07-26: without this, this router's
+	// own uplink DHCP client raced (and sometimes lost to) the real
+	// upstream network's DHCP server on its own STA link, and dnsmasq also
+	// handed out bogus offers from this router's own LAN pool to unrelated
+	// third-party devices on the shared network being repeated. Same
+	// pattern already used for the 'wan' interface.
+	if (!uci.get('dhcp', networkName)) {
+		uci.add('dhcp', 'dhcp', networkName);
+		uci.set('dhcp', networkName, 'interface', networkName);
+		uci.set('dhcp', networkName, 'ignore', '1');
+	}
+
 	var zones = uci.sections('firewall', 'zone');
 	var zone = zones.filter(function(z) {
 		return (z.network || []).indexOf(networkName) !== -1;
@@ -167,6 +194,7 @@ return view.extend({
 			uci.load('wireless'),
 			uci.load('network'),
 			uci.load('firewall'),
+			uci.load('dhcp'),
 			network.getWifiDevices()
 		]);
 	},
@@ -232,10 +260,23 @@ return view.extend({
 			if (found) {
 				var sections2 = uci.sections('wireless', 'wifi-iface');
 				var existing = findCompanion(sections2, otherDev, sta.ssid);
-				if (!existing) {
+				// Only one STA fits per radio (physically one channel at a
+				// time - the whole reason this project exists). If the other
+				// band's radio already has a DIFFERENT network's STA on it
+				// (e.g. radio1 already repeating Eufy), do not silently try
+				// to add a second one - that's a live conflict, not a
+				// dual-band win. Caught by testing this exact scenario live:
+				// American (dual-band) + Eufy (already on radio1) together
+				// tried to double-book radio1 before this check existed.
+				var radioOccupied = sections2.some(function(s) {
+					return s.mode === 'sta' && s.device === otherDev && s.ssid !== sta.ssid;
+				});
+				if (!existing && !radioOccupied) {
 					var base2 = nextFreeBaseName(sections2);
 					addRepeaterPair(base2, otherDev, base2 + '_wwan', sta.ssid, sta.encryption, sta.key, true);
-					dualBandMsg = _('Also found "%s" on the other band - repeating both.').format(sta.ssid);
+					dualBandMsg = _('Also found "%s" on the other band - extending both.').format(sta.ssid);
+				} else if (!existing && radioOccupied) {
+					dualBandMsg = _('Also found "%s" on the other band, but that radio is already extending a different network - only extending this band.').format(sta.ssid);
 				}
 			}
 			return uci.save().then(function() {
@@ -243,7 +284,7 @@ return view.extend({
 			});
 		}).then(function(dualBandMsg) {
 			ui.addNotification(null, E('p', [
-				E('strong', {}, _('Repeater configured for "%s".').format(sta.ssid)),
+				E('strong', {}, _('Extender configured for "%s".').format(sta.ssid)),
 				dualBandMsg ? E('p', {}, dualBandMsg) : '',
 				E('p', {}, _('A reboot is required to bring this up reliably - this router\'s driver does not reliably hot-swap AP/STA interfaces on the same radio (confirmed repeatedly this project). Use the "Reboot Now" button below when ready.'))
 			]), 'info');
@@ -256,7 +297,7 @@ return view.extend({
 	},
 
 	handleRemoveRepeat: function(companion, ev) {
-		if (!confirm(_('Remove the repeater for "%s"? This deletes its wireless, network and firewall configuration.').format(companion.ssid)))
+		if (!confirm(_('Remove the Extender for "%s"? This deletes its wireless, network and firewall configuration.').format(companion.ssid)))
 			return;
 
 		var base = companion['.name'].replace(/_ap$/, '');
@@ -289,7 +330,7 @@ return view.extend({
 
 		var self = this;
 		return uci.save().then(function() {
-			ui.addNotification(null, E('p', _('Repeater for "%s" removed. Reboot to fully apply.').format(companion.ssid)), 'info');
+			ui.addNotification(null, E('p', _('Extender for "%s" removed. Reboot to fully apply.').format(companion.ssid)), 'info');
 			return self.render();
 		});
 	},
@@ -322,7 +363,7 @@ return view.extend({
 						var status = statusByName[companion['.name']] || { active: false };
 						var statusEl = status.active
 							? E('span', { 'style': 'color:#5c5' }, [
-									_('Repeating'), ' (', status.clients, ' ',
+									_('Extending'), ' (', status.clients, ' ',
 									(status.clients === 1 ? _('client') : _('clients')), ')'
 								])
 							: E('span', { 'style': 'color:#c95' }, _('Configured - reboot to activate'));
@@ -337,7 +378,7 @@ return view.extend({
 						actionCell = E('button', {
 							'class': 'cbi-button cbi-button-action',
 							'click': ui.createHandlerFn(this, 'handleEnableRepeat', sta)
-						}, _('Enable Repeating'));
+						}, _('Enable Extending'));
 					}
 					return E('tr', { 'class': 'tr' }, [
 						E('td', { 'class': 'td' }, sta.ssid || E('em', {}, _('(hidden)'))),
@@ -352,27 +393,27 @@ return view.extend({
 						E('th', { 'class': 'th' }, _('Network')),
 						E('th', { 'class': 'th' }, _('Band')),
 						E('th', { 'class': 'th' }, _('Radio')),
-						E('th', { 'class': 'th right' }, _('Repeater'))
+						E('th', { 'class': 'th right' }, _('Extender'))
 					])
 				].concat(rows));
 
 				if (rows.length === 0) {
 					table.appendChild(E('tr', { 'class': 'tr placeholder' }, [
 						E('td', { 'class': 'td', 'colspan': 4 }, [
-							E('em', {}, _('No joined networks yet. Use Network › Wireless › Scan › Join Network to connect to one first, then come back here to turn it into a repeater.'))
+							E('em', {}, _('No joined networks yet. Use Network › Wireless › Scan › Join Network to connect to one first, then come back here to turn it into an Extender.'))
 						])
 					]));
 				}
 
 				return E('div', {}, [
 					E('h2', {}, _('Extender')),
-					E('p', {}, _('Turn any network this router has joined into a WiFi repeater/extender - same SSID and password as the original, transparent to clients. If the same network is also found on the other band, both get repeated automatically.')),
+					E('p', {}, _('Turn any network this router has joined into a WiFi Extender - same SSID and password as the original, transparent to clients. If the same network is also found on the other band, both get extended automatically.')),
 					table,
 					E('div', { 'class': 'cbi-page-actions right', 'style': 'margin-top:1em' }, [
 						E('button', {
 							'class': 'cbi-button cbi-button-positive important',
 							'click': ui.createHandlerFn(self, 'handleReboot')
-						}, _('Reboot Now (apply repeater changes)'))
+						}, _('Reboot Now (apply Extender changes)'))
 					])
 				]);
 			});

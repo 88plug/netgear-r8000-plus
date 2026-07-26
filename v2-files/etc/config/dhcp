@@ -37,6 +37,26 @@ config dhcp 'wan'
 	option interface 'wan'
 	option ignore '1'
 
+# Extender STA/WWAN interfaces (phy1-sta0/phy2-sta0) must never be served
+# DHCP by this router's own dnsmasq - despite `nonwildcard '1'` above,
+# dnsmasq's non-wildcard binding does not cover these dynamically-created
+# wwan interfaces on its own, and without an explicit ignore section here
+# dnsmasq answers DHCP broadcasts overheard on them directly. Confirmed
+# live 2026-07-26: this router's own uplink DHCP client was racing (and
+# sometimes losing to) the real upstream network's DHCP server on these
+# same interfaces, and dnsmasq was also handing out bogus offers (from
+# this router's own LAN pool) to unrelated third-party devices on the
+# shared upstream network being repeated. Same `ignore '1'` pattern as
+# the 'wan' section above - add one of these per extN_wwan/extN24_wwan
+# network interface the LuCI Extender page creates.
+config dhcp 'american_wwan'
+	option interface 'american_wwan'
+	option ignore '1'
+
+config dhcp 'american24_wwan'
+	option interface 'american24_wwan'
+	option ignore '1'
+
 config odhcpd 'odhcpd'
 	option maindhcp '0'
 	option leasefile '/tmp/odhcpd.leases'

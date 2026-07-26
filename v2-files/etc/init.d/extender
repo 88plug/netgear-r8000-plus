@@ -155,23 +155,31 @@ start_ap_relay() {
 	# confirmed live this actually takes effect and survives bringing the
 	# interface back up.
 	#
-	# A real repeater shares the upstream AP's own identity so a client
-	# doesn't have to pick between "the real AP" and "the repeater" - it's
-	# one network either way, transparently. This project's earlier
-	# derived-unique-MAC approach (XOR the locally-administered bit) got
-	# that backwards: it deliberately made this interface a DIFFERENT
-	# BSSID from the AP it's repeating. Clone the upstream AP's own BSSID
-	# instead - `iw dev link`'s "Connected to <mac>" is exactly that.
-	# Only safe/correct to do this for a network this router's owner
-	# actually controls (the repeated AP is impersonating that MAC on the
-	# air) - falls back to the old derived-unique-MAC behavior if the
-	# upstream BSSID can't be read, rather than silently going unset.
-	local sta_mac ap_mac upstream_bssid
+	# REVERSED 2026-07-26: this project previously cloned the upstream AP's
+	# own BSSID here, on the theory that a "real" repeater is transparent
+	# down to the BSSID and a client shouldn't have to pick between "the
+	# real AP" and "the repeater". Externally researched and confirmed
+	# wrong: OpenWrt's own official relayd guide, its WDS guide (which goes
+	# out of its way to use a DIFFERENT ESSID specifically to stop clients
+	# from picking the wrong link), and every commercial extender all use
+	# the AP-role vif's own natural BSSID with the SAME SSID as upstream -
+	# never a cloned BSSID. The only real precedent for same-BSSID/same-
+	# channel across independent transmitters is enterprise Single-Channel
+	# Architecture, which requires a central controller doing frame-level
+	# TX scheduling across all radios - nothing like that exists here.
+	#
+	# Confirmed live on this router: with BSSID cloned, kernel-level RX
+	# packet counters on the repeated AP interface (errors/dropped/missed
+	# all included, not just accepted packets) sat at an exact, unbroken
+	# zero indefinitely, even during sustained heavy client activity on the
+	# same network - because the client's radio has no way to prefer our
+	# clone over the real, already-established AP using the identical
+	# BSSID, so it never even attempts contact with our interface. Using
+	# the vif's own default MAC instead makes this a distinct, selectable
+	# network the client can actually choose or roam to.
+	local sta_mac ap_mac
 	sta_mac="$(cat "/sys/class/net/$sta_ifname/address" 2>/dev/null)"
-	upstream_bssid="$(iw dev "$sta_ifname" link 2>/dev/null | sed -n 's/^Connected to \([0-9a-fA-F:]*\).*/\1/p')"
-	if [ -n "$upstream_bssid" ]; then
-		ap_mac="$upstream_bssid"
-	elif [ -n "$sta_mac" ]; then
+	if [ -n "$sta_mac" ]; then
 		local first="${sta_mac%%:*}" rest="${sta_mac#*:}"
 		ap_mac="$(printf '%02x' "$(( (0x$first ^ 0x02) & 0xff ))"):${rest}"
 	fi
