@@ -146,17 +146,23 @@ start_ap_relay() {
 	# confirmed live this actually takes effect and survives bringing the
 	# interface back up.
 	#
-	# Derive a distinct MAC deterministically (XOR the locally-
-	# administered bit on the STA's own MAC's first octet) instead of
-	# leaving it to whatever the driver defaults to - same convention
-	# this project's own main_radioN AP interfaces already use (their
-	# real bssids are the router's base MAC with that same bit set,
-	# confirmed against
-	# `ubus call usteer local_info` output: ea:fc:af:f9:f1:39/...:37 vs
-	# base e8:fc:af:f9:f1:38).
-	local sta_mac ap_mac
+	# A real repeater shares the upstream AP's own identity so a client
+	# doesn't have to pick between "the real AP" and "the repeater" - it's
+	# one network either way, transparently. This project's earlier
+	# derived-unique-MAC approach (XOR the locally-administered bit) got
+	# that backwards: it deliberately made this interface a DIFFERENT
+	# BSSID from the AP it's repeating. Clone the upstream AP's own BSSID
+	# instead - `iw dev link`'s "Connected to <mac>" is exactly that.
+	# Only safe/correct to do this for a network this router's owner
+	# actually controls (the repeated AP is impersonating that MAC on the
+	# air) - falls back to the old derived-unique-MAC behavior if the
+	# upstream BSSID can't be read, rather than silently going unset.
+	local sta_mac ap_mac upstream_bssid
 	sta_mac="$(cat "/sys/class/net/$sta_ifname/address" 2>/dev/null)"
-	if [ -n "$sta_mac" ]; then
+	upstream_bssid="$(iw dev "$sta_ifname" link 2>/dev/null | sed -n 's/^Connected to \([0-9a-fA-F:]*\).*/\1/p')"
+	if [ -n "$upstream_bssid" ]; then
+		ap_mac="$upstream_bssid"
+	elif [ -n "$sta_mac" ]; then
 		local first="${sta_mac%%:*}" rest="${sta_mac#*:}"
 		ap_mac="$(printf '%02x' "$(( (0x$first ^ 0x02) & 0xff ))"):${rest}"
 	fi
