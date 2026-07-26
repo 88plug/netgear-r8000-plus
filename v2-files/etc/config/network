@@ -45,24 +45,27 @@ config interface 'guest'
 	option ipaddr '192.168.2.1'
 	option netmask '255.255.255.0'
 
-# STA side of the Eufy_B838D4 repeater (see config/wireless eufy_sta/eufy_ap
-# and etc/init.d/eufy-repeater) - this router's own DHCP lease from the
-# repeated network. Deliberately NOT a dependency for the repeater itself:
-# etc/init.d/eufy-repeater checks radio-level association (iw link), not
-# this interface's DHCP state, before bringing up the AP+relay side.
+# STA side of the WiFi Extender's first repeat target (see config/wireless
+# ext0_sta/ext0_ap and etc/init.d/extender) - this router's own DHCP lease
+# from the repeated network. Deliberately NOT a dependency for the
+# repeater itself: etc/init.d/extender checks radio-level association
+# (iw link), not this interface's DHCP state, before bringing up the
+# AP+relay side. Any FUTURE extend target added via the LuCI Extender page
+# (Network › Extender) gets its own 'extN_wwan' interface, same shape,
+# created by that page - see www/luci-static/resources/view/extender.js.
 #
-# defaultroute/peerdns MUST both be '0'. Confirmed live 2026-07-25
-# (FINDINGS.md §19 addendum): without these, this interface's DHCP lease
-# installs a default route at the same metric (0) as the real `wan`
-# interface's, and the kernel silently preferred the Eufy-network one -
-# this router's own outbound traffic (not repeated-client traffic, which
-# relayd handles separately at L2) started intermittently routing out
-# through the third-party Eufy network instead of the real WAN, causing
-# ~50% loss to real internet hosts. Caught by testing multi-hop
-# connectivity (ping 8.8.8.8) after a real flash, not by the 1-hop
-# gateway ping alone, which stayed clean throughout and would have masked
-# this.
-config interface 'eufy_wwan'
+# defaultroute/peerdns MUST both be '0' on every one of these, not just
+# this one. Confirmed live 2026-07-25 (FINDINGS.md §19 addendum): without
+# them, this interface's DHCP lease installs a default route at the same
+# metric (0) as the real `wan` interface's, and the kernel silently
+# preferred the repeated network's one - this router's own outbound
+# traffic (not repeated-client traffic, which relayd handles separately at
+# L2) started intermittently routing out through the third-party network
+# instead of the real WAN, causing ~50% loss to real internet hosts.
+# Caught by testing multi-hop connectivity (ping 8.8.8.8) after a real
+# flash, not by the 1-hop gateway ping alone, which stayed clean
+# throughout and would have masked this.
+config interface 'ext0_wwan'
 	option proto 'dhcp'
 	option defaultroute '0'
 	option peerdns '0'

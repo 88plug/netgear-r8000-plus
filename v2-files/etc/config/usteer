@@ -69,7 +69,7 @@ config usteer
 	#
 	# Set 2026-07-25 (FINDINGS.md §19 v16 addendum): without this, usteer's
 	# local_mode='0' auto-discovery picks up EVERY local hostapd node,
-	# including etc/init.d/eufy-repeater's `rpt_eufy_ap` - confirmed via
+	# including etc/init.d/extender's `rpt_ext0_ap` - confirmed via
 	# `ubus call usteer local_info` listing it alongside this router's own
 	# unrelated R8000 nodes, with 802.11k neighbor-report entries for each.
 	# A client on a *repeated third-party network* has no business being

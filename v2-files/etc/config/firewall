@@ -138,29 +138,34 @@ config rule 'guest_isolate'
 	option dest 'lan'
 	option target 'REJECT'
 
-# Eufy_B838D4 repeater STA (config/network eufy_wwan, config/wireless
-# eufy_sta/eufy_ap). Open in all directions: this router relays other
-# devices' traffic through relayd, and needs to reach the upstream Eufy
-# network/internet freely for its own DHCP lease and any local traffic.
+# WiFi Extender's first repeat target, "ext0" (config/network ext0_wwan,
+# config/wireless ext0_sta/ext0_ap) - a generic mechanism, "eufy" was only
+# ever the name of the real network this instance happens to repeat. Any
+# FUTURE extend target added via the LuCI Extender page gets its own
+# 'extN' zone in this same shape (see
+# www/luci-static/resources/view/extender.js). Open in all directions:
+# this router relays other devices' traffic through relayd, and needs to
+# reach the upstream network/internet freely for its own DHCP lease and
+# any local traffic.
 #
-# `list device 'rpt_eufy_ap'` is not optional. Confirmed live (2026-07-25,
+# `list device 'rpt_ext0_ap'` is not optional. Confirmed live (2026-07-25,
 # FINDINGS.md §19 addendum) against the official OpenWrt relayd guide and
 # this router's own generated nft ruleset: relayd is a routed mechanism
 # subject to netfilter, NOT an L2/proxy-ARP bypass of it - a prior version
 # of this comment claimed otherwise and was wrong, corrected here.
-# `rpt_eufy_ap` (the raw AP interface etc/init.d/eufy-repeater creates -
-# the interface real clients actually connect to) is never bound to any
-# UCI `network` section, so `list network 'eufy_wwan'` alone (which only
+# `rpt_ext0_ap` (the raw AP interface etc/init.d/extender creates - the
+# interface real clients actually connect to) is never bound to any UCI
+# `network` section, so `list network 'ext0_wwan'` alone (which only
 # covers `phy1-sta0`) leaves it in NO zone. Default forward policy is
 # REJECT (see `config defaults` above), so without this, every repeated
 # client's traffic would be silently dropped - hostapd/relayd/STA
 # association all look completely healthy while delivering zero real
 # internet access. `device` is a genuine, separate fw4 zone-membership
 # option (confirmed against /usr/share/ucode/fw4.uc), not a workaround.
-config zone 'eufy'
-	option name 'eufy'
-	list network 'eufy_wwan'
-	list device 'rpt_eufy_ap'
+config zone 'ext0'
+	option name 'ext0'
+	list network 'ext0_wwan'
+	list device 'rpt_ext0_ap'
 	option input 'ACCEPT'
 	option output 'ACCEPT'
 	option forward 'ACCEPT'

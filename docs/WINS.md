@@ -736,3 +736,19 @@ WiFi dongle for a genuinely separate STA-side radio (`kmod-rt2800-usb` +
 an RT5370 dongle — router has 2 idle USB ports confirmed, package
 confirmed present in the 25.12.5 feed) — not attempted, needs physical
 hardware.
+
+**Shipped: "Extender" - a real LuCI page, GL.iNet-style, for turning any
+joined network into a repeater in one click.** Reuses stock LuCI's own
+Scan/Join Network flow unchanged (Network › Wireless), adds only what
+was actually missing: an "Enable Repeating" button that provisions the
+AP-side repeat companion (BSSID-cloned, PROMISC/ALLMULTI, relayd-bridged
+- the mechanism `docs/FINDINGS.md` §15-§28 established), auto-detects
+and repeats the other band too if the same SSID is found there, and
+shows real live status (client count, or "reboot to activate" if not
+yet applied) by asking `hostapd_cli` directly - the one thing that
+actually knows a raw, netifd-invisible interface's true state. Verified
+end-to-end in a real logged-in browser session: enable, dual-band
+auto-provisioning (network interface + firewall zone, with the
+defaultroute/peerdns protection §19 already proved necessary), and
+remove, each confirmed against the router's actual UCI state via SSH,
+not just the UI's own say-so. Full history: `docs/FINDINGS.md` §30-§31.

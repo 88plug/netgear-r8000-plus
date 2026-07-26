@@ -2368,3 +2368,69 @@ both removed, confirmed zero remaining). Zero new console errors (the
 one pre-existing `protocol/relay.js` 404 is stock LuCI probing an
 uninstalled proto handler, unrelated to this page, present before this
 change too).
+
+## 31. Naming cleanup + a real app-plus pass on the Extender feature -
+two genuine bugs found and fixed by actually testing it like a human,
+not just reading the diff (2026-07-26)
+
+**Renamed everything eufy-specific to generic**, per the operator's own
+correction: "eufy" was only ever the name of the first real target this
+project tested against, never a property of the mechanism. Renamed
+live on the router (verified via reboot, zero regressions) and in
+`v2-files`: `eufy_sta`/`eufy_ap`/`eufy_wwan`/`eufy` (firewall zone) →
+`ext0_sta`/`ext0_ap`/`ext0_wwan`/`ext0`, matching the `extN` convention
+the Extender LuCI page already used for anything added through the UI.
+`etc/init.d/eufy-repeater` → `etc/init.d/extender` (rc.d symlinks
+recreated, old script removed). `wireless.example` updated to point at
+the LuCI page as the easiest path, not just hand-editing.
+
+**Ran the edgar-morin reasoning loop the app-plus method actually calls
+for** (not just informal code reading) against `extender.js` -
+`capture_user_intent` → `reason()` through the real tensions →
+dialectical-drift warning correctly fired after too many one-sided
+thoughts → a genuine counter-hypothesis registered → decided on the
+merits. Found and fixed: `handleRemoveRepeat`'s firewall-zone deletion
+matched by loose containment (`zone.network` includes this network)
+rather than exclusive ownership - narrow in practice (a dual-band
+network's synthetic name can't pre-date the same save transaction that
+creates it) but a delete path shouldn't rely on "can't happen" alone.
+Tightened to require the zone have exactly one network member before
+removal. Two other candidates (zone-naming edge case for non-`_wwan`
+network names; per-render live ubus round-trips) assessed as genuinely
+low-priority at this feature's real scale and deliberately left alone -
+best judgment, not maximal change.
+
+**Then tested it like a human would, in a real browser again - and
+that's what actually found the significant bug**, not the reasoning
+pass: the live-status feature (§30) showed "Configured - reboot to
+activate" for the real, already-running `Eufy_B838D4`/`ext0_ap`
+repeater, when it was genuinely up (confirmed independently via SSH:
+`hostapd_cli status` showed `state=ENABLED`, BSSID cloned, PROMISC set,
+`relayd` running). Root cause: `network.getWifiNetwork().isUp()`
+reflects **netifd's** view of wireless interfaces - and the entire
+reason this repeater architecture exists (§15) is that its AP side is
+deliberately created OUTSIDE netifd's awareness (raw `iw` + hostapd,
+`disabled='1'` so netifd never touches it). The same architectural
+choice that makes the repeater work at all made the natural LuCI status
+API blind to it. Fixed by asking the one thing that actually knows -
+`hostapd_cli -p /var/run/hostapd-<section> status` via `fs.exec()` -
+parsing `state=ENABLED` and `num_sta[0]` directly. Required a new ACL
+grant (`ubus.file.exec` + a specific `/usr/sbin/hostapd_cli` allowlist
+entry, matching the exact scoping pattern `luci-mod-network`'s own ACL
+uses for the same kind of call). Re-verified live: now correctly shows
+"Repeating (0 clients)" for the real target.
+
+**Full human-style pass, end to end, in a real logged-in browser
+session**, not just unit-level checks: reloaded after the rc.d
+rename+reboot, confirmed the real repeater's row and the renamed
+interfaces; added a throwaway STA (`UITEST-FAKE2`), clicked "Enable
+Repeating", confirmed the `Unsaved Changes` counter, "Save & Apply"d,
+confirmed on the router via SSH that `network.uitest_wwan`
+(defaultroute=0/peerdns=0) and its firewall zone were both created
+correctly - the exact bug fixed in §30 - not a re-assertion, a fresh
+confirmation against the post-rename code. Clicked "Remove", confirmed
+the browser `confirm()` dialog, accepted, "Save & Apply"d again,
+confirmed via SSH that the AP section was fully gone and the
+independently-joined STA correctly survived (the remove guard's
+`base+'_sta' === staSection.name` check working as designed). Cleaned
+up every test artifact afterward, confirmed zero residue.

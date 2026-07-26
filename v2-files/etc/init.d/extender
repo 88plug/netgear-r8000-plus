@@ -1,7 +1,15 @@
 #!/bin/sh /etc/rc.common
-# Repeats an existing WiFi network by running hostapd + relayd directly
-# against a manually-created AP interface, deliberately bypassing OpenWrt's
-# wifi-scripts orchestration for the AP side of an AP+STA combo.
+# WiFi Extender: repeats an existing WiFi network by running hostapd +
+# relayd directly against a manually-created AP interface, deliberately
+# bypassing OpenWrt's wifi-scripts orchestration for the AP side of an
+# AP+STA combo. Generic - not tied to any one target network. Config
+# comes entirely from UCI (any `wireless` wifi-iface section with
+# repeater_mode='1'); the LuCI "Extender" page (Network › Extender,
+# www/luci-static/resources/view/extender.js) writes exactly this shape
+# when you click "Enable Repeating" on an already-joined network. Renamed
+# from `eufy-repeater` 2026-07-26 - that name was only ever the first
+# real target this project tested against (Eufy_B838D4), never a
+# limitation of the mechanism itself.
 #
 # Root cause, confirmed directly on this hardware (not assumed): bringing
 # up an AP-mode wifi-iface via UCI/wifi-scripts, on a radio that already has
@@ -44,7 +52,9 @@
 # interface is already associated on that same radio. A section like this
 # stays 'disabled=1' from wifi-scripts' own point of view (netifd/hostapd.sh
 # must never try to bring it up itself - that's exactly the broken path) -
-# this script is what actually reads and acts on it instead.
+# this script is what actually reads and acts on it instead. Any number of
+# such sections can coexist (one per radio in practice, since each needs
+# its own already-associated STA on the same device).
 
 START=96
 USE_PROCD=1
@@ -92,25 +102,25 @@ start_ap_relay() {
 
 	[ "$repeater_mode" = "1" ] || return 0
 	[ -n "$device" ] && [ -n "$ssid" ] || {
-		echo "eufy-repeater: section $section missing device/ssid, skipping"
+		echo "extender: section $section missing device/ssid, skipping"
 		return 0
 	}
 
 	local devpath
 	devpath="$(uci -q get wireless."$device".path)" || {
-		echo "eufy-repeater: wireless.$device.path not set, skipping $section"
+		echo "extender: wireless.$device.path not set, skipping $section"
 		return 0
 	}
 
 	local phy
 	phy="$(resolve_phy_for_device "$devpath")" || {
-		echo "eufy-repeater: could not resolve phy for $device ($devpath), skipping $section"
+		echo "extender: could not resolve phy for $device ($devpath), skipping $section"
 		return 0
 	}
 
 	local sta_ifname
 	sta_ifname="$(wait_for_sta_ifname "$phy")" || {
-		echo "eufy-repeater: no associated STA found on $phy within 30s, skipping $section"
+		echo "extender: no associated STA found on $phy within 30s, skipping $section"
 		return 0
 	}
 
@@ -130,12 +140,11 @@ start_ap_relay() {
 	local ap_ifname="rpt_${section}"
 
 	# `iw phy interface add` with no `addr` defaults the new interface to
-	# the SAME MAC as the radio's existing interface (phy1-sta0 here) -
-	# confirmed live 2026-07-25 (FINDINGS.md §19 v17 addendum):
-	# `cat /sys/class/net/{rpt_eufy_ap,phy1-sta0}/address` both returned
-	# the identical e8:fc:af:f9:f1:37. relayd's `-I` explicitly does "ARP
-	# cache and host route management" per interface, keyed by MAC - two
-	# of its own interfaces sharing one MAC breaks that bookkeeping
+	# the SAME MAC as the radio's existing interface (its STA vif) -
+	# confirmed live 2026-07-25 (FINDINGS.md §19 v17 addendum): both
+	# ended up with the identical address. relayd's `-I` explicitly does
+	# "ARP cache and host route management" per interface, keyed by MAC -
+	# two of its own interfaces sharing one MAC breaks that bookkeeping
 	# outright, independent of the -B/-D forwarding fix above.
 	#
 	# This driver silently IGNORES `addr <mac>` passed inline to
@@ -213,13 +222,13 @@ start_ap_relay() {
 
 	# The raw interface's lifetime is tied to hostapd's own nl80211 socket -
 	# confirmed live 2026-07-25 (FINDINGS.md §19 addendum): killing hostapd
-	# also destroys `rpt_eufy_ap` (driver/kernel behavior, not something
-	# this script controls). A bare `procd_set_param command hostapd ...`
-	# respawn re-execs hostapd against an interface that no longer exists
-	# after ANY hostapd exit (crash, OOM-kill, whatever) and fails forever
-	# - confirmed live, it does not self-heal. Wrapping interface
-	# (re)creation into the respawned command itself, instead of only
-	# doing it once before the first start, means every respawn - not
+	# also destroys the raw AP interface (driver/kernel behavior, not
+	# something this script controls). A bare `procd_set_param command
+	# hostapd ...` respawn re-execs hostapd against an interface that no
+	# longer exists after ANY hostapd exit (crash, OOM-kill, whatever) and
+	# fails forever - confirmed live, it does not self-heal. Wrapping
+	# interface (re)creation into the respawned command itself, instead of
+	# only doing it once before the first start, means every respawn - not
 	# just the initial one - restores the interface first. `iw dev del`
 	# before `add` stays idempotent/safe whether or not the interface
 	# currently exists.
@@ -256,7 +265,7 @@ start_ap_relay() {
 	# cleanly (WiFi/EAPOL layer is fine - this is why WMM/usteer fixes in
 	# the FINDINGS.md §19 v16 addendum had no effect, that whole
 	# investigation was aimed at the wrong layer) but never gets a real
-	# IP from the actual Eufy DHCP server, and the client's own OS
+	# IP from the actual upstream DHCP server, and the client's own OS
 	# "no internet" detection disconnects it within seconds - matches the
 	# observed ~4s associate/disassociate pattern exactly, across every
 	# client tested. Confirmed live 2026-07-25 (FINDINGS.md §19 v17
