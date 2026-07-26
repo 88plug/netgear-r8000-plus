@@ -1,29 +1,49 @@
 #!/bin/sh
 # uci-defaults: bind the R8000 front-panel WiFi-band LEDs to the netdev
-# names this build's hostapd actually creates (multi-BSS "phyN-apM"),
-# instead of the legacy single-SSID "wlanN" names a stale board.d/uci
-# config on this unit had been left pointing at.
+# names this build's driver actually creates, instead of the legacy
+# single-SSID "wlanN" names a stale board.d/uci config on this unit had
+# been left pointing at.
 #
 # Builds on the v2-staging/leds investigation (DTS/GPIOs verified good,
-# no kernel-level fix needed — see v2-staging/leds/notes.md). This file
-# corrects the live wiring for the *current* production image, which
-# creates phyN-apM interfaces rather than wlanN ones.
+# no kernel-level fix needed — see v2-staging/leds/notes.md).
 #
 # Radio-slot <-> band mapping is hardware-fixed via GPIO (see
 # v2-staging/leds/leds-and-buttons-excerpt.dts) and was independently
 # confirmed live via `iw dev` channel/frequency on 192.168.1.1:
-#   phy1 -> 2.4GHz (channel 1 / 2412MHz)  -> bcm53xx:white:2ghz
-#   phy0 -> 5GHz upper (channel 153/5765MHz) -> bcm53xx:white:5ghz-1
-#   phy2 -> 5GHz lower (channel 36 /5180MHz) -> bcm53xx:white:5ghz-2
+#   phy0 -> 5GHz (channel 149/5745MHz)  -> bcm53xx:white:5ghz-2
+#   phy1 -> 2.4GHz (channel 6/2437MHz)  -> bcm53xx:white:2ghz
+#   phy2 -> 5GHz (channel 44/5220MHz)   -> bcm53xx:white:5ghz-1
+#
+# REVISED 2026-07-26: this originally bound each LED to "phyN-ap0" (each
+# radio's own primary AP BSS), which was wrong for the CURRENT extender
+# architecture - radio1 and radio2 are frequently STA-only (no native
+# AP at all) when fully dedicated to extending another network's band,
+# so "phy1-ap0"/"phy2-ap0" don't exist and the LED trigger silently binds
+# to nothing. Bind to whichever interface actually indicates that radio
+# is doing its job right now:
+#   - radio0 (phy0) always has its own native AP (the router's main
+#     SSID) -> phy0-ap0 is correct and stable.
+#   - radio1/radio2 have no fixed interface name - they might be a
+#     native AP (phyN-ap0) OR a STA link to an extended network
+#     (phyN-sta0) OR both, depending on current UCI config. This script
+#     only runs once at first boot, so it can't dynamically pick the
+#     "current" interface - it picks the STA link as the best default
+#     signal for these two radios, since that's this project's normal
+#     steady state (see docs/RUNBOOK.md / docs/WINS.md). If a radio's
+#     role changes later (e.g. main_radio2 re-enabled as a native AP,
+#     or an extend target removed), re-point that LED's `dev` by hand:
+#       uci set system.led_wlan2g.dev=<real ifname>   # 2.4GHz, radio1
+#       uci set system.led_wlan5g1.dev=<real ifname>  # 5GHz-1, radio2
+#       uci commit system && /etc/init.d/led reload
+#     Confirm the right ifname first with `iw dev` (interface names are
+#     driver/probe-order assigned, not fixed - re-check rather than
+#     assume, exactly like the phy-index caveat below).
 #
 # Caveat (same class as the wlanN caveat in v2-staging/notes.md): the
 # GPIO<->radio-slot mapping never changes, but which kernel phy index
 # (phy0/phy1/phy2) a given radio slot enumerates as is driver/probe-order
-# determined. Binding to "phyN-ap0" (first/primary BSS on that phy) is
-# more robust than the old wlanN scheme since it no longer depends on
-# global net-device probe order, only on the phy index for that radio,
-# but if a kernel/driver bump ever changes phy enumeration order,
-# re-verify with:
+# determined. If a kernel/driver bump ever changes phy enumeration
+# order, re-verify with:
 #   for p in /sys/class/ieee80211/phy*; do
 #     echo "$p -> $(iw phy $(basename $p) info | grep -m1 'Frequencies' -A2)"
 #   done
@@ -38,14 +58,15 @@ netgear,r8000)
 	# WAN: already correct in board.d (link-only, off is legitimate
 	# when no WAN cable has carrier) - left untouched.
 
-	ucidef_set_led_netdev "wlan2g"  "2.4GHz" "bcm53xx:white:2ghz"   "phy1-ap0" "link tx rx"
-	ucidef_set_led_netdev "wlan5g1" "5GHz-1" "bcm53xx:white:5ghz-1" "phy0-ap0" "link tx rx"
-	ucidef_set_led_netdev "wlan5g2" "5GHz-2" "bcm53xx:white:5ghz-2" "phy2-ap0" "link tx rx"
+	ucidef_set_led_netdev "wlan2g"  "2.4GHz" "bcm53xx:white:2ghz"   "phy1-sta0" "link tx rx"
+	ucidef_set_led_netdev "wlan5g1" "5GHz-1" "bcm53xx:white:5ghz-1" "phy2-sta0" "link tx rx"
+	ucidef_set_led_netdev "wlan5g2" "5GHz-2" "bcm53xx:white:5ghz-2" "phy0-ap0"  "link tx rx"
 
 	# "Wireless" front-panel LED had no consistent per-band icon; wire
-	# it to the 2.4GHz AP (always-on radio, present on every R8000) so
-	# it tracks general wireless-up status instead of sitting dark.
-	ucidef_set_led_netdev "wireless" "Wireless" "bcm53xx:white:wireless" "phy1-ap0" "link tx rx"
+	# it to the router's own main SSID (radio0, always-on, present on
+	# every R8000) so it tracks general wireless-up status instead of
+	# sitting dark.
+	ucidef_set_led_netdev "wireless" "Wireless" "bcm53xx:white:wireless" "phy0-ap0" "link tx rx"
 
 	# WPS stays off/unmanaged here deliberately: it's a button-triggered
 	# indicator (blinks during an active WPS pairing session via
