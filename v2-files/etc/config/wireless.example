@@ -116,6 +116,28 @@ config wifi-iface 'main_radio0'
 	option bss_transition '1'
 	option disabled '0'
 
+# ---- OPTIONAL: clone an upstream network's own SSID as a 2nd BSS on
+# radio0 (real multi-BSS, patches/861 - only legitimate when the
+# operator administers BOTH networks, e.g. this router extending the
+# operator's own OPNsense/mesh LAN over a STA uplink, config/network's
+# *_wwan interfaces). NOT third-party SSID cloning - see FINDINGS.md
+# §37 for the full rationale, the confirmed-working result (real client,
+# 0% packet loss, via the existing NAT'd STA-uplink path, no new
+# backhaul), and the one real, confirmed limitation: this only helps a
+# client's FRESH connection decision (first join, wifi toggle, sleep/
+# wake) - an already-connected client will NOT proactively roam here
+# even with a much stronger signal (industry-wide sticky-client
+# behavior, not a config gap). Traffic is NAT'd, not L2-bridged onto
+# the real LAN (this driver rejects WDS/4-address mode outright).
+#config wifi-iface 'american_ap'
+#	option device 'radio0'
+#	option network 'lan'
+#	option mode 'ap'
+#	option ssid 'CHANGE-ME-same-as-upstream-ssid'
+#	option encryption 'psk2'
+#	option key 'CHANGE-ME-same-as-upstream-password'
+#	option disabled '0'
+
 config wifi-iface 'main_radio1'
 	option device 'radio1'
 	option network 'lan'

@@ -2966,3 +2966,85 @@ bcm53xx-generic-netgear_r8000-squashfs.chk` (sha256
 live-patched approximation of it. Build scratch directories
 (`openwrt-build-25.12.5/`, `BUILD_OUT/`, ~2.4GB) cleaned up after
 copying the final artifact out; nothing untracked left behind.
+
+## 37. Corrected a false premise, then built the thing it had ruled out:
+R8000 now also broadcasts the operator's own real "American" SSID as a
+2nd BSS on radio0 (2026-07-27)
+
+Earlier same-session reasoning (this file's own §§ around the Extender
+pivot, and this turn's initial answer to "why not clone the SSID")
+rested on an assumption that turned out to be wrong: that "American"
+was a third-party network the operator doesn't control. Corrected by
+the operator directly: American is the operator's **own** network -
+an OPNsense router doing DHCP/routing for `192.168.1.0/24` (confirmed
+live: `curl -I http://192.168.1.1/` from a client actually on American
+returned `Server: OPNsense`), with Plume mesh APs providing the actual
+WiFi layer behind it. That collapses the strongest objection from the
+prior answer (no shared administrative domain, so no legitimate way to
+coordinate) - the operator administers both ends.
+
+**Re-examined with the corrected premise, not just re-asserted:**
+- "No spare radio" (an earlier claim in this same conversation) - held
+  up to scrutiny, it was too fast: radio0 already runs 4 concurrent
+  AP-role BSSes fine (`iw phy phy0 info`: `#{ AP } <= 4, total <= 4,
+  #channels <= 1` - the same multi-BSS capability patches/861 already
+  fixed, not the AP+STA-concurrent limit that blocks a *repeater* role).
+  Adding "American" as a 2nd BSS alongside `main_radio0` needed nothing
+  new.
+- "GL.iNet not doing this proves it's broken" - retracted as weak
+  evidence in this same conversation before building anything: their
+  choice is consistent with several possible reasons, not proof of one
+  specific technical cause. The real, load-bearing constraint is the
+  L2/DHCP-domain one below, which stands on its own regardless of what
+  any other vendor ships.
+- **The one constraint that survived the re-examination**: real
+  seamless mid-connection roaming (no re-DHCP, no dropped session)
+  still requires a shared L2 broadcast domain with the real network -
+  a true bridge (WDS/4-address mode), which this exact brcmfmac driver
+  rejects outright (`NL80211_IFTYPE_WDS` unsupported, confirmed
+  §19/§29). Owning both networks doesn't remove this - WDS support (or
+  lack of it) is a driver/silicon fact, independent of who administers
+  the far end. This is real, not dogma: re-confirmed the driver
+  rejection stands regardless of the corrected ownership premise.
+
+**Built it anyway, scoped to what's actually achievable without a real
+bridge:** added `american_ap`, a 2nd wifi-iface on radio0, same SSID
++ password as the real network, NAT'd through the already-proven
+STA-uplink path (`config/network`/`config/firewall`, unchanged - no
+new backhaul mechanism, just one more AP sharing the existing egress).
+This is legitimate precisely because the operator owns both ends - it
+is one more real AP on an already-administered network, the same
+mechanism additional Plume pods themselves use to "roam" clients
+(same SSID, multiple physical APs, client decides).
+
+**Live-verified, both halves honestly, not just the flattering one:**
+- Real scan from next to the router: R8000's own "American" BSS at
+  **-27dBm** vs the real Plume APs at -55 to -70dBm from the same
+  spot - a large, real signal advantage.
+- **Fresh connection correctly picks it**: `svc wifi disable` / `enable`
+  (forcing a clean reconnection decision, not a manual pick) associated
+  to R8000's BSS (`e8:fc:af:f9:f1:38`, -42dBm, 866.7 MBit/s) over the
+  real AP automatically. Real internet through it: `ping -c4 8.8.8.8`,
+  0% packet loss.
+- **Already-connected clients do NOT roam here** - tested directly,
+  not assumed: a real device sitting on the actual AP at -62dBm did not
+  roam after 15s even with a 34dB-stronger same-SSID BSS available.
+  This is the exact sticky-client bias this project already documented
+  earlier this session (the original reason same-SSID repeating was
+  abandoned) - re-confirmed here under the corrected premise, still
+  real, still a client-OS behavior rather than anything fixable in this
+  router's config. Reported honestly rather than only citing the
+  flattering fresh-connect result.
+
+**Net effect:** any device joining fresh - new device, phone coming out
+of sleep, walking back into range, toggling WiFi - now automatically
+gets the strongest available "American" signal, R8000's own repeat
+included, with zero client-side configuration. Devices that stay
+continuously connected to a real Plume pod won't be yanked over
+mid-session, which is arguably the safer default anyway (no session
+drops) even though it's not literally the "instant free-roam" the
+initial ask pictured. DHCP-pool numeric overlap between R8000's own
+`192.168.1.100-249` range and the real network's own range is
+confirmed harmless: NAT means R8000's internal DHCP clients live in a
+completely separate, isolated address space regardless of the
+coincidentally-matching subnet number.
