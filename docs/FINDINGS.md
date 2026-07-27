@@ -4619,3 +4619,47 @@ as its own deliberate, well-prepared attempt (backup taken, recovery net
 re-confirmed, ideally with a way to observe the router through an
 actual reboot rather than just noticing one after the fact), not a
 continuation of this same test run.
+
+**CORRECTION, same day - "Phase D" was never the missing piece; this
+project had already found and documented the real, final answer before
+this session's compaction.** `hwoffload-research/fa-probe/BRINGUP_RESULT.md`
+already contains a live=1 test with the identical hit=0 result, AND its
+own root-cause section, reached BEFORE this entry was written:
+
+Broadcom's own vendor driver (`graveyard-vendor/extracted-source/et_linux.c`)
+calls `ctf_forward()` at four points inside ITS OWN RX handler, on every
+received packet, before the packet ever reaches `netif_receive_skb()` -
+that is the only real per-packet consultation point FA/CTF depends on
+anywhere in the entire extracted vendor tree. This router runs mainline
+`bgmac.c`, a completely separate, independently-written upstream driver
+- confirmed (already, before this session) to contain **zero** references
+to CTF/FA/any equivalent hook. The vendor's own attach point
+(`ctf_attach_fn`) is a function pointer that only gets populated if
+Broadcom's closed-source `ctf.ko` is loaded - nothing in mainline ever
+does this.
+
+**This is not a bring-up completeness problem - GMAC init-done AND the
+switch-side SRAB OOB-pause enable (both of "Phase D") were already done
+and confirmed working in this same prior investigation, and the hit
+counter was STILL zero, because the code path that would ever consult
+the table doesn't exist in this kernel at all.** No amount of register
+writes fixes a hook that was never wired into mainline's RX path. Real
+acceleration would require porting/reimplementing Broadcom's closed-
+source RX-hook logic directly into `bgmac.c` itself - a mainline Ethernet
+driver modification, categorically bigger and riskier (touches the hot
+receive path for ALL traffic on this NIC, not an isolated offload
+backend) than anything attempted in #61/#62, and explicitly not
+something to start in the same session as an already-unexplained reboot.
+
+**Honest, final answer on "get hardware NAT offload working" as
+literally stated:** not achievable on this router's current software
+stack (mainline OpenWrt/`bgmac.c`), for an architectural reason this
+project already found and documented, not a gap this session's testing
+could have closed by trying harder or going further into Phase D. The
+real next lever, if ever pursued, is a `bgmac.c` RX-hook port/
+reimplementation - a distinct, much larger, separate future project, not
+a continuation of today's work. Everything actually built and verified
+this session (#61's dispatch-gap fix, the write-path proof, the
+hit-counter oracle technique, #62's crash-on-unload mitigation) remains
+real and correct - it's the "what's next" framing that needed this
+correction, not the work itself.
