@@ -3212,3 +3212,76 @@ trusting the build-time fix in isolation. Doing that real build+flash
 cycle is the natural next step, deferred here per this project's own
 one-artifact-per-turn discipline around live kernel-module rebuild/
 deploy/crash-recover cycles.
+
+## 40. CORRECTION to #39: the apk version tie was real but NOT the actual
+## cause - true root cause was a stray file, found by actually doing the
+## rebuild and hash-verifying it
+
+Did the real rebuild+reflash-prep #39 said was deferred. First rebuild with
+only the PKG_RELEASE fix still shipped the STOCK `brcmfmac.ko`
+(`6f21bc31...`, hash-identical to `/rom`) in the actual embedded rootfs -
+the #39 fix did NOT work. Re-oriented rather than assume the theory was
+just "not quite right yet": manually instrumented the real `make image`
+run with `V=s` and traced module state through every stage.
+
+Direct evidence trail:
+- apk's own install log for the real full build showed `Installing
+  kmod-brcmfmac (6.12.94.6.18.26-r2)` - our LOCAL, patched, bumped-version
+  package. Confirmed correct.
+- `build_dir/.../root.orig-bcm53xx/lib/modules/6.12.94/brcmfmac.ko` (the
+  `prepare_rootfs` pre-overlay snapshot, `TARGET_DIR_ORIG`) hash matched our
+  local `.apk`'s own module exactly. Confirmed correct - apk resolution
+  was NEVER the problem, disproving #39's core claim.
+- `build_dir/.../root-bcm53xx/lib/modules/6.12.94/brcmfmac.ko` (the actual
+  `TARGET_DIR` used to build the final squashfs, AFTER the FILES= overlay
+  step) hash matched STOCK exactly. Wrong, and this is the file that
+  actually becomes the shipped image.
+
+Root cause: `v2-files/lib/modules/6.12.94/brcmfmac.ko` - a stray, forgotten
+copy of the STOCK module, dated 2026-07-23 (found via `git check-ignore`:
+gitignored by `.gitignore:49` alongside the rest of `v2-files/lib/modules/`,
+so it never once showed up in `git status` across this entire project,
+completely invisible to every diff/review this whole time). OpenWrt's
+`FILES=` overlay mechanism applies LAST, by design, deliberately overriding
+whatever the package manager installed - that's the entire point of FILES=
+(letting you override configs/files post-install). This stray file has
+been silently reverting `brcmfmac.ko` to stock on every single build since
+2026-07-23, including all the "real build+flash+verify" cycles reported
+earlier this session as successful (§36) - the apsta/ieee80211w fixes
+(§34/§35) still worked live because they're runtime `uci`/config changes
+applied on top of whatever kernel module happens to be running, not
+dependent on which brcmfmac.ko variant is loaded.
+
+Fix: deleted the stray file (`rm -rf v2-files/lib/modules`; nothing else
+was in that gitignored tree). Real rebuild + real Check 4 (fixed alongside
+this - see below) now proves embedded `brcmfmac.ko` hash matches the local
+patched `.apk` exactly (`15159a87...`).
+
+**#39's fix is NOT reverted** - the apk-version-tie between the local repo
+and the upstream `kmods` feed is real and independently confirmed (`apk
+policy kmod-brcmfmac` genuinely lists both at one point). It just wasn't
+what caused this specific symptom. Kept as cheap, harmless defense-in-depth
+against a real (if here, dormant) class of build-reproducibility risk;
+downgraded in significance from "the fix" to "a fix for a different,
+currently-latent problem."
+
+**Also fixed: `static-verify.sh` Check 4 itself didn't work as first
+written.** Its binwalk-signature-offset approach assumed a bare squashfs
+partition; this board's rootfs is a UBI volume (`mode=ubi`, dynamic volume
+"rootfs") wrapping the squashfs, which binwalk's default scan doesn't
+descend into. Real fix, verified working: `binwalk -e` splits the TRX
+container into its two partitions (kernel, UBI image);
+`ubireader_extract_images` (new dependency: `pip install ubi_reader`) pulls
+the raw "rootfs" volume out of the UBI image; `unsquashfs` then extracts it
+normally (its non-zero exit code when run as non-root, from failing to
+create `/dev/console` device nodes, is expected and not a real failure -
+matches Check 1's own pattern of checking file presence, not the
+extractor's exit status). CI's `release.yml` updated to install
+`ubi_reader`.
+
+**Lesson, stated plainly:** a theory that seems mechanically complete
+(apk resolving two identically-versioned candidates) is still just a
+theory until the actual artifact is rebuilt and hash-checked end to end.
+#39 was published and pushed before that verification ran. Caught here
+specifically because "do the real rebuild" was followed through on rather
+than treating the code fix as self-evidently correct.

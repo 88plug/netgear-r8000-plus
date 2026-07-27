@@ -130,27 +130,48 @@ fi
 echo "--- Check 4: the module actually EMBEDDED in the image matches the local patched .apk ---"
 # This is the check that would have caught v19 shipping silently: Check 1
 # only proves the sidecar .apk file itself is a valid, non-truncated module -
-# it says nothing about what ImageBuilder's apk resolver actually chose to
-# put in the rootfs. Root-caused 2026-07-26: our local kmod-brcmfmac and the
-# upstream kmods feed carried the IDENTICAL version string, so apk's
-# dependency resolution had no reliable way to prefer ours (see
-# build-image.sh's PKG_RELEASE-bump fix) - the .chk shipped with a
-# brcmfmac.ko byte-identical to stock, hash-confirmed against /rom on the
-# real router, despite the correct .apk sitting right there in packages/ the
-# whole time. Only a real diff against the EMBEDDED module catches that class
-# of bug; comparing the sidecar file to itself cannot.
+# it says nothing about what actually ended up in the rootfs. Root-caused
+# 2026-07-27 (FINDINGS.md #40): the real cause was a stray STOCK brcmfmac.ko
+# left in the gitignored v2-files/lib/modules/ tree (dated 2026-07-23, long
+# forgotten) - FILES= overlays apply LAST, by design, after package install,
+# so it silently clobbered the correctly apk-installed patched module on
+# every single build. Only a real diff against the EMBEDDED module catches
+# that class of bug; comparing the sidecar file to itself cannot.
+#
+# bcm53xx's netgear_r8000 image is CHK(header) -> TRX(2 partitions) ->
+# partition_1 is a UBI image (mode=ubi, dynamic volume "rootfs") wrapping the
+# actual squashfs - NOT a bare squashfs partition binwalk's default signature
+# scan finds directly. Confirmed by hand 2026-07-27: binwalk -e splits the
+# TRX into partition_0.bin (kernel, LZMA) / partition_1.bin (UBI image);
+# ubireader_extract_images (pip: ubi_reader) pulls the raw "rootfs" volume
+# out of the UBI image without trying to parse it as UBIFS (it isn't -
+# dynamic volume, raw squashfs payload); unsquashfs then works on that.
 if [ -z "${LOCAL_KO_ABS:-}" ] || [ ! -f "$LOCAL_KO_ABS" ]; then
   echo "SKIP: no local brcmfmac.ko available to compare against (Check 1 didn't produce one)"
-elif ! command -v binwalk >/dev/null 2>&1 || ! command -v unsquashfs >/dev/null 2>&1; then
-  echo "SKIP: unsquashfs/binwalk not both available on this runner"
+elif ! command -v binwalk >/dev/null 2>&1 || ! command -v unsquashfs >/dev/null 2>&1 || ! command -v ubireader_extract_images >/dev/null 2>&1; then
+  echo "SKIP: binwalk/unsquashfs/ubireader_extract_images (pip install ubi_reader) not all available on this runner"
 else
-  SQUASH_OFFSET="$(binwalk "$CHK" 2>/dev/null | awk '/Squashfs filesystem/{print $1; exit}')"
-  if [ -z "$SQUASH_OFFSET" ]; then
-    echo "WARN: couldn't locate a squashfs partition inside $(basename "$CHK") - can't verify the embedded module (non-fatal, logged for review)"
+  rm -rf /tmp/static-verify-trx && mkdir -p /tmp/static-verify-trx
+  binwalk -e -C /tmp/static-verify-trx "$CHK" >/dev/null 2>&1
+  TRX_PART1="$(find /tmp/static-verify-trx -name 'partition_1.bin' | head -1)"
+  if [ -z "$TRX_PART1" ]; then
+    echo "WARN: binwalk couldn't split the TRX partitions out of $(basename "$CHK") - can't verify the embedded module (non-fatal, logged for review)"
   else
-    rm -rf /tmp/rootfs-check
-    if unsquashfs -o "$SQUASH_OFFSET" -d /tmp/rootfs-check "$CHK" >/dev/null 2>&1; then
-      EMBEDDED_KO="$(find /tmp/rootfs-check -iname 'brcmfmac.ko' | head -1)"
+    rm -rf /tmp/static-verify-ubi
+    ubireader_extract_images -o /tmp/static-verify-ubi "$TRX_PART1" >/dev/null 2>&1
+    UBI_VOL="$(find /tmp/static-verify-ubi -iname '*vol-rootfs.ubifs' | head -1)"
+    if [ -z "$UBI_VOL" ]; then
+      echo "WARN: couldn't extract the rootfs UBI volume - can't verify the embedded module (non-fatal, logged for review)"
+    else
+      rm -rf /tmp/static-verify-rootfs
+      # unsquashfs exits non-zero here even on a fully successful extraction
+      # (it can't create /dev/console character-device nodes as non-root) -
+      # confirmed directly: the extracted tree is complete and correct
+      # despite the exit code, same as Check 1's apk extract which is
+      # likewise only verified by the file's actual presence afterward, not
+      # the extractor's exit status.
+      unsquashfs -d /tmp/static-verify-rootfs "$UBI_VOL" >/dev/null 2>&1 || true
+      EMBEDDED_KO="$(find /tmp/static-verify-rootfs -iname 'brcmfmac.ko' 2>/dev/null | head -1)"
       if [ -z "$EMBEDDED_KO" ]; then
         echo "FAIL: extracted rootfs has no brcmfmac.ko at all - can't confirm the driver shipped"
         FAIL=1
@@ -158,14 +179,12 @@ else
         LOCAL_SUM="$(sha256sum "$LOCAL_KO_ABS" | awk '{print $1}')"
         EMBEDDED_SUM="$(sha256sum "$EMBEDDED_KO" | awk '{print $1}')"
         if [ "$LOCAL_SUM" != "$EMBEDDED_SUM" ]; then
-          echo "FAIL: embedded brcmfmac.ko ($EMBEDDED_SUM) does NOT match the local patched .apk's module ($LOCAL_SUM) - ImageBuilder picked a different source (e.g. the upstream kmods feed instead of packages/). This is the exact v19 regression class."
+          echo "FAIL: embedded brcmfmac.ko ($EMBEDDED_SUM) does NOT match the local patched .apk's module ($LOCAL_SUM) - something is overriding or mis-selecting the driver (stray FILES= override, apk resolution, etc). This is the exact v19 regression class."
           FAIL=1
         else
           echo "OK: embedded brcmfmac.ko hash matches the local patched .apk exactly ($LOCAL_SUM)"
         fi
       fi
-    else
-      echo "WARN: unsquashfs failed to extract at offset $SQUASH_OFFSET - can't verify the embedded module (non-fatal, logged for review)"
     fi
   fi
 fi

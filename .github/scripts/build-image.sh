@@ -166,6 +166,21 @@ if [ ! -f "$REPO_ROOT/v2-files/etc/config/wireless" ]; then
   exit 1
 fi
 
+# FOUND AND FIXED 2026-07-27 (FINDINGS.md #40): a stray STOCK brcmfmac.ko had
+# been sitting in v2-files/lib/modules/ since 2026-07-23 - gitignored
+# (.gitignore's v2-files/lib/modules/ entry), so it never once showed up in
+# `git status` across the whole project, and silently clobbered the
+# correctly apk-installed patched module on every build via FILES= (which
+# applies LAST, by design, always overriding what packages installed).
+# v2-files/lib/modules/ should NEVER contain anything - kernel modules must
+# always come from the apk-built package, never from the FILES overlay -
+# so fail loudly if this ever recurs instead of silently shipping stock.
+if [ -d "$REPO_ROOT/v2-files/lib/modules" ] && [ -n "$(find "$REPO_ROOT/v2-files/lib/modules" -type f)" ]; then
+  echo "FATAL: v2-files/lib/modules/ contains file(s) - this overlay tree is gitignored and invisible to git status/diff, and FILES= silently overrides whatever apk installed. This is exactly how v19 shipped a stock brcmfmac.ko (FINDINGS.md #40). Kernel modules must only ever come from the built .apk - remove whatever is in v2-files/lib/modules/ before building."
+  find "$REPO_ROOT/v2-files/lib/modules" -type f
+  exit 1
+fi
+
 make image PROFILE=netgear_r8000 \
   PACKAGES="-wpad-basic-mbedtls wpad-mbedtls hostapd-utils wpa-cli wireless-regdb \
     luci usteer sqm-scripts ethtool relayd \

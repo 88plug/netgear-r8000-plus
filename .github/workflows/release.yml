@@ -35,7 +35,14 @@ jobs:
           [ -s v2-files/etc/config/wireless ] || { echo "FATAL: WIRELESS_CONFIG_B64 secret is missing or empty - see docs/RUNBOOK.md CI section"; exit 1; }
 
       - name: Install build deps
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq build-essential ncurses-dev zlib1g-dev gawk git gettext libssl-dev xsltproc rsync wget unzip python3 binwalk device-tree-compiler squashfs-tools zstd
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq build-essential ncurses-dev zlib1g-dev gawk git gettext libssl-dev xsltproc rsync wget unzip python3 python3-pip binwalk device-tree-compiler squashfs-tools zstd
+          # ubi_reader: static-verify.sh Check 4 needs it to pull the raw
+          # squashfs payload out of this board's UBI-wrapped rootfs volume
+          # (bcm53xx/netgear_r8000 isn't a bare squashfs partition) before it
+          # can hash-compare the module actually embedded in the .chk
+          # against the locally patched .apk - see FINDINGS.md #40.
+          pip install --break-system-packages ubi_reader
 
       - name: Build image
         run: .github/scripts/build-image.sh "${{ inputs.openwrt_version }}"

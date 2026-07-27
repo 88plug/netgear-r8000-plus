@@ -208,8 +208,16 @@ here). `tftp-hpa` installed.
     resulting `.apk` into ImageBuilder's `packages/` before running
     `make image`. This is the exact mistake that silently shipped v5 with
     the stock (unpatched) driver — see `docs/WINS.md`'s v5→v6 entry.
-  - **File presence in `packages/` alone is NOT sufficient — this bit v19
-    too, root-caused 2026-07-26 (FINDINGS.md #39).** apk (this release's
+  - **CORRECTION (FINDINGS.md #40, 2026-07-27): v19's actual cause was a
+    stray stock `brcmfmac.ko` sitting in the gitignored
+    `v2-files/lib/modules/` tree, silently overriding the correctly-built
+    module via the `FILES=` overlay (which always applies last). Deleted.
+    The apk-version-tie note just below is real and worth keeping as
+    defense-in-depth, but it was NOT what actually caused v19's regression
+    — verified by rebuilding, not just by reasoning about it.**
+  - **File presence in `packages/` alone is NOT sufficient — this was
+    thought to be v19's cause, see the correction above (FINDINGS.md
+    #39/#40).** apk (this release's
     package manager, not opkg) resolves `kmod-brcmfmac` against BOTH the
     local `packages/` repo and the upstream `kmods` feed listed in
     `repositories`; if both provide the exact same version string (they
