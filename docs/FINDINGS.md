@@ -4663,3 +4663,42 @@ this session (#61's dispatch-gap fix, the write-path proof, the
 hit-counter oracle technique, #62's crash-on-unload mitigation) remains
 real and correct - it's the "what's next" framing that needed this
 correction, not the work itself.
+
+## 63. The one remaining concrete, documented switch-enablement lever
+## checked - already satisfied, not a gap
+
+Before accepting #62's correction as final, re-read
+`graveyard-vendor/notes.md` §4 closely: `robo_fa_enable(robo, on, bhdr)` is
+documented as exactly TWO register writes - `PAGE_FC/REG_FC_OOBPAUSE` bit 8
+(already done, `fa_switch_oobpause_test.c`/`_persist.c`) and
+`PAGE_MMR(0x02)/REG_BRCM_HDR(0x03) = 1` (never tried before today - a real
+gap worth checking, not dogma to wave away).
+
+Built and loaded `fa_switch_brcmhdr_persist.c` (same proven SRAB
+read/write/revert-on-rmmod pattern as the OOB-pause persist module) to
+check and set this bit in isolation, before combining with anything else.
+**Result: `BRCM_HDR before = 0x0001`** - already set, by mainline's own
+`b53`/DSA `tag_brcm` driver (Broadcom-header tagging is also a normal
+mainline DSA mechanism, unrelated to FA specifically) - writing the
+documented "on" value (`1`) was a genuine no-op (`0x0001 | 0x0001 =
+0x0001`). Reverted cleanly (wrote the same value back), router unaffected,
+confirmed via `uptime` with no reboot this time (a much simpler,
+single-register, no-actual-change write, unlike #62's live=1 exit path).
+
+**Both documented halves of switch-side FA enablement are now confirmed
+either done or already-satisfied** - this was the one remaining concrete,
+low-risk lever available from this project's own open-source register
+map, and it wasn't the missing piece. This strengthens, rather than
+reopens, #62's conclusion: the gap genuinely isn't an incomplete
+enablement sequence - `robo_fa_aux_init()`/`robo_fa_aux_enable()` (CFP
+TCAM FIN/RST mirroring) remain unimplemented but are documented as a
+teardown-visibility refinement for software conntrack sync, not an
+activation prerequisite, so their absence doesn't explain hit=0 for a
+connection that never got as far as a hardware-side teardown event.
+
+**Final answer holds, now on firmer ground:** every open-source-documented
+register-level activation step for this hardware has been tried or
+confirmed already-satisfied, across this session and the one before it.
+Real forwarding remains blocked by the missing `bgmac.c` RX-path hook
+(#62's correction) - a mainline driver gap, not a leftover configuration
+step.
