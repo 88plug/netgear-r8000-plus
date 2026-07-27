@@ -24,7 +24,7 @@ CROSS_COMPILE ?= arm-openwrt-linux-muslgnueabi-
 PWD := $(shell pwd)
 export PATH := $(TOOLCHAIN_DIR)/bin:$(PATH)
 
-obj-m := fa_probe.o fa_bringup.o fa_macc_test.o fa_switch_oobpause_test.o fa_accel.o fa_napt_row_test.o fa_stats_probe.o fa_switch_oobpause_persist.o fa_switch_brcmhdr_persist.o
+obj-m := fa_probe.o fa_bringup.o fa_macc_test.o fa_switch_oobpause_test.o fa_accel.o fa_napt_row_test.o fa_stats_probe.o fa_switch_oobpause_persist.o fa_switch_brcmhdr_persist.o fa_bcmhdr_probe.o
 
 all:
 	$(MAKE) -C $(KDIR) M=$(PWD) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) modules

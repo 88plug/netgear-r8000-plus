@@ -4702,3 +4702,66 @@ confirmed already-satisfied, across this session and the one before it.
 Real forwarding remains blocked by the missing `bgmac.c` RX-path hook
 (#62's correction) - a mainline driver gap, not a leftover configuration
 step.
+
+## 64. The actual missing register found, with exact vendor values - and
+## why it should NOT be flipped without an explicit separate go-ahead
+
+Continued past #63 by reading `graveyard-vendor/extracted-source/etc_fa.c`
+directly (present on disk, `ls` had missed it earlier in this same
+session - re-checked and it's there) rather than relying on `notes.md`'s
+summary. `fa_up()` (etc_fa.c:~949-995), Broadcom's own real bring-up
+sequence, does MORE than GMAC table-init + switch OOB-pause/BRCM_HDR-tag
+(both already done/confirmed-satisfied, #61-#63):
+
+```c
+if (HW_HASH()) {  /* #define HW_HASH() 1 on this code path */
+    val = (CTF_BRCM_HDR_PARSE_IGN_EN | CTF_BRCM_HDR_HW_EN |
+           CTF_BRCM_HDR_SW_RX_EN | CTF_BRCM_HDR_SW_TX_EN);
+    W_REG(osh, &regs->bcm_hdr_ctl, val);   /* FA_BASE_OFFSET + 0x08 */
+    ...
+}
+robo_fa_enable(fai->robo, TRUE, HW_HASH());
+```
+
+Built `fa_bcmhdr_probe.c` (read-only, same safety class as `fa_probe.c`)
+and confirmed live: **`bcm_hdr_ctl = 0x00000000`** - completely untouched,
+never enabled by anything this project has done. This register is a real,
+concrete, previously-unexamined candidate - `CTF_BRCM_HDR_HW_EN` (bit 0)
+is FA's own hardware switch to start prepending its "Broadcom header" to
+packets on this GMAC, and per `fa_core.h`'s bit definitions the full
+vendor-used value is `0xF` (all four `CTF_BRCM_HDR_*` bits).
+
+**Why this should NOT be written live without an explicit separate
+go-ahead, unlike every other write this project has made:** every prior
+register write this session (NAPT table rows, OOB-pause, BRCM_HDR
+switch-tag) was confirmed to affect ONLY FA's own isolated internal state
+or a bit already proven inert - none of them changed the wire format of
+real traffic. `CTF_BRCM_HDR_HW_EN` is different in kind: it is FA's own
+hardware switch to start prepending a header to packets on GMAC-2 (`eth2`
+on this board - the SAME interface `lan1`/`lan2-4`/`wan` are VLAN
+sub-interfaces of, confirmed via `ip -br link`: `lan1@eth2`). Mainline
+`bgmac.c` has no code to parse or strip this header format (already
+established, #62) - if the hardware starts prepending it to every frame
+on `eth2` and Linux's stack doesn't understand it, every packet on that
+interface could look corrupted to the kernel, not just fail to
+accelerate. That includes THIS session's own SSH management path (the
+dongle's `lan1@eth2` connection) - unlike every previous experiment,
+where local/management traffic was confirmed structurally unaffected by
+the write under test (FA/CTF only ever touches FORWARDED traffic, and
+`bcm_hdr_ctl`'s NAPT-row/OOB-pause/tag writes so far have all been
+confirmed inert or scoped to FA's own internal tables), a bad outcome
+here could plausibly require physical console access or a full
+`nmrpflash` recovery cycle rather than a clean live `rmmod` revert - a
+materially higher blast radius than anything attempted in #61-#63,
+including the already-real reboot in #62.
+
+**Not attempted this session.** This is the actual, concrete, final
+remaining lever - found with source-level precision, not left as vague
+"needs more research" - but it crosses from "isolated FA-internal state"
+into "changes the wire format of the router's live, in-use management
+interface," which this project's own established discipline treats as
+needing an explicit, separate operator go-ahead (matching exactly how
+`fa_bringup.c`'s own GO_NOGO_BRINGUP.md required one before its first
+write, and how Phase C/D were already treated as separate escalations
+from Phase A/B). Recorded here at full precision so that decision can be
+made deliberately, not skipped past.
