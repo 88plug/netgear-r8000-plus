@@ -4209,3 +4209,53 @@ survive a FUTURE sysupgrade if upstream openwrt/openwrt#21655 wipes
 that happens, re-apply the same four `uci set` lines above; the shipped
 generic 50000/25000 seed is a safe fallback in the meantime, not a
 regression.
+
+## 57. SQM's actual bufferbloat benefit, finally measured under real
+## saturating load (not just asserted)
+
+#55/#56 shipped cake on the real uplinks and claimed it would control
+bufferbloat, but never actually measured latency under load - exactly
+the class of gap this session's own audit discipline exists to catch
+(the #50 "verifier grants the win" failure mode: proving a mechanism is
+attached is not proving it does what it claims). Closed that gap with a
+real A/B: same saturating load pattern, cake enabled vs disabled, ping to
+a real external host (1.1.1.1, genuinely routed through the STA uplinks -
+not the shared-192.168.1.0/24 LAN, see #43) as the latency probe.
+
+**First attempt was itself a bad measurement, caught before trusting it:**
+a single sequential wget stream under cake-off looked BETTER than
+cake-on (9.4ms vs 11.1ms avg) - a single flow never came close to
+saturating the ~47-54 Mbit/radio ceiling (this project's own repeated
+finding, #45/#49/#51/#52: single-connection throughput is far below
+aggregate/parallel capacity), so neither condition was under real stress
+and the "difference" was noise. Re-ran with 8 parallel `wget -O
+/dev/null` streams (avoids the tmpfs constraint entirely - also caught
+`/tmp` was sitting at 121.8M/121.8M used, 0 available, from an earlier
+aria2 multi-file test exceeding its own documented tmpfs budget;
+cleared it before this test) to genuinely saturate the link, matching
+this deployment's real high-concurrency usage pattern.
+
+Two trials each, alternating, same load pattern:
+
+| Condition | Trial | min/avg/max ping (ms) | loss |
+|---|---|---|---|
+| idle baseline (cake on) | - | 9.693/10.214/11.017 | 0% |
+| **cake OFF** (bare fq_codel, no bandwidth ceiling) | 1 | 9.310/**222.012**/**1251.229** | 0% |
+| **cake OFF** | 2 | 10.405/**173.565**/**1004.173** | 5% |
+| **cake ON** (real measured ceilings, #55/#56) | 1 | 8.537/12.447/29.670 | 0% |
+| **cake ON** | 2 | 8.282/13.921/29.353 | 0% |
+
+Reproducible both directions, same order of magnitude each trial: with
+cake off, average latency under load is **~15-20x** the idle baseline
+and max latency spikes past **1 second** (with real packet loss once);
+with cake on, average latency stays within ~1.3x of idle and max never
+exceeds 30ms. This is the real, substantial, measured bufferbloat
+control this whole SQM fix was for - not previously verified, now it is.
+
+Note: bare `fq_codel` (cake-off state) is itself a real AQM, already
+better than a plain FIFO would be - the comparison here is specifically
+"cake's bandwidth-aware shaping vs fq_codel alone with no bandwidth
+ceiling", which is the actual, honest choice this router has (fq_codel
+alone was the unintended default #55 found and fixed FROM). Cleaned up
+after: SQM left running (the correct end state), test scripts and
+tmpfs both cleared, live-verified via `tc qdisc show` immediately after.
