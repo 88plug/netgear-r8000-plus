@@ -151,15 +151,33 @@ APK="$(find bin -iname 'kmod-brcmfmac-*.apk' | head -1)"
 [ -n "$APK" ] || { echo "FATAL: kmod-brcmfmac apk not produced - patch may have failed to apply, check the log above"; exit 1; }
 echo "Built: $APK"
 
+# REAL BUG, hit live 2026-07-27 (FINDINGS.md #41): CONFIG_PACKAGE_BRCM80211_DEBUG=y
+# above builds kmod-brcmutil as a DEBUG variant too (it exports
+# brcmu_dbg_hex_dump, which debug-built brcmfmac.ko needs) - but only
+# kmod-brcmfmac's .apk was ever staged into packages/. ImageBuilder then
+# pulled kmod-brcmutil from the upstream feed's NON-debug build, and the
+# mismatched pair fails to load on the real router: "brcmfmac: Unknown
+# symbol brcmu_dbg_hex_dump (err -2)" - confirmed live, ALL radios down
+# after a real sysupgrade, recovered only by reverting to the previous
+# image. This exact failure mode was already known from live-patching
+# earlier in the project (both .ko files must be redeployed as a matched
+# pair) but was never closed in the build script itself. Stage both.
+UTIL_APK="$(find bin -iname 'kmod-brcmutil-*.apk' | head -1)"
+[ -n "$UTIL_APK" ] || { echo "FATAL: kmod-brcmutil apk not produced alongside kmod-brcmfmac - CONFIG_PACKAGE_BRCM80211_DEBUG may not have applied to the whole mac80211 build"; exit 1; }
+echo "Built: $UTIL_APK"
+
 echo "==> Stage 2: ImageBuilder assembly with the patched package + v2-files overlay"
 cd "$WORK/$IB_DIR"
 mkdir -p packages
 cp "$WORK/$SDK_DIR/$APK" packages/
+cp "$WORK/$SDK_DIR/$UTIL_APK" packages/
 
 # First-clone safety net: build fails loudly, not silently on a stock module,
 # if this ever regresses (this exact mistake shipped v5 with the unpatched
-# driver - see docs/WINS.md v5->v6). Confirm the patched .apk is really staged.
-ls packages/kmod-brcmfmac-*.apk >/dev/null
+# driver - see docs/WINS.md v5->v6). Confirm both patched .apks are really
+# staged as a matched pair - kmod-brcmfmac alone silently reintroduces the
+# brcmu_dbg_hex_dump mismatch documented above.
+ls packages/kmod-brcmfmac-*.apk packages/kmod-brcmutil-*.apk >/dev/null
 
 if [ ! -f "$REPO_ROOT/v2-files/etc/config/wireless" ]; then
   echo "FATAL: v2-files/etc/config/wireless missing (gitignored, real passphrases) - CI needs it provided as a secret-backed file, not built from wireless.example placeholders"
@@ -196,6 +214,7 @@ MANIFEST="$(find bin/targets/bcm53xx/generic -iname '*.manifest' | head -1)"
 cp "$CHK" "$OUT/"
 [ -n "$MANIFEST" ] && cp "$MANIFEST" "$OUT/"
 cp "$WORK/$SDK_DIR/$APK" "$OUT/"
+cp "$WORK/$SDK_DIR/$UTIL_APK" "$OUT/"
 
 # static-verify.sh runs in this same job/workspace right after this script,
 # so it can use the SDK's own apk tool directly - no need to bundle/tar it

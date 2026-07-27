@@ -3285,3 +3285,72 @@ theory until the actual artifact is rebuilt and hash-checked end to end.
 #39 was published and pushed before that verification ran. Caught here
 specifically because "do the real rebuild" was followed through on rather
 than treating the code fix as self-evidently correct.
+
+## 41. v20 real flash took down ALL radios: matched debug/non-debug pair,
+## the exact bug already known from live-patching, never closed in the
+## build script itself
+
+With #40's stray-module fix in place, built v20 and flashed it for real
+(`sysupgrade`, config-preserving, pre-flight `sysupgrade -b` backup taken
+and pulled off-router first). Router came back up, but WiFi was completely
+down on every radio: `iw dev` returned nothing, `lsmod` showed `brcmutil`
+loaded but no `brcmfmac` at all, and `dmesg` showed exactly:
+
+```
+brcmfmac: Unknown symbol brcmu_dbg_hex_dump (err -2)
+kmodloader: - brcmfmac - 0
+```
+
+This is the IDENTICAL failure this project already hit and documented once
+before this session, live-patching a running router (see the "Debug-build
+mismatched module pair" entry earlier this session): `brcmu_dbg_hex_dump`
+only exports when `CONFIG_PACKAGE_BRCM80211_DEBUG`/`CPTCFG_BRCMDBG` is on,
+which builds `kmod-brcmutil` as a debug variant right alongside
+`kmod-brcmfmac`. `build-image.sh` enables that config and stages the
+custom `kmod-brcmfmac` .apk into `packages/` - but never staged
+`kmod-brcmutil`. ImageBuilder resolved `kmod-brcmutil` from the upstream
+feed instead, which ships the plain, non-debug build. A debug `brcmfmac.ko`
+paired with a non-debug `brcmutil.ko` fails to insmod, full stop. The
+live-patching incident found and worked around this exact thing by hand;
+the underlying gap in the build SCRIPT was never actually closed, and #40's
+fix (removing the stray file that had been masking it) is precisely what
+let the real custom-built, debug-enabled `brcmfmac.ko` reach the router for
+the first time - immediately surfacing this second, independent bug.
+
+**Recovery:** reverted live via a second real `sysupgrade` back to the
+previous known-good v19 image (sha256-verified transfer, matching what was
+already on hand in `images/`). Confirmed full recovery: `brcmfmac`/
+`brcmutil` loaded cleanly, R8000 main SSID and both American STA uplinks
+back up. The `american_ap` same-SSID clone BSS was absent post-revert -
+expected, not a new bug: v19 predates that feature (added later the same
+day it was built), so rolling back to v19 also rolls back that addition
+until a fixed image ships.
+
+**Fix, both parts implemented and verified before touching the router
+again:**
+1. `build-image.sh` now also finds and stages `kmod-brcmutil-*.apk` into
+   `packages/` alongside `kmod-brcmfmac-*.apk` (FATAL if either is
+   missing) - a real, debug-matched pair, not one patched module hoping
+   the feed's default happens to be compatible.
+2. `static-verify.sh` gained **Check 5**: extracts both `.ko`s from their
+   local `.apk`s and statically cross-checks, via `nm`, that every
+   `brcmu_*` symbol `brcmfmac.ko` leaves undefined is actually exported by
+   `brcmutil.ko` - the exact contract that broke live. This is checked
+   BEFORE any image is flashed, not discovered by watching radios die.
+
+Rebuilt (v21) with both fixes; Check 5 passes (`OK: every brcmu_* symbol
+brcmfmac.ko needs ... is exported by this brcmutil.ko`), and the module
+pair is confirmed staged locally rather than mixed with the feed. Not
+flashed at time of writing this entry - real flash + live confirmation is
+the immediate next step, done deliberately AFTER static verification this
+time, not before.
+
+**Lesson, stated plainly, again:** this is the second time in two
+consecutive findings (#39/#40, now #41) that a fix looked complete on
+paper and only real hardware proved otherwise. The project's own
+static-verify.sh is explicitly a hardware-less pre-check, not a substitute
+for the real flash - but until this entry, it also wasn't checking the
+ONE specific thing that had already bitten this exact driver once before
+this very session. A known failure mode documented in prose (the earlier
+live-patching entry) is not the same as a failure mode a script actually
+checks for.

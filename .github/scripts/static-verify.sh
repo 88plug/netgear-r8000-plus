@@ -22,6 +22,7 @@ FAIL=0
 CHK="$(find "$BUILD_OUT" -iname '*.chk' | head -1)"
 MANIFEST="$(find "$BUILD_OUT" -iname '*.manifest' | head -1)"
 APK="$(find "$BUILD_OUT" -iname 'kmod-brcmfmac-*.apk' | head -1)"
+UTIL_APK="$(find "$BUILD_OUT" -iname 'kmod-brcmutil-*.apk' | head -1)"
 
 [ -n "$CHK" ] || { echo "FATAL: no .chk in $BUILD_OUT"; exit 1; }
 echo "==> Checking: $(basename "$CHK")"
@@ -185,6 +186,75 @@ else
           echo "OK: embedded brcmfmac.ko hash matches the local patched .apk exactly ($LOCAL_SUM)"
         fi
       fi
+    fi
+  fi
+fi
+
+echo "--- Check 5: kmod-brcmfmac/kmod-brcmutil are a matched debug/non-debug pair ---"
+# Real bug, hit live 2026-07-27 (FINDINGS.md #41): CONFIG_PACKAGE_BRCM80211_DEBUG=y
+# builds kmod-brcmutil as a debug variant too, exporting brcmu_dbg_hex_dump -
+# a symbol debug-built brcmfmac.ko needs. build-image.sh previously only
+# staged kmod-brcmfmac locally, so ImageBuilder pulled a NON-debug
+# kmod-brcmutil from the upstream feed instead. The mismatched pair loaded
+# fine in CI's static checks (each .ko is independently a valid ELF) but
+# failed to insmod on the real router: "brcmfmac: Unknown symbol
+# brcmu_dbg_hex_dump (err -2)" - ALL radios down after a real sysupgrade,
+# only recoverable by reverting to the previous image. Nothing in this
+# script caught it beforehand. This check would have: cross-reference
+# brcmfmac.ko's undefined brcmu_* symbols against brcmutil.ko's actual
+# exports, statically, before anything is ever flashed.
+if [ -z "$UTIL_APK" ]; then
+  echo "FAIL: no kmod-brcmutil-*.apk staged alongside kmod-brcmfmac - can't confirm they're a matched pair (this is the exact v20 regression class)"
+  FAIL=1
+elif [ -z "${LOCAL_KO_ABS:-}" ] || [ ! -f "$LOCAL_KO_ABS" ]; then
+  echo "SKIP: no local brcmfmac.ko available to check symbols against (Check 1 didn't produce one)"
+elif ! command -v nm >/dev/null 2>&1; then
+  echo "SKIP: nm (binutils) not available on this runner"
+else
+  APK_TOOL="$(cat "$BUILD_OUT/.sdk-apk-path" 2>/dev/null || true)"
+  rm -rf /tmp/brcmutil-check && mkdir -p /tmp/brcmutil-check && cd /tmp/brcmutil-check
+  if [ -n "$APK_TOOL" ] && [ -x "$APK_TOOL" ]; then
+    "$APK_TOOL" extract --allow-untrusted --destination . "$UTIL_APK" >/dev/null 2>&1
+  else
+    tar xf "$UTIL_APK" 2>/dev/null || true
+  fi
+  UTIL_KO="$(find . -iname 'brcmutil.ko' | head -1)"
+  cd - >/dev/null
+  if [ -z "$UTIL_KO" ]; then
+    echo "FAIL: kmod-brcmutil apk didn't contain brcmutil.ko"
+    FAIL=1
+  else
+    UTIL_KO="/tmp/brcmutil-check/${UTIL_KO#./}"
+    # Undefined symbols brcmfmac.ko actually needs from the brcmu_* family
+    # (nm 'U' = undefined). Symbols from cfg80211/mac80211/usbcore/the
+    # kernel itself are out of scope here - this check is specifically about
+    # the brcmfmac<->brcmutil contract that broke live.
+    # Undefined symbols print as "         U name" (no address field) -
+    # only 2 awk fields, unlike defined symbols' 3 ("addr type name").
+    # Confirmed directly: an earlier version of this filter assumed 3
+    # fields uniformly and silently matched zero symbols every time.
+    NEEDED="$(nm "$LOCAL_KO_ABS" 2>/dev/null | awk '$1=="U" && $2 ~ /^brcmu_/{print $2}' | sort -u)"
+    # A real kernel module's EXPORT_SYMBOL'd names live in the __ksymtab*
+    # sections (what find_symbol() actually resolves against at insmod
+    # time), NOT as plain nm T/t .symtab entries - OpenWrt's packaging
+    # strips modules (rstrip.sh), which removes regular global-function
+    # .symtab entries but can't remove the __ksymtab string table without
+    # breaking module loading entirely. Confirmed directly: nm T/t against
+    # this exact brcmutil.ko showed nothing but anonymous ARM mapping
+    # symbols even though the module genuinely exports brcmu_dbg_hex_dump -
+    # an earlier version of this check used nm here and produced a false
+    # PASS that would have missed the real bug. `strings` finds the name
+    # regardless of stripping, since it just scans for printable text.
+    UTIL_STRINGS="$(strings "$UTIL_KO" 2>/dev/null)"
+    MISSING=""
+    for sym in $NEEDED; do
+      grep -qx "$sym" <<<"$UTIL_STRINGS" || MISSING="$MISSING $sym"
+    done
+    if [ -n "$MISSING" ]; then
+      echo "FAIL: brcmfmac.ko needs symbol(s)$MISSING from brcmutil, but this kmod-brcmutil build doesn't export them - mismatched debug/non-debug pair, exactly the class of bug that took down all radios on the real router. Confirm CONFIG_PACKAGE_BRCM80211_DEBUG applied to BOTH packages."
+      FAIL=1
+    else
+      echo "OK: every brcmu_* symbol brcmfmac.ko needs ($(echo "$NEEDED" | wc -w) checked) is exported by this brcmutil.ko"
     fi
   fi
 fi
