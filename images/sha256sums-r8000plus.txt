@@ -16,3 +16,4 @@ e4e3abd8133d9c369a22026834461363fd75f2cf872b3ab68a910cf474c9db45  images/openwrt
 aaadf900a00811ec321de6a12235ad8195d1285460e09df1de8be23a2a73e5ac  images/openwrt-25.12.5-r8000plus-v19-bcm53xx-generic-netgear_r8000-squashfs.chk
 4a2e1ed57171658ee328fcdcb79045008f832eb5b2957afdb08ccf07d6d52388  images/openwrt-25.12.5-r8000plus-v20-bcm53xx-generic-netgear_r8000-squashfs.chk
 cce89cab59eff033bcbd74dfbb0c9467c6a1d5e56bbde7628e674b31359c95de  images/openwrt-25.12.5-r8000plus-v21-bcm53xx-generic-netgear_r8000-squashfs.chk
+8cc2023f6d7d7392337b643622015f32f17c5ffb19daa67e2df48e68cd99e8d4  images/openwrt-25.12.5-r8000plus-v22-bcm53xx-generic-netgear_r8000-squashfs.chk
