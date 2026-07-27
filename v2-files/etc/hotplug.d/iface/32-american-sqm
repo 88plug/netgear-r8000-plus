@@ -1,0 +1,44 @@
+#!/bin/sh
+# Rebinds each American uplink's SQM/cake queue to whatever the CURRENT
+# real device is, every time that uplink comes up - see FINDINGS.md #55.
+# Reading upstream sqm-scripts' own src/run-openwrt.sh directly confirmed
+# it takes `option interface` as a RAW device name via config_get, with NO
+# logical-UCI-interface-name resolution, and it does not react to hotplug
+# events on its own - so a static phyN-sta0 value in config/sqm works only
+# until the next reboot renumbers the phys (already repeatedly observed
+# this session: phy0->phy3->phy6->phy12...). Without this script, cake
+# silently stops shaping the real uplink after any such reboot, with no
+# error - it just keeps shaping whatever stale device name was last
+# written, which may not exist or may now be a different radio entirely.
+# Same failure class as FINDINGS.md #40/#54 (a file at a specific path
+# silently deciding behavior, invisible unless the actual result is
+# checked).
+case "$ACTION" in
+	ifup) ;;
+	*) exit 0 ;;
+esac
+case "$INTERFACE" in
+	american_wwan) SECTION="american_5g" ;;
+	american24_wwan) SECTION="american_24g" ;;
+	*) exit 0 ;;
+esac
+
+# Same idiom as etc/hotplug.d/iface/30-american-dns-route (already proven
+# live) - l3_device does not have the active/inactive quirk that
+# route[]/dns-server have, so a single ubus call is enough here.
+DEVICE="$(ubus call network.interface."$INTERFACE" status 2>/dev/null | jsonfilter -e '@.l3_device' 2>/dev/null)"
+[ -n "$DEVICE" ] || { logger -t american-sqm "$INTERFACE ifup but no l3_device resolved - not touching SQM"; exit 0; }
+
+CURRENT="$(uci -q get sqm."$SECTION".interface)"
+if [ "$CURRENT" = "$DEVICE" ]; then
+	logger -t american-sqm "$SECTION already bound to $DEVICE - restarting sqm to make sure cake is actually attached"
+else
+	logger -t american-sqm "rebinding $SECTION from '$CURRENT' to '$DEVICE' ($INTERFACE)"
+	uci set sqm."$SECTION".interface="$DEVICE"
+	uci commit sqm
+fi
+
+# Full restart, not a per-queue reload: sqm-scripts' own init script
+# exposes no clean single-queue primitive, and a full restart is cheap
+# (sub-second tc qdisc replace calls) - see FINDINGS.md #55.
+/etc/init.d/sqm restart

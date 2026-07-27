@@ -1,73 +1,120 @@
 # NETGEAR R8000 (bcm53xx / brcmfmac) -- v2 SQM (bufferbloat control)
 # Workstream: modern roaming/steering/QoS. Rationale/evidence: ../../notes.md
 #
+# REWRITTEN 2026-07-27 (FINDINGS.md #55): the previous single 'wan' queue
+# targeted the physical Ethernet WAN port, which this deployment's own
+# WiFi-extender architecture pivot (american_wwan/american24_wwan STA
+# uplinks replacing the wired WAN - see config/network, config/wireless)
+# left physically unplugged. Confirmed live: `ip link show wan` shows
+# NO-CARRIER/LOWERLAYERDOWN, and `tc qdisc show dev wan` had cake attached
+# to a dead interface while the REAL uplinks (phy2-sta0, phy1-sta0) ran
+# only bare default fq_codel - meaning SQM provided ZERO real bufferbloat
+# control on any actual traffic this router has carried since that pivot.
+#
 # Package: sqm-scripts (pulls in kmod-sched-cake, kmod-ifb, tc, ip,
 # iptables-mod-ipopt automatically -- see ../../imagebuilder-packages.md).
-# This is the single biggest real-world latency-under-load win available on
-# this device: it is pure userspace/software (tc + cake qdisc on the kernel
-# side), has zero dependency on brcmfmac AP-mode capability, and works
-# identically regardless of what the WiFi driver can or can't do. Every WAN
-# packet crosses this shaper.
 #
-# WAN interface confirmed live on-device: `ip link` / `board.json` both show
-# the WAN net-device is literally named 'wan' (bcm53xx switch driver exposes
-# it directly, not eth0.2/eth1-style) -- verified via `cat
-# /sys/class/net/wan/address` matching board.json's wan.macaddr.
+# Two queues now, one per real American STA uplink, matching
+# american_wwan (5GHz, phy2-sta0) / american24_wwan (2.4GHz, phy1-sta0) -
+# see config/wireless and etc/hotplug.d/iface/31-american-multipath-default.
 #
-# Measured 2026-07-24 with the WAN cable plugged into the bench network
-# (private DHCP lease on wan, 192.168.52.0/24 -- NAT'd upstream, not a
-# direct modem/ONT handoff). Method: tunneled through the router itself
-# (ssh -D SOCKS proxy) so the transfer used the real WAN path end-to-end,
-# then curl'd a clean test target from the host side (the router's own
-# minimal wget got 403'd by Cloudflare and gave misleadingly slow numbers
-# against a congested OVH mirror -- neither reflected the real link).
-# Download 101.3 Mbps (Linode Newark), upload 99.4 Mbps (Cloudflare) --
-# consistent with the earlier 82.4 Mbps double-NAT test, so trusted.
-# Set to 90% of measured. If this router is later moved to a different
-# physical WAN connection, re-measure and update -- these numbers are
-# this link's, not a property of the router.
+# `option interface` below is a RAW DEVICE NAME, not a UCI logical
+# interface name - confirmed by reading upstream sqm-scripts' own
+# src/run-openwrt.sh directly: it does `config_get "$section" interface`
+# and uses that value as-is against the real netdev, with NO logical-name
+# resolution and no hotplug reaction of its own. Device names here
+# (phy2-sta0/phy1-sta0) are NOT stable across reboots - this session has
+# repeatedly observed phy renumbering (phy0->phy3->phy6->phy12...) - so
+# these are only a first-boot seed. etc/hotplug.d/iface/32-american-sqm
+# rewrites the correct section's `interface` option to whatever the real
+# current device is and restarts sqm on every ifup of either uplink -
+# without that script this config would silently rot exactly like the old
+# 'wan' queue did.
+#
+# Bandwidth: real per-radio solo throughput, not guessed. Measured via the
+# same aria2-driven single-radio ablation methodology as FINDINGS.md #52
+# (100MB test file, split=16, default route forced onto ONE STA uplink at
+# a time so the download's true path is unambiguous):
+#   phy2-sta0 (american_wwan/5GHz) solo: 52.4 Mbit/s (#52's own measurement)
+#   phy1-sta0 (american24_wwan/2.4GHz) solo: 59.9 Mbit/s (104857600 bytes /
+#     14s, measured 2026-07-27) - genuinely faster than the 5GHz leg on
+#     THIS link right now; this is what was measured, not a general
+#     "2.4GHz beats 5GHz" claim - the bottleneck here is the American
+#     network's own AP/backhaul capacity per radio, not this router's
+#     receive quality.
+# Download ceilings set to 90% of each measured number, matching the
+# original wan queue's own methodology.
+#
+# Upload NOT measured - this router has no curl and no other upload-capable
+# tool without adding a new package (`which curl` returned nothing live),
+# so there was no way to run a real upload-direction test without adding
+# an upload target/tool dependency. Upload ceilings below are a DELIBERATE
+# conservative approximation (80% of the measured download ceiling) so an
+# unmeasured number under-shapes (wastes some upload headroom) rather than
+# over-shapes (which would silently defeat bufferbloat control the same
+# way the old 'wan' queue did). Revisit if/when a real upload-capable tool
+# is added and a genuine A/B measurement can replace this.
 
-config queue 'wan'
+config queue 'american_5g'
 	option enabled '1'
-	option interface 'wan'
+	option interface 'phy2-sta0'
 
-	# kbit/s, 90% of measured (see above).
-	option download '91000'
-	option upload '89000'
+	# kbit/s. 90% of 52.4 Mbit/s measured (#52). Upload is the
+	# conservative 80%-of-download approximation described above.
+	option download '47000'
+	option upload '38000'
 
 	option qdisc 'cake'
 	option script 'piece_of_cake.qos'
 
-	# cake's own DSCP-aware and per-host-fairness logic; leave "besteffort"
-	# off (i.e. let cake's default diffserv3 tin classification run) unless
-	# a specific need for full priority-tier QoS (VoIP/gaming ahead of bulk
-	# downloads) shows up -- diffserv3 already does most of what home
-	# networks need without hand-tuned DSCP marking elsewhere in the config.
 	option qdisc_advanced '0'
 	option squash_dscp '1'
 	option squash_ingress '1'
 	option ingress_ecn 'ECN'
 	option egress_ecn 'ECN'
 
-	# --- Link-layer overhead: SET TO MATCH THE ACTUAL WAN HANDOFF TYPE ---
-	# Values below assume a typical North American cable/DOCSIS hand-off
-	# behind this router (common default for a Netgear R8000 deployment).
-	# If the WAN is actually PPPoE/VDSL2, fiber ONT (pure Ethernet), or
-	# something else, replace per this table (OpenWrt SQM docs, verified
-	# 2026):
-	#   DOCSIS/cable modem (Ethernet handoff) ......... linklayer ethernet, overhead 22
-	#   Pure Ethernet / fiber ONT (no PPPoE) ........... linklayer ethernet, overhead 44
-	#   VDSL2 + PPPoE ................................... linklayer ethernet, overhead 34
-	#   VDSL2 bridged, no PPPoE ......................... linklayer ethernet, overhead 26
-	#   ADSL / other DSL (ATM) .......................... linklayer atm,      overhead 44
-	# When genuinely unsure, overestimate -- 44 is the documented safe
-	# default across connection types.
+	# --- Link-layer overhead ---
+	# No PPPoE/ATM anywhere in this hop - it's a raw WiFi STA uplink to
+	# the American AP, so 'ethernet'/0 (no additional encapsulation) is
+	# the architecturally correct baseline. Could not re-verify against
+	# current upstream SQM docs at write time (both WebSearch and the
+	# SearXNG MCP backend were unavailable this session) - flagged here
+	# rather than silently asserted as "verified". Revisit with a real
+	# ping-under-load bufferbloat test once traffic flows through this.
 	option linklayer 'ethernet'
-	option overhead '22'
+	option overhead '0'
 
-	# Leave empty for automatic target selection (cake computes this from
-	# the configured bandwidth); do not set a fixed ms value unless a
-	# specific measurement justifies overriding cake's own choice.
+	option itarget ''
+	option etarget ''
+	option iqdisc_opts ''
+	option eqdisc_opts ''
+
+	option debug_logging '0'
+	option verbosity '5'
+
+config queue 'american_24g'
+	option enabled '1'
+	option interface 'phy1-sta0'
+
+	# kbit/s. 90% of 59.9 Mbit/s measured 2026-07-27 (104857600 bytes /
+	# 14s, single-radio-forced route). Upload: same 80%-of-download
+	# approximation as above, same reason (no upload-capable tool
+	# on-router).
+	option download '54000'
+	option upload '43000'
+
+	option qdisc 'cake'
+	option script 'piece_of_cake.qos'
+
+	option qdisc_advanced '0'
+	option squash_dscp '1'
+	option squash_ingress '1'
+	option ingress_ecn 'ECN'
+	option egress_ecn 'ECN'
+
+	option linklayer 'ethernet'
+	option overhead '0'
+
 	option itarget ''
 	option etarget ''
 	option iqdisc_opts ''

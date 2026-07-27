@@ -4057,3 +4057,71 @@ shipped the opposite of it, because a different file the new package
 brought along was never inspected. "I wrote the right value in my
 config" and "this is what's actually running" are different claims,
 and only the second one is worth trusting.
+
+## 55. SQM was shaping a dead interface - zero real bufferbloat control
+## on any traffic this router has actually carried since the extender pivot
+
+`uci show sqm` showed a single queue, `option interface 'wan'` - the
+physical Ethernet WAN port. `ip link show wan` showed `NO-CARRIER`,
+`state LOWERLAYERDOWN`: that port is physically unplugged in this
+deployment's current architecture (WiFi-extender to the American
+network via `american_wwan`/`american24_wwan` STA uplinks, not a wired
+WAN handoff). `tc qdisc show dev wan` confirmed `cake` was genuinely
+attached there - correctly configured, just to nothing. `tc qdisc show
+dev phy2-sta0` / `dev phy1-sta0` (the REAL uplinks every packet
+actually crosses) showed only bare default `fq_codel` - no cake, no
+bandwidth-aware shaping at all. Root cause: `etc/config/sqm`'s own
+comments show it was measured 2026-07-24 with the WAN cable physically
+connected, predating this deployment's later pivot to the WiFi-extender
+architecture - the config was never revisited after the pivot made it
+target the wrong interface.
+
+Read upstream `tohojo/sqm-scripts`' real source
+(`src/run-openwrt.sh`) directly before designing the fix: `option
+interface` is read via plain `config_get "$section" interface` and used
+as-is against the real netdev - a RAW device name, not a UCI logical
+interface name, and the script has no hotplug reaction of its own.
+Meaning a naive static fix (just pointing `interface` at `phy2-sta0`)
+would rot the exact same way the `wan` queue did, the next time a
+reboot renumbers the phys - already repeatedly observed this session
+(phy0->phy3->phy6->phy12...).
+
+**Fix**, two parts:
+- `etc/config/sqm` rewritten with two queues, one per real American STA
+  uplink (`american_5g` -> `phy2-sta0`, `american_24g` -> `phy1-sta0`),
+  bandwidth ceilings at 90% of each radio's real measured solo
+  throughput - not guessed: phy2-sta0 52.4 Mbit/s (#52's own ablation),
+  phy1-sta0 59.9 Mbit/s (measured this round: 104857600 bytes / 14s,
+  default route forced onto that one radio via the same single-radio
+  ablation methodology as #52). Upload direction was NOT measured -
+  this router has no `curl` and no other upload-capable tool without
+  adding a new package dependency - so upload ceilings are a flagged,
+  deliberately conservative 80%-of-download approximation (under-shapes
+  rather than over-shapes, which is the safe direction for bufferbloat
+  control: wasting some headroom is a much smaller failure than
+  silently defeating the shaper the way the dead `wan` queue already
+  was).
+- New `etc/hotplug.d/iface/32-american-sqm`: on every `ifup` of either
+  American uplink, resolves the CURRENT real `l3_device` via the same
+  proven `ubus`/`jsonfilter` idiom already used by
+  `30-american-dns-route`, rewrites the matching queue's `interface`
+  option to that value, and runs `/etc/init.d/sqm restart` - so cake
+  stays bound to whatever the real device actually is, every boot,
+  instead of a static value that only happened to be right once.
+
+**Honest gaps left open:** the `linklayer`/`overhead` settings
+(`ethernet`/`0`, architecturally correct for a raw WiFi hop with no
+PPPoE/ATM in the path, but NOT re-verified against current upstream SQM
+docs - both WebSearch and the SearXNG MCP backend were unavailable when
+this was written) and the whole fix's real bufferbloat-under-load
+effect (a genuine ping-under-load test needs actual contended traffic
+on these uplinks, not yet run) are both flagged, not asserted as
+settled. Bandwidth ceilings will also need re-measurement if the
+American network's own AP/backhaul capacity changes - these numbers are
+this link's, right now, same caveat the original `wan` queue's own
+comment already stated.
+
+**Lesson:** a config file's own comments recording *when* and *under
+what topology* it was measured is what made this bug visible at all -
+without that provenance, "SQM is configured" would have looked done
+forever while shaping nothing real.
