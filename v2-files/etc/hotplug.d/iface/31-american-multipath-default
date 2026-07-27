@@ -1,0 +1,74 @@
+#!/bin/sh
+# Weighted ECMP default route across BOTH American STA uplinks, instead of
+# netifd's own single-path defaultroute (now off on both interfaces - see
+# config/network's comment). Real, verified live 2026-07-27 (FINDINGS.md
+# #46): multiple simultaneous connections to the same destination genuinely
+# split across both radios (confirmed via real packet-count deltas on both
+# uplinks' counters from 10 parallel connections), giving real combined
+# throughput for MULTI-connection traffic - most speedtest tools (Ookla,
+# fast.com) and normal parallel downloads already work this way. This does
+# NOT and cannot speed up a single, unsplittable stream past one link's own
+# rate - that's a real protocol constraint (see FINDINGS.md #45's research:
+# true single-stream bonding needs 802.11be MLO, which this BCM43602
+# hardware cannot do, or MPTCP through a remote VPS this project doesn't
+# have). Requires net.ipv4.fib_multipath_hash_policy=1 (etc/sysctl.conf) -
+# without it, the kernel hashes on IP-pair only and every connection to the
+# same destination lands on the same nexthop every time, silently defeating
+# this entirely.
+case "$ACTION" in
+	ifup|ifdown) ;;
+	*) exit 0 ;;
+esac
+case "$INTERFACE" in
+	american_wwan|american24_wwan) ;;
+	*) exit 0 ;;
+esac
+
+# american_wwan = radio2/5GHz, generally faster and more reliable than
+# american24_wwan = radio1/2.4GHz - see config/wireless's own txpower/
+# htmode comments. Adjust here if the real link-quality balance changes.
+W_5G=4
+W_24G=1
+
+is_up() {
+	[ "$(ubus call network.interface."$1" status 2>/dev/null | jsonfilter -e '@.up' 2>/dev/null)" = "true" ]
+}
+get_gw() {
+	# netifd only populates the ACTIVE .route[] entry when defaultroute='1'
+	# for that interface - with both American interfaces at defaultroute
+	# '0' (this script owns the default route instead), the real
+	# DHCP-negotiated gateway sits under .inactive.route[] instead.
+	# Confirmed live 2026-07-27: check both, active first.
+	ubus call network.interface."$1" status 2>/dev/null | \
+		jsonfilter -e '@.route[@.target="0.0.0.0"].nexthop' -e '@.inactive.route[@.target="0.0.0.0"].nexthop' 2>/dev/null | \
+		head -1
+}
+get_dev() {
+	ubus call network.interface."$1" status 2>/dev/null | jsonfilter -e '@.l3_device' 2>/dev/null
+}
+
+GW5=""; DEV5=""; GW24=""; DEV24=""
+if is_up american_wwan; then
+	GW5="$(get_gw american_wwan)"
+	DEV5="$(get_dev american_wwan)"
+fi
+if is_up american24_wwan; then
+	GW24="$(get_gw american24_wwan)"
+	DEV24="$(get_dev american24_wwan)"
+fi
+
+if [ -n "$DEV5" ] && [ -n "$GW5" ] && [ -n "$DEV24" ] && [ -n "$GW24" ]; then
+	logger -t american-multipath "both uplinks up - weighted multipath default: $DEV5(w$W_5G) + $DEV24(w$W_24G)"
+	ip route replace default scope global \
+		nexthop via "$GW5" dev "$DEV5" weight "$W_5G" \
+		nexthop via "$GW24" dev "$DEV24" weight "$W_24G"
+elif [ -n "$DEV5" ] && [ -n "$GW5" ]; then
+	logger -t american-multipath "only american_wwan up - single-path default via $DEV5"
+	ip route replace default via "$GW5" dev "$DEV5"
+elif [ -n "$DEV24" ] && [ -n "$GW24" ]; then
+	logger -t american-multipath "only american24_wwan up - single-path default via $DEV24"
+	ip route replace default via "$GW24" dev "$DEV24"
+else
+	logger -t american-multipath "neither uplink up - removing default route"
+	ip route del default 2>/dev/null
+fi

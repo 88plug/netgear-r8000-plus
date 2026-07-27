@@ -62,16 +62,26 @@ config interface 'guest'
 # wpa_supplicant negotiates it, nothing here or in etc/init.d/extender needs
 # to know or set it.
 #
-# defaultroute/peerdns: exactly ONE of a router's extend-target interfaces
-# should carry defaultroute='1'/peerdns='1' at a time (the live uplink) -
-# confirmed live 2026-07-26, `american_wwan` (5GHz, better link speed) is
-# it; `american24_wwan` stays defaultroute='0' (available, not primary).
-# Never leave defaultroute='0' on ALL of them, unlike the old relayd
-# architecture's isolation requirement - here we WANT this to become the
-# router's real route out.
+# defaultroute: BOTH set to '0' as of 2026-07-27 (FINDINGS.md #46) - netifd
+# no longer owns the default route for these interfaces at all. Real,
+# verified live: parallel connections to the same destination genuinely
+# split across BOTH uplinks (a weighted ECMP multipath default route +
+# net.ipv4.fib_multipath_hash_policy=1, see sysctl.conf) instead of
+# following just one "primary" link - confirmed via real packet-count
+# deltas on both interfaces from 10 parallel connections. If netifd also
+# tried to install its own single-path default route here (defaultroute
+# '1' on either), it would fight/overwrite the multipath route on every
+# lease renewal. etc/hotplug.d/iface/31-american-multipath-default now
+# owns the default route entirely - reconstructs the weighted multipath
+# route whenever either uplink's state changes, with single-path fallback
+# if only one is actually up. peerdns is UNCHANGED from before this fix
+# (american_wwan stays '1' - dnsmasq's resolvfile still needs the real
+# network's own DNS server merged in; 30-american-dns-route's own ubus
+# lookup doesn't depend on peerdns either way, but resolvfile does) -
+# don't flip it, that's a separate mechanism from FINDINGS.md #43.
 config interface 'american_wwan'
 	option proto 'dhcp'
-	option defaultroute '1'
+	option defaultroute '0'
 	option peerdns '1'
 
 config interface 'american24_wwan'

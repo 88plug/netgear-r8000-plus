@@ -3578,3 +3578,60 @@ main_radio2 bug fix (genuine, already shipped), the interference finding
 honest tradeoff lever), and mwan3-nft for real aggregate multi-device
 throughput if the operator wants it despite the out-of-feed maintenance
 cost. Not yet rebuilt into a real image at time of writing.
+
+## 46. Break-dogma on #45's own "no VPS = no benefit" claim - built a real,
+## zero-infrastructure multi-connection aggregation using native kernel ECMP
+
+Operator directly challenged #45's framing ("can we invent using
+lo[ad-balancing] instead of a vpn"). Re-examined rather than defended: #45's
+"no VPS = no throughput benefit" claim was only ever true for a single,
+unsplittable TCP stream (a real protocol constraint - confirmed) - it was
+NOT load-bearing for the much more common case of MULTIPLE simultaneous
+connections, which is how most speedtest tools (Ookla, fast.com) and many
+real downloads already work by default. That case needs no VPS, no VPN,
+and no unofficial package (mwan3-nft) at all - just the Linux kernel's own
+native ECMP multipath routing, already built in.
+
+**Built and verified live:** a weighted multipath default route
+(`ip route replace default nexthop via <gw> dev phy2-sta0 weight 4 nexthop
+via <gw> dev phy1-sta0 weight 1`, matching the two uplinks' real relative
+capability) plus `net.ipv4.fib_multipath_hash_policy=1`. That sysctl is
+NOT optional - the default policy (0) hashes only on source/dest IP, so
+every connection to the SAME destination (any single speedtest server,
+any single website) would hash to the SAME nexthop every time, silently
+defeating a multipath route entirely for exactly the traffic pattern this
+is meant to help. Confirmed the difference matters: after setting policy
+1, firing 10-12 parallel connections to one destination IP produced real
+packet-count increases on BOTH uplinks' interface counters (roughly
+matching the intended 4:1 weighting, e.g. +72/+28 and +115/+8 across two
+separate test runs) - proof multiple connections genuinely split across
+both radios, not just a plausible-sounding config.
+
+**Real gotcha found and fixed while implementing this:** netifd only
+populates an interface's ACTIVE `route[]` entry in `ubus ... status` when
+that interface's own `defaultroute` UCI option is `'1'`. Both American
+uplinks needed `defaultroute='0'` here (so netifd stops installing its
+OWN single-path default route and fighting this script's multipath route
+on every lease renewal) - but that meant the real DHCP-negotiated gateway
+moved to the `.inactive.route[]` field instead of disappearing. The
+hotplug script checks both (active first, falls back to inactive) rather
+than assuming either location is authoritative.
+
+**Implementation:** `etc/hotplug.d/iface/31-american-multipath-default`
+(new hotplug script, fires on ifup/ifdown for either American STA
+uplink) - reconstructs the weighted multipath default route whenever
+either uplink's state changes, with automatic single-path fallback if
+only one is up, and removes the default route entirely if neither is.
+`etc/config/network`: both `american_wwan`/`american24_wwan` now
+`defaultroute='0'` (this script owns it exclusively) - `peerdns` left
+UNCHANGED (american_wwan stays `'1'`, needed for #43's DNS-forwarding
+fix, unrelated to this mechanism). `etc/sysctl.conf` (new): the
+`fib_multipath_hash_policy=1` setting, documented inline.
+
+**Honest scope, restated:** this gives real combined throughput for
+MULTIPLE simultaneous connections/devices - not a single unsplittable
+stream, which is still capped by whichever one link it lands on (that
+part of #45 was correct and remains true; MLO/MPTCP-to-a-VPS are still
+the only ways past that specific limit). Not yet rebuilt into a real
+image at time of writing - live-tested and verified working, queued
+alongside #45's main_radio2 fix for the next real build.
