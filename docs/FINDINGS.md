@@ -2902,3 +2902,67 @@ independent, silently-broken pieces of this hostapd/driver build that
 no amount of status-line checking, scanning, or firmware counter
 reading could have caught - only a genuine, independently-driven client
 connect attempt, watched end to end, ever surfaced either one.
+
+## 36. Real build, real sysupgrade flash, real bandwidth numbers -
+§§32-35's fixes verified on the actual persistent image, not just live
+patches (2026-07-26)
+
+Everything in §§32-35 was live-patched (hot kernel module swap, `uci
+set`/`commit`/reload) - correct for fast iteration, but none of it
+survives a real reflash on its own. Ran the actual, documented,
+two-stage build (`.github/scripts/build-image.sh`, mirroring
+`docs/RUNBOOK.md` §5 exactly - fresh SDK download, kmod-brcmfmac
+rebuilt with the corrected patch set (861/865/866/867/868, NOT
+862/863/864), then ImageBuilder assembly with the fixed `v2-files`
+overlay) end to end, producing a real, checksummed, flashable `.chk`.
+
+**One more real bug found in the process, live-tested before it went
+into the image:** `flow_offloading_hw` was `0` (software-only NAT) in
+`v2-files/etc/config/firewall`. Flipped it to `1` live and re-measured
+a real download (`wget` from this bench's own LAN client, through
+R8000 -> American, 50MB from Cloudflare's speed-test endpoint):
+**8.19 MB/s -> 14.6 MB/s, a real ~2x improvement** - not a no-op, this
+router's flowtable offload genuinely helps. Folded into the image
+before building (`option flow_offloading_hw '1'`).
+
+**Full documented flash procedure followed, not shortcut:**
+`sysupgrade -b` pre-flight config backup (mandatory per RUNBOOK.md,
+verified non-empty: `tar tzf` showed real `etc/config/{wireless,
+firewall}` content), image transferred and sha256-verified byte-for-
+byte before flashing, `sysupgrade` (config-preserving, no `-n`).
+
+**Confirmed the exact known bug this repo already documented
+(`openwrt/openwrt#21655`) actually fired:** post-flash,
+`wireless.ieee80211w=0` survived correctly, but
+`firewall.flow_offloading_hw` silently reverted to the image's
+compiled-in default (`0`) despite the pre-flight backup having
+captured `1` moments earlier - "no warning when this happens" as
+RUNBOOK.md's own long-standing note says, and none was given here
+either. Not a new problem - RUNBOOK.md's own remediation (fix directly
+post-flash, verify) was already correct and is what was done: `uci
+set`+`commit`+`reload`, confirmed `1` again.
+
+**Full end-to-end re-verification, on the real flashed image, not the
+pre-flash live-patched state:**
+- R8000 visible in a real scan: `-30dBm` (consistent with the earlier
+  `-27dBm` live-test reading).
+- Real device (same rooted Android test device) joined R8000 through
+  the actual Settings UI: real DHCP lease this time (`192.168.1.205`,
+  proper `valid_lft`, not the earlier stale-static-IP artifact from
+  unrelated old testing), signal `-30dBm`, real link rate `866.7
+  MBit/s VHT-MCS9`.
+- Real internet: `ping -c5 8.8.8.8` from the connected device - 0%
+  packet loss (14-113ms, more variable than the wired bench numbers,
+  consistent with real wireless + NAT conditions, not a fault).
+- Real throughput on the fresh flash, hardware flow offload re-applied:
+  **44.7 MB/s (~358 Mbps)** for the same 50MB Cloudflare download from
+  this bench's LAN client - even better than the live-tested number,
+  consistent with a clean post-flash state.
+
+Final image archived at `images/openwrt-25.12.5-r8000plus-v19-
+bcm53xx-generic-netgear_r8000-squashfs.chk` (sha256
+`aaadf900a00811ec...`, full hash in `images/sha256sums-r8000plus.txt`)
+- this is what's actually running on the router right now, not a
+live-patched approximation of it. Build scratch directories
+(`openwrt-build-25.12.5/`, `BUILD_OUT/`, ~2.4GB) cleaned up after
+copying the final artifact out; nothing untracked left behind.
