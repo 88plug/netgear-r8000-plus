@@ -3635,3 +3635,43 @@ part of #45 was correct and remains true; MLO/MPTCP-to-a-VPS are still
 the only ways past that specific limit). Not yet rebuilt into a real
 image at time of writing - live-tested and verified working, queued
 alongside #45's main_radio2 fix for the next real build.
+
+## 47. v24 flashed for real - both #45/#46 fixes confirmed live, AND the
+## open "Failed to set beacon parameters" mystery (open item after #42)
+## resolved as a side effect of the main_radio2 fix
+
+Flashed v24 for real (both #45's `main_radio2` disable and #46's
+multipath ECMP route). Confirmed from a genuinely cold boot, zero manual
+steps: no orphaned `phy2-ap0` this time (clean disable from boot, unlike
+the earlier live-toggle which left one behind); the multipath default
+route auto-installed itself via a real `ifup` hotplug event
+(`both uplinks up - weighted multipath default: phy2-sta0(w4) +
+phy1-sta0(w1)`); the DNS host route (#43) auto-installed the same way;
+R8000 + American both still up on phy0. Re-ran the parallel-connection
+proof on the fresh build: 12 connections produced +11 packets on
+phy1-sta0 and +110 on phy2-sta0 - both uplinks genuinely carrying traffic
+again, roughly matching the intended weighting.
+
+**The `hostapd: Failed to set beacon parameters` recurring error (open
+since #44, flagged in #42 as new/unexplained) is GONE.** Raised hostapd's
+log level to debug on both phy0 BSSes to catch the next occurrence with
+more context - it never recurred. Checked directly: 0 occurrences in the
+log after 7 minutes of uptime, versus a previous ~6-second period that
+would have produced roughly 70 occurrences in that same window. Root
+cause, in hindsight: hostapd runs as ONE global process
+(`/usr/sbin/hostapd -s -g /var/run/hostapd/global`) managing every BSS
+across every phy in one shared event loop - `main_radio2` genuinely
+running concurrently with `wifinet4` on one physical radio (the #45 bug)
+was very plausibly destabilizing that shared process's periodic
+maintenance tasks broadly, not just on the radio actually misconfigured.
+Fixing #45 fixed this too, without ever needing to fully reverse-engineer
+which specific hostapd internal timer was failing. Task #64 closed.
+
+**Standing lesson for this whole v39-v47 arc:** a genuinely correct fix,
+verified with real evidence, sometimes resolves more than the one symptom
+it targeted - but the reverse (declaring victory on a resolved SYMPTOM
+without pinning the actual mechanism) is exactly what #39 got wrong
+earlier. Here the mechanism (shared hostapd process, one radio's
+instability affecting others) is a plausible, sufficient explanation
+consistent with every fact observed, and the fix time-correlates exactly
+- treated as resolved on that basis, not treated as certain beyond it.
