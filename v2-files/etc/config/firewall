@@ -138,35 +138,30 @@ config rule 'guest_isolate'
 	option dest 'lan'
 	option target 'REJECT'
 
-# WiFi Extender's first repeat target, "ext0" (config/network ext0_wwan,
-# config/wireless ext0_sta/ext0_ap) - a generic mechanism, "eufy" was only
-# ever the name of the real network this instance happens to repeat. Any
-# FUTURE extend target added via the LuCI Extender page gets its own
-# 'extN' zone in this same shape (see
-# www/luci-static/resources/view/extender.js). Open in all directions:
-# this router relays other devices' traffic through relayd, and needs to
-# reach the upstream network/internet freely for its own DHCP lease and
-# any local traffic.
-#
-# `list device 'rpt_ext0_ap'` is not optional. Confirmed live (2026-07-25,
-# FINDINGS.md §19 addendum) against the official OpenWrt relayd guide and
-# this router's own generated nft ruleset: relayd is a routed mechanism
-# subject to netfilter, NOT an L2/proxy-ARP bypass of it - a prior version
-# of this comment claimed otherwise and was wrong, corrected here.
-# `rpt_ext0_ap` (the raw AP interface etc/init.d/extender creates - the
-# interface real clients actually connect to) is never bound to any UCI
-# `network` section, so `list network 'ext0_wwan'` alone (which only
-# covers `phy1-sta0`) leaves it in NO zone. Default forward policy is
-# REJECT (see `config defaults` above), so without this, every repeated
-# client's traffic would be silently dropped - hostapd/relayd/STA
-# association all look completely healthy while delivering zero real
-# internet access. `device` is a genuine, separate fw4 zone-membership
-# option (confirmed against /usr/share/ucode/fw4.uc), not a workaround.
-config zone 'ext0'
-	option name 'ext0'
-	list network 'ext0_wwan'
-	list device 'rpt_ext0_ap'
-	option input 'ACCEPT'
+# WiFi Extender, REARCHITECTED 2026-07-26 (see config/network's matching
+# comment for the full why). This is now a plain WAN-style uplink zone for
+# the STA interfaces bound in config/network (american_wwan/american24_wwan)
+# - same shape as the real `wan` zone above (input REJECT, output ACCEPT,
+# forward REJECT, masq on), not the old wide-open "ext0" bridge-relay zone.
+# No AP-side device list anymore - there is no second AP interface at all,
+# only the STA uplink(s).
+config zone 'american'
+	option name 'american'
+	list network 'american_wwan'
+	list network 'american24_wwan'
+	option input 'REJECT'
 	option output 'ACCEPT'
-	option forward 'ACCEPT'
+	option forward 'REJECT'
+	option masq '1'
+	option mtu_fix '1'
+
+# Give the router's EXISTING lan zone (the "R8000" SSID + wired ports,
+# already what devices normally join - no new SSID to onboard onto) a real
+# route out through the extend target, exactly matching GL.iNet's actual
+# "WiFi-as-WAN-uplink" repeater model, confirmed live 2026-07-26 by reading
+# their published gl-sdk4-repeater source: no relayd, no cloned/second AP,
+# just a routed STA uplink NAT'd to the existing downstream network.
+config forwarding
+	option src 'lan'
+	option dest 'american'
 

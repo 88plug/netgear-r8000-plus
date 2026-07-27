@@ -45,27 +45,36 @@ config interface 'guest'
 	option ipaddr '192.168.2.1'
 	option netmask '255.255.255.0'
 
-# STA side of the WiFi Extender's first repeat target (see config/wireless
-# ext0_sta/ext0_ap and etc/init.d/extender) - this router's own DHCP lease
-# from the repeated network. Deliberately NOT a dependency for the
-# repeater itself: etc/init.d/extender checks radio-level association
-# (iw link), not this interface's DHCP state, before bringing up the
-# AP+relay side. Any FUTURE extend target added via the LuCI Extender page
-# (Network › Extender) gets its own 'extN_wwan' interface, same shape,
-# created by that page - see www/luci-static/resources/view/extender.js.
+# WiFi Extender, REARCHITECTED 2026-07-26: no more relayd/raw-AP-per-target
+# (etc/init.d/extender, the whole rpt_extN_ap + hostapd + relayd mechanism,
+# is retired - the interfaces it created had no real firmware AP role behind
+# them on this chip when a STA is already active on the same radio, and
+# separately, same-SSID/cloned-or-distinct-BSSID transparent bridging is not
+# how real repeaters (GL.iNet's actual shipped firmware, confirmed by
+# reading their published source) solve this - they NAT/route a normal STA
+# uplink out to the router's OWN existing LAN, never a second same-SSID AP).
 #
-# defaultroute/peerdns MUST both be '0' on every one of these, not just
-# this one. Confirmed live 2026-07-25 (FINDINGS.md §19 addendum): without
-# them, this interface's DHCP lease installs a default route at the same
-# metric (0) as the real `wan` interface's, and the kernel silently
-# preferred the repeated network's one - this router's own outbound
-# traffic (not repeated-client traffic, which relayd handles separately at
-# L2) started intermittently routing out through the third-party network
-# instead of the real WAN, causing ~50% loss to real internet hosts.
-# Caught by testing multi-hop connectivity (ping 8.8.8.8) after a real
-# flash, not by the 1-hop gateway ping alone, which stayed clean
-# throughout and would have masked this.
-config interface 'ext0_wwan'
+# Current mechanism: each extend target is just a plain STA wifi-iface
+# (config/wireless) bound to one of these interfaces, with the router's
+# EXISTING `lan` zone (already what devices normally join - no new SSID)
+# forwarded + NAT'd out through it via config/firewall. Auto-detects the
+# target network's own channel/band the same way any OpenWrt STA does -
+# wpa_supplicant negotiates it, nothing here or in etc/init.d/extender needs
+# to know or set it.
+#
+# defaultroute/peerdns: exactly ONE of a router's extend-target interfaces
+# should carry defaultroute='1'/peerdns='1' at a time (the live uplink) -
+# confirmed live 2026-07-26, `american_wwan` (5GHz, better link speed) is
+# it; `american24_wwan` stays defaultroute='0' (available, not primary).
+# Never leave defaultroute='0' on ALL of them, unlike the old relayd
+# architecture's isolation requirement - here we WANT this to become the
+# router's real route out.
+config interface 'american_wwan'
+	option proto 'dhcp'
+	option defaultroute '1'
+	option peerdns '1'
+
+config interface 'american24_wwan'
 	option proto 'dhcp'
 	option defaultroute '0'
 	option peerdns '0'
