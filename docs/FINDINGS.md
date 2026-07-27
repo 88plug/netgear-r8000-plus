@@ -3048,3 +3048,45 @@ initial ask pictured. DHCP-pool numeric overlap between R8000's own
 confirmed harmless: NAT means R8000's internal DHCP clients live in a
 completely separate, isolated address space regardless of the
 coincidentally-matching subnet number.
+
+**Real bug found and fixed the same evening, live: a client on the new
+BSS got DHCP but no DNS.** Operator reported a specific real client
+(`6e:9c:40:a4:e5:13` / `192.168.1.138`) associated on `phy0-ap1`
+("American" clone), authorized, real hostapd traffic counters, DHCP
+DISCOVER/OFFER/REQUEST/ACK completed cleanly - but every DNS query
+(`/proc/net/nf_conntrack`, many attempts across ports/time) showed
+`[UNREPLIED]`: 0 reply packets, 0 bytes, from the router's own
+dnsmasq. Router-to-client ping succeeded (0% loss, though at an
+unusually high ~500ms - a real oddity on this client's own radio,
+unexplained but not the cause of the DNS failure: conntrack showing
+zero reply packets sent proves dnsmasq itself never attempted a
+reply, ruling out a WiFi-side delivery delay).
+
+Root cause: `dhcp.cfg01411c.localservice='1'` - dnsmasq's
+`--local-service` ACL (which subnets/interfaces count as "local" enough
+to answer) gets computed from the interface topology dnsmasq sees *at
+its own startup*. `phy0-ap1` was added to `br-lan` live, after dnsmasq
+was already running from an earlier boot - `wifi reload radio0`
+brought the new bridge port up correctly (bridge membership confirmed:
+`bridge link show` listed `phy0-ap1` as a real br-lan port), but never
+told dnsmasq to re-derive its local-service ACL. Bridge/L2 forwarding
+worked (conntrack shows the query packets genuinely arriving), DHCP
+worked (a separate code path, always broadcast-triggered), but
+`local-service`-gated unicast DNS silently dropped for this specific
+interface's clients only.
+
+Fix: `/etc/init.d/dnsmasq restart` (not just `reload`) - confirmed
+immediately on a real controlled client on the exact same BSS: `curl
+http://google.com/` returned a genuine `301 Moved` with real DNS
+resolution. **Then verified this is NOT a persistent bug**: full
+reboot, re-tested a fresh connection to the same BSS with zero manual
+intervention - DNS worked cleanly from boot, no restart needed. This
+confirms the bug was purely a live-incremental-config artifact (adding
+a bridge member without restarting the service that computes an ACL
+from bridge topology) - a real flash or a real reboot starts dnsmasq
+*after* all interfaces/bridge members are already configured, so it
+never manifests there. Documented here as a live-editing gotcha, not a
+standing defect: **any time a new wifi-iface is added to an existing
+bridged network via live UCI+reload (not a fresh boot/flash),
+`/etc/init.d/dnsmasq restart` is required alongside the `wifi reload`,
+or clients on the new interface will get DHCP but silently no DNS.**
