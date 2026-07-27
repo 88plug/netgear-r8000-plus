@@ -752,3 +752,33 @@ auto-provisioning (network interface + firewall zone, with the
 defaultroute/peerdns protection §19 already proved necessary), and
 remove, each confirmed against the router's actual UCI state via SSH,
 not just the UI's own say-so. Full history: `docs/FINDINGS.md` §30-§31.
+
+**Root cause of R8000's own AP being invisible over the air - found and
+fixed (2026-07-26).** This was a genuinely separate bug from everything
+above (not a config issue, not a hardware fault, not the same-radio
+AP+STA limit) - the router's own main SSID, running on its own solo
+radio0 with zero concurrent STA, simply never radiated a beacon any
+external receiver could hear, while hostapd/mac80211/firmware all
+reported completely healthy state throughout. Ruled out with hard,
+independently-verified evidence, in order: firmware calibration
+(clm_blob - already tried, reverted, unrelated), antenna disconnection
+(built and deployed a real driver patch exposing `iw phy info`'s
+antenna chain masks - full 3-chain, healthy), a dead RF chain
+(disabled the AP, ran radio0 as a solo STA, and got a full real WPA2
+4-way handshake with an independently-built test AP on radio0's exact
+operating channel - proves TX/RX both work at the hardware level).
+That left AP-mode/beacon-generation specifically as the only remaining
+candidate. Found it: patches 862/863 (built months earlier for the now-
+fully-retired raw-AP+STA-concurrent Extender mechanism) force the
+firmware `apsta` iovar to 1 unconditionally on ANY primary-interface AP
+bring-up - including R8000's own solo AP, which has no concurrent STA
+and never needed it. Live-tested: removing these two patches (reverting
+to stock `apsta=0`) made R8000 visible immediately, at -27dBm, and
+responding to real probe requests. Both American uplinks and the real
+downstream-client internet path reconfirmed healthy throughout. Full
+root-cause chain across three sessions of work: `docs/FINDINGS.md`
+§32-§34. Along the way, built and shipped three genuinely reusable
+driver diagnostics that didn't exist before (patches 866-868): real
+antenna chain-mask reporting, firmware MAC-layer TX/RX counters via
+debugfs, and a live apsta read/write hook - all upstream-pattern,
+low-risk additions now part of this repo's standing toolkit.

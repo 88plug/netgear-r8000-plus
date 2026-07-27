@@ -1,3 +1,21 @@
+RETIRED 2026-07-26 - DO NOT APPLY. Root-caused as the reason R8000's own
+AP (radio0/main_radio0) never radiated a single beacon any external
+receiver could hear, despite hostapd/mac80211/firmware all reporting
+fully healthy state throughout. This patch (and 863) force apsta=1
+unconditionally on ANY primary-interface AP bring-up (ifidx==0), not
+just when a genuine concurrent AP+STA scenario exists on the same
+radio - they were built for the OLD Extender's raw-AP+STA-concurrent
+mechanism, which has since been fully retired (see FINDINGS.md's
+Extender pivot entries; the Extender is pure STA-uplink-only now, no
+AP+STA-concurrent scenario exists anywhere in this router's current
+architecture). Reverting to stock apsta=0 (i.e. NOT applying this
+patch) fixed R8000's visibility immediately - live-tested, R8000 became
+visible at -27dBm the moment this patch was removed from the build.
+See FINDINGS.md #33/#34 for the full root-cause chain. Kept in the repo
+as historical record only; excluded from build-image.sh's patch copy.
+
+--- original description below, no longer accurate to current behavior ---
+
 brcmfmac: force apsta=1 instead of 0 when bringing up an AP role
 
 brcmf_cfg80211_start_ap() unconditionally forces the firmware "apsta"

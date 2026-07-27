@@ -1,3 +1,10 @@
+RETIRED 2026-07-26 - DO NOT APPLY. See patches/862's own updated header
+for the full story: this pair is the root cause of R8000's over-the-air
+invisibility, fixed by not applying either. Kept as historical record
+only; excluded from build-image.sh's patch copy.
+
+--- original description below, no longer accurate to current behavior ---
+
 brcmfmac: also set apsta=1 on the primary interface (matching P2P's routing)
 
 patches/862 forced the firmware "apsta" iovar to 1 (instead of the

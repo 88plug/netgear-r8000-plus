@@ -1,0 +1,87 @@
+brcmfmac: expose live "apsta" iovar read/write via debugfs
+
+Real diagnostic + live-test tool: patches/862+863 force the "apsta"
+iovar to 1 unconditionally whenever ANY AP-role vif starts on this
+chip, regardless of whether a concurrent STA vif actually exists. That
+fix targeted the old Extender's raw-AP+STA-concurrent scenario - which
+no longer exists in this router's current architecture (the Extender
+is now pure STA-uplink-only, see FINDINGS.md's Extender pivot entries).
+radio0's own solo AP (R8000, no concurrent STA) still gets apsta=1
+forced on it unconditionally by that patch, with no way to verify or
+change the live value without a rebuild - until now.
+
+Adds two debugfs entries (registered at the same generic, bus-agnostic
+point as "revinfo"/"counters"):
+- "apsta" (read-only, seq_file): reports the live value of the
+  "apsta" iovar for the primary interface.
+- "apsta_set" (write-only, 0600): sets the "apsta" iovar directly,
+  bypassing brcmf_cfg80211_start_ap()'s own forced value entirely, so
+  the apsta=1-vs-0 hypothesis for R8000's AP-mode beacon-invisibility
+  problem can be tested live in seconds, without a rebuild/redeploy
+  cycle per attempt.
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/core.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/core.c
+@@ -1217,6 +1217,53 @@
+ 	return 0;
+ }
+ 
++static int brcmf_apsta_read(struct seq_file *s, void *data)
++{
++	struct brcmf_bus *bus_if = dev_get_drvdata(s->private);
++	struct brcmf_pub *drvr = bus_if->drvr;
++	struct brcmf_if *ifp = brcmf_get_ifp(drvr, 0);
++	u32 apsta;
++	s32 err;
++
++	if (!ifp)
++		return -ENODEV;
++
++	err = brcmf_fil_iovar_int_get(ifp, "apsta", &apsta);
++	if (err) {
++		seq_printf(s, "apsta get error: %d\n", err);
++		return 0;
++	}
++
++	seq_printf(s, "%u\n", apsta);
++	return 0;
++}
++
++static ssize_t brcmf_apsta_write(struct file *file, const char __user *user_buf,
++				 size_t count, loff_t *ppos)
++{
++	struct brcmf_pub *drvr = file->private_data;
++	struct brcmf_if *ifp = brcmf_get_ifp(drvr, 0);
++	u32 value;
++	s32 err;
++
++	if (!ifp)
++		return -ENODEV;
++
++	if (kstrtou32_from_user(user_buf, count, 0, &value))
++		return -EINVAL;
++
++	err = brcmf_fil_iovar_int_set(ifp, "apsta", value);
++	if (err)
++		return err;
++
++	return count;
++}
++
++static const struct file_operations brcmf_apsta_fops = {
++	.open	= simple_open,
++	.write	= brcmf_apsta_write,
++};
++
+ static void brcmf_core_bus_reset(struct work_struct *work)
+ {
+ 	struct brcmf_pub *drvr = container_of(work, struct brcmf_pub,
+@@ -1324,6 +1371,9 @@
+ 	/* populate debugfs */
+ 	brcmf_debugfs_add_entry(drvr, "revinfo", brcmf_revinfo_read);
+ 	brcmf_debugfs_add_entry(drvr, "counters", brcmf_counters_read);
++	brcmf_debugfs_add_entry(drvr, "apsta", brcmf_apsta_read);
++	debugfs_create_file("apsta_set", 0600, brcmf_debugfs_get_devdir(drvr),
++			    drvr, &brcmf_apsta_fops);
+ 	debugfs_create_file("reset", 0600, brcmf_debugfs_get_devdir(drvr), drvr,
+ 			    &bus_reset_fops);
+ 	brcmf_feat_debugfs_create(drvr);

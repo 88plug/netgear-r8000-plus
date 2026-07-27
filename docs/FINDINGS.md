@@ -2709,3 +2709,116 @@ on `phy0-ap0`, both American uplinks reconnected, and the actual
 downstream-client path re-confirmed end-to-end (a real LAN client on
 this bench, not the router pinging itself: 0% packet loss to 8.8.8.8
 through the extended network) - zero lasting damage from this test.
+
+## 34. ROOT CAUSE FOUND AND FIXED: patches 862/863's forced apsta=1 is
+why R8000 never radiated a beacon (2026-07-26)
+
+§33 proved radio0's RF/antenna/TX/RX all work via a real WPA2 handshake
+in STA mode. That narrowed the entire multi-session investigation to
+one question: what's different about AP-mode/beacon-generation
+specifically on this radio.
+
+**Built a live test tool instead of guessing (patch 868):** exposed the
+firmware `"apsta"` iovar via debugfs (read at
+`/sys/kernel/debug/ieee80211/phy<N>/apsta`, write via `apsta_set`) - the
+same bus-agnostic registration point as patches 866/867. Read it live on
+R8000's AP: **`apsta=1`**. Read it on both American STA radios (which
+never call `brcmf_cfg80211_start_ap()` at all): **`apsta=0`**. This
+directly confirmed patches 862/863 - which force the firmware `apsta`
+iovar to 1 whenever an AP-role interface starts - are live and active on
+R8000's own solo AP right now, months after the mechanism they were
+built to fix (the old Extender's raw-AP+STA-concurrent-on-one-radio data
+flow) was fully retired.
+
+**First test - live-flip, genuinely inconclusive, correctly not
+over-claimed:** wrote `0` to `apsta_set` while the AP kept running
+(no interface teardown at all). Read-back confirmed the firmware
+accepted `0`. Re-scanned from the Android device: still nothing. Then
+did a clean `hostapd_cli -i phy3-ap0 disable` / `enable` cycle (not a
+UCI role-switch, so no wedge risk) and re-read `apsta`: **it had gone
+back to 1 on its own** - conclusively proving `brcmf_cfg80211_start_ap()`
+re-forces the value unconditionally on every real AP bring-up, so a
+live mid-flight flip can never be a clean test of "started fresh with
+apsta=0." This ruled out the quick test, not the hypothesis - a real
+test needed the force removed from the code path itself, not patched
+around after the fact.
+
+**Read the actual guarded code (`cfg80211.c`, ~line 5370):**
+```c
+if ((dev_role == NL80211_IFTYPE_AP) &&
+    ((ifp->ifidx == 0) ||
+     (!brcmf_feat_is_enabled(ifp, BRCMF_FEAT_RSDB) &&
+      !brcmf_feat_is_enabled(ifp, BRCMF_FEAT_MCHAN)))) {
+        err = brcmf_fil_cmd_int_set(ifp, BRCMF_C_DOWN, 1);
+        ...
+        brcmf_fil_iovar_int_set(ifp, "apsta", 1);   /* patches/862 changed 0->1 here */
+        if (ifp->ifidx != 0) {
+                struct brcmf_if *pri_ifp = brcmf_get_ifp(drvr, 0);
+                if (pri_ifp)
+                        brcmf_fil_iovar_int_set(pri_ifp, "apsta", 1);  /* patches/863 */
+        }
+}
+```
+The `ifp->ifidx == 0` branch fires for ANY primary-interface AP bring-up
+- there is no concurrent-STA check anywhere in this condition. R8000's
+`main_radio0` is the sole, primary (`ifidx==0`) interface on that radio,
+so this fires every single time it starts, unconditionally - refining
+the original hypothesis: it was never actually gated on a real AP+STA-
+concurrent scenario at all, even before the Extender pivot.
+
+**The real test: removed patches 862/863 entirely from the SDK build**
+(not a live patch - the actual code path reverted to stock, so a fresh
+`start_ap()` genuinely runs with `apsta=0` from the first beacon
+onward). Rebuilt via the same proven SDK recipe, depends-hash verified
+against the running kernel, deployed (brcmutil.ko was byte-identical to
+the already-deployed copy - only brcmfmac.ko needed swapping). Router
+came back up clean: R8000 AP `state=ENABLED`, `phy=phy12`,
+`freq=5745` (note: BSSID changed from the locally-administered
+`ea:fc:af:f9:f1:39` to the router's raw hardware address
+`e8:fc:af:f9:f1:38` - a real, harmless side effect of 862/863's own MAC
+handling being gone, confirmed genuine via the `renamed from wlan0`
+dmesg tell, not the fake MBSS-fallback path).
+
+**Result:**
+```
+$ adb shell su -c "iw dev wlan0 scan freq 5745"
+BSS e8:fc:af:f9:f1:38(on wlan0)
+	freq: 5745
+	signal: -27.00 dBm
+	Information elements from Probe Response frame:
+	SSID: R8000
+```
+**-27dBm - by far the strongest signal seen on this channel all
+session** (every neighbor AP found throughout this investigation was
+-55 to -82dBm), responding to a real active probe request. R8000 is
+visible for the first time in this project's entire history. Both
+American uplinks (`ping -I phy14-sta0 -c3 8.8.8.8`: 0% loss) and the
+real downstream-client internet path (`ping -I enp101s0f3u1`: 0% loss)
+reconfirmed healthy throughout - zero regression anywhere else.
+
+**Root cause, stated plainly:** patches 862/863 forced firmware
+`apsta=1` unconditionally on every primary-AP-interface bring-up. That
+was a legitimate, working fix for a real problem *at the time it was
+written* (the old raw-AP+STA-concurrent Extender mechanism genuinely
+needed concurrent-scheduling firmware support). That mechanism was
+later fully retired (replaced by the pure-STA-uplink Extender
+architecture - see the earlier pivot entries), which removed every
+legitimate reason for `apsta` to ever be forced to 1 on this router -
+but the two kernel patches forcing it were never revisited or removed,
+and kept unconditionally applying themselves to R8000's own unrelated
+solo AP. Whatever the exact internal firmware mechanism is by which
+`apsta=1` silences AP-mode beacon transmission on a chip with no
+RSDB/MCHAN and no concurrent STA to actually schedule against remains
+unestablished at the firmware-internals level (out of scope - the
+firmware itself is closed) - but the causal fix is proven with hard,
+repeatable, live evidence: remove the patches, R8000 radiates.
+
+**Disposition:** patches 862/863 marked RETIRED in-place (headers
+rewritten to point here, original description kept below for the
+historical record - never deleted, per this repo's own convention),
+excluded from `build-image.sh`'s patch copy alongside the already-
+excluded malformed 864. Patches 866, 867, 868 (antenna reporting,
+firmware counters, and the apsta live-toggle debugfs tool that found
+this) all remain in active use - genuinely reusable diagnostic
+capability this driver didn't have before this session, independent of
+the specific bug they were built to chase.

@@ -72,12 +72,31 @@ MAC80211_PATCH_DIR="package/kernel/mac80211/patches/brcm"
 mkdir -p "$MAC80211_PATCH_DIR"
 # All patches actually deployed on the live router, not just 861 - this
 # drifted stale once before (this script only ever copied 861, while
-# 862/863/865/866 were applied to the running kernel by hand). 864 is a
-# known-malformed patch.py reject, never shipped, deliberately excluded -
-# see patches/864-brcmfmac-r8000-psta-repeater-vif.patch's own history.
+# 862/863/865/866 were applied to the running kernel by hand). Two
+# patches are deliberately excluded, kept in the repo only as historical
+# record (never deleted - the point of this repo is a reproducible
+# runbook, not a summary):
+#   864: known-malformed patch.py reject, never shipped. See
+#        patches/864-brcmfmac-r8000-psta-repeater-vif.patch's own history.
+#   862, 863: ROOT CAUSE of R8000's over-the-air invisibility, found and
+#        fixed 2026-07-26 (FINDINGS.md #33/#34). Force firmware apsta=1
+#        unconditionally on ANY primary-interface (ifidx==0) AP bring-up
+#        - built to fix the old Extender's raw-AP+STA-concurrent-on-one-
+#        radio data flow (retired architecture, see FINDINGS.md's
+#        Extender pivot entries), but applied to EVERY primary AP
+#        including R8000's own solo main_radio0, which has no concurrent
+#        STA and never needed it. Confirmed live: with these applied,
+#        hostapd/mac80211/firmware all reported fully healthy state
+#        while zero external receiver ever heard a single R8000 beacon;
+#        reverting to stock apsta=0 (i.e. NOT applying these two
+#        patches) fixed it immediately, R8000 became visible at -27dBm.
+#        Do not re-apply without re-solving whatever the underlying
+#        apsta=1-vs-beacon-generation interaction actually is - there is
+#        no remaining AP+STA-concurrent scenario anywhere in this
+#        router's current architecture that needs them.
 for PATCH in "$REPO_ROOT"/patches/86*.patch; do
   case "$(basename "$PATCH")" in
-    864-*) continue ;;
+    862-*|863-*|864-*) continue ;;
   esac
   cp "$PATCH" "$MAC80211_PATCH_DIR/"
 done
