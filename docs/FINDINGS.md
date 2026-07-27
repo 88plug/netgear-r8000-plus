@@ -4850,3 +4850,26 @@ SSH session I'm stuck" into "the router fixes itself in 30 seconds
 regardless of what happens to my connection" - this is what actually
 made testing the riskiest remaining lever responsible, not just asking
 for permission and hoping.
+
+**Reproduced independently, same watchdog method, isolating the actual
+cause:** ran a second trial with only `fa_bringup` + `fa_bcmhdr_ctl_persist`
+loaded (no `fa_accel`/`live=1` this time) - confirms the disruption comes
+from `bcm_hdr_ctl` itself, not from any NAPT-table write. This trial
+showed **100% ping loss** (worse than trial 1's 60% - real run-to-run
+severity variance, not a fixed/deterministic corruption pattern, which
+is itself informative: a purely static "every frame shifted by exactly
+4 bytes" model would predict a more consistent loss rate across runs).
+Watchdog auto-reverted cleanly again at its timer - 0% loss/sub-ms
+latency restored, `bcm_hdr_ctl` back to `0x00000000`, full router state
+reconfirmed intact.
+
+Attempted a packet-level capture (via `tcpdump`) to see the actual
+corrupted frames rather than just aggregate ping stats, on two different
+vantage points - this session's own management host (no root/CAP_NET_RAW
+available) and the rooted Android phone already used in #61 (no
+`tcpdump`/`busybox` binary present, and pushing a static binary wasn't
+judged worth the added effort against the marginal diagnostic value).
+Deeper packet-level forensics on the exact corruption mechanism remains
+open for whoever picks up the actual driver-integration project - the
+aggregate result (real, severe, run-to-run-variable disruption, always
+cleanly auto-recoverable) is solid and reproduced twice independently.
