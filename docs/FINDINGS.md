@@ -2488,11 +2488,54 @@ software-layer signal reporting fully healthy:
   receiver, by this project or apparently at any point in this router's
   documented history, until tonight's scan came back silent.
 
-**Standing conclusion:** every driver/firmware/mac80211/hostapd signal
-this project can inspect remotely says radio0's AP is healthy. The one
-layer that can't be checked over SSH - the physical dedicated dipole
-antenna path for chains 4-6 - is now the leading, well-evidenced
-suspect. Next step is physical: inspect/reseat radio0's antenna
-connectors (or, if internal/non-removable, the board-level connection)
-with eyes on the actual hardware. Not yet done; no further remote
-software lever is left to pull on this specific finding.
+**Standing conclusion (superseded below):** every driver/firmware/
+mac80211/hostapd signal this project can inspect remotely says radio0's
+AP is healthy. The one layer that can't be checked over SSH - the
+physical dedicated dipole antenna path for chains 4-6 - was the leading
+suspect. That suspicion is now narrowed further, see next entry.
+
+**Update, same session: radio0's antenna is NOT disconnected - RX proven
+working.** Disabled `main_radio0` (AP) and brought up a solo STA vif on
+radio0 alone (avoiding the interface_create AP+STA-concurrent limitation
+by never having two vifs on the same radio at once). `iw dev phy3-sta0
+scan freq 5745` heard the same neighbor ("STARLINK", `1a:f1:ac:3e:af:85`)
+at -58 to -60dBm across repeated scans, matching the Android device's
+independent -69dBm reading (different receiver, different location in
+the room, same physical signal - directionally consistent). **This rules
+out a disconnected or physically dead antenna on radio0.** The dedicated
+dipole antenna path for chains 4-6 is receiving real RF at a healthy
+signal level.
+
+Attempted to isolate TX specifically:
+- TX packet counter showed zero change across the scan. Ran the
+  identical before/after check on `phy4-sta0` (2.4GHz, proven working,
+  real ping traffic flowing) as a control - it ALSO showed zero TX
+  change during its own scan. This means brcmfmac's scan is firmware-
+  internal (probe requests never touch the host netdev TX path) on this
+  driver - the test is not diagnostic either way, and the earlier
+  reasoning from it is retracted.
+- Attempted a direct `iw dev phy3-sta0 connect STARLINK` to force a real
+  auth/assoc frame exchange over the host TX path (regardless of
+  whether the handshake would ultimately succeed without the PSK) - the
+  command failed on tooling (no `timeout` binary in this busybox), never
+  actually ran.
+- Every AP<->STA role switch on radio0 this session (including this one)
+  has landed hostapd in the same wedged state
+  (`v2-staging/maxpower/notes.md`'s documented "Known-bad sequence") -
+  repeating "hostapd: Failed to set beacon parameters" that only a full
+  reboot clears, not a live `wifi`/`wifi reload`. Confirmed again this
+  round; full reboot restored R8000 + both American uplinks cleanly
+  (0% loss re-verified on the 5GHz uplink post-reboot).
+
+**Given that live-instability cost is real and repeats every time,
+stopped further live role-switching on radio0 rather than chase one more
+TX data point.** Standing conclusion updated: radio0's antenna/RX chain
+is proven physically intact. The fault is narrowed to radio0's transmit
+path specifically (AP-mode beacon frames are handed to the driver at the
+correct rate, per §32 above, but no external receiver has ever heard
+them) - still unconfirmed whether that's a firmware/calibration issue or
+a genuine PA hardware fault on this one radio's dedicated TX chain.
+Testing STA-mode TX cleanly (associating to a network the operator
+controls, with a known password, to get an unambiguous data-plane TX
+counter increment) is the next concrete lever, not another blind
+disable/re-enable cycle against a stranger's AP.
