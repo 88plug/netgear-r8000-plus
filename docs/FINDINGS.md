@@ -3090,3 +3090,64 @@ standing defect: **any time a new wifi-iface is added to an existing
 bridged network via live UCI+reload (not a fresh boot/flash),
 `/etc/init.d/dnsmasq restart` is required alongside the `wifi reload`,
 or clients on the new interface will get DHCP but silently no DNS.**
+
+## 38. Second real client, same DHCP-but-no-DNS symptom - broader fix applied
+
+Operator reported a second real client, same "American" clone BSS
+(`phy0-ap1`), same symptom: `5e:bf:f9:2f:11:a1` / `192.168.1.109`,
+described as physically closest to the router. Got DHCP, got a DNS
+server address, no actual DNS traffic flowing. Investigated fresh
+(not assumed identical to §37's first client) per the ongoing OODA
+discipline - the dnsmasq restart above had already been proven
+non-persistent by a full reboot test, so this couldn't be the exact
+same live-editing artifact recurring.
+
+Checked hostapd station state on `phy0-ap1`: real `[AUTH][ASSOC]
+[AUTHORIZED]`, real traffic counters, so association itself was fine.
+Initially flagged `capability=0x0`, `supported_rates=0c 18 30`, and a
+randomized MAC as suspicious. Operator corrected directly - randomized
+MACs are normal on modern devices, not a diagnostic signal. Retracted
+that MAC point, then did a direct A/B check instead of arguing about
+it: ran `hostapd_cli -i phy0-ap1 all_sta` and found my OWN currently-
+connected, confirmed-working device reporting the IDENTICAL
+`capability=0x0` / `supported_rates=0c 18 30` / `signal=0` telemetry.
+Proves those fields are a cosmetic hostapd/driver reporting quirk for
+secondary-BSS stations in general, not a real anomaly - retracted this
+whole line of investigation rather than chasing a red herring.
+
+Checked dnsmasq's own query log (`logqueries=1`, left on from §37):
+zero log entries for `.109` at any point, despite conntrack
+(`/proc/net/nf_conntrack`) showing its DNS query packets genuinely
+arriving at the kernel layer. Same signature as §37 - a query dropped
+before it reaches dnsmasq's own socket/logging layer - but this
+client's own device (per hostapd) looked no different from my already-
+working device on the same BSS, so the narrow "ACL not yet recomputed
+after live bridge-add" story from §37 doesn't fully explain why THIS
+specific client/IP would still be affected post-reboot while others on
+the same BSS work. Root mechanism not fully pinned down to the exact
+byte/field level.
+
+Applied a broader, more conservative fix instead of continuing to
+chase the exact narrow mechanism: disabled `local-service` entirely
+(`uci set dhcp.@dnsmasq[0].localservice='0'; uci commit dhcp;
+/etc/init.d/dnsmasq restart`). Reasoning: `local-service` is an ACL
+layer restricting which "local" sources dnsmasq will answer, but this
+network is already fully NAT'd and firewall-zoned (see `config
+firewall`'s zone definitions) - the firewall, not dnsmasq's own ACL, is
+what actually gates which interfaces can reach the DNS service.
+`local-service` here is redundant belt-and-suspenders that has now
+caused two real clients on a live multi-BSS setup to silently lose DNS
+for reasons not fully isolated. Removing it removes an unnecessary
+extra failure mode rather than patching around it a third time.
+
+Verified my own device's DNS still worked post-fix (`curl` -> real
+`301` from google.com, same as §37). **Honest limitation: could not
+get live re-confirmation from the exact reported client** - waited
+~20s post-fix, checked `logread`/conntrack, no new activity from
+`.109` (it wasn't actively retrying/connected at that moment). This
+fix is applied live on the router and persisted to
+`v2-files/etc/config/dhcp` (`option localservice '0'`), but has not
+yet been re-verified against a fresh connection from the originally-
+reported client. Documented honestly per this project's own standard:
+the live fix is real and doesn't regress a known-working device, but
+full closure on the *specific* reported client is still open.

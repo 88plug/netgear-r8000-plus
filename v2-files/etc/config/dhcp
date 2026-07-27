@@ -16,7 +16,17 @@ config dnsmasq
 	option leasefile '/tmp/dhcp.leases'
 	option resolvfile '/tmp/resolv.conf.d/resolv.conf.auto'
 	option nonwildcard '1'
-	option localservice '1'
+	# localservice OFF (was '1'): confirmed live 2026-07-27 (FINDINGS.md
+	# #37/#38) - real clients on the "American" 2nd-BSS (radio0/american_ap)
+	# got DHCP fine but every DNS query silently vanished (kernel/conntrack
+	# saw the packet arrive, dnsmasq's own query log never logged it -
+	# consistent with local-service's ACL discarding it before the socket
+	# layer even parses/logs it). Not needed for correctness on this
+	# single-operator-owned network anyway - the firewall zones already
+	# gate which interfaces can reach dnsmasq at all; local-service was
+	# redundant belt-and-suspenders that broke real clients on a live
+	# multi-BSS setup instead.
+	option localservice '0'
 	option ednspacket_max '1232'
 	option filter_aaaa '0'
 	option filter_a '0'
