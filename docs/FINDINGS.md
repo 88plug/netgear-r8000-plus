@@ -3675,3 +3675,33 @@ earlier. Here the mechanism (shared hostapd process, one radio's
 instability affecting others) is a plausible, sufficient explanation
 consistent with every fact observed, and the fix time-correlates exactly
 - treated as resolved on that basis, not treated as certain beyond it.
+
+## 48. Re-tested #45's VHT40-tradeoff question on v24 - link is now stable
+## under real load, no narrowing needed
+
+#45 left an open decision: whether to trade VHT80's peak throughput for
+VHT40's stability, given real interference found via scan (a neighboring
+`GL-X300` at -41dBm on channel 48, inside the same 80MHz block). Rather
+than guess or unilaterally narrow the channel (a real peak-vs-stability
+tradeoff, not a bug fix), re-measured on v24 first.
+
+Idle sampling briefly showed the same kind of rx-rate dip (down to 6.0
+Mbit/s for ~8 seconds) seen before - but with `tx failed` completely flat
+throughout (no real traffic being pushed at the time, so not a fair
+comparison to the original observation, which was captured during the
+operator's actual speedtest). Generated real sustained load instead (30
+sequential requests over ~20s) and re-sampled every 2s: `tx bitrate`/`rx
+bitrate` stayed consistently high (526-702 Mbit/s) the entire window, and
+`tx failed` did not increase AT ALL - a dramatic improvement from the
+original test (which showed the same counter climbing by 151 in 30
+seconds).
+
+Most likely explanation: the dominant cause of the original instability
+was #45's `main_radio2` AP+STA-concurrency bug (radio2 fighting itself
+internally), not primarily the external GL-X300 interference the scan
+found - the neighbor is real and still present, but evidently isn't the
+main driver of what was observed under load. **Decision: kept VHT80,
+no narrowing.** Re-measure again if real instability recurs under a
+longer/heavier load test - the neighbor hasn't gone anywhere and could
+still matter under different conditions (e.g. if it starts transmitting
+heavily during a future test).
