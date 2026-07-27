@@ -1,9 +1,21 @@
-# aria2 download accelerator, added 2026-07-27 (FINDINGS.md #49/#50) - turns
-# #49's "use a multi-connection downloader" recommendation into an actual
-# deployed capability: any LAN device (even ones that can't install
-# anything themselves, like a phone) can submit a URL via the LuCI web UI
-# and get a real multi-connection download that #46's ECMP genuinely
-# spreads across both American uplinks - confirmed live this session.
+# aria2 download accelerator, added 2026-07-27 (FINDINGS.md #49/#50/#51) -
+# turns #49's "use a multi-connection downloader" recommendation into an
+# actual deployed capability: any LAN device (even ones that can't
+# install anything themselves, like a phone) can submit a URL via the
+# LuCI web UI and get a real multi-connection download - measured 6.8x
+# faster (5.34 -> 36.5 Mbit/s, 100MB test file) than a single connection.
+#
+# CORRECTED 2026-07-27 (#51, real A/B/ablation test): that 6.8x is from
+# running 8 parallel connections, NOT from #46's dual-radio ECMP split -
+# a controlled test (same file, same connection count, forced onto ONE
+# radio vs both) produced the IDENTICAL time either way. Both American
+# uplinks share one real upstream gateway/ISP connection, so for a
+# SINGLE destination the bottleneck sits upstream of both radios, not at
+# either radio's own capacity - the second radio had nothing left to
+# add. #46's split is still real and valuable for multiple DIFFERENT
+# simultaneous destinations/devices (its actual proven use case) - just
+# not for one download's speed, which is what this package accelerates,
+# via parallelism alone.
 #
 # dir is tmpfs (/tmp), not the real overlay - this router has no USB
 # storage attached and the overlay itself is only ~18MB free (confirmed

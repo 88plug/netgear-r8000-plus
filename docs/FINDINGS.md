@@ -3874,3 +3874,63 @@ architecture already protected this.
 BitTorrent features (DHT/LPD/torrent-following) deliberately left off -
 scoped as an HTTP(S)/FTP accelerator only, matching the actual use case,
 avoiding port-forwarding requirements and scope creep.
+
+## 51. Audit of #50's claim (world-first discipline): the measured
+## speedup is real, but NOT from the second radio - a real ablation
+## catches an unproven causal claim
+
+#50 showed a real 10MB download splitting packets across both uplinks
+and left it there, implicitly crediting #46's dual-radio ECMP for any
+speed benefit. That's exactly a "verifier grants the win" gap the
+world-first checklist calls out: proving packets SPLIT is not the same
+as proving the split PRODUCED more throughput. Ran the real, tuned A/B/
+ablation this time, same 100MB file (`speedtest.tele2.net/100MB.zip`)
+throughout for a fair comparison:
+
+- **Baseline (tuned): single connection** (`split=1,
+  max-connection-per-server=1`) - 157s for 100MB = **~5.34 Mbit/s**.
+- **Mechanism as originally claimed: 8 connections, both uplinks active**
+  (the live default multipath route) - 23s = **~36.5 Mbit/s (6.8x)**.
+- **Ablation: 8 connections, but forced onto ONE radio only**
+  (temporarily replaced the default route with a single-path one via
+  `phy2-sta0`, same file, same connection count) - **23s. Identical.**
+
+**The second radio contributed nothing measurable.** The entire 6.8x
+speedup comes from running 8 parallel connections instead of one -
+overcoming whatever single-connection bottleneck exists (TCP window/RTT
+limits, or the test server's own per-connection throttling, both
+well-documented real effects independent of which physical link carries
+the traffic) - not from combining two radios' bandwidth. Route was
+restored to the weighted multipath default immediately after the test.
+
+**This directly, empirically confirms #49's own formal reasoning**, not
+just in theory this time: both American uplinks terminate at the same
+real upstream gateway sharing one real ISP connection - "only one actual
+uplink in play" once traffic is past R8000, exactly as the impossibility
+argument concluded. A single radio already had enough headroom to hit
+whatever the REAL bottleneck further upstream is (ISP capacity, or
+speedtest server throttling - not distinguished by this test, and not
+necessary to distinguish for the conclusion that matters here); the
+second radio had nothing left to add for this one destination.
+
+**Corrected scope, stated plainly:**
+- #46's ECMP dual-radio split is real and still valuable for what it
+  was actually proven to do: distributing MULTIPLE DIFFERENT simultaneous
+  connections/devices across both radios for real aggregate HOUSEHOLD
+  throughput (confirmed via packet counters across genuinely different
+  destinations/flows in #46's own tests).
+- It is NOT proven, and this test directly disproves for this specific
+  upstream network, to add anything to a SINGLE destination's download
+  speed - because the bottleneck for a single destination here sits
+  upstream of both radios, not at either radio's own capacity.
+- The real, measured, still-genuine win in #50 is aria2's multi-
+  connection parallelism itself (6.8x, real, reproducible) - independent
+  of and not caused by the dual-radio routing. The feature stays; the
+  credited mechanism was wrong and is corrected here.
+
+**Not yet re-tested:** whether dual-radio splitting produces a real
+throughput benefit under a DIFFERENT load pattern - specifically,
+multiple simultaneous LARGE transfers to DIFFERENT destinations at once
+(the scenario #46 was actually built and proven for), as opposed to one
+destination's single file. That remains the correctly-scoped claim and
+wasn't re-litigated here.
