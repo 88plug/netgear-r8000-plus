@@ -4125,3 +4125,71 @@ comment already stated.
 what topology* it was measured is what made this bug visible at all -
 without that provenance, "SQM is configured" would have looked done
 forever while shaping nothing real.
+
+## 56. #55's own fix was itself identity-specific - corrected to a fully
+## generic, name-agnostic mechanism
+
+#55 replaced the dead `wan` queue with two queues hardcoded to THIS
+deployment's current uplink names (`american_wwan`/`american24_wwan`,
+section names `american_5g`/`american_24g`). That is the exact same class
+of mistake this project has already ruled out for clients ("clients
+change all the time" - never hardcode to a specific device) applied to
+the uplink side instead: this router's upstream network happens to be
+called "American" today, but the SQM mechanism has no business ever
+knowing or caring what it's called, and a rename/re-point of the uplink
+would have silently reintroduced #55's exact bug (a queue bound to a name
+that no longer matches anything real).
+
+Corrected via `etc/hotplug.d/iface/32-dynamic-wan-sqm` (replaces the
+deleted `32-american-sqm`): walks every `config zone` in
+`etc/config/firewall` generically via `config_foreach`, looking for
+`option masq '1'` - this router's own, already-existing, name-agnostic
+definition of "this is a NAT'd uplink zone" (true for the original wired
+`wan` zone, `network` list `wan`/`wan6`, exactly as much as the current
+`american` zone, `network` list `american_wwan`/`american24_wwan`, and
+for any future zone added the same way). For each such logical interface
+currently up, it auto-provisions (first sight only, never overwrites an
+existing section) a `sqm_<logical-interface-name>` queue and rebinds its
+`interface` option to whatever the current real device is - the SAME
+device-resolution idiom as #55, just no longer gated on a specific
+interface-name allowlist. `etc/config/sqm` now ships with ZERO
+pre-declared queue sections - the hotplug script is the sole owner.
+Verified directly in the built rootfs before flashing: zero references to
+"american" anywhere in the script's actual logic (comments only, which
+document the history/rationale, not a name check).
+
+Bandwidth ceilings are now a single generic seed (50000/25000 kbit, in the
+same ballpark as #55's real per-radio measurements but explicitly NOT
+identity-bound) applied identically to whatever uplink is first seen -
+not a per-network measured value baked into the shipped config. This is
+an honest trade: it's less precise than #55's real 52.4/59.9 Mbit/s
+numbers until someone measures the SPECIFIC link again, but it is
+correctly *generic* rather than *wrong-by-name-mismatch* the moment
+anything changes. Refining a specific `sqm_<interface>` section's
+download/upload via UCI after a real measurement survives every future
+boot untouched - the hotplug script only ever sets those values on first
+sight of a new interface name.
+
+Verified live after flashing v30: `uci show sqm` shows `sqm_american_wwan`
+(-> phy2-sta0) and `sqm_american24_wwan` (-> phy1-sta0), both correctly
+auto-created and bound at boot (confirmed via `logread`), `tc qdisc show`
+confirms cake genuinely attached on both real devices. Also incidentally
+reconfirmed upstream openwrt/openwrt#21655 (already documented in
+RUNBOOK.md §3): this sysupgrade silently reset `/etc/config/sqm` to the
+shipped FILES= default rather than preserving the prior live
+`american_5g`/`american_24g` sections - harmless here since the new
+shipped default is empty and the hotplug script re-provisions from
+scratch correctly, but confirms that gotcha is still very much real and
+the mandatory pre-flash backup step still matters. `wireless`/`firewall`/
+`network`/`system` all confirmed correctly sized and functionally intact
+(real SSIDs live, `american` zone still present, multipath route,
+radios, aria2, cubic congestion control all unaffected).
+
+**Lesson:** "don't hardcode to a specific X" is a principle that has to
+be re-applied every time a NEW kind of X shows up in the design - this
+project already knew not to hardcode to a specific client, and still
+wrote a fix two rounds ago that hardcoded to a specific uplink network by
+name. The generic fix (zone-membership by a structural property, not a
+name) is not meaningfully more code than the hardcoded one - it was
+never actually easier to hardcode, just a shortcut that felt fine because
+"american" was the only uplink in view at the time.

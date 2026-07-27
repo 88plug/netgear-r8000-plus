@@ -1,0 +1,94 @@
+#!/bin/sh
+# Dynamically provisions/rebinds an SQM cake queue for WHATEVER interface is
+# currently acting as a NAT'd uplink, per this router's OWN firewall config -
+# never a specific named network. FINDINGS.md #56: the previous fix (#55,
+# etc/hotplug.d/iface/32-american-sqm, now deleted) hardcoded to
+# american_wwan/american24_wwan by name. That is wrong for the same reason
+# this project never hardcodes to a specific client (clients - and,
+# apparently, uplink networks too - change): this uplink happens to be
+# "American" today, but nothing in this script may ever know or care what
+# it's called, so the exact same mechanism keeps working unmodified if this
+# router is ever pointed at a totally different upstream network.
+#
+# Genericity signal: a firewall zone with `option masq '1'` IS, by this
+# router's own config/firewall, the definition of an uplink/NAT zone - true
+# for the original wired 'wan' zone (network list: wan, wan6) exactly as
+# much as the current 'american' zone (network list: american_wwan,
+# american24_wwan), and for any future zone added the same way. This script
+# walks every firewall zone generically via config_foreach and never
+# references a zone or interface name.
+. /lib/functions.sh
+
+case "$ACTION" in
+	ifup) ;;
+	*) exit 0 ;;
+esac
+
+FOUND=0
+check_zone() {
+	section="$1"
+	config_get zone_masq "$section" masq
+	[ "$zone_masq" = "1" ] || return 0
+	config_get zone_net "$section" network
+	for n in $zone_net; do
+		[ "$n" = "$INTERFACE" ] && FOUND=1
+	done
+}
+config_load firewall
+config_foreach check_zone zone
+
+[ "$FOUND" = "1" ] || exit 0
+
+# Same proven idiom as etc/hotplug.d/iface/30-american-dns-route.
+DEVICE="$(ubus call network.interface."$INTERFACE" status 2>/dev/null | jsonfilter -e '@.l3_device' 2>/dev/null)"
+[ -n "$DEVICE" ] || { logger -t dynamic-wan-sqm "$INTERFACE ifup but no l3_device resolved - not touching SQM"; exit 0; }
+
+# Section name is derived from whatever the logical interface happens to be
+# called, at runtime - not authored in advance for a specific network's name.
+SECTION="sqm_${INTERFACE}"
+
+if ! uci -q get sqm."$SECTION" >/dev/null 2>&1; then
+	# First time this uplink has ever been seen: provision a queue with a
+	# generic, identity-agnostic starting ceiling - NOT a per-network
+	# measured value. This is a deliberately conservative seed in the
+	# same ballpark as typical home-uplink capacity, not a real
+	# measurement of THIS link - refine download/upload for this specific
+	# section via UCI once a real solo-throughput test (same methodology
+	# as FINDINGS.md #52/#55) has actually been run against it. Existing
+	# sections are never overwritten here, so a human's real measurement
+	# for a given interface survives every future boot untouched.
+	logger -t dynamic-wan-sqm "first time seeing uplink $INTERFACE ($DEVICE) - provisioning a new SQM queue with generic default ceilings, see FINDINGS.md #56"
+	uci set sqm.$SECTION=queue
+	uci set sqm.$SECTION.enabled='1'
+	uci set sqm.$SECTION.download='50000'
+	uci set sqm.$SECTION.upload='25000'
+	uci set sqm.$SECTION.qdisc='cake'
+	uci set sqm.$SECTION.script='piece_of_cake.qos'
+	uci set sqm.$SECTION.qdisc_advanced='0'
+	uci set sqm.$SECTION.squash_dscp='1'
+	uci set sqm.$SECTION.squash_ingress='1'
+	uci set sqm.$SECTION.ingress_ecn='ECN'
+	uci set sqm.$SECTION.egress_ecn='ECN'
+	uci set sqm.$SECTION.linklayer='ethernet'
+	uci set sqm.$SECTION.overhead='0'
+	uci set sqm.$SECTION.debug_logging='0'
+	uci set sqm.$SECTION.verbosity='5'
+fi
+
+# `option interface` is a RAW DEVICE NAME to sqm-scripts (confirmed by
+# reading upstream src/run-openwrt.sh directly - config_get with no
+# logical-name resolution, no hotplug reaction of its own) and device names
+# are NOT stable across reboots (phy0->phy3->phy6->phy12... repeatedly
+# observed this session) - rebind on every ifup regardless of whether the
+# section is new.
+CURRENT="$(uci -q get sqm.$SECTION.interface)"
+if [ "$CURRENT" != "$DEVICE" ]; then
+	logger -t dynamic-wan-sqm "rebinding $SECTION from '$CURRENT' to '$DEVICE' ($INTERFACE)"
+	uci set sqm.$SECTION.interface="$DEVICE"
+fi
+uci commit sqm
+
+# Full restart, not a per-queue reload: sqm-scripts' own init script exposes
+# no clean single-queue primitive, and a full restart is cheap (sub-second
+# tc qdisc replace calls).
+/etc/init.d/sqm restart

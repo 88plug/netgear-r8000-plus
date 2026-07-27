@@ -1,124 +1,39 @@
 # NETGEAR R8000 (bcm53xx / brcmfmac) -- v2 SQM (bufferbloat control)
 # Workstream: modern roaming/steering/QoS. Rationale/evidence: ../../notes.md
 #
-# REWRITTEN 2026-07-27 (FINDINGS.md #55): the previous single 'wan' queue
-# targeted the physical Ethernet WAN port, which this deployment's own
-# WiFi-extender architecture pivot (american_wwan/american24_wwan STA
-# uplinks replacing the wired WAN - see config/network, config/wireless)
-# left physically unplugged. Confirmed live: `ip link show wan` shows
-# NO-CARRIER/LOWERLAYERDOWN, and `tc qdisc show dev wan` had cake attached
-# to a dead interface while the REAL uplinks (phy2-sta0, phy1-sta0) ran
-# only bare default fq_codel - meaning SQM provided ZERO real bufferbloat
-# control on any actual traffic this router has carried since that pivot.
+# NO QUEUES ARE PRE-DECLARED IN THIS FILE (FINDINGS.md #56). Two earlier
+# versions of this file both got this wrong in a way worth recording:
+#   - The original version hardcoded a queue to the physical 'wan' port,
+#     which this deployment's WiFi-extender architecture pivot left
+#     physically unplugged (FINDINGS.md #55) - zero real shaping.
+#   - The #55 fix replaced that with two queues hardcoded to this
+#     deployment's CURRENT uplink names (american_wwan/american24_wwan).
+#     That is wrong for the same reason this project never hardcodes to a
+#     specific client - it happens to be "American" today, but nothing
+#     about SQM should ever know or care what the uplink is called.
+#
+# etc/hotplug.d/iface/32-dynamic-wan-sqm is now the sole owner of every
+# queue section here. On every ifup, it walks ALL firewall zones generically
+# (config/firewall) looking for `option masq '1'` - this router's own,
+# already-existing, name-agnostic definition of "this is a NAT'd uplink
+# zone", true for the original wired 'wan' zone exactly as much as the
+# current 'american' zone, and for any future zone added the same way. For
+# whichever logical interface(s) are members of such a zone and currently
+# up, it auto-creates (first time only - never overwrites an existing
+# section) a `sqm_<logical-interface-name>` queue with a generic,
+# identity-agnostic seed bandwidth, then rebinds `option interface` (a RAW
+# DEVICE NAME to sqm-scripts, confirmed by reading its own
+# src/run-openwrt.sh directly - no logical-name resolution, no hotplug
+# reaction of its own) to whatever the current real device is - device
+# names are NOT stable across reboots (phy0->phy3->phy6->phy12...,
+# repeatedly observed this session).
+#
+# Once a real per-link measurement is taken (same solo-throughput ablation
+# methodology as FINDINGS.md #52/#55), refine that specific
+# `sqm_<interface>` section's download/upload via UCI directly - the
+# hotplug script only ever sets the seed values on FIRST sight of a new
+# interface name, so a real measurement, once entered, survives every
+# future boot untouched.
 #
 # Package: sqm-scripts (pulls in kmod-sched-cake, kmod-ifb, tc, ip,
 # iptables-mod-ipopt automatically -- see ../../imagebuilder-packages.md).
-#
-# Two queues now, one per real American STA uplink, matching
-# american_wwan (5GHz, phy2-sta0) / american24_wwan (2.4GHz, phy1-sta0) -
-# see config/wireless and etc/hotplug.d/iface/31-american-multipath-default.
-#
-# `option interface` below is a RAW DEVICE NAME, not a UCI logical
-# interface name - confirmed by reading upstream sqm-scripts' own
-# src/run-openwrt.sh directly: it does `config_get "$section" interface`
-# and uses that value as-is against the real netdev, with NO logical-name
-# resolution and no hotplug reaction of its own. Device names here
-# (phy2-sta0/phy1-sta0) are NOT stable across reboots - this session has
-# repeatedly observed phy renumbering (phy0->phy3->phy6->phy12...) - so
-# these are only a first-boot seed. etc/hotplug.d/iface/32-american-sqm
-# rewrites the correct section's `interface` option to whatever the real
-# current device is and restarts sqm on every ifup of either uplink -
-# without that script this config would silently rot exactly like the old
-# 'wan' queue did.
-#
-# Bandwidth: real per-radio solo throughput, not guessed. Measured via the
-# same aria2-driven single-radio ablation methodology as FINDINGS.md #52
-# (100MB test file, split=16, default route forced onto ONE STA uplink at
-# a time so the download's true path is unambiguous):
-#   phy2-sta0 (american_wwan/5GHz) solo: 52.4 Mbit/s (#52's own measurement)
-#   phy1-sta0 (american24_wwan/2.4GHz) solo: 59.9 Mbit/s (104857600 bytes /
-#     14s, measured 2026-07-27) - genuinely faster than the 5GHz leg on
-#     THIS link right now; this is what was measured, not a general
-#     "2.4GHz beats 5GHz" claim - the bottleneck here is the American
-#     network's own AP/backhaul capacity per radio, not this router's
-#     receive quality.
-# Download ceilings set to 90% of each measured number, matching the
-# original wan queue's own methodology.
-#
-# Upload NOT measured - this router has no curl and no other upload-capable
-# tool without adding a new package (`which curl` returned nothing live),
-# so there was no way to run a real upload-direction test without adding
-# an upload target/tool dependency. Upload ceilings below are a DELIBERATE
-# conservative approximation (80% of the measured download ceiling) so an
-# unmeasured number under-shapes (wastes some upload headroom) rather than
-# over-shapes (which would silently defeat bufferbloat control the same
-# way the old 'wan' queue did). Revisit if/when a real upload-capable tool
-# is added and a genuine A/B measurement can replace this.
-
-config queue 'american_5g'
-	option enabled '1'
-	option interface 'phy2-sta0'
-
-	# kbit/s. 90% of 52.4 Mbit/s measured (#52). Upload is the
-	# conservative 80%-of-download approximation described above.
-	option download '47000'
-	option upload '38000'
-
-	option qdisc 'cake'
-	option script 'piece_of_cake.qos'
-
-	option qdisc_advanced '0'
-	option squash_dscp '1'
-	option squash_ingress '1'
-	option ingress_ecn 'ECN'
-	option egress_ecn 'ECN'
-
-	# --- Link-layer overhead ---
-	# No PPPoE/ATM anywhere in this hop - it's a raw WiFi STA uplink to
-	# the American AP, so 'ethernet'/0 (no additional encapsulation) is
-	# the architecturally correct baseline. Could not re-verify against
-	# current upstream SQM docs at write time (both WebSearch and the
-	# SearXNG MCP backend were unavailable this session) - flagged here
-	# rather than silently asserted as "verified". Revisit with a real
-	# ping-under-load bufferbloat test once traffic flows through this.
-	option linklayer 'ethernet'
-	option overhead '0'
-
-	option itarget ''
-	option etarget ''
-	option iqdisc_opts ''
-	option eqdisc_opts ''
-
-	option debug_logging '0'
-	option verbosity '5'
-
-config queue 'american_24g'
-	option enabled '1'
-	option interface 'phy1-sta0'
-
-	# kbit/s. 90% of 59.9 Mbit/s measured 2026-07-27 (104857600 bytes /
-	# 14s, single-radio-forced route). Upload: same 80%-of-download
-	# approximation as above, same reason (no upload-capable tool
-	# on-router).
-	option download '54000'
-	option upload '43000'
-
-	option qdisc 'cake'
-	option script 'piece_of_cake.qos'
-
-	option qdisc_advanced '0'
-	option squash_dscp '1'
-	option squash_ingress '1'
-	option ingress_ecn 'ECN'
-	option egress_ecn 'ECN'
-
-	option linklayer 'ethernet'
-	option overhead '0'
-
-	option itarget ''
-	option etarget ''
-	option iqdisc_opts ''
-	option eqdisc_opts ''
-
-	option debug_logging '0'
-	option verbosity '5'
