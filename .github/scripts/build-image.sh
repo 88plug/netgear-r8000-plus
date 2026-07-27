@@ -70,8 +70,17 @@ rm -rf "$MAC80211_SRC"
 
 MAC80211_PATCH_DIR="package/kernel/mac80211/patches/brcm"
 mkdir -p "$MAC80211_PATCH_DIR"
-PATCH="$REPO_ROOT/patches/861-brcmfmac-r8000-legacy-mbss-fallback.patch"
-cp "$PATCH" "$MAC80211_PATCH_DIR/"
+# All patches actually deployed on the live router, not just 861 - this
+# drifted stale once before (this script only ever copied 861, while
+# 862/863/865/866 were applied to the running kernel by hand). 864 is a
+# known-malformed patch.py reject, never shipped, deliberately excluded -
+# see patches/864-brcmfmac-r8000-psta-repeater-vif.patch's own history.
+for PATCH in "$REPO_ROOT"/patches/86*.patch; do
+  case "$(basename "$PATCH")" in
+    864-*) continue ;;
+  esac
+  cp "$PATCH" "$MAC80211_PATCH_DIR/"
+done
 
 # make defconfig must run AFTER mac80211 is in place - its Kconfig symbols
 # (CONFIG_PACKAGE_kmod-brcmfmac etc) don't exist in .config otherwise, which

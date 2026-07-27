@@ -2434,3 +2434,65 @@ confirmed via SSH that the AP section was fully gone and the
 independently-joined STA correctly survived (the remove guard's
 `base+'_sta' === staSection.name` check working as designed). Cleaned
 up every test artifact afterward, confirmed zero residue.
+
+## 32. R8000 (radio0, ch149) invisible over the air - ruled out every
+software/firmware layer with real evidence, converges on radio0's own
+dedicated antenna hardware (2026-07-26)
+
+radio0's own main SSID ("R8000") could not be seen in a real scan from
+an independently-driven, rooted Android test device placed directly
+next to the router, on 5745MHz (channel 149) - despite every
+software-layer signal reporting fully healthy:
+
+- `hostapd_cli status`: `state=ENABLED`, correct BSSID/SSID, `ieee80211ac=1`,
+  correct VHT config, `max_txpower=30`, `num_sta[0]=0`.
+- `ip -s link show phy0-ap0`: TX packet counter incrementing at ~beacon-
+  interval rate (100ms beacon_int) between two reads 3s apart - real
+  beacon frames are genuinely being generated and handed to the driver.
+- dmesg: `phy0-ap0: renamed from wlan0` present - the tell for a real,
+  firmware-backed AP bsscfg (not the fake MBSS-fallback netdev this
+  project's earlier root-cause work found for the retired Extender raw
+  APs).
+- Built and deployed patch 866 (implements cfg80211 get_antenna/
+  set_antenna - upstream brcmfmac has never wired these up, so
+  `iw phy info` always shows "Available Antennas: TX 0 RX 0" on every
+  radio regardless of real chain state). Real result: radio0 reports
+  `Available/Configured Antennas: TX 0x7 RX 0x7` - full 3-chain, byte-
+  identical to the two STA uplinks (radio1/radio2) that are independently
+  proven working end-to-end (American extend, 0% packet loss to 8.8.8.8).
+  Chain-mask/firmware misconfiguration is ruled out with hard data, not
+  assumption.
+- Re-checked `v2-staging/maxpower/notes.md` §11 cross-reference: the only
+  prior "radio0 AP came up" observation in this project's history
+  (`verify/before-after.md` Attempt 4, channel 153) was ALSO hostapd/
+  `iw dev` status only - no independent over-the-air confirmation was
+  ever done for radio0 before tonight. The "31.00 dBm" reading tonight
+  is not new or suspicious; it's the same value Attempt 4 saw, and both
+  are just the calibration-decoded PA ceiling being reported, not a live
+  RF measurement.
+- Re-scanned 5745MHz directly: the Android device clearly sees a
+  neighbor's real AP (SSID "STARLINK", -69dBm) plus one hidden-SSID
+  BSS, both on the exact same frequency/channel R8000 uses - proving the
+  scan methodology itself is sound and channel 149 is not somehow
+  radio-silent everywhere. R8000/`ea:fc:af:f9:f1:39` simply never
+  appears.
+- Cross-referenced this device's actual FCC teardown
+  (`v2-staging/fccid/specs.md` §3): radio0 (UNII-3, ch149-165) and radio2
+  (UNII-1, ch36-144) are on physically separate BCM43602 modules with
+  **different antenna chains** - radio2 shares chains 1-3/antennas 1-3
+  with the 2.4GHz radio; radio0 has **dedicated chains 4-6, dipole
+  antennas, shared with nothing else on this board**. This rules out the
+  tempting shortcut of treating radio2's (or radio1's) proven-working RF
+  path as evidence for radio0's - they don't share hardware. radio0's
+  antenna path has never been independently verified with a real
+  receiver, by this project or apparently at any point in this router's
+  documented history, until tonight's scan came back silent.
+
+**Standing conclusion:** every driver/firmware/mac80211/hostapd signal
+this project can inspect remotely says radio0's AP is healthy. The one
+layer that can't be checked over SSH - the physical dedicated dipole
+antenna path for chains 4-6 - is now the leading, well-evidenced
+suspect. Next step is physical: inspect/reseat radio0's antenna
+connectors (or, if internal/non-removable, the board-level connection)
+with eyes on the actual hardware. Not yet done; no further remote
+software lever is left to pull on this specific finding.
