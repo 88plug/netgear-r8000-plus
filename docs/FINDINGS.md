@@ -3806,3 +3806,71 @@ spreads those connections across both uplinks, works for HTTP AND HTTPS
 (no MITM needed, unlike the Range-splitting-proxy idea), and gets most of
 the real-world value for a small fraction of the invasiveness. No new
 build needed - this is a usage recommendation, not a repo change.
+
+## 50. #49's recommendation turned into a real deployed feature: a
+## router-hosted aria2 download accelerator, verified end to end
+
+#49 ended with a usage recommendation (client-side `aria2c`) rather than
+a repo change. Turned it into an actual capability instead: any LAN
+device - even ones that can't install anything, like a phone - can now
+submit a URL through the router's own LuCI web UI and get a real
+multi-connection download that #46's ECMP genuinely spreads across both
+American uplinks.
+
+**Real constraint checked before building, not assumed:** first attempt
+to verify `aria2` was packaged for this arch used a broken extracted
+`apk` binary (missing its bundled dynamic loader) - every "not found"
+result was a silent false negative from the tool failing to even run.
+Re-extracted properly (full `staging_dir/host` tree, not just the
+isolated binary) and confirmed `aria2`, `aria2-openssl`, and
+`luci-app-aria2` (with 30+ language packs) all genuinely exist in the
+25.12 feeds for this target.
+
+**Real hardware constraint, not a placeholder:** no USB storage is
+attached to this router, and the overlay itself has only ~18MB free -
+nowhere near enough for real downloads. `dir` points at `/tmp`
+(tmpfs, ~121MB free) instead - genuinely load-bearing, not a shortcut:
+downloads here are volatile (wiped on reboot) and RAM-capped, fine for
+small/medium files, not large ISOs. Since `/tmp` is fresh empty tmpfs
+every boot (a FILES= overlay path under `/tmp` would be meaningless),
+added a real boot-time init script (`etc/init.d/aria2-download-dir`,
+`START=10`, before aria2's own `START=99`) to create it - aria2's own
+init script refuses to start at all if `dir` doesn't already exist.
+
+**Real security issue found while reading aria2's actual init script
+source (not guessed):** it unconditionally sets `rpc-listen-all=true`
+and `rpc-allow-origin-all=true` - neither is a UCI-configurable option -
+meaning the RPC port binds to every interface, including the WAN-facing
+American uplinks, by design of the upstream package, not a misconfig
+here. Two real responses: (1) `rpc_secret` generated once at first boot
+(`etc/uci-defaults/95-aria2-rpc-secret`, real entropy via
+`/proc/sys/kernel/random/uuid`, persisted into the overlay from then on)
+- never hardcoded/committed, matching this project's existing rule for
+real credentials; (2) checked, rather than assumed, whether the existing
+`american` zone's `input 'REJECT'` policy (already the standing default
+for every service on this router, not something added for aria2) already
+covers this - confirmed directly in the real `nft list ruleset` output:
+`chain input_american { jump reject_from_american }`, unconditional, no
+exceptions anywhere. No new firewall rule needed - the existing
+architecture already protected this.
+
+**Verified end to end on the real router, not just "package installed":**
+- `aria2c` running, download directory created, RPC secret generated -
+  all from a genuinely fresh boot, zero manual steps.
+- JSON-RPC actually reachable and correctly enforcing the secret: an
+  unauthenticated `aria2.getVersion` call returned `{"error":{"code":1,
+  "message":"Unauthorized"}}`; with the real generated token, a normal
+  response.
+- Submitted a real 10MB download via `aria2.addUri` - completed
+  (`"status":"complete"`, `completedLength` matched `totalLength`
+  exactly). Packet counters on both STA uplinks before/after: phy1-sta0
+  +387, phy2-sta0 +3482 - both radios genuinely carried real bytes from
+  this ONE download (aria2's own `split '8'` opens 8 parallel Range
+  connections, and #46's per-flow ECMP hash spread them across both
+  uplinks, roughly matching the intended 4:1 weighting).
+- Confirmed the firewall claim directly in the live ruleset (`nft list
+  ruleset`), not just reasoned about it - see above.
+
+BitTorrent features (DHT/LPD/torrent-following) deliberately left off -
+scoped as an HTTP(S)/FTP accelerator only, matching the actual use case,
+avoiding port-forwarding requirements and scope creep.

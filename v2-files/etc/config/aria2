@@ -1,0 +1,54 @@
+# aria2 download accelerator, added 2026-07-27 (FINDINGS.md #49/#50) - turns
+# #49's "use a multi-connection downloader" recommendation into an actual
+# deployed capability: any LAN device (even ones that can't install
+# anything themselves, like a phone) can submit a URL via the LuCI web UI
+# and get a real multi-connection download that #46's ECMP genuinely
+# spreads across both American uplinks - confirmed live this session.
+#
+# dir is tmpfs (/tmp), not the real overlay - this router has no USB
+# storage attached and the overlay itself is only ~18MB free (confirmed
+# live), nowhere near enough for real downloads. /tmp has ~121MB free
+# (RAM-backed). This is a real, load-bearing constraint, not a
+# placeholder: downloads here are VOLATILE (wiped on reboot) and capped
+# by available RAM, not disk - fine for small-to-medium files, not for
+# large ISOs/games. etc/init.d/aria2-download-dir creates this directory
+# at boot, since aria2 refuses to start if `dir` doesn't already exist and
+# a FILES= overlay path under /tmp is meaningless (tmpfs is fresh every
+# boot, unrelated to what's baked into the squashfs).
+#
+# rpc_secret is generated once at first boot (etc/uci-defaults, real
+# entropy via /proc/sys/kernel/random/uuid) and persisted into the real
+# overlay from then on - never hardcoded/committed, matching this
+# project's existing rule for real credentials. The aria2 init script
+# unconditionally sets rpc-listen-all=true and rpc-allow-origin-all=true
+# (not configurable via UCI) - meaning the RPC port binds to every
+# interface, including the WAN-facing American uplinks, not just LAN.
+# Verified live 2026-07-27: the existing `american`/`wan` zone `input
+# 'REJECT'` policy (config/firewall - already the standing default for
+# every service on this router, not something added for aria2
+# specifically) already blocks unsolicited traffic from those zones to
+# ANY port on the router itself, aria2's RPC port included - no new
+# firewall rule needed. rpc_secret is still real defense in depth (LAN-
+# side auth, and in case that zone policy is ever loosened for something
+# else later) - not the only thing standing between this and the WAN.
+# BitTorrent features (DHT/LPD/torrent-following) deliberately OFF - this
+# is scoped as an HTTP(S)/FTP multi-connection download accelerator only
+# (the actual use case from FINDINGS.md #49), not a general BT client -
+# avoids port-forwarding requirements and scope creep neither this
+# project nor the real upstream network's own firewall needs.
+config aria2 'main'
+	option enabled '1'
+	option dir '/tmp/aria2-downloads'
+	option max_connection_per_server '8'
+	option split '8'
+	option min_split_size '1M'
+	option max_concurrent_downloads '3'
+	option max_overall_download_limit '0'
+	option rpc_listen_port '6800'
+	option rpc_auth_method 'token'
+	option check_certificate 'true'
+	option file_allocation 'none'
+	option enable_dht 'false'
+	option bt_enable_lpd 'false'
+	option follow_torrent 'false'
+	option save_session_interval '0'

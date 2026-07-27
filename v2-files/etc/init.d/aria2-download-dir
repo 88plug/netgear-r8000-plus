@@ -1,0 +1,14 @@
+#!/bin/sh /etc/rc.common
+# Creates aria2's tmpfs download directory before aria2 itself starts.
+# aria2's own init script (net/aria2 package) requires `dir` to already
+# exist and refuses to start otherwise - a FILES= overlay path under
+# /tmp is meaningless (tmpfs is recreated empty every boot, unrelated to
+# what's baked into the squashfs), so this has to run as a real boot
+# step, not a static file in the image. See config/aria2 for the full
+# rationale (no USB storage, tiny overlay, tmpfs is the only option).
+START=10
+
+start() {
+	mkdir -p /tmp/aria2-downloads
+	chmod 755 /tmp/aria2-downloads
+}
