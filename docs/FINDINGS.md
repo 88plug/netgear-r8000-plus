@@ -4394,3 +4394,109 @@ at an honest, evidence-based stopping point**, not an assumed one: every
 controllable layer has a real measurement behind it (#51-#60), and the
 remaining gap has a named, external, out-of-scope cause rather than being
 left as an open question.
+
+## 61. FA/CTF Phase A+B driver (`fa_accel.ko`) verified against REAL forwarded
+## traffic for the first time - root cause of why it never fired found and fixed
+
+The FA/CTF hardware-offload driver plan (Phase A: register + log-only,
+Phase B: decode `flow_rule` into the vendor NAPT row format, still
+log-only) was written and built (`hwoffload-research/fa-probe/fa_accel.c`)
+before this segment, but its own plan explicitly named the verification
+gap: no second test client existed on this bench to generate real
+forwarded traffic that would exercise the `FLOW_CLS_REPLACE` callback.
+
+**That premise was wrong and got corrected.** Two real test clients were
+available the whole time and unused: (1) the USB-ethernet dongle host
+(already generating real LAN->WAN forwarded traffic since #58's
+flow-offload audit - `curl --interface` through the router, out the STA
+uplinks), and (2) an HTC 5G Hub (Magisk-rooted Android 9) connected via
+USB/adb, capable of joining this router's own WiFi (confirmed root via
+`su`, `WifiConfigStore.xml` had this router's `R8000`/`American`
+networks already saved from earlier use - just needed the currently-
+preferred network temporarily de-prioritized via a root-level
+`Status` field edit + `svc wifi disable/enable` to force reassociation,
+since Android 9 predates `cmd wifi connect-network`).
+
+**First real attempt still showed nothing** - loaded `fa_accel.ko`
+(`live=0`, rebuilt fresh against the exact running kernel, vermagic
+confirmed matching before load), generated real traffic from both
+clients, zero `FLOW_CLS_REPLACE` callbacks fired, only the one-time
+registration log line. A `/etc/init.d/firewall reload` didn't help
+either - only a full `restart` (which tears down and recreates the
+nftables ruleset/flowtable object, forcing a fresh bind) was tried next,
+and even that produced nothing.
+
+**Root cause, found by checking `nft list table inet fw4`'s actual
+flowtable definition, not by guessing at kernel internals:** the `ft`
+flowtable had NO `flags offload` clause. Per the kernel's own flowtable
+hardware-offload path, `flags offload` is what makes nftables attempt
+indirect hardware dispatch at all - without it, every flow stays
+strictly on the pure-software workqueue path and the kernel never walks
+the `flow_indr_dev`-registered callback list, regardless of whether a
+driver is loaded and registered. This traces directly back to `uci
+firewall.@defaults[0].flow_offloading_hw` (already found `='0'` in #58,
+correctly described there as "no driver exists so this is honestly off"
+- true, but incomplete: it also means NO indirect driver, existing or
+future, would ever be dispatched to at all while this stays off, which
+is new information #58 didn't have).
+
+Set `flow_offloading_hw='1'` live, `/etc/init.d/firewall restart`, and
+confirmed `nft list table inet fw4` now shows `flags offload` plus an
+EXPANDED device list (individual ports `lan1-4`/`phy0-ap0`/`phy0-ap1`
+instead of just `br-lan` - hardware offload needs real ports, not the
+bridge abstraction). Regenerated traffic from both clients:
+
+```
+fa_accel: match (pre-NAT tuple, mirrors ctf_ipc_t->tuple): proto=6 192.168.1.205:42604 -> 90.130.70.73:80
+fa_accel: post-NAT tuple ...: 192.168.1.190:42604 -> 0.0.0.0:0
+fa_accel: would-be NAPT row: action=CTF_NAPT_OVRW_IP+REDIRECT egress_dev=phy1-sta0 ...
+fa_accel: FLOW_CLS_REPLACE cookie=0xc2767244 - decoding (Phase B), NOT installing (live=0, default)
+... (mirrored reply-direction tuple, egress_dev=phy0-ap1, for the phone's own traffic)
+fa_accel: FLOW_CLS_DESTROY cookie=0xc2767244
+```
+
+Real, correctly-decoded pre-NAT and post-NAT tuples for both the dongle
+host's and the phone's actual live connections, correct egress device per
+direction, clean teardown logging on flow end - **Phase A (registration/
+dispatch plumbing) and Phase B (translation logic) are now genuinely
+verified against real traffic, for the first time this project has had
+that capability.** Still strictly log-only the entire time - `live=0`
+throughout, `NOT installing` on every line, zero FA register writes,
+zero risk to any real flow (confirmed unaffected: ping/curl through both
+clients succeeded normally throughout).
+
+**Cleaned up fully afterward** (this was a verification run, not a
+persistent change): `rmmod fa_accel`, `flow_offloading_hw` reverted to
+`'0'`, firewall restarted again and `flowtable ft` confirmed back to its
+original definition (no `flags offload`, device list back to
+`br-lan`/`phy1-sta0`/`phy2-sta0`/`wan`). Router state confirmed
+unaffected throughout (multipath route, SQM ceilings, radios/SSIDs all
+intact). The phone's `WifiConfigStore.xml` was restored from a pre-edit
+backup and its WiFi cycled back to its original state.
+
+**Provenance check (honest, not exhaustive):** asked deepwiki against
+`openwrt/openwrt` directly - no `flow_indr_dev_register`/TC-flower-based
+hardware-offload driver exists for bcm53xx's FA/CTF block in that tree;
+the closest prior art is Realtek's RTL83xx DSA driver, which implements
+tc-flower offload through native `dsa_switch_ops` callbacks (a
+NDO_SETUP_TC-native path), architecturally different from this driver's
+indirect-block registration (used because bgmac/brcmfmac/the bridge
+implement no native `ndo_setup_tc` on this target). **This search was
+NOT exhaustive** - both general web-search tools were unavailable this
+session (SearXNG backend unreachable, WebSearch session budget
+exhausted at 200/200) - so this is scoped honestly as "closest found:
+Realtek RTL83xx DSA tc-flower offload, differs in mechanism (native
+dsa_switch_ops vs indirect flow_indr_dev) and target chip family; no
+anticipating reference in the searched corpus (deepwiki + openwrt/openwrt
+repo only; gap: full web search unavailable)" - not an unqualified
+"first". Certification level: **functional** (independently runs,
+verified against real traffic by this session) - not reproduced
+(no independent third-party re-run) or certified.
+
+**What this unblocks, not yet done:** Phase C (real FA table writes,
+`live=1`) was explicitly deferred by the original plan pending real
+traffic to verify against - that traffic now exists and Phase B's
+translation logic is confirmed correct against it, so Phase C is the
+next real go/no-go decision, separate from this one. Phase D (persistent
+bring-up) stays a separate decision after that, unchanged from the
+original plan.
