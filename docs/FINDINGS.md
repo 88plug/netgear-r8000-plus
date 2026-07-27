@@ -3454,3 +3454,45 @@ un-interface-pinned `ping` silently used an ambiguous route and produced
 a clean, confident, wrong "100% packet loss." The operator's domain
 knowledge of the real network caught it; the fix was to re-test with the
 interface pinned explicitly, not to argue from the first result.
+
+## 44. #43's fix re-verified end to end on v22, live; a real, separate,
+## still-open anomaly found alongside it
+
+Operator reported the same "closest to R8000, gets DHCP/DNS, no traffic"
+symptom recurring on v22, with a new client (`86:54:39:66:a2:78` /
+`192.168.1.217`), and pushed back hard that nothing had actually been
+fixed or validated. Re-verified from scratch rather than assuming #43
+held:
+
+- `192.168.1.47` DNS host route confirmed auto-added by the hotplug
+  script on a REAL `ifup` event this boot (not a manual test) - the
+  fix is genuinely wired in, not just live-patched once.
+- `/proc/net/nf_conntrack` for `.217` showed a real, `[ASSURED]` TCP
+  round-trip to an external host (91.246.30.2:80) with real bytes both
+  directions - this specific client's traffic DID reach the internet.
+- Direct end-to-end proof from the router, through the identical NAT
+  path any phy0-ap1 client uses: Android's own connectivity-check URL
+  (`connectivitycheck.gstatic.com/generate_204`), Apple's
+  (`captive.apple.com/hotspot-detect.html`, returned the exact expected
+  "Success" body), and plain HTTPS to google.com all succeeded cleanly.
+
+This is real, direct evidence the network path (DNS, NAT, routing) is
+correctly functioning end to end right now, for real traffic, including
+for the actual live client in question. `DNS shows 192.168.1.1` is
+correct, expected, unchanged, standard behavior for any client on the
+NAT'd `american_ap` BSS (R8000's own dnsmasq) - not a defect, and not
+something #43's fix touched or could touch.
+
+**Separate, real, NOT YET explained anomaly found alongside this:**
+`hostapd: Failed to set beacon parameters` recurring in the log on a
+precise 6-second period (confirmed via timestamps, not client-triggered -
+first appeared exactly when patches 866-868 went genuinely live for the
+first time, per #42). Radios stay up, SSIDs keep broadcasting, and the
+direct traffic tests above all succeeded despite it, so it is NOT proven
+to cause the reported symptom - but it's also not proven harmless, and it
+did not exist (or wasn't visible) before this session's patches actually
+shipped. Pulled the new `counters` debugfs (patch 867) as raw hex looking
+for a correlated firmware error counter - inconclusive without decoding
+Broadcom's `wl_cnt` struct layout against this exact firmware, which
+wasn't done in this pass. Logged here as an open, tracked item rather than
+either overclaiming it's the cause or dropping it silently.
