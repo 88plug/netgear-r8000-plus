@@ -204,7 +204,7 @@ make image PROFILE=netgear_r8000 \
     luci usteer sqm-scripts ethtool relayd \
     kmod-brcmfmac brcmfmac-firmware-43602a1-pcie kmod-usb-ohci kmod-usb2 \
     kmod-phy-bcm-ns-usb2 kmod-usb-ledtrig-usbport kmod-usb3 kmod-phy-bcm-ns-usb3 \
-    aria2 luci-app-aria2" \
+    aria2 luci-app-aria2 kmod-tcp-bbr" \
   FILES="$REPO_ROOT/v2-files" \
   EXTRA_IMAGE_NAME="r8000plus-auto-${VERSION}"
 

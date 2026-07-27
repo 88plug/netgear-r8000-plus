@@ -3976,3 +3976,45 @@ about 8 connections and wrong to imply the dual-radio investment was a
 wash - pushing one level further (more connections, same test) found
 the actual, narrower truth. Not yet rebuilt into a real image at time of
 writing.
+
+## 53. BBR tried, measured, NOT shipped as default - a real negative
+## result, not a shrug
+
+Continued looking for real "accelerate traffic" levers. `kmod-tcp-bbr`
+genuinely exists in the 25.12 kmods feed for this exact kernel
+(confirmed via the same proper apk-extraction method as #40/#50 -
+tiny, ~14KB installed, single dependency on the exact kernel version).
+BBR is well-regarded generally for lossy/variable-RTT links, which
+describes these WiFi STA uplinks - a plausible-sounding case for a
+default change.
+
+Installed it live (`apk add kmod-tcp-bbr`, real internet access
+confirmed working through the STA uplinks) and ran the same disciplined
+A/B methodology as #51/#52 instead of trusting the general reputation:
+single-connection 100MB download, same file, same link, congestion
+control as the only variable.
+
+- cubic (re-measured baseline): 166s (~5.05 Mbit/s) - close to but not
+  identical to #51's own cubic baseline (157s/~5.34 Mbit/s), giving a
+  real, measured sense of this link's own run-to-run noise: ~5-10%.
+- bbr: 160s (~5.24 Mbit/s) - about 3.6% faster than this run's cubic
+  baseline, comfortably inside the noise band just measured.
+
+**No decisive, above-noise improvement found.** Rather than ship an
+unproven default switch on BBR's general reputation - which would be
+exactly #50's original mistake (crediting a mechanism without measuring
+it) applied to a different lever - `kmod-tcp-bbr` ships available but
+NOT selected: cubic (OpenWrt's own long-tested default) stays the
+actual default. Anyone can opt in live
+(`sysctl -w net.ipv4.tcp_congestion_control=bbr`) if their own traffic
+pattern shows a real benefit this clean single-flow test didn't
+exercise (BBR's documented strength is specifically under real loss/
+bufferbloat contention, which an idle test against a public file server
+doesn't simulate) - shipped as a real, free option, not a forced,
+unmeasured claim.
+
+**What "accelerating traffic" actually shipped this round, real and
+measured:** the aria2 split=8->16 change (#52, genuine, reproducible
+improvement, already flashed as v26). BBR was tried and honestly killed
+by measurement - a real negative result is still real work, not a gap
+in the record.
