@@ -4765,3 +4765,88 @@ needing an explicit, separate operator go-ahead (matching exactly how
 write, and how Phase C/D were already treated as separate escalations
 from Phase A/B). Recorded here at full precision so that decision can be
 made deliberately, not skipped past.
+
+## 65. bcm_hdr_ctl tested live, safely, via an auto-revert watchdog - real
+## traffic disruption confirmed, cleanly and automatically recovered
+
+#64 identified `bcm_hdr_ctl` (FA_BASE_OFFSET+0x08) as the one remaining
+untested register from Broadcom's real `fa_up()` sequence, and flagged
+that writing it live carried a materially higher risk than anything else
+this project has done: it could change the wire format of every packet
+on `eth2` (the same interface this session's own SSH management path
+runs through, `lan1@eth2`), with no serial console available as a
+fallback if it broke badly enough.
+
+Before touching real hardware, did what the operator explicitly asked
+for: verified the risk in software first. Constructed both a real
+Ethernet frame and the same frame with FA's documented 4-byte header
+prepended, and parsed both exactly as `eth_type_trans()` would - the
+shifted frame's `dst_mac`/`src_mac`/`ethertype` all came out as garbage
+(`00:00:00:00:e8:fc`, `0xccdd` unrecognized ethertype). Also discovered,
+by reading `etc_fa.c`'s real `fa_process_tx()`/`fa_process_rx()`
+(`PKTPUSH`/`PKTPULL` by exactly 4 bytes) and cross-checking against
+mainline DSA's own `tag_brcm` (also a 4-byte tag, also positioned before
+the Ethernet header, per direct confirmation this session), that FA's
+header and DSA's own switch-port tag are DIFFERENT, likely-additive
+headers - mainline's `b53` driver already correctly manages its own
+4-byte DSA tag (confirmed active, #63), but has zero knowledge of FA's
+*separate* header, so enabling FA's copy would very plausibly leave
+extra, unaccounted-for bytes in front of what DSA hands up to the
+bridge.
+
+**Given the real, now well-understood risk, built a genuine safety net
+before running the test live: an auto-revert watchdog**, not just a
+manual revert plan. A background script on the router (`setsid`-detached,
+survives the SSH session dying) loaded `fa_bringup` + a new
+`fa_bcmhdr_ctl_persist` module (writes the real vendor value, `0xF =
+CTF_BRCM_HDR_HW_EN|SW_RX_EN|SW_TX_EN|PARSE_IGN_EN`) + `fa_accel live=1`,
+then armed a 30-second timer: if a confirm file wasn't created within
+that window, it automatically reverted all three modules itself, with
+zero dependence on the operator's SSH session, or even the operator
+being reachable at all.
+
+**Result: real, measurable, severe disruption - not a crash.** Immediately
+after the write, `ping 192.168.1.1` showed 60% packet loss and
+500-1500ms latency (vs. the normal <1ms) - consistent with DSA silently
+dropping frames it can no longer correctly parse, exactly the mechanism
+predicted, and exactly matching this project's own already-documented
+finding that DSA's tag-parsing is bounds-checked (drops malformed frames,
+does not crash - #62's prior research). The router was never fully
+unreachable and never crashed. The watchdog's 30-second timer expired
+without a confirm (correctly - this was clearly not working), and
+**auto-reverted with zero manual intervention**: `ping` returned to 0%
+loss / <1ms latency within seconds of the scripted revert, and a
+follow-up read confirmed `bcm_hdr_ctl` back to the exact pre-write
+`0x00000000`. Full router state (radios, multipath route, SQM ceilings,
+aria2) reconfirmed intact afterward.
+
+**This is now a real, empirically-confirmed result, not a prediction:**
+enabling FA's own hardware header mechanism, as Broadcom's vendor driver
+does it, breaks real traffic on this router's mainline OpenWrt/DSA
+software stack - confirming (not just theorizing) that a working
+integration needs matching kernel-side header strip/insert logic that
+does not exist anywhere in mainline today, and that correctly
+interoperating with DSA's own tag_brcm (rather than fighting or
+replacing it) is a genuine, unresolved design question, not a quick
+patch.
+
+**Every open-source-documented register-level lever for this hardware
+has now actually been tried, live, on real silicon** - GMAC bring-up,
+both switch-side enablement writes, and FA's own header-control
+register - each with a real, measured result. The `hwoffload-research/`
+FA/CTF investigation is complete for what register-level testing alone
+can answer: the hardware is real and responds correctly to every
+control it exposes; real packet forwarding requires a mainline kernel
+driver integration project (`bgmac.c`/DSA-aware header handling) that
+this session has now scoped precisely but not built, and that remains a
+distinct, separate undertaking - not because it wasn't tried, but
+because trying it live just proved exactly why it needs to be built
+correctly before being enabled, not enabled first to see what breaks.
+
+**Methodology worth keeping for any future genuinely risky live test on
+this router:** an auto-revert watchdog (background, detached via
+`setsid`, timer-based, confirm-file-gated) converts "if this breaks my
+SSH session I'm stuck" into "the router fixes itself in 30 seconds
+regardless of what happens to my connection" - this is what actually
+made testing the riskiest remaining lever responsible, not just asking
+for permission and hoping.
