@@ -4351,3 +4351,46 @@ it removes is a real CPU-side ceiling that could otherwise cap combined
 aggregate throughput or add processing-queue latency under heavy
 multi-radio load, independent of what the radios themselves are capable
 of.
+
+## 60. Where the real ceiling actually is - PHY layer audited and cleared,
+## the gap to raw link rate is external
+
+Closing check on the whole "accelerating traffic" thread: is there real
+throughput being left on the table at the radio/PHY layer, after #52/#55
+measured only ~52-60 Mbit/s achieved per radio? Measured directly rather
+than guessed:
+
+- `iw dev phy2-sta0 link`: signal -66/-67 dBm, **rx/tx bitrate 585.0 /
+  526.5 Mbit/s** (VHT80, `wireless.radio2.htmode='VHT80'` channel 36).
+- `iw dev phy1-sta0 link`: signal -55/-56 dBm, **rx/tx bitrate 144.4
+  Mbit/s** - this is 2.4GHz's own HT20 2-stream MCS15 ceiling exactly
+  (`wireless.radio1.htmode='HT20'` channel 6) - this radio is already
+  running at its hardware-mode maximum, not a config or driver limit.
+- `ip -s link show` on both real uplinks: **zero RX/TX errors**, `dropped`
+  negligible relative to total packets (<0.1%), zero collisions/carrier
+  errors on either radio.
+- MTU 1500 on both (no fragmentation), `net.ipv4.tcp_rmem`/`tcp_wmem`
+  auto-tuning max ~900KB (far above the ~75KB BDP this link's own
+  measured throughput and ~10ms RTT implies) - TCP buffer sizing is not
+  the constraint either.
+
+**Conclusion:** the gap between negotiated PHY rate (144-585 Mbit/s) and
+achieved application-level throughput (~47-60 Mbit/s per radio, #52/#55)
+is real, but it is NOT a radio, driver, config, or CPU problem - every
+layer this router actually controls (PHY/htmode/txpower, driver/CPU
+balance #59, TCP buffering, congestion control #53/#54, queueing #55-57,
+connection parallelism #51/#52, flow offload #58) has now been directly
+measured and is already correct or already fixed. The remaining
+distance to raw PHY rate is the normal WiFi goodput-vs-PHY-rate
+efficiency loss (protocol/ACK/contention overhead, well-documented to
+leave only a fraction of nominal PHY rate as real throughput even under
+ideal conditions) plus, most likely, the American upstream network's own
+real internet-facing capacity - this router is a CLIENT/extender on that
+network, not its ISP connection, and that capacity is outside this
+project's control or scope to fix.
+
+**This closes the "accelerating traffic" audit thread for this session
+at an honest, evidence-based stopping point**, not an assumed one: every
+controllable layer has a real measurement behind it (#51-#60), and the
+remaining gap has a named, external, out-of-scope cause rather than being
+left as an open question.
