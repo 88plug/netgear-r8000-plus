@@ -4596,3 +4596,26 @@ actually settled it, honestly, in the negative. A second, independent
 real cost was paid for testing this rigorously (the reboot) rather than
 stopping at "curl succeeded, ship it" - worth it, since the alternative
 was shipping a false positive.
+
+**Mitigation applied, NOT re-tested live this session:**
+`fa_accel_exit()`'s live-flow cleanup loop did real indirect-register
+I/O (`fa_flow_destroy_live()`) for any flow still open at unload time -
+the single most likely place for the hang, since every OTHER hardware
+I/O path in this file (normal runtime write/read/verify, and the
+FLOW_CLS_DESTROY path for flows that closed normally) had already been
+exercised repeatedly without issue, both this session and in earlier
+probe modules. Changed that loop to free only SOFTWARE state at
+`__exit` and explicitly NOT touch hardware from module-exit context -
+a stale NF/NH row is a bounded, low-risk cost (overwritten by the next
+`live=1` load reusing the same small index space, or cleared by the
+next reboot); a hang/crash on unload is not. Rebuilt clean.
+
+**Deliberately not reloaded/re-tested live=1 again this session.**
+Retrying immediately after an unexplained reboot, on only circumstantial
+evidence of the actual cause, would repeat the exact risk pattern this
+finding exists to flag. This fix is a reasoned mitigation of the prime
+suspect, not a confirmed root-cause fix - treat the next `live=1` load
+as its own deliberate, well-prepared attempt (backup taken, recovery net
+re-confirmed, ideally with a way to observe the router through an
+actual reboot rather than just noticing one after the fact), not a
+continuation of this same test run.

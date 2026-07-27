@@ -678,15 +678,46 @@ static int __init fa_accel_init(void)
 
 static void __exit fa_accel_exit(void)
 {
-	int i;
+	int i, leaked = 0;
 
 	flow_indr_dev_unregister(fa_indr_setup_cb, NULL, NULL);
 
+	/*
+	 * FINDINGS.md #62: a prior version of this loop called
+	 * fa_flow_destroy_live() here, which does a REAL indirect-register
+	 * read+write per still-active flow. Unloading the module with
+	 * live=1 rows installed appears to have hung/crashed the router
+	 * (circumstantial - no panic trace survives, no pstore on this
+	 * device - but the timeline fits a watchdog reboot exactly).
+	 *
+	 * By the time __exit runs, every flow that closed normally has
+	 * already gone through FLOW_CLS_DESTROY (real hardware writes,
+	 * already proven safe - see #61/#62) - this loop is only a
+	 * fallback for flows STILL open at rmmod time, a rare edge case.
+	 * Doing fresh hardware I/O from module-exit context (interrupts,
+	 * locking state, and general exit-path assumptions all differ from
+	 * normal runtime) is exactly the kind of unverified difference
+	 * that caused #62's hang - so this fallback now only frees
+	 * SOFTWARE state and logs what it couldn't clean up in hardware,
+	 * rather than attempting more indirect-register I/O in a context
+	 * that has already shown a real problem. A leaked NF/NH row is a
+	 * bounded, low-risk cost (recovered on next boot or the next live=1
+	 * load reusing the same small index space) - a hang/crash on
+	 * unload is not.
+	 */
 	if (live) {
 		for (i = 0; i < FA_MAX_LIVE_FLOWS; i++) {
-			if (fa_flows[i].in_use)
-				fa_flow_destroy_live(fa_flows[i].cookie);
+			if (fa_flows[i].in_use) {
+				leaked++;
+				fa_flows[i].in_use = false;
+			}
 		}
+		if (leaked)
+			pr_warn("fa_accel: live: %d flow(s) still open at unload - "
+				"freed software state only, NOT touching hardware from "
+				"exit context (see FINDINGS.md #62). Any stale NF/NH "
+				"rows are harmless: reused/overwritten on next live=1 "
+				"load, or cleared on next reboot.\n", leaked);
 	}
 
 	if (fa_base) {
