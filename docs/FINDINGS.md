@@ -3705,3 +3705,104 @@ no narrowing.** Re-measure again if real instability recurs under a
 longer/heavier load test - the neighbor hasn't gone anywhere and could
 still matter under different conditions (e.g. if it starts transmitting
 heavily during a future test).
+
+## 49. Invention campaign, run properly (world-first discipline): true
+## single-stream throughput aggregation across the two uplinks, with zero
+## remote infrastructure, is PROVEN IMPOSSIBLE - not just unattempted
+
+Ran the full pipeline (entry gate, ideation fan-out, refute, provenance
+search) on the one real remaining wall from #45/#46: getting ONE logical
+TCP stream to exceed a single uplink's own speed, using only R8000's own
+two radios, with no remote VPS/server the operator provisions and no
+modification to the real "American" network's own upstream gateway.
+
+**Entry gate:** confirmed limit already established (#45/#46) - MLO
+needs 802.11be hardware this BCM43602 doesn't have; MPTCP needs a
+cooperating remote endpoint. Acceptance bar: mechanism M achieves
+combined throughput for one TCP 5-tuple, to an arbitrary uncooperative
+destination, vs. the tuned single-path baseline, with zero added
+infrastructure.
+
+**Ideation fan-out (5 parallel, blind agents), one distinct
+removed-constraint lens each:**
+1. *Local proxy/HTTP-Range-splitting* - real prior art exists in spirit
+   (an open aria2 feature request, #984, asks for exactly this; nobody's
+   shipped it). Real practical killer: HTTPS is the overwhelming majority
+   of real traffic and Range headers live inside the TLS record - doing
+   this transparently needs a locally-trusted MITM CA on every client
+   device, which is invasive far beyond "no remote infrastructure."
+   Separately confirmed Ookla's own speedtest methodology already opens
+   4-8 parallel connections itself - meaning #46's ECMP fix already
+   captures most of the real-world benefit for the actual motivating
+   use case, no further invention needed there.
+2. *Packet-level striping with local resequencing* - modern Linux RACK
+   (RFC 8985) genuinely tolerates more path-latency skew than old
+   dup-ACK folklore suggested, but Linux's own `bonding.rst` docs
+   already document that naive `balance-rr` striping causes exactly the
+   reordering-triggers-congestion-control problem this session watched
+   for. No shipped project resequences a THIRD party's TCP flow this
+   way - real gap, but see the refute below for why it doesn't close.
+3. *Provenance search across commercial/OSS/academic/community* - found
+   pfSense's own official docs stating flatly that WAN bandwidth cannot
+   be aggregated into one pipe without ISP involvement (MLPPP being the
+   sole exception, itself needing ISP cooperation) - and independently
+   confirmed every real shipped bonding product (Peplink SpeedFusion,
+   OpenMPTCProuter/MPTCP, MLVPN, Glorytun) requires a remote node. Zero
+   hits for a remote-infrastructure-free version.
+4. *Local MPTCP-relay / free-public-endpoint angles* - both dead ends,
+   with the precise mechanism named: MPTCP's gain exists only on the
+   segment BETWEEN two multipath-aware endpoints; the router already
+   sits at the exact point where both uplinks converge, so inserting a
+   proxy there creates no NEW multipath segment - the router-to-real-
+   destination hop is still single-path by definition. No general-
+   purpose public MPTCP-speaking relay exists either (checked: Multipath
+   QUIC is still an unshipped IETF draft, not deployed by any major CDN).
+5. *Formal impossibility construction* - a real conservation-law-style
+   argument: a shared flow identity needs a shared place to write it -
+   either the network address (which forces single-path routing) or an
+   explicit above-IP token both stacks parse (which requires
+   destination cooperation). No third option exists. Explicitly checked
+   and dismissed the "both radios share one upstream gateway" detail as
+   a potential escape hatch - flagged as needing a dedicated refute pass
+   rather than accepted at face value.
+
+**Refute gate**, on the one candidate that survived ideation without a
+clean kill (a local resequencing buffer exploiting the shared-gateway
+detail): a fresh-context `scientific-method:refuter` (not the agent that
+proposed it) traced the actual packet path through the real network's
+own upstream gateway's NAT. Verdict: **kill, confidence 0.93.** Standard
+NAPT/conntrack (RFC 3022; this is how Linux conntrack - the near-
+universal basis for OPNsense/pfSense-class gateways - works, unmodified)
+keys strictly on the full `(proto, src_ip, src_port, dst_ip, dst_port)`
+tuple. Splitting one flow across R8000's two source IPs (.119/.190)
+doesn't survive the FIRST hop, let alone reach the real destination -
+the upstream gateway forks it into two independent external mappings
+with different source ports, producing two ordinary TCP connections at
+the destination, not one 5-tuple. A local reorder/dejitter buffer only
+fixes ordering within an ALREADY-unified sequence space (which is what
+MPTCP subflows are, but only because both ends explicitly negotiate
+that unification per RFC 8684) - it cannot retroactively fuse two
+independently-negotiated TCP handshakes the upstream gateway already
+forked. The stated fact that R8000 gets two SEPARATE DHCP leases (one
+per radio) independently rules out any L2/MLO bonding escape hatch too -
+that's only possible if the upstream gateway treats both radios as one
+association, which two separate leases proves it doesn't.
+
+**Verdict: PROVEN, not just unattempted.** True single-stream throughput
+aggregation across independent WiFi uplinks, to an arbitrary
+uncooperative destination, without provisioning remote infrastructure
+AND without modifying equipment outside this project's own control, is
+impossible - not a gap in effort, a consequence of how TCP/IP identity
+and NAT/conntrack fundamentally work (RFC 3022, RFC 793, RFC 8684).
+Every real shipped product that claims "bonding" either does ordinary
+multi-connection load balancing (which #46 already provides) or requires
+a remote node (which this project doesn't have and isn't building).
+
+**What actually IS real and actionable, surfaced as a side effect of this
+campaign:** for the closest practical want (near-single-download speed),
+use a client-side multi-connection download tool (`aria2c -x8 -s8` or
+equivalent) against any Range-capable server - #46's ECMP already
+spreads those connections across both uplinks, works for HTTP AND HTTPS
+(no MITM needed, unlike the Range-splitting-proxy idea), and gets most of
+the real-world value for a small fraction of the invasiveness. No new
+build needed - this is a usage recommendation, not a repo change.
