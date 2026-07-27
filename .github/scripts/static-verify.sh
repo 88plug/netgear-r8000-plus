@@ -68,6 +68,9 @@ else
     FAIL=1
   else
     echo "OK: brcmfmac.ko present, valid ELF, reasonable size"
+    # Absolute path, captured before the cd back below - $KO is relative to
+    # /tmp/apk-check and Check 4 needs it from a different cwd.
+    LOCAL_KO_ABS="/tmp/apk-check/${KO#./}"
   fi
   cd - >/dev/null
 fi
@@ -122,6 +125,49 @@ if command -v unsquashfs >/dev/null 2>&1 && command -v dtc >/dev/null 2>&1 && co
   [ "$FOUND_VALID" -eq 1 ] || echo "WARN: no extracted candidate parsed as a valid netgear,r8000 DTB (non-fatal - binwalk extraction is heuristic, see comment above; logged for review, not a build defect signal)"
 else
   echo "SKIP: unsquashfs/dtc/binwalk not all available on this runner"
+fi
+
+echo "--- Check 4: the module actually EMBEDDED in the image matches the local patched .apk ---"
+# This is the check that would have caught v19 shipping silently: Check 1
+# only proves the sidecar .apk file itself is a valid, non-truncated module -
+# it says nothing about what ImageBuilder's apk resolver actually chose to
+# put in the rootfs. Root-caused 2026-07-26: our local kmod-brcmfmac and the
+# upstream kmods feed carried the IDENTICAL version string, so apk's
+# dependency resolution had no reliable way to prefer ours (see
+# build-image.sh's PKG_RELEASE-bump fix) - the .chk shipped with a
+# brcmfmac.ko byte-identical to stock, hash-confirmed against /rom on the
+# real router, despite the correct .apk sitting right there in packages/ the
+# whole time. Only a real diff against the EMBEDDED module catches that class
+# of bug; comparing the sidecar file to itself cannot.
+if [ -z "${LOCAL_KO_ABS:-}" ] || [ ! -f "$LOCAL_KO_ABS" ]; then
+  echo "SKIP: no local brcmfmac.ko available to compare against (Check 1 didn't produce one)"
+elif ! command -v binwalk >/dev/null 2>&1 || ! command -v unsquashfs >/dev/null 2>&1; then
+  echo "SKIP: unsquashfs/binwalk not both available on this runner"
+else
+  SQUASH_OFFSET="$(binwalk "$CHK" 2>/dev/null | awk '/Squashfs filesystem/{print $1; exit}')"
+  if [ -z "$SQUASH_OFFSET" ]; then
+    echo "WARN: couldn't locate a squashfs partition inside $(basename "$CHK") - can't verify the embedded module (non-fatal, logged for review)"
+  else
+    rm -rf /tmp/rootfs-check
+    if unsquashfs -o "$SQUASH_OFFSET" -d /tmp/rootfs-check "$CHK" >/dev/null 2>&1; then
+      EMBEDDED_KO="$(find /tmp/rootfs-check -iname 'brcmfmac.ko' | head -1)"
+      if [ -z "$EMBEDDED_KO" ]; then
+        echo "FAIL: extracted rootfs has no brcmfmac.ko at all - can't confirm the driver shipped"
+        FAIL=1
+      else
+        LOCAL_SUM="$(sha256sum "$LOCAL_KO_ABS" | awk '{print $1}')"
+        EMBEDDED_SUM="$(sha256sum "$EMBEDDED_KO" | awk '{print $1}')"
+        if [ "$LOCAL_SUM" != "$EMBEDDED_SUM" ]; then
+          echo "FAIL: embedded brcmfmac.ko ($EMBEDDED_SUM) does NOT match the local patched .apk's module ($LOCAL_SUM) - ImageBuilder picked a different source (e.g. the upstream kmods feed instead of packages/). This is the exact v19 regression class."
+          FAIL=1
+        else
+          echo "OK: embedded brcmfmac.ko hash matches the local patched .apk exactly ($LOCAL_SUM)"
+        fi
+      fi
+    else
+      echo "WARN: unsquashfs failed to extract at offset $SQUASH_OFFSET - can't verify the embedded module (non-fatal, logged for review)"
+    fi
+  fi
 fi
 
 echo "==> Static verify: $([ "$FAIL" -eq 0 ] && echo PASS || echo FAIL)"

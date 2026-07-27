@@ -68,6 +68,31 @@ rm -rf package/kernel/mac80211
 cp -r "$MAC80211_SRC/package/kernel/mac80211" package/kernel/
 rm -rf "$MAC80211_SRC"
 
+# ROOT CAUSE (found 2026-07-26, this is the actual v19/v5-class bug, not just
+# "the .apk wasn't present"): our local kmod-brcmfmac.apk and the upstream
+# `kmods` feed's kmod-brcmfmac carry the IDENTICAL version string
+# (PKG_VERSION+PKG_RELEASE from this exact upstream Makefile, unchanged by our
+# patches - confirmed by decoding both packages.adb indexes with the SDK's own
+# apk tool: both report "6.12.94.6.18.26-r1"). ImageBuilder's apk invocation
+# (Makefile: --repositories-file repositories --repository packages/packages.adb)
+# consults BOTH the local packages/ dir and the remote kmods feed for the same
+# package name; on an exact version tie there is no guarantee apk's resolver
+# picks the local one over the feed's. This is exactly how v19 silently shipped
+# with brcmfmac.ko/brcmutil.ko hash-identical to stock /rom, despite the correct
+# custom .apk sitting right there in packages/ the whole time (static-verify.sh's
+# existing check only validated the sidecar .apk file itself, never what
+# ImageBuilder actually chose to embed - see static-verify.sh Check 4).
+# Fix: bump PKG_RELEASE so our build is a STRICTLY HIGHER version than whatever
+# this exact SDK's upstream Makefile ships - apk's normal highest-version-wins
+# resolution then picks ours deterministically, no repository-priority gambling.
+MAC80211_MK="package/kernel/mac80211/Makefile"
+CUR_RELEASE="$(awk -F':=' '/^PKG_RELEASE:=/{print $2; exit}' "$MAC80211_MK")"
+[ -n "$CUR_RELEASE" ] || { echo "FATAL: couldn't read PKG_RELEASE from $MAC80211_MK - format may have changed upstream"; exit 1; }
+NEW_RELEASE=$((CUR_RELEASE + 1))
+sed -i "s/^PKG_RELEASE:=${CUR_RELEASE}\$/PKG_RELEASE:=${NEW_RELEASE}/" "$MAC80211_MK"
+grep -q "^PKG_RELEASE:=${NEW_RELEASE}\$" "$MAC80211_MK" || { echo "FATAL: PKG_RELEASE bump (${CUR_RELEASE} -> ${NEW_RELEASE}) didn't stick"; exit 1; }
+echo "Bumped mac80211 PKG_RELEASE ${CUR_RELEASE} -> ${NEW_RELEASE} so our kmod-brcmfmac/kmod-brcmutil outrank the upstream kmods feed on version alone"
+
 MAC80211_PATCH_DIR="package/kernel/mac80211/patches/brcm"
 mkdir -p "$MAC80211_PATCH_DIR"
 # All patches actually deployed on the live router, not just 861 - this

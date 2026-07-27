@@ -208,6 +208,22 @@ here). `tftp-hpa` installed.
     resulting `.apk` into ImageBuilder's `packages/` before running
     `make image`. This is the exact mistake that silently shipped v5 with
     the stock (unpatched) driver — see `docs/WINS.md`'s v5→v6 entry.
+  - **File presence in `packages/` alone is NOT sufficient — this bit v19
+    too, root-caused 2026-07-26 (FINDINGS.md #39).** apk (this release's
+    package manager, not opkg) resolves `kmod-brcmfmac` against BOTH the
+    local `packages/` repo and the upstream `kmods` feed listed in
+    `repositories`; if both provide the exact same version string (they
+    do, by default — our patches don't touch `PKG_VERSION`/`PKG_RELEASE`),
+    apk has no reliable reason to prefer the local one, and v19 shipped
+    with a stock-hash-identical `brcmfmac.ko` despite the correct `.apk`
+    sitting right there the whole time. `build-image.sh` now bumps
+    `PKG_RELEASE` in the SDK's `package/kernel/mac80211/Makefile` before
+    building, so our local package is a strictly higher version and wins
+    apk's normal resolution deterministically — don't remove that step.
+    `static-verify.sh` Check 4 now also hash-compares the module actually
+    embedded in the built `.chk`'s squashfs against the local `.apk`, not
+    just the sidecar file's own validity — this is the check that would
+    have caught v19.
   - `v2-files/` overlays FILES into the rootfs (patched `/etc/init.d/nvram`,
     guest-network config, `perf-tune`, `radio-watchdog`, LED binding, etc).
     Verify a FILES override took: `unsquashfs -n <root.squashfs> <path>` and

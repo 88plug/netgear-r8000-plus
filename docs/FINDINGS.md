@@ -3151,3 +3151,64 @@ yet been re-verified against a fresh connection from the originally-
 reported client. Documented honestly per this project's own standard:
 the live fix is real and doesn't regress a known-working device, but
 full closure on the *specific* reported client is still open.
+
+## 39. ROOT CAUSE FOUND: why v19's real flash ran the STOCK brcmfmac.ko
+
+Confirmed earlier this session that the real, sysupgrade-flashed v19 image's
+`/lib/modules/6.12.94/brcmfmac.ko` hash matched the STOCK `/rom` copy
+exactly (`6f21bc31bf51577cf720d96ffab4ec2160c2f51630811dfebe9ebfdfd1ccd0ea`),
+and no antenna-get/set/counters/apsta debugfs entries existed - patches
+866/867/868 were simply not present in the running image, despite the
+correct custom `.apk` (hash `9067b03d64efc7306879e682375dff7e3a781c5d31dd6ffef3e988b3e9f53353`)
+sitting in ImageBuilder's `packages/` directory the whole time. The core
+apsta-removal fix (patches 862/863 retired, §34) still worked only by
+coincidence - stock brcmfmac never had that bug in the first place.
+
+Root cause: **an exact apk version tie**, not a missing file. This
+release (25.12.5) uses `apk`, not `opkg` - `ImageBuilder`'s `Makefile`
+resolves packages against BOTH `--repositories-file repositories` (8
+remote feed URLs, including a `kmods` feed carrying the stock
+`kmod-brcmfmac`) AND `--repository packages/packages.adb` (the local
+override repo) in one solve. Decoded both index files directly with the
+SDK's own `apk adbdump` tool: the upstream `kmods` feed's `kmod-brcmfmac`
+reports `version: 6.12.94.6.18.26-r1` - byte-identical to our local
+build's version string, since our patches only touch driver source, never
+`PKG_VERSION`/`PKG_RELEASE` in `package/kernel/mac80211/Makefile` (confirmed
+against the exact upstream `v25.12.5` tag: `PKG_VERSION:=6.18.26`,
+`PKG_RELEASE:=1`). With two repos offering the identical version for the
+same package name, apk's resolver has no principled reason to prefer the
+local one over the feed - and evidently didn't, for this build.
+
+This is a strictly worse variant of the already-documented v5 regression
+(docs/WINS.md v5->v6): that fix only ensured the local `.apk` FILE was
+present in `packages/`, which is necessary but was never actually
+sufficient - a version tie can silently reintroduce the identical failure
+mode even with the right file sitting right there, and the existing
+`static-verify.sh` safety net didn't catch it because it only validated
+the sidecar `.apk` artifact's own integrity, never what ImageBuilder
+actually chose to embed in the final rootfs.
+
+**Fix, two parts, both implemented:**
+1. `build-image.sh` now reads `PKG_RELEASE` from the SDK's
+   `package/kernel/mac80211/Makefile` right after checking it out, and
+   bumps it by 1 before `make defconfig`/build - making our local
+   `kmod-brcmfmac`/`kmod-brcmutil` builds a strictly higher version than
+   whatever this exact SDK's upstream feed ships, so apk's normal
+   highest-version-wins resolution picks ours deterministically. No
+   repository-priority guessing needed.
+2. `static-verify.sh` gained **Check 4**: locates the squashfs partition
+   inside the built `.chk` (via `binwalk` offset detection + `unsquashfs
+   -o <offset>`), extracts the actually-embedded `brcmfmac.ko`, and
+   sha256-compares it against the module inside the local patched `.apk`
+   (already extracted by Check 1). This is the check that would have
+   caught v19 before it ever reached the router - Check 1 alone provably
+   cannot, since it only proves the sidecar file is valid, not that it's
+   what got shipped.
+
+**Not yet done:** a real rebuild+reflash with this fix in place, to
+confirm patches 866/867/868 are genuinely active on the router (antenna
+reporting, firmware counters, apsta debugfs all present) rather than just
+trusting the build-time fix in isolation. Doing that real build+flash
+cycle is the natural next step, deferred here per this project's own
+one-artifact-per-turn discipline around live kernel-module rebuild/
+deploy/crash-recover cycles.
