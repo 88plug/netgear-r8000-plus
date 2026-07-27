@@ -4018,3 +4018,42 @@ measured:** the aria2 split=8->16 change (#52, genuine, reproducible
 improvement, already flashed as v26). BBR was tried and honestly killed
 by measurement - a real negative result is still real work, not a gap
 in the record.
+
+## 54. #53's own decision got silently overridden - a real bug found by
+## checking the flashed result, not trusting the config file
+
+Flashed v27 (kmod-tcp-bbr available, #53's deliberate decision to leave
+cubic as the default) and checked the real result on a fresh boot rather
+than assuming the config took effect: `sysctl
+net.ipv4.tcp_congestion_control` showed **bbr**, not cubic - the exact
+opposite of what #53 decided and documented.
+
+Root cause: the `kmod-tcp-bbr` package ships its OWN
+`/etc/sysctl.d/12-tcp-bbr.conf`, unconditionally setting
+`net.ipv4.tcp_congestion_control=bbr` via its postinst script - a real
+upstream packaging decision (whoever built this OpenWrt package chose to
+change the systemwide default the moment the module is installed, not
+just make it available). This silently overrode `etc/sysctl.conf`'s
+documented decision from #53, because `/etc/sysctl.d/*.conf` and
+`/etc/sysctl.conf` are two entirely separate files - editing one has no
+effect on the other, and I only edited the one I'd originally written
+to, never checked whether the package I was adding shipped a competing
+file at a different path.
+
+This is the exact same class of bug as #40 (a file at a specific path
+silently deciding behavior, invisible unless you check the ACTUAL
+flashed result) - and the exact same fix applies: this project's FILES=
+overlay always wins over package-installed files at the same path.
+Shipped `etc/sysctl.d/12-tcp-bbr.conf` (empty/comment-only) to override
+the package's version and actually restore cubic as decided. Fixed live
+first (confirmed `sysctl -w` + overriding the live file both took
+effect, `tcp_congestion_control` back to `cubic`), then baked into a
+real rebuild (v28) rather than left as a live-only patch.
+
+**Lesson, stated plainly, yet again this session:** a decision written
+into one config file is not verified until the ACTUAL FLASHED, BOOTED
+result is checked - #53 documented a decision correctly and still
+shipped the opposite of it, because a different file the new package
+brought along was never inspected. "I wrote the right value in my
+config" and "this is what's actually running" are different claims,
+and only the second one is worth trusting.
