@@ -3934,3 +3934,45 @@ multiple simultaneous LARGE transfers to DIFFERENT destinations at once
 (the scenario #46 was actually built and proven for), as opposed to one
 destination's single file. That remains the correctly-scoped claim and
 wasn't re-litigated here.
+
+## 52. #51's own "zero benefit" verdict corrected too - the dual-radio
+## effect is real, just threshold-dependent, found by pushing the scan
+## further instead of stopping at one data point
+
+Kept going past #51's own conclusion rather than treating it as final.
+aria2's `max-connection-per-server` accepts at most 16 (a hard aria2
+limit, confirmed live - `32` was flatly rejected by the RPC with an
+option-validation error). Re-ran the same 100MB scaling test at 16
+connections: **~12-14s (roughly 60-70 Mbit/s)** - already faster than
+8 connections' 23s on its own, independent of the radio question.
+
+Re-ran #51's exact single-vs-dual-radio ablation AT this higher
+concurrency (16 connections, same 100MB file, same forced-single-path
+technique): **dual-radio 12s vs single-radio 16s - a real, reproducible
+~33% improvement**, unlike the identical result at 8 connections.
+
+**Corrected understanding: the dual-radio benefit is real, not zero -
+it's threshold-dependent.** At 8 parallel connections, whatever was
+bottlenecking the transfer (per-connection throttling, TCP window
+effects, or similar) hadn't yet reached either radio's own real
+capacity, so a second radio had nothing to add. At 16 connections,
+throughput is high enough that a single radio's own capacity becomes
+the binding constraint, and splitting across both radios provides real,
+measured relief. #51 stopped at the first ablation and generalized from
+one data point ("the second radio contributed nothing") when the honest
+finding was narrower: nothing *at that specific concurrency level*.
+
+**Real, actionable result: bumped the default config from split=8 to
+split=16** (`max_connection_per_server`/`split`, both now 16, matching
+aria2's own ceiling) - strictly faster on its own merits (measured, not
+assumed) AND the concurrency level where #46's dual-radio investment
+actually pays off. No downside observed at this file size; larger/longer
+transfers weren't tested at this concurrency and could behave
+differently (more real-world use will tell).
+
+**Lesson, stated plainly, once more:** a real ablation is worth exactly
+what it measured, not what it seems to generalize to. #51 was right
+about 8 connections and wrong to imply the dual-radio investment was a
+wash - pushing one level further (more connections, same test) found
+the actual, narrower truth. Not yet rebuilt into a real image at time of
+writing.

@@ -5,17 +5,20 @@
 # LuCI web UI and get a real multi-connection download - measured 6.8x
 # faster (5.34 -> 36.5 Mbit/s, 100MB test file) than a single connection.
 #
-# CORRECTED 2026-07-27 (#51, real A/B/ablation test): that 6.8x is from
-# running 8 parallel connections, NOT from #46's dual-radio ECMP split -
-# a controlled test (same file, same connection count, forced onto ONE
-# radio vs both) produced the IDENTICAL time either way. Both American
-# uplinks share one real upstream gateway/ISP connection, so for a
-# SINGLE destination the bottleneck sits upstream of both radios, not at
-# either radio's own capacity - the second radio had nothing left to
-# add. #46's split is still real and valuable for multiple DIFFERENT
-# simultaneous destinations/devices (its actual proven use case) - just
-# not for one download's speed, which is what this package accelerates,
-# via parallelism alone.
+# CORRECTED 2026-07-27 (#51, real A/B/ablation test): the 6.8x at 8
+# connections is from parallelism, NOT #46's dual-radio ECMP split - a
+# controlled test (same file, same connection count, forced onto ONE
+# radio vs both) produced the IDENTICAL time either way at split=8. BUT
+# the dual-radio benefit is real and threshold-dependent, not zero: the
+# SAME ablation re-run at split=16 (aria2's own hard max for
+# max-connection-per-server) showed dual-radio genuinely faster than
+# single-radio (12s vs 16s for the same 100MB file, ~33% real
+# improvement) - at higher concurrency, a single radio's own capacity
+# becomes the binding constraint and the second radio provides real
+# relief; at 8 connections it wasn't yet the bottleneck. split/
+# max_connection_per_server bumped from 8 to 16 below accordingly - 16
+# connections was ALSO measured strictly faster on its own (100MB in
+# ~12-14s vs 8 connections' 23s), independent of the radio question.
 #
 # dir is tmpfs (/tmp), not the real overlay - this router has no USB
 # storage attached and the overlay itself is only ~18MB free (confirmed
@@ -51,8 +54,8 @@
 config aria2 'main'
 	option enabled '1'
 	option dir '/tmp/aria2-downloads'
-	option max_connection_per_server '8'
-	option split '8'
+	option max_connection_per_server '16'
+	option split '16'
 	option min_split_size '1M'
 	option max_concurrent_downloads '3'
 	option max_overall_download_limit '0'
