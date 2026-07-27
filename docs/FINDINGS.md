@@ -4193,3 +4193,19 @@ name. The generic fix (zone-membership by a structural property, not a
 name) is not meaningfully more code than the hardcoded one - it was
 never actually easier to hardcode, just a shortcut that felt fine because
 "american" was the only uplink in view at the time.
+
+**Addendum, same day:** applied the real per-radio numbers already
+measured in #52/#55 (phy2-sta0/`sqm_american_wwan` 47000/38000 kbit,
+phy1-sta0/`sqm_american24_wwan` 54000/43000 kbit) on top of the live v30
+auto-provisioned generic seed, via plain `uci set`+`uci commit sqm`+
+`/etc/init.d/sqm restart` - no rebuild needed, this is exactly the
+"refine via UCI once a real measurement exists" path the mechanism was
+designed for, confirmed by `tc qdisc show` on both real devices and their
+`ifb4*` download-side counterparts immediately after. This is a LIVE-only
+change (persists across normal reboots via the real overlay, but is not
+baked into the shipped `v2-files` default and is not guaranteed to
+survive a FUTURE sysupgrade if upstream openwrt/openwrt#21655 wipes
+`/etc/config/sqm` again, as it already did once this same session) - if
+that happens, re-apply the same four `uci set` lines above; the shipped
+generic 50000/25000 seed is a safe fallback in the meantime, not a
+regression.
