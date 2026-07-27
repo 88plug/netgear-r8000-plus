@@ -27,6 +27,19 @@ config dnsmasq
 	# redundant belt-and-suspenders that broke real clients on a live
 	# multi-BSS setup instead.
 	option localservice '0'
+	# Fallback upstream resolvers, confirmed needed live 2026-07-27
+	# (FINDINGS.md #43): this router's ONLY upstream nameserver otherwise
+	# comes from whatever the real "American" network's own DHCP hands
+	# out (currently 192.168.1.47) via resolvfile above - a single point
+	# of failure with zero redundancy. When it's unreachable (see the
+	# 30-american-dns-route hotplug script for the routing-ambiguity bug
+	# that caused exactly that), every FRESH DNS lookup silently fails
+	# while already-cached ones keep working, masking the outage as a
+	# per-client problem rather than an upstream one. dnsmasq queries all
+	# configured servers, so these are pure redundancy, not a replacement
+	# for the real upstream.
+	list server '1.1.1.1'
+	list server '8.8.8.8'
 	option ednspacket_max '1232'
 	option filter_aaaa '0'
 	option filter_a '0'

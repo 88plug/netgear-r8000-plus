@@ -3385,3 +3385,72 @@ apk version tie that turned out not to matter, then a genuinely real
 debug/non-debug module-pairing gap). All three are now fixed and, more
 importantly, each has a static check that would catch a regression before
 the next flash rather than after.
+
+## 43. Third client DNS complaint: real cause was a routing ambiguity from
+## the R8000/American subnet overlap, NOT the upstream DNS server being
+## down - initial diagnosis was wrong, operator caught it
+
+Third real client report, same shape as #37/#38: `da:ad:a3:b6:77:f9` /
+`192.168.1.208`, connected to `phy0-ap1` (the "American" clone BSS on
+R8000's radio0), full `[AUTH][ASSOC][AUTHORIZED]`, real traffic counters.
+New detail this time: the client's own DNS server showed as `192.168.1.1`
+(expected/correct - R8000's own dnsmasq, by design for this NAT'd BSS),
+but "no traffic flows" despite that.
+
+**First hypothesis, WRONG, corrected by the operator directly:** conntrack
+showed the client's DNS queries getting real replies (not silently dropped
+like #37/#38), so investigated dnsmasq's own upstream resolution instead.
+`nslookup <domain> 192.168.1.47` (the DNS server this router's own STA
+uplink, `american_wwan`, learned via DHCP from the real network) timed
+out, and a plain `ping 192.168.1.47` showed 100% loss - concluded the
+upstream DNS server itself was down. Operator pushed back immediately:
+*"its not unreachable from normal American you are wrong you must be
+setitng it somewher eor its getting set"* - i.e. other devices on the real
+network reach it fine, so the router itself must be the problem.
+
+**Re-tested rather than defended the first answer:** `ip route get
+192.168.1.47` showed `dev br-lan` - R8000's OWN LAN, which has no path to
+that address at all. Explicit-interface pings proved the real cause:
+`ping -I phy1-sta0 192.168.1.47` and `ping -I phy2-sta0 192.168.1.47` both
+succeeded immediately (0% loss, 2-9ms). Root cause: R8000's own LAN
+(`br-lan`) and the real American network share the exact same
+`192.168.1.0/24` numbering by design (documented since #37 as "harmless"
+for client/NAT traffic) - but for ROUTER-ORIGINATED traffic to a specific
+host in that shared range (like the upstream DNS server), the kernel has
+THREE routes to the identical `/24` prefix (br-lan, `american_wwan`,
+`american24_wwan`) and picks br-lan, which is wrong for anything not
+actually on R8000's own LAN segment. dnsmasq's upstream-forwarded queries
+hit this exact ambiguity: every FRESH lookup silently failed, while
+already-cached domains kept resolving instantly from dnsmasq's own cache
+- masking a real routing bug as an isolated per-client problem, exactly
+matching the pattern of the two prior "closest to R8000" reports.
+
+**Fix, two parts, both verified live before persisting:**
+1. `v2-files/etc/hotplug.d/iface/30-american-dns-route` (new): fires on
+   `ifup` for `american_wwan`/`american24_wwan`, reads whichever DNS
+   server(s) DHCP actually handed out on that specific interface (via
+   `ubus call network.interface.<if> status`, the `dns-server` field -
+   not a hardcoded IP, since it can change), and adds a `/32` host route
+   for each via the correct device. A host route beats the ambiguous
+   `/24` every time, resolving the conflict deterministically. Verified:
+   manually invoking it set `192.168.1.47 dev phy2-sta0`, and a fresh
+   (never-queried-this-session) domain resolved correctly through
+   dnsmasq immediately after.
+2. `v2-files/etc/config/dhcp`: added `1.1.1.1`/`8.8.8.8` as extra
+   `list server` entries. Pure redundancy, not a replacement for #1 -
+   dnsmasq queries all configured servers, so a future outage or
+   misroute of the primary upstream no longer silently fails every fresh
+   lookup for whoever's unlucky enough to be mid-lookup when it happens.
+
+**Honest gap:** like #38 and #39/#40's live incidents, could not get a
+live re-test from the exact reported client (`.208`) after the fix -
+verified the underlying mechanism directly (route resolution + a real
+DNS lookup through dnsmasq) instead. Not yet rebuilt into a real image;
+applied live via `uci`/hotplug script test only at time of writing.
+
+**Lesson, stated plainly:** the first theory (upstream server down)
+fit the evidence collected so far and was wrong anyway - a plain,
+un-interface-pinned `ping` silently used an ambiguous route and produced
+a clean, confident, wrong "100% packet loss." The operator's domain
+knowledge of the real network caught it; the fix was to re-test with the
+interface pinned explicitly, not to argue from the first result.

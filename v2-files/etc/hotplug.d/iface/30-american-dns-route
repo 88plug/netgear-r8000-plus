@@ -1,0 +1,36 @@
+#!/bin/sh
+# Fixes a real, confirmed-live bug (2026-07-27, FINDINGS.md #43): R8000's own
+# LAN (br-lan) and the real "American" upstream network share the SAME
+# 192.168.1.0/24 numbering by design (see config/wireless's american_ap
+# comment - R8000's DHCP pool overlaps the real network's range, isolated by
+# NAT). That overlap is harmless for CLIENT traffic, but it silently breaks
+# ROUTER-ORIGINATED traffic to any host that happens to live in that shared
+# range on the far side of a STA uplink: the kernel has three routes to the
+# same 192.168.1.0/24 prefix (br-lan, american_wwan, american24_wwan) and
+# picks br-lan for a plain destination lookup, since it can't tell "this IP
+# is on my own LAN" from "this IP is actually reachable only via the STA
+# uplink". Confirmed directly: `ip route get 192.168.1.47` (the real
+# network's own DNS server, learned via DHCP on american_wwan) resolved to
+# `dev br-lan` - wrong, that interface has no path to it at all - while
+# `ping -I phy2-sta0 192.168.1.47` succeeded immediately. dnsmasq forwards
+# upstream queries using the same ambiguous route, so every fresh DNS lookup
+# a client made silently failed (already-cached lookups kept working,
+# masking the outage) while the upstream DNS server itself was never down.
+#
+# Fix: a /32 host route beats the ambiguous /24 every time, so add one for
+# whichever DNS server(s) DHCP actually hands out on these interfaces, at
+# the moment the lease is bound - not hardcoded, since the IP could change.
+[ "$ACTION" = "ifup" ] || exit 0
+case "$INTERFACE" in
+	american_wwan|american24_wwan) ;;
+	*) exit 0 ;;
+esac
+
+DEVICE="$(ubus call network.interface.$INTERFACE status 2>/dev/null | jsonfilter -e '@.l3_device' 2>/dev/null)"
+[ -n "$DEVICE" ] || exit 0
+
+ubus call network.interface.$INTERFACE status 2>/dev/null | jsonfilter -e '@["dns-server"][*]' 2>/dev/null | while read -r ns; do
+	[ -n "$ns" ] || continue
+	logger -t american-dns-route "routing DNS server $ns via $DEVICE ($INTERFACE)"
+	ip route replace "$ns/32" dev "$DEVICE"
+done
