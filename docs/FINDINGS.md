@@ -4259,3 +4259,42 @@ ceiling", which is the actual, honest choice this router has (fq_codel
 alone was the unintended default #55 found and fixed FROM). Cleaned up
 after: SQM left running (the correct end state), test scripts and
 tmpfs both cleared, live-verified via `tc qdisc show` immediately after.
+
+## 58. Software flow offloading audited and confirmed genuinely
+## functioning - not a silent no-op like #55/#56's SQM bug
+
+Given this session already found two "configured but actually inert"
+bugs (SQM shaping a dead interface, #55; a fix hardcoded to a name that
+would silently stop matching, #56), checked whether `firewall`'s
+`flow_offloading`/`flow_offloading_hw` config is real or another one.
+
+`uci show firewall.@defaults[0]`: `flow_offloading='1'`,
+`flow_offloading_hw='0'`. `nft list ruleset` confirms the real mechanism:
+a `flowtable ft` with `devices = { br-lan, phy1-sta0, phy2-sta0, wan }`
+(the real current interfaces - `wan` stays listed even though physically
+unplugged, harmless static membership) and the forward chain's first rule
+is `meta l4proto { tcp, udp } flow add @ft`, offering every new
+forwarded TCP/UDP flow to the table before any other forward-chain logic
+runs.
+
+Generated real forwarded traffic through the router (curl `--interface`
+bound to the LAN-side dongle, through the router, out the STA uplink, to
+a real external host) and checked `/proc/net/nf_conntrack` for the
+connection: **`[OFFLOAD]`** was present on the real entry (1024/1220
+packets, real byte counts, matching the actual download in progress) -
+software flow offloading is genuinely accelerating real forwarded
+traffic on this router right now, not a placebo setting.
+
+`flow_offloading_hw='0'` is honest, not a bug: bcm53xx has no registered
+hardware flow-offload driver in mainline for this SoC (confirmed by zero
+`flow`/`offload`-related dmesg output) - this is exactly the gap the
+`hwoffload-research/` FA/CTF driver plan exists to close, deliberately
+phased and deferred pending a second test client this bench doesn't
+have (see the saved plan). Turning `flow_offloading_hw` on today would
+be a no-op at best, not a real acceleration path yet.
+
+**Lesson:** a clean audit result - "this is configured correctly and is
+genuinely doing what it claims" - is worth recording with the same rigor
+as a bug. Two real silent-no-op bugs already found this session made
+this setting worth checking; finding it actually works is itself useful
+information, not a non-event.
