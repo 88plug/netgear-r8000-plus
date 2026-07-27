@@ -209,3 +209,50 @@ general "something about extra bytes." That's real progress on the
 open question FINDINGS.md #65 left unresolved, obtained by reading this
 project's own already-present, real kernel source tree rather than by
 running the same live experiment a third time.
+
+## v4: the v3 patch compiles clean against the real target - and why it
+## was NOT flashed
+
+Applied the v3 patch (`BCM53012_DEVICE_ID` added to `b53_common.c`'s
+flow-accelerator tag-protocol check) directly to
+`/home/andrew/netgearr8000/openwrt/` - a full, separate OpenWrt buildroot
+checkout that exists in this project (distinct from the SDK+ImageBuilder
+pipeline `build-image.sh`/`docs/RUNBOOK.md` normally use), already fully
+built and cached (11GB `build_dir`, complete toolchain, a prior `.chk`
+present from 23 juil).
+
+**Real, positive result:** `make target/linux/compile` recompiled
+`b53_common.c` and the kernel cleanly in ~17 seconds (cache reused for
+everything else), and `make target/linux/install` successfully packaged
+a complete, valid `.chk` - the patch is syntactically and semantically
+sound C, accepted by this exact kernel build (6.12.94, same
+arm_cortex-a9_musl_eabi target as the router). This is real, meaningful
+verification that goes beyond "the design looks plausible on paper."
+
+**Not flashed, and must not be confused with a real build of this
+project:** this buildroot's own `.config` does not carry this session's
+package additions (grep of the produced manifest: no `aria2`, no
+`kmod-tcp-bbr` - both real, shipped, #49-54 additions missing here) and
+**has no FILES overlay configured at all** - not `v2-files`, not even
+the old stale `image-files/` RUNBOOK.md already warns against, literally
+none (`grep -i INCLUDE_FILES /home/andrew/netgearr8000/openwrt/.config`
+returns nothing). Flashing this exact `.chk` would silently regress
+every project-specific fix and feature shipped this session and before
+it (SQM #55/#56, RPS #59, aria2 #49-52, the BBR override #54, guest
+network, radio-watchdog, every hotplug script) back to a bare package
+set with zero customization - exactly the kind of "wrong artifact
+flashed" mistake this project's own `static-verify.sh`/pre-flash-diff
+discipline exists to catch, caught here by checking *before* touching
+the router rather than after.
+
+**What real testing of this patch would still require, not done:**
+reconciling this buildroot's `.config` and rootfs overlay configuration
+with the project's actual shipped state (same package list as
+`build-image.sh`'s `PACKAGES=` line, same `FILES=v2-files` content) - a
+real, separate, non-trivial configuration task in its own right, not a
+quick fix, and not something to rush through to get to a live test
+faster. Until that reconciliation is done and verified (e.g. via this
+project's own `static-verify.sh`-style diffing against the currently
+running image), this patch has been verified to *compile*, not verified
+to be *safe to flash* - those are different claims, and only the first
+one is true right now.
