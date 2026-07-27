@@ -4500,3 +4500,99 @@ translation logic is confirmed correct against it, so Phase C is the
 next real go/no-go decision, separate from this one. Phase D (persistent
 bring-up) stays a separate decision after that, unchanged from the
 original plan.
+
+## 62. Phase C attempted live - write path verified correct, but the FA
+## hit-counter proved hardware never actually forwarded a single packet,
+## and unloading the module appears to have crashed/rebooted the router
+
+Following #61, attempted Phase C (`insmod fa_accel.ko live=1`) against
+real traffic, with the recovery net confirmed staged first (`nmrpflash`
+present, stock `.chk` on disk) and the safety property that this
+session's own SSH/management channel is LOCAL traffic, not forwarded, so
+it stays reachable regardless of what happens to the forwarded path
+under test.
+
+**The write mechanism itself worked correctly.** A real curl connection
+from the dongle host to neverssl.com (`192.168.1.195:52402 ->
+34.223.124.45:80`) got 8 real NAPT rows written across both directions,
+each one **write + immediate readback + byte-compare, only THEN
+accepted** (`fa_flow_replace_live()`'s existing design, not new - see
+#61) - all 8 passed verification, offload was accepted
+(`FLOW_CLS_REPLACE` returned 0, not `-EOPNOTSUPP`), and the curl itself
+completed with byte-correct data (`http_code=200 size=3961`, matching
+the real `Content-Length`). On connection close, all 8 rows were cleanly
+marked invalid and freed. Register-interface correctness, now proven
+against real live traffic, not just synthetic test patterns.
+
+**But real hardware forwarding was NOT confirmed - it was actively
+disproven.** Used the existing `fa_stats_probe.c` (real FA hit/miss/
+error counters, `FA_REG_STAT_HIT`/`FA_REG_STAT_MISS`) as the before/after
+oracle specifically because "the connection worked" is not proof
+hardware did anything - the kernel's software flowtable could equally
+explain a working connection regardless of what an INDIRECT (non-native)
+driver returns, and this project's own audit discipline exists precisely
+to catch that gap (#50's "verifier grants the win" failure mode, again).
+Baseline probe: `hit=0 miss=29014`. Ran the exact test connection whose
+row was written+verified+accepted. Re-probed: **`hit=0` (unchanged)
+miss=297** (miss appears to be read-to-clear or otherwise reset by the
+first read - the second number reflects only the short window since,
+plausible for real background traffic with the phone also connected).
+**Hit stayed at zero across the entire observation, including for the
+one specific connection whose row was accepted.** This is real,
+significant evidence that the FA forwarding engine is not actually
+consulting the installed table - the register-write mechanism being
+correct does not mean the silicon is engaged. This matches exactly what
+the code's own header comment anticipated before this test ran: register
+interface correctness and packet-forwarding correctness are materially
+different claims, and only the first has now been demonstrated. The most
+likely explanation: FA's actual bring-up sequence (GMAC table-init
+handshake + switch OOB-pause enable - Phase D, deliberately NOT done in
+this test) is required before the forwarding engine actually snoops/
+intercepts real traffic; writing NH/NF table rows alone does not appear
+sufficient.
+
+**Separately, and more seriously: unloading `fa_accel` with live rows
+installed appears to have caused a hang and a hardware-watchdog reboot.**
+Sequence: `rmmod fa_accel` printed `insmod exit=0`... `rmmod exit=0`
+(userspace call returned success) - the SAME ssh command's remaining
+lines (`uci set flow_offloading_hw=0`, `uci commit`, `firewall restart`)
+never ran; that ssh session then hung past its 20s+ then 45s timeouts;
+checking a moment later found the router on a **fresh boot** (`uptime`:
+"up 1 min") with `flow_offloading_hw` still `'1'` - proof the revert
+commands never executed, meaning the reboot happened between `rmmod`
+returning and the next line running. This device has a 30-second
+hardware software-timer watchdog (`bcm47xx-wdt`, confirmed in the fresh
+boot's own log) - a hang anywhere in `fa_accel_exit()`'s live-flow
+cleanup loop (or in `flow_indr_dev_unregister()`/`iounmap()` afterward)
+that stalls long enough would fit this exact timeline. **No panic trace
+survives** - this device has no `pstore`/`ramoops` configured
+(`/sys/fs/pstore` does not exist), so this is circumstantial, not a
+captured stack trace, and stated at that confidence level, not higher.
+
+Full state re-verified after the reboot: radios/SSIDs, multipath route,
+real SQM ceilings (survived - this was a plain reboot, not a sysupgrade,
+so #21655 does not apply here), RPS, aria2, cubic congestion control,
+and `flow_offloading_hw` all confirmed intact or correctly re-applied by
+the existing boot-time hotplug scripts. `flow_offloading_hw` was
+manually set back to `'0'` post-reboot (the one piece of state that
+hadn't self-healed, since it's a config value, not a hotplug-managed
+one) and firewall restarted clean. Router left in the exact same known-
+good state as before this test began.
+
+**This is now a real, standing gate, not dogma to route around:**
+`fa_accel.c`'s `live=1` path must not be re-attempted against this
+router until its `fa_accel_exit()`/live-flow-teardown path is reviewed
+for what could hang or crash on unload with active rows - a repeat
+without a fix would just risk another unexplained reboot for no new
+information. The write-path correctness (#61 and this entry's first
+half) and the hit-counter oracle technique are both real, reusable
+results; the crash-on-unload is the blocking item for anything further.
+
+**Lesson:** "the connection worked" and "hardware did the work" are
+different claims, and conflating them here would have been exactly the
+kind of unearned "hardware offload working!" claim this project's whole
+audit discipline exists to prevent - the hit-counter oracle is what
+actually settled it, honestly, in the negative. A second, independent
+real cost was paid for testing this rigorously (the reboot) rather than
+stopping at "curl succeeded, ship it" - worth it, since the alternative
+was shipping a false positive.
