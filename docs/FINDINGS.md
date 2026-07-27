@@ -3354,3 +3354,34 @@ ONE specific thing that had already bitten this exact driver once before
 this very session. A known failure mode documented in prose (the earlier
 live-patching entry) is not the same as a failure mode a script actually
 checks for.
+
+## 42. v21 flashed for real: diagnostic tooling (866/867/868) genuinely
+## live on real hardware for the first time in this entire project
+
+Flashed v21 (both #40 and #41's fixes applied, static-verify PASS
+including the new Check 5) via real `sysupgrade`, sha256-verified transfer
+both ways. Confirmed live, post-reboot, on the actual router:
+
+- `brcmfmac.ko`/`brcmutil.ko` hashes match the local patched build exactly
+  (`15159a87...` / matched pair) - no unknown-symbol errors, `lsmod` shows
+  `brcmfmac` loaded normally.
+- `iw phy phyN info` on all three radios reports real antenna values
+  (`Available/Configured Antennas: TX 0x7 RX 0x7`), not the `TX 0 RX 0`
+  every prior build showed - **patch 866 confirmed live for the first
+  time.**
+- `/sys/kernel/debug/ieee80211/phy0/` now contains `apsta`, `apsta_set`,
+  and `counters` alongside the stock `revinfo` entry - **patches 867 and
+  868 confirmed live for the first time.**
+- Both SSIDs up on radio0 (`R8000` + `American`), both American STA
+  uplinks connected on radio1/radio2 - the `american_ap` clone BSS lost
+  during the v19 rollback (#41) is back, since v21 is built from the
+  current wireless config.
+
+This closes out the multi-entry #39/#40/#41 saga: the diagnostic patches
+built early this session were real and correctly written the whole time -
+what was broken was the BUILD PIPELINE silently failing to ship them
+(three independent, compounding causes: a stray leftover file, then an
+apk version tie that turned out not to matter, then a genuinely real
+debug/non-debug module-pairing gap). All three are now fixed and, more
+importantly, each has a static check that would catch a regression before
+the next flash rather than after.

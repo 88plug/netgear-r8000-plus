@@ -798,3 +798,21 @@ open internet through it - `ping 8.8.8.8`: 0% packet loss - with zero
 special client configuration. This is the literal, original goal of the
 entire multi-session project, now confirmed working end to end on real
 hardware.
+
+**Diagnostic tooling (patches 866/867/868) confirmed genuinely live on
+real hardware, first time ever, after fixing three compounding build
+pipeline bugs (2026-07-27, `docs/FINDINGS.md` #39-#42).** Every prior
+"real build+flash" this project reported had actually been shipping the
+STOCK `brcmfmac.ko`/`brcmutil.ko` the whole time - hash-confirmed against
+`/rom`. Root causes, found only by rebuilding and hash-checking rather
+than trusting the code: a stray stock module forgotten in the gitignored
+`v2-files/lib/modules/` since 2026-07-23, silently overriding the correct
+build via `FILES=` overlay semantics; then, once that was fixed, a real
+debug/non-debug module-pairing gap that took down every radio on a real
+flash and needed a live revert to v19 to recover. Both fixed, both now
+covered by a static pre-flight check (`static-verify.sh` Checks 4 and 5)
+so a regression fails loudly before the next flash instead of shipping
+silently. Real v21 flash confirmed live: correct module hashes, real
+antenna chain-mask values on all 3 radios (was `TX 0 RX 0` on every prior
+build), and `apsta`/`apsta_set`/`counters` debugfs entries all present for
+the first time.
