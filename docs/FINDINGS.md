@@ -4298,3 +4298,56 @@ genuinely doing what it claims" - is worth recording with the same rigor
 as a bug. Two real silent-no-op bugs already found this session made
 this setting worth checking; finding it actually works is itself useful
 information, not a non-event.
+
+## 59. Real CPU imbalance found and fixed under saturating load - one core
+## was near-saturated while the other sat mostly idle
+
+This SoC is dual-core ARM Cortex-A9 (BogoMIPS 1000/core). Measured real
+`/proc/stat` deltas across a 6s window of the same 8-parallel-stream
+saturating load used in #57: **CPU1 ~91% busy (~73% of that softirq),
+CPU0 ~36% busy** - a genuine, large, real imbalance, not noise (two
+independent snapshots agreed).
+
+Root cause, found via `/proc/interrupts` and each device's
+`rps_cpus`: brcmfmac's PCIe interrupt line (`brcmf_pcie_intr`, irq 49 -
+shared by BOTH STA radios, confirmed by the doubled description in
+`/proc/interrupts`) has `smp_affinity=2` (CPU1 only) - essentially all
+real packet-arrival interrupt handling for both uplinks lands on one
+core. Making it worse: `/sys/class/net/phy1-sta0/queues/rx-0/rps_cpus`
+and `phy2-sta0`'s equivalent were both `0` (RPS disabled) - `br-lan` and
+`eth0` already get RPS from OpenWrt's own stock defaults, but WiFi STA
+vifs created dynamically by mac80211/brcmfmac are not covered by that
+default. With the hardware interrupt pinned to one core AND no software
+mechanism to spread the resulting NAPI/softirq work, every packet
+crossing either uplink was processed on CPU1 alone, regardless of how
+idle CPU0 was.
+
+**Fix**, matching #56's exact genericity requirement (never bound to a
+specific interface name): `etc/hotplug.d/iface/33-dynamic-wan-rps`,
+same firewall-zone-membership (`masq='1'`) detection as
+`32-dynamic-wan-sqm`, enables RPS (`rps_cpus=3`, both cores on this
+2-core SoC) on whatever device is currently resolved for any such
+uplink interface, on every ifup - idempotent, only writes when not
+already set.
+
+**Measured, not assumed:** re-ran the identical load pattern with RPS
+enabled - CPU0 ~59% busy, CPU1 ~55% busy. The ~55-point imbalance is
+gone; total combined busy-ticks across both cores also dropped slightly
+(776 -> 692 in the measured window), consistent with more efficient
+parallel completion of the same work rather than just redistributing an
+unchanged total. This is real spare capacity that was sitting unused
+under exactly the kind of high-concurrency multi-radio load this whole
+session's aria2/multipath work was built to create - a genuine
+"accelerating traffic" win, not just a rebalancing exercise: headroom
+freed on CPU1 is headroom available for cake's own per-packet AQM work,
+conntrack, and NAT under real load, all of which run in the same softirq
+context that was previously bottlenecked on one core.
+
+**Honest scope:** RPS spreads *software* processing of already-arrived
+packets across cores; it does not move the hardware interrupt itself
+(still CPU1-pinned - that's a driver/firmware property, not something
+this project controls) and does not increase raw radio throughput. What
+it removes is a real CPU-side ceiling that could otherwise cap combined
+aggregate throughput or add processing-queue latency under heavy
+multi-radio load, independent of what the radios themselves are capable
+of.

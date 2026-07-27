@@ -1,0 +1,52 @@
+#!/bin/sh
+# Enables RPS (Receive Packet Steering) on whatever interface is currently
+# acting as a NAT'd uplink, per this router's OWN firewall config - never a
+# specific named network, same genericity signal and reasoning as
+# etc/hotplug.d/iface/32-dynamic-wan-sqm (FINDINGS.md #56/#59).
+#
+# Root cause found (FINDINGS.md #59): brcmfmac's shared PCIe interrupt for
+# BOTH STA radios is hard-affined to CPU1 only (/proc/irq/49/smp_affinity),
+# and RPS was NOT enabled on phy1-sta0/phy2-sta0's rx queue by default
+# (br-lan and eth0 already get RPS from OpenWrt's own stock defaults - WiFi
+# STA vifs created dynamically by mac80211/brcmfmac do not). Under real
+# saturating combined-radio load this meant ALL softirq packet-processing
+# work for both uplinks funneled through one core: measured CPU1 ~91% busy
+# (~73% of that softirq) while CPU0 sat ~36% busy, real headroom going
+# unused. Enabling RPS (spreading softirq processing across both cores in
+# software, since the hardware interrupt itself stays pinned) measured
+# ~59%/~55% - CPU1's bottleneck effectively gone, confirmed via /proc/stat
+# deltas under the same load pattern before/after.
+case "$ACTION" in
+	ifup) ;;
+	*) exit 0 ;;
+esac
+. /lib/functions.sh
+
+FOUND=0
+check_zone() {
+	section="$1"
+	config_get zone_masq "$section" masq
+	[ "$zone_masq" = "1" ] || return 0
+	config_get zone_net "$section" network
+	for n in $zone_net; do
+		[ "$n" = "$INTERFACE" ] && FOUND=1
+	done
+}
+config_load firewall
+config_foreach check_zone zone
+
+[ "$FOUND" = "1" ] || exit 0
+
+DEVICE="$(ubus call network.interface."$INTERFACE" status 2>/dev/null | jsonfilter -e '@.l3_device' 2>/dev/null)"
+[ -n "$DEVICE" ] || exit 0
+
+for q in /sys/class/net/"$DEVICE"/queues/rx-*/rps_cpus; do
+	[ -f "$q" ] || continue
+	CUR="$(cat "$q" 2>/dev/null)"
+	# "3" = both CPUs on this 2-core SoC (bitmask). Idempotent - only write
+	# when it isn't already set, since this fires on every ifup.
+	if [ "$CUR" != "3" ]; then
+		echo 3 > "$q" 2>/dev/null
+		logger -t dynamic-wan-rps "enabled RPS on $DEVICE ($INTERFACE) queue $q"
+	fi
+done
