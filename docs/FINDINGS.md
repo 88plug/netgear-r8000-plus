@@ -3496,3 +3496,85 @@ for a correlated firmware error counter - inconclusive without decoding
 Broadcom's `wl_cnt` struct layout against this exact firmware, which
 wasn't done in this pass. Logged here as an open, tracked item rather than
 either overclaiming it's the cause or dropping it silently.
+
+## 45. Live speed instability investigated: real interference found, a real
+## config bug found and fixed, and radio-bonding researched to a hard no
+
+Operator ran a real speedtest while asking for live investigation.
+Sampled `phy2-sta0` (the active 5GHz American uplink, channel 44) every 2s
+for 30s during the test: `rx bitrate` swung wildly (585 -> 468 -> 650 ->
+520 -> **30** -> **130** -> 526 -> **30** -> 351 -> 585 Mbit/s) and
+`tx failed` climbed from a static baseline of 27 to 178 in that window,
+almost entirely during real load. Confirmed this is real rate-control
+"hunting" under contention, not noise.
+
+**Real interference found via a full scan (`iw dev phy2-sta0 scan`) that
+hadn't been run yet:** a neighboring device (SSID `GL-X300`, a GL.iNet
+travel router) broadcasting on channel 48 at **-41dBm** - much stronger
+than our own AP's -63dBm at that location - and channel 48 sits INSIDE
+the same 80MHz-wide channel block (36-40-44-48) our uplink uses at
+channel 44/VHT80. A 3-radio device cluster (`20:be:cd:36:ec:c*`) at
+-56dBm on channel 36 is also inside that same block. VHT80 needs all
+four 20MHz sub-channels clear for full-rate frames; either neighbor
+directly explains the observed hunting. This is a real, external,
+third-party interference source R8000's own config can't eliminate -
+narrowing to VHT40 (using fewer of the contended sub-channels) is a real,
+available tradeoff, not yet applied pending the operator's call given the
+peak-throughput cost.
+
+**Real, separate, confirmed and FIXED bug found while testing the VHT40
+change:** `wireless.main_radio2` (an AP broadcasting SSID `R8000` on
+5GHz) turned out to be genuinely `disabled='0'` (enabled) - running
+CONCURRENTLY with `wifinet4` (the STA extending American's 5GHz) on the
+exact same physical radio, exactly the "AP+STA-concurrent-on-one-radio"
+problem this project's own config comment already warned against. Root
+cause: the `main_radio2` UCI section had TWO `option disabled` lines (a
+leftover editing artifact) - `'1'` then, later in the same section, `'0'`
+- and UCI takes the last duplicate, silently re-enabling it despite the
+comment's stated intent. Confirmed via `uci show wireless` on the live
+router and `iw dev` showing a real, active `phy2-ap0` AP interface
+alongside the STA. Fixed live (single `disabled '1'`, duplicate line
+removed) and in `v2-files/etc/config/wireless`; the STA cleanly
+renegotiated a full VHT80/780Mbit link afterward. A `wifi` (system-wide)
+reload left one harmless orphaned `phy2-ap0` netdev handle behind (no
+hostapd attached, confirmed NOT beaconing via a fresh scan showing no
+trace of its BSSID) - clears on next real reboot/reflash, not urgent.
+
+**Researched (3 parallel agents) whether the router's 3 radios can be
+combined/bonded for real throughput, since the operator asked directly:**
+- **True single-stream radio-level bonding: hardware-impossible, not
+  just unconfigured.** The only 802.11 mechanism for this is Multi-Link
+  Operation (802.11be/"WiFi 7", ratified 2024) - it requires MAC-layer
+  framing (Multi-Link element, per-STA-profile, cross-link sequence
+  numbering) built into the chip/firmware at design time. BCM43602 is a
+  ~2015 802.11ac-only ASIC with closed firmware that predates the
+  standard by about a decade; no driver or firmware update can retrofit
+  it. There's also no independent mac80211/kernel mechanism for merging
+  two independent WiFi associations' throughput outside MLO - unlike
+  wired 802.3ad bonding, two WiFi links have divergent, time-varying
+  latency and disjoint loss that naive bonding can't paper over.
+- **MPTCP / OpenMPTCProuter genuinely does single-stream aggregation,
+  but needs a remote VPS the operator would have to run** as the
+  multipath-terminating endpoint - it does NOT aggregate bandwidth to an
+  arbitrary destination (like a public speedtest server) client-side
+  only, confirmed directly from OpenWrt's own docs. Kernel MPTCP is
+  present in 25.12 but the userspace path-manager tooling isn't included
+  by default; real use needs OMR's own package feed.
+- **mwan3 (the standard package) is flatly incompatible with OpenWrt
+  25.12** - it's iptables-based, and 25.12 dropped iptables entirely for
+  nftables/firewall4. A community nftables port (`mwan3-nft`) targets
+  25.12+ but isn't in official feeds yet, meaning manual reinstall after
+  every sysupgrade. Also, mwan3 is per-CONNECTION load balancing, not
+  per-stream - it would give real aggregate throughput across multiple
+  simultaneous devices/flows (not a single speedtest run), and needs a
+  real weighting policy (e.g. 4:1) since the two uplinks are very
+  unequal in real capability.
+
+**Bottom line, stated plainly:** there is no way to make one speedtest
+run faster than R8000's single best uplink can go, on this hardware,
+without external infrastructure (a VPS). What IS real and available: the
+main_radio2 bug fix (genuine, already shipped), the interference finding
+(real, third-party, not something config alone fixes, but VHT40 is an
+honest tradeoff lever), and mwan3-nft for real aggregate multi-device
+throughput if the operator wants it despite the out-of-feed maintenance
+cost. Not yet rebuilt into a real image at time of writing.
