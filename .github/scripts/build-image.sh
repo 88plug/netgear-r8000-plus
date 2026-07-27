@@ -87,6 +87,18 @@ done
 # silently breaks the clean/compile targets later with a confusing
 # "No rule to make target" error that has nothing to do with the patch.
 make defconfig >/dev/null
+
+# Enable brcmfmac's own debugfs infrastructure (revinfo, and now patch 867's
+# "counters" dump) - off by default in a stock SDK, and there is no top-level
+# .config at all before the defconfig call above (a pristine SDK tarball
+# ships none - confirmed by inspecting it directly), so this can only be
+# flipped AFTER that first defconfig has generated the file. This is
+# CONFIG_BRCMDBG, an existing upstream Kconfig option this driver already
+# ships but disables by default - not a novel debug mechanism. A second
+# defconfig re-resolves anything dependent on it.
+sed -i 's/^# CONFIG_PACKAGE_BRCM80211_DEBUG is not set/CONFIG_PACKAGE_BRCM80211_DEBUG=y/' .config
+make defconfig >/dev/null
+grep -q '^CONFIG_PACKAGE_BRCM80211_DEBUG=y' .config || { echo "FATAL: CONFIG_PACKAGE_BRCM80211_DEBUG did not stick after defconfig - brcmutil/brcmfmac would be built without the matching debugfs symbols, and a mismatched pair between deploys fails to load (Unknown symbol brcmu_dbg_hex_dump)"; exit 1; }
 grep -q '^CONFIG_PACKAGE_kmod-brcmfmac=' .config || { echo "FATAL: CONFIG_PACKAGE_kmod-brcmfmac missing from .config after defconfig - mac80211 didn't get picked up"; exit 1; }
 
 make package/kernel/mac80211/{clean,download,prepare,compile} -j"$(nproc)" V=s

@@ -2539,3 +2539,86 @@ Testing STA-mode TX cleanly (associating to a network the operator
 controls, with a known password, to get an unambiguous data-plane TX
 counter increment) is the next concrete lever, not another blind
 disable/re-enable cycle against a stranger's AP.
+
+**Follow-up, same session: built real firmware-level TX/RX counter
+access (patch 867), got a genuinely new data point, hit a genuine
+firmware ABI limit before it could fully settle the question.**
+
+`ethtool -S`/`-i` confirmed `supports-statistics: no` - not wired up.
+`iw dev ... survey dump` returns nothing - `.dump_survey` isn't
+implemented in this driver either (confirmed absent from
+`cfg80211_ops`). brcmfmac's own debugfs "counters" entry exists but only
+for the SDIO bus (bus-transport interrupt/glom stats, not firmware MAC
+counters) - nothing exposes the actual `"counters"` iovar (Broadcom's
+long-standing `wl_cnt_ver_*_t` MAC-layer TX/RX statistics ABI) on any
+bus. Also confirmed: the ENTIRE brcmfmac debugfs subsystem is gated
+`#ifdef DEBUG`/`CPTCFG_BRCMDBG`, and this build has it off (matches §17's
+"neither CONFIG_BRCMDBG nor CONFIG_BRCM_TRACING is set" finding, just
+from the other direction).
+
+Built patch 867: adds a bus-independent debugfs "counters" file
+(registered at the same generic point as the existing "revinfo" entry,
+so PCIe/SDIO/USB alike get it) that queries the `"counters"` iovar
+directly and dumps version+length+raw hex - deliberately not guessing at
+a specific version's field layout in-kernel, since the per-field offsets
+vary across `wl_cnt_ver` revisions. Enabled the existing, upstream-
+supported `CONFIG_PACKAGE_BRCM80211_DEBUG` Kconfig option (maps to
+`CPTCFG_BRCMDBG`) to unlock the whole debugfs subsystem this driver
+already ships but disables by default - not a novel debug mechanism.
+
+Rebuild/deploy hit one real snag: the debug build's `brcmfmac.ko` needs
+a MATCHING debug-built `brcmutil.ko` (`brcmu_dbg_hex_dump` is only
+exported when `CPTCFG_BRCMDBG` is set) - deploying just the new
+`brcmfmac.ko` against the stale `brcmutil.ko` failed with `Unknown
+symbol brcmu_dbg_hex_dump`, taking all 3 radios down until both modules
+were swapped together as a matched pair. Recovered cleanly (backup
+`.ko` restored, full WiFi back within under a minute, zero lasting
+damage) - documented here so it's not repeated. `build-image.sh` updated
+accordingly (defconfig runs twice: once to generate the .config a
+pristine SDK tarball doesn't ship at all, then again after flipping
+`CONFIG_PACKAGE_BRCM80211_DEBUG=y`, with a hard `FATAL` check that it
+stuck - a from-scratch build that silently reverted to the non-debug
+default would silently ship a mismatched module pair again).
+
+Read `/sys/kernel/debug/ieee80211/phy<N>/counters` for all three radios
+(fresh module load, `version: 10, length: 848` on every radio - the
+firmware's own reported struct size). Verified the field layout against
+Broadcom's actual `wlioctl.h` (`wl_cnt_ver_11_t`, fetched via `gh search
+code` + `gh api` against real driver source trees - not recalled from
+memory) - the leading "transmit stat counters"/"receive stat counters"
+prefix has been stable across `wl_cnt_ver_6_t` through `_11_t`, so it
+reliably describes this firmware's smaller version-10, 848-byte blob
+too. Result, comparing radio0 (R8000 AP) against both proven-working STA
+uplinks:
+
+| counter (offset) | radio0 (R8000 AP) | radio1 (2.4GHz STA, working) | radio2 (5GHz STA, working) |
+|---|---|---|---|
+| txframe (+4) | **0** | 84 | 4027 |
+| txctl (+20) | 1 | 102 | 29 |
+| txnoassoc (+36) | 138 (varied to 2169 on re-read) | 0 | 0 |
+| rxctl (+76) | 8 | 4 | 0 |
+
+`txframe` (real 802.11 DATA frames sent) is genuinely 0 for radio0 -
+but this is fully explained by zero clients ever connecting (there is no
+data traffic for a clientless AP to send, independent of whether its
+beacons are radiating). The one counter that would actually settle the
+beacon question - `txbcnfrm`, "beacons transmitted" - lives in the later
+"MAC counters: 32-bit version of d11.h's macstat_t" section of the full
+struct, well past byte 848 in every reference copy checked. **This
+firmware's version-10 counters format does not include it at all** -
+a genuine firmware ABI limit, not something patch 867 can work around
+by reading harder. `txnoassoc` (138, climbing) is the one odd, unique-
+to-radio0 signal (STA radios show 0) but its exact meaning for an
+AP-role vif with zero associated stations is not established with
+confidence - flagged, not overclaimed as proof of anything.
+
+**Standing conclusion, unchanged in substance, now backed by one more
+independently-verified data point:** radio0's antenna/RX is proven
+physically intact (previous entry); its firmware-level TX/RX MAC
+counters are consistent with "healthy but clientless," not clearly
+diagnostic of the beacon-visibility question either way, because the
+one counter that would answer it directly isn't present in this
+firmware's counter ABI version. Real, working new diagnostic tooling
+(patch 867) now exists in the repo for whoever picks this up next, but
+this specific thread has reached the limit of what firmware
+introspection alone can resolve.

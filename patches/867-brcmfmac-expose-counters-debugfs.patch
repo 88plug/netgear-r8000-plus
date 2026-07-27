@@ -1,0 +1,95 @@
+brcmfmac: expose the firmware "counters" iovar via debugfs
+
+Real diagnostic gap: this driver has no exposure of the 802.11 MAC-layer
+TX/RX frame statistics firmware already tracks internally (the
+"counters" iovar - txframe/txretrans/txfail/rxframe/etc in Broadcom's
+long-standing wl_cnt_ver_*_t ABI). ethtool -S reports "no stats
+available" (get_ethtool_stats not implemented), dump_survey isn't
+implemented either, and brcmfmac's own debugfs "counters" entry only
+exists for the SDIO bus (bus-transport interrupt/glom counters, not
+firmware MAC stats) - nothing exposes this for PCIe-attached chips
+(this router's BCM43602s), and nothing exposes the real 802.11 counters
+for any bus.
+
+Adds a bus-independent debugfs "counters" file (registered at the same
+generic, per-bus-agnostic point as the existing "revinfo" entry, so it
+works for PCIe/SDIO/USB alike) that queries the "counters" iovar
+directly and dumps it: the stable version+length header every known
+wl_cnt_ver_*_t revision leads with, then a raw hex dump of the payload.
+Deliberately does not guess at a specific version's field layout in-
+kernel - the per-field offsets vary across wl_cnt_ver revisions and
+guessing wrong in a kernel printk is worse than not printing at all;
+the raw bytes let the exact layout be worked out for the specific
+firmware version actually running, offline.
+
+Requires CONFIG_PACKAGE_BRCM80211_DEBUG (maps to the kernel's
+CONFIG_BRCMDBG, gates the existing, upstream-supported debugfs
+infrastructure this driver already ships but has disabled by default -
+not a new debug mechanism, just turning on an existing one).
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/core.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/core.c
+@@ -1167,6 +1167,56 @@
+ 	return 0;
+ }
+ 
++static int brcmf_counters_read(struct seq_file *s, void *data)
++{
++	struct brcmf_bus *bus_if = dev_get_drvdata(s->private);
++	struct brcmf_pub *drvr = bus_if->drvr;
++	struct brcmf_if *ifp = brcmf_get_ifp(drvr, 0);
++	u8 *buf;
++	const u32 buflen = 2048;
++	u16 version;
++	u16 length;
++	s32 err;
++	u32 i;
++
++	if (!ifp)
++		return -ENODEV;
++
++	buf = kzalloc(buflen, GFP_KERNEL);
++	if (!buf)
++		return -ENOMEM;
++
++	err = brcmf_fil_iovar_data_get(ifp, "counters", buf, buflen);
++	if (err) {
++		seq_printf(s, "counters iovar error: %d\n", err);
++		kfree(buf);
++		return 0;
++	}
++
++	/* Every known wl_cnt_ver_*_t revision leads with a stable
++	 * u16 version + u16 length header - print that unconditionally,
++	 * then the raw bytes so the exact per-field layout for this
++	 * firmware's specific version can be worked out offline instead
++	 * of guessing a field layout blind in-kernel.
++	 */
++	version = le16_to_cpup((__le16 *)buf);
++	length = le16_to_cpup((__le16 *)(buf + 2));
++	seq_printf(s, "version: %u\n", version);
++	seq_printf(s, "length: %u\n", length);
++
++	for (i = 0; i < buflen && i < length; i += 16) {
++		u32 j;
++
++		seq_printf(s, "%04x:", i);
++		for (j = i; j < i + 16 && j < buflen && j < length; j++)
++			seq_printf(s, " %02x", buf[j]);
++		seq_printf(s, "\n");
++	}
++
++	kfree(buf);
++	return 0;
++}
++
+ static void brcmf_core_bus_reset(struct work_struct *work)
+ {
+ 	struct brcmf_pub *drvr = container_of(work, struct brcmf_pub,
+@@ -1273,6 +1323,7 @@
+ 
+ 	/* populate debugfs */
+ 	brcmf_debugfs_add_entry(drvr, "revinfo", brcmf_revinfo_read);
++	brcmf_debugfs_add_entry(drvr, "counters", brcmf_counters_read);
+ 	debugfs_create_file("reset", 0600, brcmf_debugfs_get_devdir(drvr), drvr,
+ 			    &bus_reset_fops);
+ 	brcmf_feat_debugfs_create(drvr);
