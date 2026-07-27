@@ -2622,3 +2622,90 @@ firmware's counter ABI version. Real, working new diagnostic tooling
 (patch 867) now exists in the repo for whoever picks this up next, but
 this specific thread has reached the limit of what firmware
 introspection alone can resolve.
+
+## 33. radio0 TX/RX DEFINITIVELY PROVEN WORKING via a real WPA2 handshake
+- the AP-mode beacon problem is isolated to AP mode specifically
+(2026-07-26)
+
+The clean test the previous two entries were building toward: a real,
+independently-controlled AP on radio0's own actual channel range, with a
+known password, so a genuine data-plane 802.11 exchange (not a scan, not
+a firmware counter) could settle the question.
+
+**Test rig:** the same rooted Android test device used all session (an
+HTC 5G Hub, not a phone) has its own `phy1` capable of 5745-5825MHz
+(149-165) AND a real `hostapd` binary (`/vendor/bin/hw/hostapd`) at
+`/vendor/etc/init/hostapd.android.rc`. Its interface-combination rules
+(`iw list`) allow concurrent managed+AP on one phy
+(`#{managed}<=2, #{AP}<=2, ... STA/AP BI must match`), so a second vif
+(`hostapd0`) was added on `phy1` without needing to disrupt anything
+system-owned. Ran a plain, standalone `hostapd -dd` against a minimal
+conf (`ssid=R8KTXTEST`, `channel=149`, `hw_mode=a`, `wpa=2`,
+`wpa_passphrase=<own value>`) - entirely outside Android's own tethering
+stack, so nothing about the device's normal function was touched.
+
+**Two false starts, both correctly diagnosed before drawing any
+conclusion from them (same discipline as §32's retracted scan-counter
+test):**
+- First two attempts: hostapd's own log showed `IEEE 802.11 driver had
+  channel switch: freq=5220 ... AP-CSA-FINISHED freq=5220` - the phone's
+  driver was silently following `wlan0`'s existing "American" STA
+  connection's channel (5220MHz/ch44) instead of honoring the requested
+  channel=149, because both vifs share one phy. 5220MHz is outside
+  radio0's DT-locked 149-165 range, so of course nothing was found -
+  this was a test-rig artifact, not a router finding, and was identified
+  and fixed rather than mistaken for evidence.
+- `wpa_cli`/normal disconnect commands weren't available on this device
+  build; `ip link set wlan0 down` (bypassing Android's own WiFi
+  framework instead of fighting it through its normal API) was what
+  actually got the shared phy off 5220 for long enough to retry cleanly.
+
+**Third attempt - real result, confirmed clean from full logcat
+timeline, not just the tail of the log:**
+```
+22:10:10.198  hostapd0: IEEE 802.11 driver had channel switch: freq=5745 ...
+22:10:10.198  hostapd0: AP-CSA-FINISHED freq=5745 dfs=0
+22:10:11.267  hostapd0: STA ea:fc:af:f9:f1:39 WPA: received EAPOL-Key frame (2/4 Pairwise)
+22:10:11.268  hostapd0: STA ea:fc:af:f9:f1:39 WPA: sending 3/4 msg of 4-Way Handshake
+22:10:11.274  hostapd0: STA ea:fc:af:f9:f1:39 WPA: received EAPOL-Key frame (4/4 Pairwise)
+22:10:11.275  hostapd0: AP-STA-CONNECTED ea:fc:af:f9:f1:39
+22:10:11.275  hostapd0: STA ea:fc:af:f9:f1:39 WPA: pairwise key handshake completed (RSN)
+22:10:20.985  hostapd0: IEEE 802.11 driver had channel switch: freq=5220 ... (wlan0 reconnected, forced CSA - router correctly followed)
+```
+`ea:fc:af:f9:f1:39` is radio0's own address. The entire authentication,
+association, and full WPA2 4-way handshake completed **while the test
+AP was genuinely on 5745MHz/channel 149 - radio0's real, DT-permitted
+operating range** - a full 9 seconds before the later channel switch
+(caused by Android reconnecting its own `wlan0` in the background,
+unrelated to this test) that the router's STA correctly followed via a
+normal CSA, without dropping the association. Confirmed independently
+from the router's own side: `wpa_cli -i phy0-sta0 status` showed
+`wpa_state=COMPLETED`, real `TX: 1726 bytes (13 packets)` /
+`RX: 684 bytes (4 packets)`.
+
+**This is unambiguous, hard proof: radio0's transmit AND receive paths
+both work correctly, including a full cryptographic handshake, on its
+actual operating channel.** Not a counter, not a scan, not an inference
+from a healthy-looking status line - genuine bidirectional RF with a
+real external AP neither side had any reason to fake.
+
+**Conclusion, superseding every hedge in §32:** radio0's RF hardware,
+antenna path, and firmware TX/RX are all proven fully functional. The
+R8000 AP-mode beacon-invisibility problem is **not a hardware defect on
+this radio** - it is isolated specifically to running radio0 in AP
+mode / generating beacons, since STA-mode association at the identical
+frequency works flawlessly. The next real lever is investigating what's
+different about this driver's AP-mode/beacon-generation path
+specifically for radio0 (vs. the MBSS-legacy-fallback path patches/861
+touches, vs. whatever radio2's now-disabled AP used before it was
+repurposed for the American 5GHz extend) - not anything RF/hardware/
+antenna-related, which is now closed out with direct evidence.
+
+Test cleanup: `hostapd0` removed from the phone, its process killed,
+router's `main_radio0` re-enabled and `rxtest0` removed via UCI, full
+reboot (same documented recovery pattern as every other AP<->STA role
+switch this session). Verified post-reboot: R8000 AP `state=ENABLED`
+on `phy0-ap0`, both American uplinks reconnected, and the actual
+downstream-client path re-confirmed end-to-end (a real LAN client on
+this bench, not the router pinging itself: 0% packet loss to 8.8.8.8
+through the extended network) - zero lasting damage from this test.
