@@ -782,3 +782,19 @@ driver diagnostics that didn't exist before (patches 866-868): real
 antenna chain-mask reporting, firmware MAC-layer TX/RX counters via
 debugfs, and a live apsta read/write hook - all upstream-pattern,
 low-risk additions now part of this repo's standing toolkit.
+
+**Full end-to-end goal actually achieved, real device, real internet
+(2026-07-26).** With the beacon fixed, a real connect attempt (not just
+a scan) surfaced a second, independent bug: `ieee80211w=1` made this
+hostapd build advertise a beacon RSN IE with one AKM (PSK) but an EAPOL
+M3 handshake message with two (PSK + PSK-SHA256) - real Android clients
+completed the full 4-way handshake, then disconnected themselves right
+after (`reason=17, locally_generated=1`) rather than accept the
+mismatch. Fixed by turning `ieee80211w` off (`docs/FINDINGS.md` §35) -
+matching the already-working American extend targets, which never used
+MFP either. Retested for real: the same rooted Android device joined
+`R8000` (`Connected`, real signal, real byte counts) and reached the
+open internet through it - `ping 8.8.8.8`: 0% packet loss - with zero
+special client configuration. This is the literal, original goal of the
+entire multi-session project, now confirmed working end to end on real
+hardware.

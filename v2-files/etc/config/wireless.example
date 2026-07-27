@@ -31,11 +31,25 @@
 # (brcmf_configure_wpaie: "Invalid key mgmt info", every boot, every radio)
 # and silently drops it from the broadcast RSN element rather than
 # erroring — sae-mixed was never actually broadcasting WPA3 despite being
-# configured that way in every prior version of this file. Plain psk2
-# (WPA2-PSK/CCMP) + ieee80211w=1 (MFP-optional, genuinely works) is what
-# this hardware can actually do. Do not re-add sae/sae-mixed/ieee80211r to
-# this file without first re-testing against a real client and checking
-# dmesg for brcmf_configure_wpaie errors.
+# configured that way in every prior version of this file. Do not re-add
+# sae/sae-mixed/ieee80211r to this file without first re-testing against
+# a real client and checking dmesg for brcmf_configure_wpaie errors.
+#
+# ieee80211w (MFP) is OFF, not "optional" — confirmed via real client
+# testing 2026-07-26 (FINDINGS.md §35) that ieee80211w=1 makes this
+# hostapd build advertise WPA-PSK-SHA256 in the EAPOL M3 handshake
+# message alongside plain WPA-PSK, but NOT in the beacon/probe-response
+# RSN IE (beacon: PSK only; M3: PSK + PSK-SHA256) — a real hostapd/driver
+# beacon-vs-handshake inconsistency on this exact build, not a config
+# mistake. wpa_supplicant on most clients tolerates the mismatch
+# ("Continue for compatibility") but at least one real Android device
+# tested here locally disconnects right after completing the 4-way
+# handshake (reason=17, locally_generated=1) rather than accept it —
+# this silently prevented every real client from ever fully joining.
+# Plain psk2 (WPA2-PSK/CCMP) is what this hardware can actually do end
+# to end. Do not re-enable ieee80211w without first fixing the
+# underlying beacon/M3 AKM-list mismatch and re-testing against a real
+# client through a full connect, not just a scan.
 
 config wifi-device 'radio0'
 	option type 'mac80211'
@@ -72,7 +86,7 @@ config wifi-device 'radio2'
 	option su_beamformer '1'
 	option su_beamformee '1'
 
-# ---- Primary unified network: R8000 (WPA2-PSK, MFP optional) ----
+# ---- Primary unified network: R8000 (WPA2-PSK, no MFP - see note above) ----
 # WPA3-SAE and 802.11r FT are NOT used here: confirmed via real-client
 # testing (2026-07-23) that this exact BCM43602/brcmfmac firmware rejects
 # AP-mode SAE outright (brcmf_configure_wpaie: "Invalid key mgmt info",
@@ -82,7 +96,8 @@ config wifi-device 'radio2'
 # this worse: the 5-AKM combination (SAE FT-SAE WPA-PSK WPA-PSK-SHA256
 # FT-PSK) caused the same driver rejection AND real, reproducible
 # rapid associate/disassociate cycling against a real client. Plain
-# WPA2-PSK + MFP-optional is what this hardware can actually do; ieee80211k
+# WPA2-PSK, no MFP (see the ieee80211w note above), is what this
+# hardware can actually do end to end; ieee80211k
 # (RRM) and bss_transition (802.11v) are unaffected by this and stay, since
 # they're independent of SAE/FT. See hwoffload-research/../BRINGUP note is
 # unrelated; this fix is documented in docs/WINS.md and docs/FINDINGS.md.
@@ -93,7 +108,7 @@ config wifi-iface 'main_radio0'
 	option mode 'ap'
 	option ssid 'R8000'
 	option encryption 'psk2'
-	option ieee80211w '1'
+	option ieee80211w '0'
 	option key 'CHANGE-ME-min-8-chars'
 	option ieee80211k '1'
 	option rrm_neighbor_report '1'
@@ -107,7 +122,7 @@ config wifi-iface 'main_radio1'
 	option mode 'ap'
 	option ssid 'R8000'
 	option encryption 'psk2'
-	option ieee80211w '1'
+	option ieee80211w '0'
 	option key 'CHANGE-ME-min-8-chars'
 	option ieee80211k '1'
 	option rrm_neighbor_report '1'
@@ -121,7 +136,7 @@ config wifi-iface 'main_radio2'
 	option mode 'ap'
 	option ssid 'R8000'
 	option encryption 'psk2'
-	option ieee80211w '1'
+	option ieee80211w '0'
 	option key 'CHANGE-ME-min-8-chars'
 	option ieee80211k '1'
 	option rrm_neighbor_report '1'

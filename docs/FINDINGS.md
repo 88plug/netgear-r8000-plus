@@ -2822,3 +2822,83 @@ firmware counters, and the apsta live-toggle debugfs tool that found
 this) all remain in active use - genuinely reusable diagnostic
 capability this driver didn't have before this session, independent of
 the specific bug they were built to chase.
+
+## 35. Second real bug found the same way: ieee80211w breaks the beacon/
+handshake AKM list, silently blocking every real client from ever
+fully joining R8000 (2026-07-26)
+
+With §34's fix live, R8000 finally showed up in a real scan. The actual
+end-to-end goal - a real device joining R8000 and getting internet via
+American, with zero special config - still needed a real connect
+attempt, not just a scan, to verify. First attempt: the same rooted
+Android test device (already had R8000 saved from much earlier this
+project) toggled WiFi on via the real Settings UI (`am start -a
+android.settings.WIFI_SETTINGS` + `input tap`, screenshots via
+`exec-out screencap` at each step - not assumed, watched), found R8000
+in the live network list at full signal, tapped it, tapped Connect.
+
+**Result: real, complete 4-way handshake, then a self-inflicted
+disconnect.** `logcat -s wpa_supplicant` showed genuine progress -
+`Associated with ea:fc:af:f9:f1:39`, `RX message 1 of 4-Way Handshake`,
+`Sending EAPOL-Key 2/4`, `RX message 3 of 4-Way Handshake`, `Sending
+EAPOL-Key 4/4` - then immediately: `CTRL-EVENT-DISCONNECTED
+bssid=ea:fc:af:f9:f1:39 reason=17 locally_generated=1`. The client
+disconnected itself, right after completing its half of the handshake,
+not the AP.
+
+**Root cause was logged plainly, one line above the disconnect:**
+```
+WPA: IE in 3/4 msg does not match with IE in Beacon/ProbeResp. Continue for compatibility
+WPA: RSN IE in Beacon/ProbeResp - hexdump(len=22): 30 14 01 00 00 0f ac 04 01 00 00 0f ac 04 01 00 00 0f ac 02 8c 00
+WPA: RSN IE in 3/4 msg          - hexdump(len=26): 30 18 01 00 00 0f ac 04 01 00 00 0f ac 04 02 00 00 0f ac 02 00 0f ac 06 8c 00
+```
+Decoded: the beacon's RSN IE advertises exactly one AKM suite (`00 0f
+ac 02` = PSK). The M3 handshake message advertises **two** (`00 0f ac
+02` PSK + `00 0f ac 06` PSK-SHA256). wpa_supplicant on this device
+tolerates the mismatch and continues anyway ("Continue for
+compatibility") - but disconnects immediately after, `locally_generated
+=1`, reason 17. Confirmed on the router: `/var/run/hostapd-phy15.conf`
+had `ieee80211w=1` and `wpa_key_mgmt=WPA-PSK WPA-PSK-SHA256` - OpenWrt's
+own wireless config generator adds the SHA256 AKM variant automatically
+whenever `ieee80211w` (MFP) is enabled alongside plain `psk2`, but this
+exact hostapd/driver build only serializes one of the two configured
+AKMs into the actual beacon/probe-response RSN IE. A genuine beacon-
+vs-handshake inconsistency in this build, not a misconfiguration - and
+notably invisible to every check this project ran before tonight,
+since it only manifests on an actual connect attempt, never a scan.
+The already-working "American" extend targets never hit this because
+neither uses MFP at all (plain PSK, confirmed via their own RSN IEs,
+§ earlier this session).
+
+**Fix: `option ieee80211w '0'`** on `main_radio0` (and `main_radio2`
+for consistency, though only radio0 was live-tested - radio2 is
+currently disabled). `wifi reload radio0` regenerated
+`wpa_key_mgmt=WPA-PSK` (single AKM, matching the beacon) with no AP
+role change and no wedge risk. Retried the exact same connect from the
+same device: **`R8000` / `Connected`**, `iw dev wlan0 link` showing
+real signal (-40dBm) and real byte counts (3.3MB RX / 3.0MB TX), and -
+the actual, original goal of this entire multi-session project -
+**`ping -c5 8.8.8.8`: 0% packet loss, ~11-24ms**, real internet, through
+R8000, through the American extend, with zero special client
+configuration. (One cosmetic wrinkle, not a router bug: this specific
+test device had a stale static IP - `192.168.8.205/24`, `valid_lft
+forever` - left over on its saved R8000 profile from unrelated earlier
+testing; the router's own dnsmasq lease file confirmed it had correctly
+offered `192.168.1.205` the whole time. The static IP still routed
+correctly to 8.8.8.8 regardless, so it didn't block the test, but it's
+a client-side leftover, not something this session introduced or needs
+to chase - a normal first-time DHCP join isn't affected.)
+
+Both `main_radio0`/`main_radio2`'s `option ieee80211w` set to `0` in
+`v2-files/etc/config/wireless` (gitignored, live build input) and
+`wireless.example` (tracked template), with updated comments explaining
+why - matching this repo's established pattern of never re-introducing
+a fix's root cause without a fresh real-client test first.
+
+**This closes the loop the whole session was chasing.** §34 fixed why
+R8000 never radiated a beacon at all; this fixes why, once it did, a
+real client still couldn't actually stay connected. Both were real,
+independent, silently-broken pieces of this hostapd/driver build that
+no amount of status-line checking, scanning, or firmware counter
+reading could have caught - only a genuine, independently-driven client
+connect attempt, watched end to end, ever surfaced either one.
